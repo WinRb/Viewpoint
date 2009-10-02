@@ -3758,7 +3758,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "ExistsType"),
     :schema_basetype => XSD::QName.new(NsTypes, "SearchExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]]
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]]
     ]
   )
 
@@ -3894,9 +3894,11 @@ module DefaultMappingRegistry
   EncodedRegistry.register(
     :class => RestrictionType,
     :schema_type => XSD::QName.new(NsTypes, "RestrictionType"),
-    :schema_element => [
-      ["searchExpression", ["SearchExpressionType", XSD::QName.new(NsTypes, "SearchExpression")]]
-    ]
+    :schema_element => [ :choice,
+        ["isEqualTo", ["IsEqualToType", XSD::QName.new(NsTypes, "IsEqualTo")]],
+        ["exists", ["ExistsType", XSD::QName.new(NsTypes, "Exists")]],
+        ["searchExpression", ["SearchExpressionType", XSD::QName.new(NsTypes, "SearchExpression")]]
+      ]
   )
 
   EncodedRegistry.register(
@@ -8627,7 +8629,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "ExistsType"),
     :schema_basetype => XSD::QName.new(NsTypes, "SearchExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]]
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]]
     ]
   )
 
@@ -8763,9 +8765,11 @@ module DefaultMappingRegistry
   LiteralRegistry.register(
     :class => RestrictionType,
     :schema_type => XSD::QName.new(NsTypes, "RestrictionType"),
-    :schema_element => [
-      ["searchExpression", ["SearchExpressionType", XSD::QName.new(NsTypes, "SearchExpression")]]
-    ]
+    :schema_element => [ :choice,
+        ["isEqualTo", ["IsEqualToType", XSD::QName.new(NsTypes, "IsEqualTo")]],
+        ["exists", ["ExistsType", XSD::QName.new(NsTypes, "Exists")]],
+        ["searchExpression", ["SearchExpressionType", XSD::QName.new(NsTypes, "SearchExpression")]]
+      ]
   )
 
   LiteralRegistry.register(
@@ -10583,7 +10587,7 @@ module DefaultMappingRegistry
     :class => ExistsType,
     :schema_name => XSD::QName.new(NsTypes, "Exists"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]]
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]]
     ]
   )
 

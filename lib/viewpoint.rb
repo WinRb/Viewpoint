@@ -23,6 +23,8 @@ require 'highline/import'
 require 'singleton'
 require 'wsdl/exchangeServiceBinding'
 require 'exchange_headers'
+require 'dm-core'
+require 'calendar'
 
 # This class will act as the controller for a client connection to the
 # Exchange web service.
@@ -42,13 +44,16 @@ class Viewpoint
 
 		# Do initial authentication
 		do_auth
+		
+		# Set up database
+		DataMapper.setup(:default, (ENV["DATABASE_URL"] || "sqlite3:///#{Dir.pwd}/viewpoint.db"))
+		DataMapper.auto_upgrade!
 	end
 
-	def get_folders
+	def find_folders
 		ff = FindFolderType.new()
 		ff.xmlattr_Traversal = FolderQueryTraversalType::Deep
 		ff.folderShape = FolderResponseShapeType.new( DefaultShapeNamesType.new("Default") )
-		#NN
 		fid = NonEmptyArrayOfBaseFolderIdsType.new()
 		fidt = DistinguishedFolderIdType.new
 		fidt.xmlattr_Id = DistinguishedFolderIdNameType::Root
@@ -62,25 +67,30 @@ class Viewpoint
 		msgs = resp.responseMessages
 
 		# Array of FindFolderResponseMessageType
-=begin
 		msgs.findFolderResponseMessage.each do |elem|
-			elem.rootFolder.folders.folder.each do |folder|
-			end
+			#elem.rootFolder.folders.folder.each do |folder|
+			#end
 			#CalendarFolderType
 			elem.rootFolder.folders.calendarFolder.each do |folder|
-				f_name = folder.displayName
-				f_id   = folder.folderId.xmlattr_Id
-				f_pid   = folder.parentFolderId.xmlattr_Id
+				if( (CalendarFolder.first(:folderId => folder.folderId.xmlattr_Id)) == nil )
+					CalendarFolder.new(folder) 
+				end
 			end
 			#elem.rootFolder.folders.contactsFolder.each do |folder|
 			#end
 			#elem.rootFolder.folders.searchFolder.each do |folder|
 			#end
-			elem.rootFolder.folders.tasksFolder.each do |folder|
-			end
+			#elem.rootFolder.folders.tasksFolder.each do |folder|
+			#end
 		end
-=end
 	end
+
+	# Find folder in the database.  If the folder does not exist return nil.
+	def get_folder(displayName)
+		return CalendarFolder.first(:displayName => displayName)
+	end
+
+
 
 	private
 	def do_auth

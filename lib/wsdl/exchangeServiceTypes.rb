@@ -8342,6 +8342,7 @@ end
 #   path - BasePathToElementType
 #   fieldURIOrConstant - FieldURIOrConstantType
 class IsEqualToType < TwoOperandExpressionType
+
   attr_accessor :path
   attr_accessor :fieldURIOrConstant
 
@@ -8681,9 +8682,12 @@ end
 #   searchExpression - SearchExpressionType
 class RestrictionType
   attr_accessor :searchExpression
+  attr_accessor :isEqualTo, :exists
 
   def initialize(searchExpression = nil)
     @searchExpression = searchExpression
+	@isEqualTo = nil
+	@exists = nil
   end
 end
 
