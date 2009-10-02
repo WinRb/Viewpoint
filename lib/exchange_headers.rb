@@ -17,10 +17,33 @@
 # You should have received a copy of the GNU General Public License along
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
+require 'rubygems'
+gem 'soap4r'
+require 'soap/header/simplehandler'
 
 
-# This module is included with all folder subtypes such as Mail, Calendar,
-# Tasks and Search.  It will serve as the brain for all of the methods that
-# each of these folder types have in common.
-module Folder
+# Some functionality of EWS depends on setting the "RequestServerVersion"
+# element with a specified "Version" attribute.  That is all this class
+# is doing.
+# It is used during the initial connection process by setting the
+# headerhandler in the serivce binding.
+# *<tt>@exchange.headerhandler << ExchangeHeaders.new</tt>
+class ExchangeHeaders < SOAP::Header::SimpleHandler
+	NAMESPACE = 'http://schemas.microsoft.com/exchange/services/2006/types'
+
+	def initialize
+		@qname = XSD::QName.new(NAMESPACE,"RequestServerVersion")
+		super(@qname)
+	end
+
+	def on_simple_outbound
+		{
+		"xmlattr_Version" => "Exchange2007_SP1"
+		}
+	end
+
+	def on_outbound
+    	h = on_simple_outbound
+    	h ? SOAP::SOAPElement.from_obj(h, nil) : nil
+  	end
 end
