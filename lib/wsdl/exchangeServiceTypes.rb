@@ -8682,12 +8682,21 @@ end
 #   searchExpression - SearchExpressionType
 class RestrictionType
   attr_accessor :searchExpression
-  attr_accessor :isEqualTo, :exists
+  attr_accessor :exists, :excludes, :containsExpression
+  attr_accessor :isEqualTo, :isNotEqualTo, :isGreaterThan
+  attr_accessor :isGreaterThanOrEqualTo, :isLessThan, :isLessThanOrEqualTo
 
-  def initialize(searchExpression = nil)
+  def initialize(searchExpression = nil, exists = nil, excludes = nil, containsExpression = nil, isEqualTo = nil, isNotEqualTo = nil, isGreaterThan = nil, isGreaterThanOrEqualTo = nil, isLessThan = nil, isLessThanOrEqualTo = nil)
     @searchExpression = searchExpression
-	@isEqualTo = nil
-	@exists = nil
+    @exists = exists
+    @excludes = excludes
+    @containsExpression = containsExpression
+    @isEqualTo = isEqualTo
+    @isNotEqualTo = isNotEqualTo
+    @isGreaterThan = isGreaterThan
+    @isGreaterThanOrEqualTo = isGreaterThanOrEqualTo
+    @isLessThan = isLessThan
+    @isLessThanOrEqualTo = isLessThanOrEqualTo
   end
 end
 

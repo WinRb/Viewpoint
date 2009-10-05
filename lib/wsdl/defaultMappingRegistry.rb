@@ -3785,7 +3785,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "ExcludesType"),
     :schema_basetype => XSD::QName.new(NsTypes, "SearchExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["bitmask", ["ExcludesValueType", XSD::QName.new(NsTypes, "Bitmask")]]
     ]
   )
@@ -3795,7 +3795,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "IsEqualToType"),
     :schema_basetype => XSD::QName.new(NsTypes, "TwoOperandExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
     ]
   )
@@ -3805,7 +3805,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "IsNotEqualToType"),
     :schema_basetype => XSD::QName.new(NsTypes, "TwoOperandExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
     ]
   )
@@ -3815,7 +3815,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "IsGreaterThanType"),
     :schema_basetype => XSD::QName.new(NsTypes, "TwoOperandExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
     ]
   )
@@ -3825,7 +3825,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "IsGreaterThanOrEqualToType"),
     :schema_basetype => XSD::QName.new(NsTypes, "TwoOperandExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
     ]
   )
@@ -3835,7 +3835,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "IsLessThanType"),
     :schema_basetype => XSD::QName.new(NsTypes, "TwoOperandExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
     ]
   )
@@ -3845,7 +3845,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "IsLessThanOrEqualToType"),
     :schema_basetype => XSD::QName.new(NsTypes, "TwoOperandExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
     ]
   )
@@ -3855,7 +3855,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "ContainsExpressionType"),
     :schema_basetype => XSD::QName.new(NsTypes, "SearchExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["constant", ["ConstantValueType", XSD::QName.new(NsTypes, "Constant")]]
     ],
     :schema_attribute => {
@@ -3896,7 +3896,14 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "RestrictionType"),
     :schema_element => [ :choice,
         ["isEqualTo", ["IsEqualToType", XSD::QName.new(NsTypes, "IsEqualTo")]],
+        ["isNotEqualTo", ["IsNotEqualToType", XSD::QName.new(NsTypes, "IsNotEqualTo")]],
         ["exists", ["ExistsType", XSD::QName.new(NsTypes, "Exists")]],
+        ["excludes", ["ExcludesType", XSD::QName.new(NsTypes, "Excludes")]],
+        ["isGreaterThan", ["IsGreaterThanType", XSD::QName.new(NsTypes, "IsGreaterThan")]],
+        ["isGreaterThanOrEqualTo", ["IsGreaterThanOrEqualToType", XSD::QName.new(NsTypes, "IsGreaterThanOrEqualTo")]],
+        ["isLessThan", ["IsLessThanType", XSD::QName.new(NsTypes, "IsLessThan")]],
+        ["isLessThanOrEqualTo", ["IsLessThanOrEqualToType", XSD::QName.new(NsTypes, "IsLessThanOrEqualTo")]],
+        ["containsExpression", ["ContainsExpressionType", XSD::QName.new(NsTypes, "Contains")]],
         ["searchExpression", ["SearchExpressionType", XSD::QName.new(NsTypes, "SearchExpression")]]
       ]
   )
@@ -8656,7 +8663,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "ExcludesType"),
     :schema_basetype => XSD::QName.new(NsTypes, "SearchExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["bitmask", ["ExcludesValueType", XSD::QName.new(NsTypes, "Bitmask")]]
     ]
   )
@@ -8666,7 +8673,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "IsEqualToType"),
     :schema_basetype => XSD::QName.new(NsTypes, "TwoOperandExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
     ]
   )
@@ -8676,7 +8683,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "IsNotEqualToType"),
     :schema_basetype => XSD::QName.new(NsTypes, "TwoOperandExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
     ]
   )
@@ -8686,7 +8693,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "IsGreaterThanType"),
     :schema_basetype => XSD::QName.new(NsTypes, "TwoOperandExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
     ]
   )
@@ -8696,7 +8703,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "IsGreaterThanOrEqualToType"),
     :schema_basetype => XSD::QName.new(NsTypes, "TwoOperandExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
     ]
   )
@@ -8706,7 +8713,7 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "IsLessThanType"),
     :schema_basetype => XSD::QName.new(NsTypes, "TwoOperandExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
     ]
   )
@@ -8716,17 +8723,18 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "IsLessThanOrEqualToType"),
     :schema_basetype => XSD::QName.new(NsTypes, "TwoOperandExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
     ]
   )
 
   LiteralRegistry.register(
     :class => ContainsExpressionType,
+    :schema_name => XSD::QName.new(NsTypes, "Contains"),
     :schema_type => XSD::QName.new(NsTypes, "ContainsExpressionType"),
     :schema_basetype => XSD::QName.new(NsTypes, "SearchExpressionType"),
     :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
+      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]],
       ["constant", ["ConstantValueType", XSD::QName.new(NsTypes, "Constant")]]
     ],
     :schema_attribute => {
@@ -8767,7 +8775,13 @@ module DefaultMappingRegistry
     :schema_type => XSD::QName.new(NsTypes, "RestrictionType"),
     :schema_element => [ :choice,
         ["isEqualTo", ["IsEqualToType", XSD::QName.new(NsTypes, "IsEqualTo")]],
+        ["isNotEqualTo", ["IsNotEqualToType", XSD::QName.new(NsTypes, "IsNotEqualTo")]],
         ["exists", ["ExistsType", XSD::QName.new(NsTypes, "Exists")]],
+        ["excludes", ["ExcludesType", XSD::QName.new(NsTypes, "Excludes")]],
+        ["isGreaterThan", ["IsGreaterThanType", XSD::QName.new(NsTypes, "IsGreaterThan")]],
+        ["isGreaterThanOrEqualTo", ["IsGreaterThanOrEqualToType", XSD::QName.new(NsTypes, "IsGreaterThanOrEqualTo")]],
+        ["isLessThan", ["IsLessThanType", XSD::QName.new(NsTypes, "IsLessThan")]],
+        ["containsExpression", ["ContainsExpressionType", XSD::QName.new(NsTypes, "Contains")]],
         ["searchExpression", ["SearchExpressionType", XSD::QName.new(NsTypes, "SearchExpression")]]
       ]
   )
@@ -10575,120 +10589,6 @@ module DefaultMappingRegistry
     :class => BaseItemIdType,
     :schema_name => XSD::QName.new(NsTypes, "BaseItemId"),
     :schema_element => []
-  )
-
-  LiteralRegistry.register(
-    :class => SearchExpressionType,
-    :schema_name => XSD::QName.new(NsTypes, "SearchExpression"),
-    :schema_element => []
-  )
-
-  LiteralRegistry.register(
-    :class => ExistsType,
-    :schema_name => XSD::QName.new(NsTypes, "Exists"),
-    :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "FieldURI")]]
-    ]
-  )
-
-  LiteralRegistry.register(
-    :class => ExcludesType,
-    :schema_name => XSD::QName.new(NsTypes, "Excludes"),
-    :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
-      ["bitmask", ["ExcludesValueType", XSD::QName.new(NsTypes, "Bitmask")]]
-    ]
-  )
-
-  LiteralRegistry.register(
-    :class => IsEqualToType,
-    :schema_name => XSD::QName.new(NsTypes, "IsEqualTo"),
-    :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
-      ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
-    ]
-  )
-
-  LiteralRegistry.register(
-    :class => IsNotEqualToType,
-    :schema_name => XSD::QName.new(NsTypes, "IsNotEqualTo"),
-    :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
-      ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
-    ]
-  )
-
-  LiteralRegistry.register(
-    :class => IsGreaterThanType,
-    :schema_name => XSD::QName.new(NsTypes, "IsGreaterThan"),
-    :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
-      ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
-    ]
-  )
-
-  LiteralRegistry.register(
-    :class => IsGreaterThanOrEqualToType,
-    :schema_name => XSD::QName.new(NsTypes, "IsGreaterThanOrEqualTo"),
-    :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
-      ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
-    ]
-  )
-
-  LiteralRegistry.register(
-    :class => IsLessThanType,
-    :schema_name => XSD::QName.new(NsTypes, "IsLessThan"),
-    :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
-      ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
-    ]
-  )
-
-  LiteralRegistry.register(
-    :class => IsLessThanOrEqualToType,
-    :schema_name => XSD::QName.new(NsTypes, "IsLessThanOrEqualTo"),
-    :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
-      ["fieldURIOrConstant", ["FieldURIOrConstantType", XSD::QName.new(NsTypes, "FieldURIOrConstant")]]
-    ]
-  )
-
-  LiteralRegistry.register(
-    :class => ContainsExpressionType,
-    :schema_name => XSD::QName.new(NsTypes, "Contains"),
-    :schema_element => [
-      ["path", ["BasePathToElementType", XSD::QName.new(NsTypes, "Path")]],
-      ["constant", ["ConstantValueType", XSD::QName.new(NsTypes, "Constant")]]
-    ],
-    :schema_attribute => {
-      XSD::QName.new(nil, "ContainmentMode") => "SOAP::SOAPString",
-      XSD::QName.new(nil, "ContainmentComparison") => "SOAP::SOAPString"
-    }
-  )
-
-  LiteralRegistry.register(
-    :class => NotType,
-    :schema_name => XSD::QName.new(NsTypes, "Not"),
-    :schema_element => [
-      ["searchExpression", ["SearchExpressionType", XSD::QName.new(NsTypes, "SearchExpression")]]
-    ]
-  )
-
-  LiteralRegistry.register(
-    :class => AndType,
-    :schema_name => XSD::QName.new(NsTypes, "And"),
-    :schema_element => [
-      ["searchExpression", ["SearchExpressionType[]", XSD::QName.new(NsTypes, "SearchExpression")], [2, nil]]
-    ]
-  )
-
-  LiteralRegistry.register(
-    :class => OrType,
-    :schema_name => XSD::QName.new(NsTypes, "Or"),
-    :schema_element => [
-      ["searchExpression", ["SearchExpressionType[]", XSD::QName.new(NsTypes, "SearchExpression")], [2, nil]]
-    ]
   )
 
   LiteralRegistry.register(
