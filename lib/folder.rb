@@ -26,7 +26,7 @@ require 'dm-core'
 # each of these folder types have in common.
 class Folder
 	include DataMapper::Resource
-	# ==================== DataMapper Model Definition ==================== #
+	# ===================== DataMapper Model Definition ===================== #
 	#  Manually set the table name
 	storage_names[:default]='folders'
 	property :folder_id, String, :key => true
@@ -34,7 +34,9 @@ class Folder
 	property :display_name, String
 	property :folder_type, Discriminator
 	property :sync_state, String
-	# ===================================================================== #
+	property :subscription_id, String
+	property :watermark, String  # subscription watermark.  needed in getEvents
+	# ======================================================================= #
 
 	def initialize(folder)
 		self.folder_id = folder.folderId.xmlattr_Id
@@ -66,5 +68,102 @@ class Folder
 			puts "** Something happened during synchronizing folder => #{self.display_name}"
 			raise
 		end
+	end
+
+	# Subscribe to folder and save the subscription_id into the database.  Subsequent calls
+	# to get_events will use that id.  We also return the SubscribeResponseMessageType in
+	# case any further processing is needed.
+	def subscribe
+		subscribe = SubscribeType.new
+		pull = PullSubscriptionRequestType.new
+
+		# Set-up folder Id
+		dist_fid = DistinguishedFolderIdType.new
+		dist_fid.xmlattr_Id = DistinguishedFolderIdNameType::Calendar
+		f_ids = NonEmptyArrayOfBaseFolderIdsType.new()
+		f_ids.distinguishedFolderId = dist_fid
+		pull.folderIds = f_ids
+
+		# Set-up event types
+		event_types = NonEmptyArrayOfNotificationEventTypesType.new
+		#event_types.push(NotificationEventTypeType::NewMailEvent)
+		event_types.push(NotificationEventTypeType::CreatedEvent)
+		event_types.push(NotificationEventTypeType::DeletedEvent)
+		#event_types.push(NotificationEventTypeType::ModifiedEvent)
+		#event_types.push(NotificationEventTypeType::MovedEvent)
+		pull.eventTypes = event_types
+
+		pull.timeout = 10
+
+		subscribe.pullSubscriptionRequest = pull
+		
+		resp = Viewpoint.instance.ews.subscribe(subscribe).responseMessages.subscribeResponseMessage[0]
+		self.subscription_id = resp.subscriptionId
+		self.watermark = resp.watermark
+		self.save
+
+		return resp
+	end
+
+
+	# Fetch events with the subscription_id.  If one does not exists or is expired,
+	# call subscribe.
+	def get_events
+		begin
+			if( self.subscription_id == nil or self.watermark == nil) then
+				self.subscribe
+			end
+			ge = GetEventsType.new(self.subscription_id, self.watermark)
+
+			resp = Viewpoint.instance.ews.getEvents(ge).responseMessages.getEventsResponseMessage[0] 
+
+			#TODO:  Add more event processing
+			
+
+			notifications = resp.notification
+
+			# Process Notifications
+			if( notifications.createdEvent != nil)
+				self.watermark = notifications.createdEvent[0].watermark
+				notifications.createdEvent.each do |note|
+				end
+			end
+
+			if( notifications.deletedEvent != nil)
+				self.watermark = notifications.deletedEvent[0].watermark
+				notifications.deletedEvent.each do |note|
+				end
+			end
+
+			if( notifications.statusEvent != nil)
+				self.watermark = notifications.statusEvent[0].watermark
+				notifications.statusEvent.each do |note|
+				end
+			end
+
+			self.save
+		end
+
+		return resp
+	end
+
+
+	def get_item(item_id)
+		get_item = GetItemType.new
+
+		item_shape = ItemResponseShapeType.new( DefaultShapeNamesType.new("Default"),
+					  false, BodyTypeResponseType::Text )
+		
+		item_id_t = ItemIdType.new()
+		item_id_t.xmlattr_Id = item_id
+		item_ids = NonEmptyArrayOfBaseItemIdsType.new([item_id_t])
+
+		get_item.itemShape = item_shape
+		get_item.itemIds= item_ids
+
+		# ItemInfoResponseMessageType
+		resp = Viewpoint.instance.ews.getItem(get_item).responseMessages.getItemResponseMessage[0]
+
+		return resp
 	end
 end
