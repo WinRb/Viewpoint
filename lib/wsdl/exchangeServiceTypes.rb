@@ -8685,6 +8685,7 @@ class RestrictionType
   attr_accessor :exists, :excludes, :containsExpression
   attr_accessor :isEqualTo, :isNotEqualTo, :isGreaterThan
   attr_accessor :isGreaterThanOrEqualTo, :isLessThan, :isLessThanOrEqualTo
+  attr_accessor :and, :not, :or
 
   def initialize(searchExpression = nil, exists = nil, excludes = nil, containsExpression = nil, isEqualTo = nil, isNotEqualTo = nil, isGreaterThan = nil, isGreaterThanOrEqualTo = nil, isLessThan = nil, isLessThanOrEqualTo = nil)
     @searchExpression = searchExpression
@@ -8697,6 +8698,9 @@ class RestrictionType
     @isGreaterThanOrEqualTo = isGreaterThanOrEqualTo
     @isLessThan = isLessThan
     @isLessThanOrEqualTo = isLessThanOrEqualTo
+	@and = nil
+	@not = nil
+	@or  = nil
   end
 end
 

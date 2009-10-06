@@ -19,9 +19,15 @@ fidt.xmlattr_Id = DistinguishedFolderIdNameType::Calendar
 fid.distinguishedFolderId = fidt
 fit.parentFolderIds = fid
 
+cal_span =  CalendarViewType.new
+cal_span.xmlattr_StartDate = DateTime.parse(Date.today.to_s).to_s
+cal_span.xmlattr_EndDate = DateTime.parse(Date.today.next.to_s).to_s
+fit.calendarView = cal_span
 
 
 # Set up restriction
+# Filter by a "Contains" expression
+=begin
 rt = RestrictionType.new
 se = ContainsExpressionType.new
 fielduri = PathToUnindexedFieldType.new
@@ -34,7 +40,26 @@ se.path = fielduri
 se.constant = c
 se.xmlattr_ContainmentMode = "Substring"
 rt.containsExpression = se
+=end
 
+
+# Filter by when Item was received
+=begin
+rt = RestrictionType.new
+se = IsGreaterThanType.new
+fielduri = PathToUnindexedFieldType.new
+fielduri.xmlattr_FieldURI = UnindexedFieldURIType::ItemDateTimeReceived 
+const = FieldURIOrConstantType.new
+c = ConstantValueType.new
+c.xmlattr_Value = (DateTime.now - 2).new_offset(0).to_s
+const.constant = c 
+se.path = fielduri
+se.fieldURIOrConstant = const
+rt.isGreaterThan = se
+=end
+
+
+# Filter by a simple "Exists" expression
 =begin
 rt = RestrictionType.new
 se = ExistsType.new
@@ -44,8 +69,6 @@ se.path = fielduri
 rt.exists = se
 =end
 
-
-fit.restriction = rt
 
 
 vp.ews.findItem(fit)

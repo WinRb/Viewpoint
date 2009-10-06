@@ -2751,8 +2751,6 @@ module DefaultMappingRegistry
 
   EncodedRegistry.register(
     :class => CalendarViewType,
-    :schema_type => XSD::QName.new(NsTypes, "CalendarViewType"),
-    :schema_basetype => XSD::QName.new(NsTypes, "BasePagingType"),
     :schema_element => [],
     :schema_attribute => {
       XSD::QName.new(nil, "MaxEntriesReturned") => "SOAP::SOAPInt",
@@ -3904,6 +3902,9 @@ module DefaultMappingRegistry
         ["isLessThan", ["IsLessThanType", XSD::QName.new(NsTypes, "IsLessThan")]],
         ["isLessThanOrEqualTo", ["IsLessThanOrEqualToType", XSD::QName.new(NsTypes, "IsLessThanOrEqualTo")]],
         ["containsExpression", ["ContainsExpressionType", XSD::QName.new(NsTypes, "Contains")]],
+        ["and", ["AndType", XSD::QName.new(NsTypes, "And")]],
+        ["not", ["NotType", XSD::QName.new(NsTypes, "Not")]],
+        ["or", ["OrType", XSD::QName.new(NsTypes, "Or")]],
         ["searchExpression", ["SearchExpressionType", XSD::QName.new(NsTypes, "SearchExpression")]]
       ]
   )
@@ -7629,8 +7630,6 @@ module DefaultMappingRegistry
 
   LiteralRegistry.register(
     :class => CalendarViewType,
-    :schema_type => XSD::QName.new(NsTypes, "CalendarViewType"),
-    :schema_basetype => XSD::QName.new(NsTypes, "BasePagingType"),
     :schema_element => [],
     :schema_attribute => {
       XSD::QName.new(nil, "MaxEntriesReturned") => "SOAP::SOAPInt",
@@ -8781,7 +8780,11 @@ module DefaultMappingRegistry
         ["isGreaterThan", ["IsGreaterThanType", XSD::QName.new(NsTypes, "IsGreaterThan")]],
         ["isGreaterThanOrEqualTo", ["IsGreaterThanOrEqualToType", XSD::QName.new(NsTypes, "IsGreaterThanOrEqualTo")]],
         ["isLessThan", ["IsLessThanType", XSD::QName.new(NsTypes, "IsLessThan")]],
+        ["isLessThanOrEqualTo", ["IsLessThanOrEqualToType", XSD::QName.new(NsTypes, "IsLessThanOrEqualTo")]],
         ["containsExpression", ["ContainsExpressionType", XSD::QName.new(NsTypes, "Contains")]],
+        ["and", ["AndType", XSD::QName.new(NsTypes, "And")]],
+        ["not", ["NotType", XSD::QName.new(NsTypes, "Not")]],
+        ["or", ["OrType", XSD::QName.new(NsTypes, "Or")]],
         ["searchExpression", ["SearchExpressionType", XSD::QName.new(NsTypes, "SearchExpression")]]
       ]
   )

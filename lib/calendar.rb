@@ -24,63 +24,32 @@ require 'dm-core'
 require 'folder'
 
 
-class CalendarFolder
-	include DataMapper::Resource
-	include Folder
-	# ==================== DataMapper Model Definition ==================== #
-	#  Manually set the table name
-	storage_names[:default]='calendar_folders'
-	property :folderId, String, :key => true
-	property :parentId, String
-	property :displayName, String
-	property :syncState, String
-	# ===================================================================== #
-	
+class CalendarFolder < Folder
+	#include DataMapper::Resource
+
+	# Make sure this is the last include or "initialize" will not work in the
+	# Folder module by calling "super"
+	#include Folder
+
 	# initialize with an item of CalendarFolderType
-	def initialize(cal_folder)
-		@folderId = self.folderId = cal_folder.folderId.xmlattr_Id
-		@parentId = self.parentId = cal_folder.parentFolderId.xmlattr_Id unless cal_folder.parentFolderId == nil
-		@displayName = self.displayName = cal_folder.displayName
-		self.save
+	def initialize(folder)
+		# Call initialize in the 
+		super(folder)
 	end
 
-	def sync_folder(max_items = 64)
-		begin
-			# ItemResponseShapeType
-			itemshapeT = ItemResponseShapeType.new(DefaultShapeNamesType::Default, false)
- 
-			# TargetFolderIdType
-			tfolderidT = TargetFolderIdType.new
-			folderidT = FolderIdType.new
-			folderidT.xmlattr_Id = self.folderId
-			tfolderidT.folderId = folderidT
-
-			# SyncFolderItemsType
-			syncitemsT = SyncFolderItemsType.new(itemshapeT,tfolderidT,self.syncState,nil,max_items)
-
-			# Call Sync => returns SyncFolderItemsResponseType
-			resp = Viewpoint.instance.ews.syncFolderItems(syncitemsT).responseMessages.syncFolderItemsResponseMessage[0]
-			self.syncState = resp.syncState
-			self.save
-			return resp
-		rescue
-			puts "** Something happened during synchronizing folder => #{@displayName}"
-			raise
-		end
-	end
 end
 
-=begin
 
+=begin
 class CalendarItem
 	include Item
 	include DataMapper::Resource
 
 	# ==================== DataMapper Model Definition ==================== #
 	#  Manually set the table name
-	storage_names[:default]='calendar_items'
-	property :itemId, String, :key => true
-	property :folderId, String
+	#storage_names[:default]='calendar_items'
+	#property :itemId, String, :key => true
+	#property :folderId, String
 	# ===================================================================== #
 end
 =end

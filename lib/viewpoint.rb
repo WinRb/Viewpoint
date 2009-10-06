@@ -24,6 +24,7 @@ require 'singleton'
 require 'wsdl/exchangeServiceBinding'
 require 'exchange_headers'
 require 'dm-core'
+require 'folder'
 require 'calendar'
 
 # This class will act as the controller for a client connection to the
@@ -72,8 +73,8 @@ class Viewpoint
 			#end
 			#CalendarFolderType
 			elem.rootFolder.folders.calendarFolder.each do |folder|
-				if( (CalendarFolder.first(:folderId => folder.folderId.xmlattr_Id)) == nil )
-					CalendarFolder.new(folder) 
+				if( (Folder.first(:folder_id => folder.folderId.xmlattr_Id)) == nil )
+					CalendarFolder.new(folder)
 				end
 			end
 			#elem.rootFolder.folders.contactsFolder.each do |folder|
@@ -86,8 +87,8 @@ class Viewpoint
 	end
 
 	# Find folder in the database.  If the folder does not exist return nil.
-	def get_folder(displayName)
-		return CalendarFolder.first(:displayName => displayName)
+	def get_folder(display_name)
+		return Folder.first(:display_name => display_name)
 	end
 
 
