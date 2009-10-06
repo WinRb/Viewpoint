@@ -90,7 +90,7 @@ class Folder
 		event_types.push(NotificationEventTypeType::CreatedEvent)
 		event_types.push(NotificationEventTypeType::DeletedEvent)
 		#event_types.push(NotificationEventTypeType::ModifiedEvent)
-		#event_types.push(NotificationEventTypeType::MovedEvent)
+		event_types.push(NotificationEventTypeType::MovedEvent)
 		pull.eventTypes = event_types
 
 		pull.timeout = 10
@@ -124,20 +124,26 @@ class Folder
 
 			# Process Notifications
 			if( notifications.createdEvent != nil)
-				self.watermark = notifications.createdEvent[0].watermark
 				notifications.createdEvent.each do |note|
+					self.watermark = note.watermark
 				end
 			end
 
 			if( notifications.deletedEvent != nil)
-				self.watermark = notifications.deletedEvent[0].watermark
 				notifications.deletedEvent.each do |note|
+					self.watermark = note.watermark
+				end
+			end
+
+			if( notifications.movedEvent != nil)
+				notifications.movedEvent.each do |note|
+					self.watermark = note.watermark
 				end
 			end
 
 			if( notifications.statusEvent != nil)
-				self.watermark = notifications.statusEvent[0].watermark
 				notifications.statusEvent.each do |note|
+					self.watermark = note.watermark
 				end
 			end
 
