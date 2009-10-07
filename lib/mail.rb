@@ -21,36 +21,96 @@ $:.unshift(File.dirname(__FILE__))
 require 'rubygems'
 require 'wsdl/exchangeServiceBinding'
 require 'dm-core'
+# --- Folder Types ---
 require 'folder'
+# --- Item Types ---
+require 'message'
 
 
 class MailFolder < Folder
-	# Make sure this is the last include or "initialize" will not work in the
-	# Folder module by calling "super"
-	#include Folder
-
-	# ==================== Extended DataMapper Model Definition ==================== #
-	# ============================================================================== #
 	
 	# initialize with an item of MailFolderType
 	def initialize(folder)
-		#self.folder_type = "Mail"
-		# Call initialize in the 
 		super(folder)
 	end
 
-end
+	def get_todays_messages
+		get_messages_since( DateTime.parse(Date.today.to_s).to_s )
+	end
+
+	# Fetch messages since a particular date.  Default is today at midnight.
+	# Returns: Array of MessageType: http://msdn.microsoft.com/en-us/library/aa494306.aspx
+	def get_messages_since(since = (DateTime.parse(Date.today.to_s).to_s) )
+		# Set-up FindItemType
+		find_item_t = FindItemType.new
+		find_item_t.xmlattr_Traversal = ItemQueryTraversalType::Shallow
+		item_shape = ItemResponseShapeType.new(DefaultShapeNamesType::IdOnly, false)
+
+		additional_props = NonEmptyArrayOfPathsToElementType.new
+		prop_a = PathToUnindexedFieldType.new
+		prop_b = PathToUnindexedFieldType.new
+		prop_c = PathToUnindexedFieldType.new
+		prop_d = PathToUnindexedFieldType.new
+		prop_e = PathToUnindexedFieldType.new
+		prop_f = PathToUnindexedFieldType.new
+		prop_a.xmlattr_FieldURI = UnindexedFieldURIType::ItemSubject
+		prop_b.xmlattr_FieldURI = UnindexedFieldURIType::ItemDateTimeReceived
+		prop_c.xmlattr_FieldURI = UnindexedFieldURIType::MessageSender 
+		prop_d.xmlattr_FieldURI = UnindexedFieldURIType::MessageFrom
+		prop_e.xmlattr_FieldURI = UnindexedFieldURIType::MessageIsRead
+		prop_f.xmlattr_FieldURI = UnindexedFieldURIType::MessageInternetMessageId
+		additional_props.upath << prop_a
+		additional_props.upath << prop_b
+		additional_props.upath << prop_c
+		additional_props.upath << prop_d
+		additional_props.upath << prop_e
+		additional_props.upath << prop_f
+		item_shape.additionalProperties = additional_props
+		find_item_t.itemShape = item_shape
 
 
+		# Set-up folder Ids to search in
+		folder_ids = NonEmptyArrayOfBaseFolderIdsType.new()
+		dist_folder = DistinguishedFolderIdType.new
+		dist_folder.xmlattr_Id = DistinguishedFolderIdNameType.new(self.display_name.downcase)
+		folder_ids.distinguishedFolderId = dist_folder
+		find_item_t.parentFolderIds = folder_ids
 
-class MailItem
-	include Item
-	include DataMapper::Resource
 
-	# ==================== DataMapper Model Definition ==================== #
-	#  Manually set the table name
-	storage_names[:default]='calendar_items'
-	property :itemId, String, :key => true
-	property :folderId, String
-	# ===================================================================== #
+		# Set-up date-based restriction.
+		restriction = RestrictionType.new
+		search_type = IsGreaterThanOrEqualToType.new
+		fielduri = PathToUnindexedFieldType.new
+		fielduri.xmlattr_FieldURI = UnindexedFieldURIType::ItemDateTimeReceived
+		const = FieldURIOrConstantType.new
+		c = ConstantValueType.new
+		c.xmlattr_Value = (DateTime.now - 2).new_offset(0).to_s
+		const.constant = c
+		search_type.path = fielduri
+		search_type.fieldURIOrConstant = const
+		restriction.isGreaterThanOrEqualTo = search_type
+
+		find_item_t.restriction = restriction
+
+		resp = find_items(find_item_t)
+		
+		if resp != nil
+			messages = []
+			resp.rootFolder.items.message.each do |msg|
+				messages << Message.new(msg, self)
+			end
+
+			return messages
+		else
+			return resp
+		end
+
+	end
+	
+	
+	def get_item(item_id)
+		super(item_id, "message")
+	end
+
+
 end

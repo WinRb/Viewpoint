@@ -20,19 +20,24 @@
 $:.unshift(File.dirname(__FILE__))
 require 'item'
 
-class Message < Item
+class CalendarItem < Item
 
-	attr_reader :subject, :parent_folder, :sender, :date_time_recieved
+	attr_reader :subject, :parent_folder, :sender
 	attr_reader :ews_item if $DEBUG
 
 	# Initialize an Exchange Web Services item
 	def initialize(ews_item, parent_folder)
 		# keep this now for debuging
 		@ews_item = ews_item if $DEBUG
+		@parent_folder = parent_folder # String
 		@subject = ews_item.subject # String
-		@folder = parent_folder # MailFolder
-		@sender = ews_item.sender.mailbox.name # String
+		@location = ews_item.location
+		@cal_item_type = ews_item.calendarItemType
+		@organizer = ews_item.organizer.mailbox.name # String
 		@is_read = ews_item.isRead  # boolean
+		@start = ews_item.start # DateTime
+		@end = ews_item.v_end # DateTime
+		@busy_status = ews_item.legacyFreeBusyStatus # String
 		@date_time_recieved = ews_item.dateTimeReceived # DateTime
 
 		super(ews_item)

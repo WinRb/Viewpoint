@@ -22,10 +22,13 @@ require 'rubygems'
 require 'highline/import'
 require 'singleton'
 require 'wsdl/exchangeServiceBinding'
-require 'exchange_headers'
 require 'dm-core'
+# --- Custom libs ---
+require 'exchange_headers'
+# --- Folder Types ---
 require 'folder'
 require 'calendar'
+require 'mail'
 
 # This class will act as the controller for a client connection to the
 # Exchange web service.
@@ -69,9 +72,13 @@ class Viewpoint
 
 		# Array of FindFolderResponseMessageType
 		msgs.findFolderResponseMessage.each do |elem|
-			#elem.rootFolder.folders.folder.each do |folder|
-			#end
-			#CalendarFolderType
+			# Mail Folders
+			elem.rootFolder.folders.folder.each do |folder|
+				if( (Folder.first(:folder_id => folder.folderId.xmlattr_Id)) == nil )
+					MailFolder.new(folder)
+				end
+			end
+			# CalendarFolderType
 			elem.rootFolder.folders.calendarFolder.each do |folder|
 				if( (Folder.first(:folder_id => folder.folderId.xmlattr_Id)) == nil )
 					CalendarFolder.new(folder)
@@ -98,7 +105,6 @@ class Viewpoint
 		retry_count = 0
 		begin
 			#@ews_endpoint  = ask("Exchange EWS Endpoint:  ") { |q| q.echo = true }
-			#@ews_endpoint  = "https://webmail.state.nd.us/ews/exchange.asmx"
 			#@user = ask("User:  ") { |q| q.echo = true }
 			#@pass = ask("Pass:  ") { |q| q.echo = "*"}
 			props = SOAP::Property.load(File.new("#{File.dirname(__FILE__)}/soap/property"))

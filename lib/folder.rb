@@ -153,23 +153,49 @@ class Folder
 		return resp
 	end
 
+	# Wrapper around EWS's FindItem method:  http://msdn.microsoft.com/en-us/library/aa566107.aspx
+	# The specifics of this method should be set up in the child classes and then this method should
+	# be called with a parameter of FindItemType:  http://msdn.microsoft.com/en-us/library/aa566370.aspx
+	# This allows for a central place of error handling.  See Calendar::get_events for an example
+	# of how this works.
+	def find_items(find_item_t)
+		# FindItemResponseMessageType: http://msdn.microsoft.com/en-us/library/aa566424.aspx
+		resp = Viewpoint.instance.ews.findItem(find_item_t).responseMessages.findItemResponseMessage[0]
 
-	def get_item(item_id)
+		#TODO: Error handling
+		if resp.xmlattr_ResponseClass == "Success"
+			return resp
+		else
+			return nil
+		end
+	end
+
+
+	def get_item(item_id, item_type = nil)
 		get_item = GetItemType.new
 
 		item_shape = ItemResponseShapeType.new( DefaultShapeNamesType.new("Default"),
 					  false, BodyTypeResponseType::Text )
 		
-		item_id_t = ItemIdType.new()
+		item_id_t = ItemIdType.new
 		item_id_t.xmlattr_Id = item_id
 		item_ids = NonEmptyArrayOfBaseItemIdsType.new([item_id_t])
 
 		get_item.itemShape = item_shape
 		get_item.itemIds= item_ids
 
-		# ItemInfoResponseMessageType
+		# ItemInfoResponseMessageType: http://msdn.microsoft.com/en-us/library/aa565417.aspx
 		resp = Viewpoint.instance.ews.getItem(get_item).responseMessages.getItemResponseMessage[0]
 
-		return resp
+		#TODO: Error handling
+		if resp.xmlattr_ResponseClass == "Success"
+			item = resp.items.send(item_type)
+			if( item.length > 1 )
+				puts "ERROR:  Item Id should only resolve to a single item!"
+			end
+			return item[0]
+		else
+			return nil
+		end
 	end
 end

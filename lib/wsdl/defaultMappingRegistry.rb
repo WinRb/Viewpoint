@@ -1489,9 +1489,10 @@ module DefaultMappingRegistry
   EncodedRegistry.register(
     :class => NonEmptyArrayOfPathsToElementType,
     :schema_type => XSD::QName.new(NsTypes, "NonEmptyArrayOfPathsToElementType"),
-    :schema_element => [
-      ["path", ["BasePathToElementType[]", XSD::QName.new(NsTypes, "Path")]]
-    ]
+    :schema_element => [ 
+      ["upath", ["PathToUnindexedFieldType[]", XSD::QName.new(NsTypes, "FieldURI")]],
+      ["epath", ["PathToExtendedFieldType[]", XSD::QName.new(NsTypes, "ExtendedFieldURI")]]
+  	]
   )
 
   EncodedRegistry.register(
@@ -6369,7 +6370,8 @@ module DefaultMappingRegistry
     :class => NonEmptyArrayOfPathsToElementType,
     :schema_type => XSD::QName.new(NsTypes, "NonEmptyArrayOfPathsToElementType"),
     :schema_element => [
-      ["path", ["BasePathToElementType[]", XSD::QName.new(NsTypes, "Path")]]
+      ["upath", ["PathToUnindexedFieldType[]", XSD::QName.new(NsTypes, "FieldURI")]],
+      ["epath", ["PathToExtendedFieldType[]", XSD::QName.new(NsTypes, "ExtendedFieldURI")]]
     ]
   )
 

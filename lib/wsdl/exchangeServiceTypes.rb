@@ -2702,7 +2702,13 @@ class PathToExtendedFieldType < BasePathToElementType
 end
 
 # {http://schemas.microsoft.com/exchange/services/2006/types}NonEmptyArrayOfPathsToElementType
-class NonEmptyArrayOfPathsToElementType < ::Array
+#class NonEmptyArrayOfPathsToElementType < ::Array
+class NonEmptyArrayOfPathsToElementType
+	attr_accessor :epath, :upath
+	def initialize
+		@epath = []
+		@upath = []
+	end
 end
 
 # {http://schemas.microsoft.com/exchange/services/2006/types}NonEmptyArrayOfPropertyValuesType
