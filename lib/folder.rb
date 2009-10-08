@@ -171,11 +171,21 @@ class Folder
 	end
 
 
-	def get_item(item_id, item_type = nil)
+	# Fetch item by item_id
+	# Params: item_id: ItemIdType
+	#         item_type: String (message, calendarItem)
+	#         all_props: boolean; default is to get just the Default props
+	# Returns:  a Item type of some sort ( depends on 'item_type' parameter )
+	def get_item(item_id, item_type = nil, all_props = false)
 		get_item = GetItemType.new
 
-		item_shape = ItemResponseShapeType.new( DefaultShapeNamesType.new("Default"),
-					  false, BodyTypeResponseType::Text )
+		if all_props
+			shape_name = DefaultShapeNamesType::AllProperties
+		else
+			shape_name = DefaultShapeNamesType::Default
+		end
+
+		item_shape = ItemResponseShapeType.new( shape_name, false, BodyTypeResponseType::Text )
 		
 		item_id_t = ItemIdType.new
 		item_id_t.xmlattr_Id = item_id

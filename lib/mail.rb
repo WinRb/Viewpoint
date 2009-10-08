@@ -108,8 +108,9 @@ class MailFolder < Folder
 	end
 	
 	
+	# See docs for Folder::get_item
 	def get_item(item_id)
-		super(item_id, "message")
+		msg = super(item_id, "message", true)
 	end
 
 

@@ -19,83 +19,215 @@
 #############################################################################
 require 'fusefs'
 include FuseFS
+require 'ftools'
 require File.dirname(__FILE__) + '/../lib/viewpoint'
 require File.dirname(__FILE__) + '/../lib/folder'
 
 
-class EWSFuse < FuseFS::FuseDir
-  def initialize
-	@vp = Viewpoint.instance
-	@vp.find_folders
-	@mf = MailFolder.all
-  end
-  def contents(path)
-	  paths = scan_path(path)
-	  case paths.pop
-	  when nil
-		  @mf.map do |m|
-			  m.display_name
-		  end
-	  when 'cur'
-		  np = paths.pop
-		  puts "folder: #{np}"
-		  mdir = MailFolder.first(:display_name => np)
-		  if( mdir == nil )
-			  []
-		  else
-			  mdir.get_todays_messages.map do |msg|
-				  "#{msg.date_time_recieved.to_time.to_i}_#{msg.item_id.hash}_#{msg.subject}"
-			  end
-		  end
-	  when 'new','tmp'
-		  []
-	  else
-		  ['cur','new','tmp']
-	  end
-  end
-  def directory?(path)
-	  paths = scan_path(path)
-	  path = paths.pop
-	  case path
-	  when nil, 'cur','new','tmp'
-		  true
-	  else
-		  if( (MailFolder.first(:display_name => path )) != nil )
-			  true
-		  else
-			  false
-		  end
-	  end
-  end
+class EWSFuse < FuseDir
 
-  def file?(path)
-	  ! directory?(path)
-  end
+	@@maildir_dirs = ['cur','new', 'tmp']
+	@@ewsfuse_dir = "#{ENV['HOME']}/.ewsfuse"
 
-  def read_file(path)
-	  'Go away!  Nothing here.'
-  end
+	def initialize(mountpoint)
+		@vp = Viewpoint.instance
+		@vp.find_folders
+		@mf = MailFolder.all
+		@files = {}
+		@mountpoint = mountpoint
+
+		if( !File.directory?(@@ewsfuse_dir) )
+			FileUtils.mkdir @@ewsfuse_dir, :mode => 0700
+		end
+	end
+
+	# ----- FuserFS Methods ----- #
+	def contents(path)
+		puts "--- IN: contents ---"
+		if (local_path?(path))
+			puts "--- IN: contents: if ---"
+			Dir.entries(local_path(path))
+		else
+			puts "--- IN: contents: else ---"
+			parts = scan_path(path)
+			case parts.pop
+			when nil
+				output = @mf.map do |m|
+					m.display_name
+				end
+				output + Dir.entries(local_path(path))
+			when 'cur'
+				np = parts.pop
+				puts "folder: #{np}"
+				mdir = MailFolder.first(:display_name => np)
+				if( mdir == nil )
+					[]
+				else
+					mdir.get_todays_messages.map do |msg|
+						msg_hash = msg.item_id.hash.abs
+						@files[msg_hash.to_s] = msg
+						"#{msg.date_time_recieved.to_time.to_i}_#{msg_hash}"
+					end
+				end
+			when 'new','tmp'
+				[]
+			else
+				['cur','new','tmp']
+			end
+		end
+	end
+
+	def directory?(path)
+		if( local_path?(path) )
+			puts "Checking for Local_dir?"
+			File.directory?( local_path(path) )
+		else
+			parts = scan_path(path)
+			part = parts.pop
+			case part
+			when /^[0-9]{10,}_/
+				puts "NOT DIR: #{path}"
+				return false
+			when nil, 'cur','new','tmp'
+				puts "IS DIR: #{path}"
+				return true
+			else
+				if( (MailFolder.first(:display_name => part )) != nil )
+					puts "IS DIR: #{path}"
+					return true
+				else
+					puts "NOT DIR: #{path}"
+					return false
+				end
+			end
+		end
+	end
+	
+	def file?(path)
+		if( local_path?(path) )
+			if(File.exists?(local_path(path)))
+				ans = !directory?(path)
+			else
+				ans = false
+			end
+		else
+			ans = !directory?(path)
+		end
+		puts "=> file?(#{path}) ... " + (ans ? "yes" : "no")
+		return ans
+	end
+
+	def executable?(path)
+		return false
+	end
+	
+	def read_file(path)
+		if( local_path?(path) )
+			IO.read(local_path(path))
+		else
+			parts = scan_path(path)
+			msg_hash = parts.last.split('_').last
+			@files[msg_hash.to_s].to_rfc822
+		end
+	end
+	
+    def can_write?(path)
+		ans = local_path?(path)
+		puts "=> can_write?(#{path}) ... " + (ans ? "yes" : "no")
+		return ans
+	end
+
+	def write_to(path, str)
+		puts "=> write_to(#{path}, str...)"
+		io = File.open(local_path(path),'w+')
+		io.write(str)
+		io.close
+	end
+
+    def can_delete?(path)
+		ans = local_path?(path)
+		puts "=> can_delete?(#{path}) ... " + (ans ? "yes" : "no")
+		ans
+	end
+
+    def delete(path)
+		puts "=> delete(#{path})"
+		lpath = local_path(path)
+		if( File.directory?(lpath) )
+			puts "Removing local directory #{lpath}"
+		else
+			puts "Removing local file #{lpath}"
+		end
+	end
+	
+    def can_mkdir?(path)
+		ans = local_path?(path)
+		puts "=> can_mkdir?(#{path}) ... " + (ans ? "yes" : "no")
+		ans
+	end
+
+	def mkdir(path)
+		puts "=> mkdir(#{path})"
+		lpath = local_path(path)
+		File::umask(0077)
+		Dir.mkdir lpath
+	end
+
+    def can_rmdir?(path)
+		puts "=> can_rmdir?(#{path})"
+		local_path?(path)
+	end
+	
+	def rmdir(path)
+		lpath = local_path(path)
+		puts "=> rmdir(#{lpath})"
+		Dir.rmdir(lpath)
+	end
+	# --- End FuserFS Methods --- #
+	
+	# Is this a virtual dir/file or a local file
+	def local_path?(path)
+		puts "==> local_path?(#{path})"
+		parts = scan_path(path)
+
+		if parts.empty?
+			return false
+		else
+			ans = ((!@@maildir_dirs.include? parts.last) &&
+					parts.last !~ /^[0-9]{10,}_/ &&
+					((MailFolder.first(:display_name => parts.last )) == nil)
+					)
+			return ans
+		end
+	end
+
+	# Return local path as a string
+	def local_path(path)
+		puts "==> local_path(#{path})"
+		#lpath = path.gsub(/#{@mountpoint}\/?/,'')
+		lpath = path.gsub(/^\/?/,'')
+		return "#{@@ewsfuse_dir}/#{lpath}"
+	end
 end
 
+# FuserFS set-up
 if (File.basename($0) == File.basename(__FILE__))
-  if (ARGV.size != 1)
-    puts "Usage: #{$0} <directory>"
-    exit
-  end
+	if (ARGV.size != 1)
+		puts "Usage: #{$0} <directory>"
+		exit
+	end
+	
+	dirname = ARGV.shift
+	
+	unless File.directory?(dirname)
+		puts "Usage: #{dirname} is not a directory."
+		exit
+	end
+	
+	root = EWSFuse.new(dirname)
 
-  dirname = ARGV.shift
-
-  unless File.directory?(dirname)
-    puts "Usage: #{dirname} is not a directory."
-    exit
-  end
-
-  root = EWSFuse.new
-
-  # Set the root FuseFS
-  FuseFS.set_root(root)
-
-  FuseFS.mount_under(dirname)
-
-  FuseFS.run # This doesn't return until we're unmounted.
+	# Set the root FuseFS
+	FuseFS.set_root(root)
+	FuseFS.mount_under(dirname)
+	FuseFS.run # This doesn't return until we're unmounted.
 end

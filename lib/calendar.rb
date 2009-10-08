@@ -112,6 +112,7 @@ class CalendarFolder < Folder
 		end
 	end
 
+	# See docs for Folder::get_item
 	def get_item(item_id)
 		super(item_id, "calendarItem")
 	end
