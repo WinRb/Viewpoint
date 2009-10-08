@@ -1,0 +1,29 @@
+--------------------------------------------------------------------------
+                   Viewpoint for Exchange Web Services
+--------------------------------------------------------------------------
+This program attempts to create a client access library for Exchange Web
+Services (EWS) in Ruby.
+--------------------------------------------------------------------------
+REQUIRED GEMS:
+
+# DataMapper ( http://datamapper.org )
+gem install -r dm-core
+
+# Sqlite3 supporting drivers
+gem install -r sqlite3-ruby do_sqlite3
+
+# Current SOAP4R ( http://dev.ctor.org/soap4r )
+gem install -r soap4r
+
+CONFIGURATION:
+Configure your user/pass and EWS endpoint in lib/soap/viewpoint.conf
+
+--------------------------------------------------------------------------
+DISCLAIMER:  I am by no means a Ruby or EWS expert.  There may be better
+means of doing what I am attempting to do.  If you see something that
+could be done better or would like to help out in the development of this
+code please feel free to clone the 'git' repository:
+git clone git://github.com/zenchild/Viewpoint-for-MS-Exchange.git
+or add an issue on GitHub:
+http://github.com/zenchild/Viewpoint-for-MS-Exchange/issues
+--------------------------------------------------------------------------

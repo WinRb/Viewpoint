@@ -19,7 +19,7 @@
 #############################################################################
 $:.unshift(File.dirname(__FILE__))
 require 'rubygems'
-require 'highline/import'
+#require 'highline/import'
 require 'singleton'
 require 'wsdl/exchangeServiceBinding'
 require 'dm-core'
@@ -74,13 +74,13 @@ class Viewpoint
 		msgs.findFolderResponseMessage.each do |elem|
 			# Mail Folders
 			elem.rootFolder.folders.folder.each do |folder|
-				if( (Folder.first(:folder_id => folder.folderId.xmlattr_Id)) == nil )
+				if( (MailFolder.first(:folder_id => folder.folderId.xmlattr_Id)) == nil )
 					MailFolder.new(folder)
 				end
 			end
 			# CalendarFolderType
 			elem.rootFolder.folders.calendarFolder.each do |folder|
-				if( (Folder.first(:folder_id => folder.folderId.xmlattr_Id)) == nil )
+				if( (CalendarFolder.first(:folder_id => folder.folderId.xmlattr_Id)) == nil )
 					CalendarFolder.new(folder)
 				end
 			end
