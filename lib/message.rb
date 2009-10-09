@@ -60,7 +60,12 @@ class Message < Item
 		rfc822.push 'Return-Path'  => @message.sender.mailbox.emailAddress
 		rfc822.push 'Delivered-To' => @message.receivedBy.mailbox.emailAddress
 		@message.internetMessageHeaders.each do |hdr|
-			rfc822.push hdr.xmlattr_HeaderName => hdr
+			# TODO: Quick Fix... needs more research
+			if( hdr.xmlattr_HeaderName == 'Content-Type' && hdr =~ /tnef/ )
+				rfc822.push hdr.xmlattr_HeaderName => 'multipart/alternative'
+			else
+				rfc822.push hdr.xmlattr_HeaderName => hdr
+			end
 		end
 
 		# From

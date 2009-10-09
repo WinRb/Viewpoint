@@ -19,7 +19,6 @@
 #############################################################################
 require 'fusefs'
 include FuseFS
-require 'ftools'
 require File.dirname(__FILE__) + '/../lib/viewpoint'
 require File.dirname(__FILE__) + '/../lib/folder'
 
@@ -33,11 +32,13 @@ class EWSFuse < FuseDir
 		@vp = Viewpoint.instance
 		@vp.find_folders
 		@mf = MailFolder.all
-		@files = {}
+		@messages = {}    # Message objects
+		@open_files = {}  # Files open for RAW IO
 		@mountpoint = mountpoint
 
+		File::umask(0077)
 		if( !File.directory?(@@ewsfuse_dir) )
-			FileUtils.mkdir @@ewsfuse_dir, :mode => 0700
+			Dir.mkdir(@@ewsfuse_dir)
 		end
 	end
 
@@ -65,7 +66,7 @@ class EWSFuse < FuseDir
 				else
 					mdir.get_todays_messages.map do |msg|
 						msg_hash = msg.item_id.hash.abs
-						@files[msg_hash.to_s] = msg
+						@messages[msg_hash.to_s] = msg
 						"#{msg.date_time_recieved.to_time.to_i}_#{msg_hash}"
 					end
 				end
@@ -127,7 +128,7 @@ class EWSFuse < FuseDir
 		else
 			parts = scan_path(path)
 			msg_hash = parts.last.split('_').last
-			@files[msg_hash.to_s].to_rfc822
+			@messages[msg_hash.to_s].to_rfc822
 		end
 	end
 	
@@ -157,6 +158,7 @@ class EWSFuse < FuseDir
 			puts "Removing local directory #{lpath}"
 		else
 			puts "Removing local file #{lpath}"
+			File.unlink(lpath)
 		end
 	end
 	
@@ -169,7 +171,6 @@ class EWSFuse < FuseDir
 	def mkdir(path)
 		puts "=> mkdir(#{path})"
 		lpath = local_path(path)
-		File::umask(0077)
 		Dir.mkdir lpath
 	end
 
@@ -183,10 +184,90 @@ class EWSFuse < FuseDir
 		puts "=> rmdir(#{lpath})"
 		Dir.rmdir(lpath)
 	end
+	
+	def size(path)
+		if(local_path?(path))
+			File.size(local_path(path))
+		end
+	end
+
+	# --- RAW FuserFS Methods --- #
+    def raw_open(path,mode)   # mode is "r" "w" or "rw", with "a" if the file
+		return false
+		puts "** => raw_open(#{path}, '#{mode}')"
+
+		if( !local_path?(path) )
+			return false
+		end
+
+		case mode
+		when /^r$/
+			mode = 'r'
+			puts "Setting mode to 'r'"
+		when /^w$/
+			mode = 'a'
+			puts "Setting mode to 'a'"
+		when /^[wr]{2}$/, /a/
+			mode = 'a+'
+			puts "Setting mode to 'r+'"
+		else
+			raise "Unknown mode error #{mode}"
+		end
+
+		return true if @open_files.has_key?(path)
+		begin
+			puts "Raw opening.... File.open(#{local_path(path)}, #{mode})" 
+			@open_files[path] = File.open(local_path(path), mode)
+			return true
+		rescue => error
+			puts "Error opening raw file: #{error}"
+			return false
+		end
+	end
+
+    def raw_read(path,offset,size)
+		begin
+			puts "** => raw_read(#{path}, #{offset}, #{size})"
+			file = @open_files[path]
+			return unless file
+			file.seek(offset, File::SEEK_SET)
+			file.read(size)
+		rescue => error
+			puts "Error reading raw file: #{error}"
+			nil
+		end
+	end
+
+    def raw_write(path,offset,size,buf)
+		begin
+			puts "** => raw_write(#{path}, #{offset}, #{size}, #{buf})"
+			file = @open_files[path]
+			return unless file
+			file.seek(offset, File::SEEK_SET)
+			file.write(buf[0, size])
+		rescue => error
+			puts "Error writing to raw file: #{error}"
+		end
+	end
+
+    def raw_close(path)
+		begin
+			puts "** => raw_close(#{path})"
+			file = @open_files[path]
+			return unless file
+			file.close
+			@open_files.delete path
+		rescue => error
+			puts "Error closing raw file: #{error}"
+		end
+	end
+
+
 	# --- End FuserFS Methods --- #
 	
 	# Is this a virtual dir/file or a local file
 	def local_path?(path)
+		return false
 		puts "==> local_path?(#{path})"
 		parts = scan_path(path)
 
