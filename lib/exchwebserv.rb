@@ -40,12 +40,12 @@ class Viewpoint::ExchWebServ
 
 	attr_reader :ews, :user, :authenticated
 
-	def initialize
+	def initialize(user = nil, pass = nil, ews_endpoint = nil)
 		@authenticated = false
 		# Exchange webservice URL (probably ends in /exchange.asmx)
-		@ews_endpoint  = ""
-		@user = ""
-		@pass = ""
+		@user = user
+		@pass = pass
+		@ews_endpoint  = ews_endpoint
 		# Connection to Exchange web services.  You can get fetch this from an accessor later
 		@ews  = nil
 
@@ -56,6 +56,7 @@ class Viewpoint::ExchWebServ
 		DataMapper.setup(:default, (ENV["DATABASE_URL"] || "sqlite3:///#{Dir.pwd}/viewpoint.db"))
 		DataMapper.auto_upgrade!
 	end
+
 
 	def find_folders
 		ff = FindFolderType.new()
@@ -147,13 +148,18 @@ class Viewpoint::ExchWebServ
 	def do_auth
 		retry_count = 0
 		begin
-			#@ews_endpoint  = ask("Exchange EWS Endpoint:  ") { |q| q.echo = true }
-			#@user = ask("User:  ") { |q| q.echo = true }
-			#@pass = ask("Pass:  ") { |q| q.echo = "*"}
-			props = SOAP::Property.load(File.new("#{File.dirname(__FILE__)}/soap/property"))
-			@user = props['exchange.ews.user']
-			@pass = props['exchange.ews.pass']
-			@ews_endpoint = props['exchange.ews.endpoint']
+			if( File.exists?("#{File.dirname(__FILE__)}/soap/property") )
+				props = SOAP::Property.load(File.new("#{File.dirname(__FILE__)}/soap/property"))
+				@user = props['exchange.ews.user'] if @user == nil
+				@pass = props['exchange.ews.pass'] if @pass == nil
+				@ews_endpoint = props['exchange.ews.endpoint'] if @ews_endpoint == nil
+			elsif(@ews_endpoint == nil && @user == nil && @pass == nil)
+				@ews_endpoint  = ask("Exchange EWS Endpoint:  ") { |q| q.echo = true }
+				@user = ask("User:  ") { |q| q.echo = true }
+				@pass = ask("Pass:  ") { |q| q.echo = "*"}
+			else
+				# Nothing to do
+			end
 
 			@ews = ExchangeServiceBinding.new(@ews_endpoint)
 			@ews.options["protocol.http.auth.ntlm"] = [@ews_endpoint.sub(/\/[^\/]+$/,'/'),@user,@pass]
