@@ -1,11 +1,12 @@
 require 'rubygems'
 gem 'soap4r'
-require File.dirname(__FILE__) + '/../lib/viewpoint'
+require File.dirname(__FILE__) + '/../lib/exchwebserv'
 require File.dirname(__FILE__) + '/../lib/wsdl/exchangeServiceBinding'
+include Viewpoint
 
 $DEBUG = true
 
-vp = Viewpoint.instance
+vp = ExchWebServ.instance
 
 vp.find_folders
 

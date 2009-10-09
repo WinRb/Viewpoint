@@ -19,8 +19,9 @@
 #############################################################################
 require 'fusefs'
 include FuseFS
-require File.dirname(__FILE__) + '/../lib/viewpoint'
+require File.dirname(__FILE__) + '/../lib/exchwebserv'
 require File.dirname(__FILE__) + '/../lib/folder'
+include Viewpoint
 
 
 class EWSFuse < FuseDir
@@ -29,14 +30,14 @@ class EWSFuse < FuseDir
 	@@ewsfuse_dir = "#{ENV['HOME']}/.ewsfuse"
 
 	def initialize(mountpoint)
-		@vp = Viewpoint.instance
+		@vp = ExchWebServ.instance
 		@vp.find_folders
 		@mf = MailFolder.all
 		@messages = {}    # Message objects
 		@open_files = {}  # Files open for RAW IO
 		@mountpoint = mountpoint
 
-		File::umask(0077)
+		#File::umask(0077)
 		if( !File.directory?(@@ewsfuse_dir) )
 			Dir.mkdir(@@ewsfuse_dir)
 		end
@@ -119,7 +120,11 @@ class EWSFuse < FuseDir
 	end
 
 	def executable?(path)
-		return false
+		if( local_path?(path) )
+			return File.executable?(local_path(path))
+		else
+			return directory?(path)
+		end
 	end
 	
 	def read_file(path)
@@ -133,7 +138,12 @@ class EWSFuse < FuseDir
 	end
 	
     def can_write?(path)
-		ans = local_path?(path)
+		return false if path =~ /folders.db/
+		parts = scan_path(path)
+
+		ans = local_path?(path) || path == '/' #||
+			#parts.last =~ /^[0-9]{10,}_/
+
 		puts "=> can_write?(#{path}) ... " + (ans ? "yes" : "no")
 		return ans
 	end
@@ -146,19 +156,44 @@ class EWSFuse < FuseDir
 	end
 
     def can_delete?(path)
-		ans = local_path?(path)
+		parts = scan_path(path)
+
+		ans = local_path?(path) ||
+			parts.last =~ /^[0-9]{10,}_/
+
 		puts "=> can_delete?(#{path}) ... " + (ans ? "yes" : "no")
 		ans
 	end
 
     def delete(path)
 		puts "=> delete(#{path})"
-		lpath = local_path(path)
-		if( File.directory?(lpath) )
-			puts "Removing local directory #{lpath}"
+		if( local_path?(path) )
+			puts "In LOCAL DELETE"
+			lpath = local_path(path)
+			if( File.directory?(lpath) )
+				puts "Removing local directory #{lpath}"
+			else
+				puts "Removing local file #{lpath}"
+				File.unlink(lpath)
+			end
 		else
-			puts "Removing local file #{lpath}"
-			File.unlink(lpath)
+			puts "In NON LOCAL DELETE"
+			parts = scan_path(path)
+			msg_hash = parts.last.split('_').last
+			puts "In NON LOCAL DELETE 2: #{msg_hash}"
+			puts "In NON LOCAL DELETE 3: #{parts[-3]}"
+			#mdir = @vp.get_folder(parts[-3])
+			if ( (msg = @messages[msg_hash.to_s]) == nil)
+				npath = parts
+				npath.pop
+				contents(npath.join('/'))
+				msg = @messages[msg_hash.to_s]
+			end
+			puts "In NON LOCAL DELETE 4: #{msg.class.to_s}"
+			puts "MESG: #{msg.class.to_s}, ID: #{msg.item_id}, PARENT: #{msg.parent_folder.class.to_s}"
+			#puts "MESG: #{mdir.class.to_s}"
+			msg.parent_folder.recycle_item(msg.item_id)
+			true
 		end
 	end
 	
@@ -193,31 +228,35 @@ class EWSFuse < FuseDir
 
 	# --- RAW FuserFS Methods --- #
     def raw_open(path,mode)   # mode is "r" "w" or "rw", with "a" if the file
-		return false
 		puts "** => raw_open(#{path}, '#{mode}')"
 
 		if( !local_path?(path) )
 			return false
 		end
 
+		lpath = local_path(path)
+
 		case mode
 		when /^r$/
 			mode = 'r'
-			puts "Setting mode to 'r'"
 		when /^w$/
 			mode = 'a'
-			puts "Setting mode to 'a'"
 		when /^[wr]{2}$/, /a/
-			mode = 'a+'
-			puts "Setting mode to 'r+'"
+			if(File.exists?(lpath))
+				mode = 'r+'
+			else
+				mode = 'w+'
+			end
 		else
 			raise "Unknown mode error #{mode}"
 		end
 
+		puts "Setting mode to '#{mode}'"
+
 		return true if @open_files.has_key?(path)
 		begin
-			puts "Raw opening.... File.open(#{local_path(path)}, #{mode})" 
-			@open_files[path] = File.open(local_path(path), mode)
+			puts "Raw opening.... File.open(#{lpath}, #{mode})" 
+			@open_files[path] = File.open(lpath, mode)
 			return true
 		rescue => error
 			puts "Error opening raw file: #{error}"
@@ -230,6 +269,8 @@ class EWSFuse < FuseDir
 			puts "** => raw_read(#{path}, #{offset}, #{size})"
 			file = @open_files[path]
 			return unless file
+			#file.sysseek(offset,IO::SEEK_SET)
+			#file.sysread(size)
 			file.seek(offset, File::SEEK_SET)
 			file.read(size)
 		rescue => error
@@ -240,11 +281,13 @@ class EWSFuse < FuseDir
 
     def raw_write(path,offset,size,buf)
 		begin
-			puts "** => raw_write(#{path}, #{offset}, #{size}, #{buf})"
+			puts "** => raw_write(#{path}, #{offset}, #{size}, ... buf)"
 			file = @open_files[path]
 			return unless file
-			file.seek(offset, File::SEEK_SET)
+			file.seek(offset, File::SEEK_CUR)
 			file.write(buf[0, size])
+			#file.sysseek(offset,IO::SEEK_CUR)
+			#file.syswrite(buf[0, size])
 		rescue => error
 			puts "Error writing to raw file: #{error}"
 		end
@@ -267,19 +310,19 @@ class EWSFuse < FuseDir
 	
 	# Is this a virtual dir/file or a local file
 	def local_path?(path)
-		return false
-		puts "==> local_path?(#{path})"
 		parts = scan_path(path)
 
 		if parts.empty?
-			return false
+			ans = false
 		else
 			ans = ((!@@maildir_dirs.include? parts.last) &&
 					parts.last !~ /^[0-9]{10,}_/ &&
 					((MailFolder.first(:display_name => parts.last )) == nil)
 					)
-			return ans
 		end
+
+		puts "==> local_path?(#{path}) ... " + (ans ? "yes" : "no")
+		return ans
 	end
 
 	# Return local path as a string

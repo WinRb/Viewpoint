@@ -19,12 +19,13 @@
 #############################################################################
 require 'rubygems'
 require 'dm-core'
-
+require 'viewpoint'
 
 # This class is inherited by all folder subtypes such as Mail, Calendar,
 # Tasks and Search.  It will serve as the brain for all of the methods that
 # each of these folder types have in common.
-class Folder
+class Viewpoint::Folder
+	include Viewpoint
 	include DataMapper::Resource
 	# ===================== DataMapper Model Definition ===================== #
 	#  Manually set the table name
@@ -60,7 +61,7 @@ class Folder
 			syncitemsT = SyncFolderItemsType.new(itemshapeT,tfolderidT,self.sync_state,nil,max_items)
 
 			# Call Sync => returns SyncFolderItemsResponseType
-			resp = Viewpoint.instance.ews.syncFolderItems(syncitemsT).responseMessages.syncFolderItemsResponseMessage[0]
+			resp = ExchWebServ.instance.ews.syncFolderItems(syncitemsT).responseMessages.syncFolderItemsResponseMessage[0]
 			self.sync_state = resp.syncState
 			self.save
 			return resp
@@ -97,7 +98,7 @@ class Folder
 
 		subscribe.pullSubscriptionRequest = pull
 		
-		resp = Viewpoint.instance.ews.subscribe(subscribe).responseMessages.subscribeResponseMessage[0]
+		resp = ExchWebServ.instance.ews.subscribe(subscribe).responseMessages.subscribeResponseMessage[0]
 		self.subscription_id = resp.subscriptionId
 		self.watermark = resp.watermark
 		self.save
@@ -115,7 +116,7 @@ class Folder
 			end
 			ge = GetEventsType.new(self.subscription_id, self.watermark)
 
-			resp = Viewpoint.instance.ews.getEvents(ge).responseMessages.getEventsResponseMessage[0] 
+			resp = ExchWebServ.instance.ews.getEvents(ge).responseMessages.getEventsResponseMessage[0] 
 
 			#TODO:  Add more event processing
 			
@@ -160,7 +161,7 @@ class Folder
 	# of how this works.
 	def find_items(find_item_t)
 		# FindItemResponseMessageType: http://msdn.microsoft.com/en-us/library/aa566424.aspx
-		resp = Viewpoint.instance.ews.findItem(find_item_t).responseMessages.findItemResponseMessage[0]
+		resp = ExchWebServ.instance.ews.findItem(find_item_t).responseMessages.findItemResponseMessage[0]
 
 		#TODO: Error handling
 		if resp.xmlattr_ResponseClass == "Success"
@@ -195,7 +196,7 @@ class Folder
 		get_item.itemIds= item_ids
 
 		# ItemInfoResponseMessageType: http://msdn.microsoft.com/en-us/library/aa565417.aspx
-		resp = Viewpoint.instance.ews.getItem(get_item).responseMessages.getItemResponseMessage[0]
+		resp = ExchWebServ.instance.ews.getItem(get_item).responseMessages.getItemResponseMessage[0]
 
 		#TODO: Error handling
 		if resp.xmlattr_ResponseClass == "Success"
@@ -207,5 +208,30 @@ class Folder
 		else
 			return nil
 		end
+	end
+
+	# Delete item by item_id
+	# More info: http://msdn.microsoft.com/en-us/library/aa580484.aspx
+	def delete_item(item_id, delete_type=DisposalType::HardDelete)
+		item_ids = NonEmptyArrayOfBaseItemIdsType.new
+		item = ItemIdType.new
+		item.xmlattr_Id = item_id
+		item_ids.itemId << item
+
+		delete = DeleteItemType.new(item_ids)
+		delete.xmlattr_DeleteType = delete_type
+		resp = ExchWebServ.instance.ews.deleteItem(delete).responseMessages.deleteItemResponseMessage[0]
+
+		#TODO: Error handling
+		if resp.xmlattr_ResponseClass == "Success"
+			return true
+		else
+			return false
+		end
+	end
+
+	# Move item to Deleted Items folder instead of deleting it
+	def recycle_item(item_id)
+		delete_item(item_id, DisposalType::MoveToDeletedItems)
 	end
 end

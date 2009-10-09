@@ -26,8 +26,11 @@ require 'folder'
 # --- Item Types ---
 require 'message'
 
+require 'viewpoint'
 
-class MailFolder < Folder
+
+class Viewpoint::MailFolder < Viewpoint::Folder
+	include Viewpoint
 	
 	# initialize with an item of MailFolderType
 	def initialize(folder)

@@ -21,6 +21,7 @@ $:.unshift(File.dirname(__FILE__))
 require 'rubygems'
 require 'wsdl/exchangeServiceBinding'
 require 'dm-core'
+require 'viewpoint'
 # --- Folder Types ---
 require 'folder'
 # --- Item Types ---
@@ -29,7 +30,8 @@ require 'calendar_item'
 
 
 
-class CalendarFolder < Folder
+class Viewpoint::CalendarFolder < Viewpoint::Folder
+	include Viewpoint
 	#include DataMapper::Resource
 
 	# Make sure this is the last include or "initialize" will not work in the
@@ -98,7 +100,7 @@ class CalendarFolder < Folder
 			cal_items = []
 
 			resp.rootFolder.items.calendarItem.each do |cali|
-				cal_items << CalendarItem.new(cali, self.folder_id)
+				cal_items << CalendarItem.new(cali, self)
 			end
 			# TODO: Handle the following types of Calendar data
 			# meetingMessage

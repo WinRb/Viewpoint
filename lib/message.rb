@@ -19,8 +19,10 @@
 #############################################################################
 $:.unshift(File.dirname(__FILE__))
 require 'item'
+require 'viewpoint'
 
-class Message < Item
+class Viewpoint::Message < Viewpoint::Item
+	include Viewpoint
 
 	attr_reader :subject, :parent_folder, :sender, :date_time_recieved
 	attr_reader :ews_item if $DEBUG
@@ -30,8 +32,8 @@ class Message < Item
 		# keep this now for debuging
 		@ews_item = ews_item if $DEBUG
 		@subject = ews_item.subject # String
-		@parent_folder = parent_folder # MailFolder
 		@sender = ews_item.sender.mailbox.name if ews_item.sender # String
+		@recipients = 
 		@is_read = ews_item.isRead  # boolean
 		@date_time_recieved = ews_item.dateTimeReceived # DateTime
 
@@ -40,12 +42,49 @@ class Message < Item
 		# body when the message is viewed.
 		@message = nil
 
-		super(ews_item)
+		super(ews_item, parent_folder)
 	end
 
 	def body
 		get_message if @message == nil
-		return @message
+		return @message.body
+	end
+
+	def recipients
+		get_message if @message == nil
+		to_recipients = ''
+		@message.toRecipients.each do |r|
+			to_recipients += ', ' if to_recipients != ''
+			to_recipients += "#{r.name} <#{r.emailAddress}>"
+		end
+
+		return to_recipients
+	end
+
+	def cc_recipients
+		get_message if @message == nil
+		if( @message.ccRecipients != nil)
+			cc = ''
+			@message.ccRecipients.each do |r|
+				cc += ', ' if cc != ''
+				cc += "#{r.name} <#{r.emailAddress}>"
+			end
+			return cc
+		end
+		return nil
+	end
+
+	def bcc_recipients
+		get_message if @message == nil
+		if( @message.bccRecipients != nil)
+			bcc = ''
+			@message.bccRecipients.each do |r|
+				bcc += ', ' if bcc != ''
+				bcc += "#{r.name} <#{r.emailAddress}>"
+			end
+			return bcc
+		end
+		return nil
 	end
 
 	def get_message
@@ -72,31 +111,16 @@ class Message < Item
 		rfc822.push 'From'  => "#{@message.sender.mailbox.name} <#{@message.sender.mailbox.emailAddress}>"
 
 		# To
-		to_recipients = ''
-		@message.toRecipients.each do |r|
-			to_recipients += ', ' if to_recipients != ''
-			to_recipients += "#{r.name} <#{r.emailAddress}>"
-		end
-		rfc822.push 'To' => to_recipients 
+		rfc822.push 'To' => self.recipients
 
 		# CC
-		if( @message.ccRecipients != nil)
-			cc_recipients = ''
-			@message.ccRecipients.each do |r|
-				cc_recipients += ', ' if cc_recipients != ''
-				cc_recipients += "#{r.name} <#{r.emailAddress}>"
-			end
-			rfc822.push 'Cc' => cc_recipients 
+		if( ( cc = self.cc_recipients) != nil)
+			rfc822.push 'Cc' => cc
 		end
 
 		# BCC
-		if( @message.bccRecipients != nil)
-			bcc_recipients = ''
-			@message.bccRecipients.each do |r|
-				bcc_recipients += ', ' if bcc_recipients != ''
-				bcc_recipients += "#{r.name} <#{r.emailAddress}>"
-			end
-			rfc822.push 'Bcc' => bcc_recipients 
+		if( ( bcc = self.bcc_recipients) != nil)
+			rfc822.push 'Bcc' => bcc
 		end
 
 		rfc822_msg = ""

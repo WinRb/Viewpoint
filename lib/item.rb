@@ -17,18 +17,29 @@
 # You should have received a copy of the GNU General Public License along
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
+require 'viewpoint'
 
 
 # This class is inherited by all Item subtypes such as Message, Event,
 # and Task.  It will serve as the brain for all of the methods that
 # each of these Item types have in common.
-class Item
+class Viewpoint::Item
+	include Viewpoint
 
 	attr_accessor :item_id
 
 	# Initialize an Exchange Web Services item
-	def initialize(ews_item)
+	def initialize(ews_item, parent_folder)
 		@item_id = ews_item.itemId.xmlattr_Id
+		@parent_folder = parent_folder
 	end
 
+
+	def delete!
+		@parent_folder.delete_item(@item_id)
+	end
+
+	def recycle!
+		@parent_folder.recycle_item(@item_id)
+	end
 end

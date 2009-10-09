@@ -20,6 +20,7 @@
 require 'rubygems'
 gem 'soap4r'
 require 'soap/header/simplehandler'
+require 'viewpoint'
 
 
 # Some functionality of EWS depends on setting the "RequestServerVersion"
@@ -28,7 +29,7 @@ require 'soap/header/simplehandler'
 # It is used during the initial connection process by setting the
 # headerhandler in the serivce binding.
 # *<tt>@exchange.headerhandler << ExchangeHeaders.new</tt>
-class ExchangeHeaders < SOAP::Header::SimpleHandler
+class Viewpoint::ExchangeHeaders < SOAP::Header::SimpleHandler
 	NAMESPACE = 'http://schemas.microsoft.com/exchange/services/2006/types'
 
 	def initialize

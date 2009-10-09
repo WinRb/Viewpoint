@@ -18,9 +18,11 @@
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
 $:.unshift(File.dirname(__FILE__))
+require 'viewpoint'
 require 'item'
 
-class CalendarItem < Item
+class Viewpoint::CalendarItem < Viewpoint::Item
+	include Viewpoint
 
 	attr_reader :subject, :parent_folder, :sender
 	attr_reader :ews_item if $DEBUG
@@ -29,7 +31,6 @@ class CalendarItem < Item
 	def initialize(ews_item, parent_folder)
 		# keep this now for debuging
 		@ews_item = ews_item if $DEBUG
-		@parent_folder = parent_folder # String
 		@subject = ews_item.subject # String
 		@location = ews_item.location
 		@cal_item_type = ews_item.calendarItemType
@@ -40,7 +41,7 @@ class CalendarItem < Item
 		@busy_status = ews_item.legacyFreeBusyStatus # String
 		@date_time_recieved = ews_item.dateTimeReceived # DateTime
 
-		super(ews_item)
+		super(ews_item, parent_folder)
 	end
 
 end

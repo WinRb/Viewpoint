@@ -1,5 +1,6 @@
-require File.dirname(__FILE__) + '/../lib/viewpoint'
-vp = Viewpoint.instance
+require File.dirname(__FILE__) + '/../lib/exchwebserv'
+$DEBUG = true
+vp = Viewpoint::ExchWebServ.instance
 vp.find_folders
 mail = vp.get_folder("Inbox")
 msgs = mail.get_todays_messages
