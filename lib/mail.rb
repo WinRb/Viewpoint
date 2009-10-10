@@ -20,7 +20,6 @@
 $:.unshift(File.dirname(__FILE__))
 require 'rubygems'
 require 'wsdl/exchangeServiceBinding'
-require 'dm-core'
 # --- Folder Types ---
 require 'folder'
 # --- Item Types ---
@@ -75,7 +74,7 @@ class Viewpoint::MailFolder < Viewpoint::Folder
 		# Set-up folder Ids to search in
 		folder_ids = NonEmptyArrayOfBaseFolderIdsType.new()
 		dist_folder = DistinguishedFolderIdType.new
-		dist_folder.xmlattr_Id = DistinguishedFolderIdNameType.new(self.display_name.downcase)
+		dist_folder.xmlattr_Id = DistinguishedFolderIdNameType.new(@display_name.downcase)
 		folder_ids.distinguishedFolderId = dist_folder
 		find_item_t.parentFolderIds = folder_ids
 

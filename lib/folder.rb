@@ -18,7 +18,6 @@
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
 require 'rubygems'
-require 'dm-core'
 require 'viewpoint'
 
 # This class is inherited by all folder subtypes such as Mail, Calendar,
@@ -26,24 +25,15 @@ require 'viewpoint'
 # each of these folder types have in common.
 class Viewpoint::Folder
 	include Viewpoint
-	include DataMapper::Resource
-	# ===================== DataMapper Model Definition ===================== #
-	#  Manually set the table name
-	storage_names[:default]='folders'
-	property :folder_id, String, :key => true
-	property :parent_id, String
-	property :display_name, String
-	property :folder_type, Discriminator
-	property :sync_state, String
-	property :subscription_id, String
-	property :watermark, String  # subscription watermark.  needed in getEvents
-	# ======================================================================= #
 
+	attr_accessor :folder_id, :parent_id, :display_name
 	def initialize(folder)
-		self.folder_id = folder.folderId.xmlattr_Id
-		self.parent_id = folder.parentFolderId.xmlattr_Id unless folder.parentFolderId == nil
-		self.display_name = folder.displayName
-		self.save
+		@folder_id = folder.folderId.xmlattr_Id
+		@parent_id = folder.parentFolderId.xmlattr_Id unless folder.parentFolderId == nil
+		@display_name = folder.displayName
+		@sync_state = nil
+		@subscription_id = nil
+		@watermark = nil
 	end
 
 	def sync_folder(max_items = 256)
@@ -62,8 +52,7 @@ class Viewpoint::Folder
 
 			# Call Sync => returns SyncFolderItemsResponseType
 			resp = ExchWebServ.instance.ews.syncFolderItems(syncitemsT).responseMessages.syncFolderItemsResponseMessage[0]
-			self.sync_state = resp.syncState
-			self.save
+			@sync_state = resp.syncState
 			return resp
 		rescue
 			puts "** Something happened during synchronizing folder => #{self.display_name}"
@@ -99,9 +88,8 @@ class Viewpoint::Folder
 		subscribe.pullSubscriptionRequest = pull
 		
 		resp = ExchWebServ.instance.ews.subscribe(subscribe).responseMessages.subscribeResponseMessage[0]
-		self.subscription_id = resp.subscriptionId
-		self.watermark = resp.watermark
-		self.save
+		@subscription_id = resp.subscriptionId
+		@watermark = resp.watermark
 
 		return resp
 	end
@@ -111,10 +99,10 @@ class Viewpoint::Folder
 	# call subscribe.
 	def get_events
 		begin
-			if( self.subscription_id == nil or self.watermark == nil) then
+			if( @subscription_id == nil or @watermark == nil) then
 				self.subscribe
 			end
-			ge = GetEventsType.new(self.subscription_id, self.watermark)
+			ge = GetEventsType.new(@subscription_id, @watermark)
 
 			resp = ExchWebServ.instance.ews.getEvents(ge).responseMessages.getEventsResponseMessage[0] 
 
@@ -126,29 +114,28 @@ class Viewpoint::Folder
 			# Process Notifications
 			if( notifications.createdEvent != nil)
 				notifications.createdEvent.each do |note|
-					self.watermark = note.watermark
+					@watermark = note.watermark
 				end
 			end
 
 			if( notifications.deletedEvent != nil)
 				notifications.deletedEvent.each do |note|
-					self.watermark = note.watermark
+					@watermark = note.watermark
 				end
 			end
 
 			if( notifications.movedEvent != nil)
 				notifications.movedEvent.each do |note|
-					self.watermark = note.watermark
+					@watermark = note.watermark
 				end
 			end
 
 			if( notifications.statusEvent != nil)
 				notifications.statusEvent.each do |note|
-					self.watermark = note.watermark
+					@watermark = note.watermark
 				end
 			end
 
-			self.save
 		end
 
 		return resp

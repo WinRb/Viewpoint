@@ -22,7 +22,6 @@ require 'rubygems'
 #require 'highline/import'
 require 'singleton'
 require 'wsdl/exchangeServiceBinding'
-require 'dm-core'
 # --- Custom libs ---
 require 'exchange_headers'
 # --- Folder Types ---
@@ -49,15 +48,15 @@ class Viewpoint::ExchWebServ
 		# Connection to Exchange web services.  You can get fetch this from an accessor later
 		@ews  = nil
 
+		# Stores folders returned from 'find_folders'
+		@folders = {}
+
 		# Do initial authentication
 		do_auth
-		
-		# Set up database
-		DataMapper.setup(:default, (ENV["DATABASE_URL"] || "sqlite3:///#{Dir.pwd}/viewpoint.db"))
-		DataMapper.auto_upgrade!
 	end
 
 
+	# Finds all folders and returns a hash of FolderTypes
 	def find_folders
 		ff = FindFolderType.new()
 		ff.xmlattr_Traversal = FolderQueryTraversalType::Deep
@@ -77,17 +76,21 @@ class Viewpoint::ExchWebServ
 		# Array of FindFolderResponseMessageType
 		msgs.findFolderResponseMessage.each do |elem|
 			# Mail Folders
+			mail_folders = {}
 			elem.rootFolder.folders.folder.each do |folder|
-				if( (MailFolder.first(:folder_id => folder.folderId.xmlattr_Id)) == nil )
-					MailFolder.new(folder) unless folder.folderClass == nil
+				if( folder.folderClass != nil)
+					mail_folders[folder.displayName] = MailFolder.new(folder)
 				end
 			end
+			@folders['MailFolder'] = mail_folders
+
 			# CalendarFolderType
+			cal_folders = {}
 			elem.rootFolder.folders.calendarFolder.each do |folder|
-				if( (CalendarFolder.first(:folder_id => folder.folderId.xmlattr_Id)) == nil )
-					CalendarFolder.new(folder)
-				end
+				cal_folders[folder.displayName] = CalendarFolder.new(folder)
 			end
+			@folders['CalendarFolder'] = cal_folders
+
 			#elem.rootFolder.folders.contactsFolder.each do |folder|
 			#end
 			#elem.rootFolder.folders.searchFolder.each do |folder|
@@ -95,6 +98,7 @@ class Viewpoint::ExchWebServ
 			#elem.rootFolder.folders.tasksFolder.each do |folder|
 			#end
 		end
+		return @folders
 	end
 
 	# Return folder
@@ -106,7 +110,10 @@ class Viewpoint::ExchWebServ
 	# 	fetch_from_ews: boolean
 	# 	folder_shape: DefaultShapeNamesType
 	def get_folder(folder_ids, fetch_from_ews = false, folder_shape = DefaultShapeNamesType::AllProperties)
-		return Folder.first(:display_name => folder_ids) unless fetch_from_ews
+		unless fetch_from_ews
+			return @folders['MailFolder'][folder_ids] ||
+				@folders['CalendarFolder'][folder_ids]
+		end
 
 		folder_shape = FolderResponseShapeType.new( folder_shape )
 		get_folder = GetFolderType.new(folder_shape, folder_ids)

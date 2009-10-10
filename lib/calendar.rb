@@ -20,7 +20,6 @@
 $:.unshift(File.dirname(__FILE__))
 require 'rubygems'
 require 'wsdl/exchangeServiceBinding'
-require 'dm-core'
 require 'viewpoint'
 # --- Folder Types ---
 require 'folder'
@@ -32,11 +31,6 @@ require 'calendar_item'
 
 class Viewpoint::CalendarFolder < Viewpoint::Folder
 	include Viewpoint
-	#include DataMapper::Resource
-
-	# Make sure this is the last include or "initialize" will not work in the
-	# Folder module by calling "super"
-	#include Folder
 
 	# initialize with an item of CalendarFolderType
 	def initialize(folder)
@@ -86,7 +80,7 @@ class Viewpoint::CalendarFolder < Viewpoint::Folder
 		
 		folder_ids = NonEmptyArrayOfBaseFolderIdsType.new()
 		dist_folder = DistinguishedFolderIdType.new
-		dist_folder.xmlattr_Id = DistinguishedFolderIdNameType.new(self.display_name.downcase)
+		dist_folder.xmlattr_Id = DistinguishedFolderIdNameType.new(@display_name.downcase)
 		folder_ids.distinguishedFolderId = dist_folder
 		find_item_t.parentFolderIds = folder_ids
 		
