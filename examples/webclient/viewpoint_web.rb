@@ -20,7 +20,11 @@
 require 'rubygems'
 require 'sinatra/base'
 require 'haml'
+require 'openssl'
+require 'digest/sha1'
+require 'uri'
 
+require 'ews_access_handler'
 require File.dirname(__FILE__) + '/../../lib/viewpoint'
 require File.dirname(__FILE__) + '/../../lib/exchwebserv'
 #require File.dirname(__FILE__) + '/../../lib/folder'
@@ -28,7 +32,11 @@ include Viewpoint
 
 
 module Viewpoint::WEB
+	DataMapper.setup(:default, (ENV["DATABASE_URL"] || "sqlite3:///#{Dir.pwd}/devel.db"))
+	DataMapper.auto_upgrade!
+
 	class WebClient < Sinatra::Base
+		#$DEBUG = true
 		set :app_file, __FILE__
 		set :root, File.dirname(__FILE__)
 		set :static, true
@@ -40,26 +48,87 @@ module Viewpoint::WEB
 		set :run, true
 
 
-=begin
 		before do
-			puts "**** Running initialization" if $DEBUG
-			if(not session.key?('userId')) then
-				puts "**** Session key 'userId' not found" if $DEBUG
-				if(request.cookies.key?('commentmonster_id')) then
-					puts "**** Session session userId from commentmonster_id cookie" if $DEBUG
-					session['userId'] = request.cookies['commentmonster_id']
-				elsif(request.get? and request.path_info != '/welcome')
-					puts "Forwarding to /welcome from 'before'" if $DEBUG
-					redirect '/welcome'
-				else
-					puts "Doing nothing in before" if $DEBUG
-				end
+			puts "AUTHC?: #{session[:authenticated].class.to_s}"
+			puts "PATH: #{request.path}"
+			puts "PATHINFO: #{request.path_info}"
+			puts "FULL-PATH: #{request.fullpath}"
+			puts "REFERRER: #{request.referrer}"
+			unless( session[:authenticated] or request.path =~ /^\/authenticate/)
+				redirect "/authenticate?redirect=#{request.path}"
 			end
 		end
-=end
 
 		get '/' do
 			haml :welcome
+		end
+
+		get '/logout' do
+			access_handler = EWSAccessHandler.first(:session_id => session[:id])
+			access_handler.destroy! unless access_handler == nil
+			session[:passkey] = nil
+		end
+
+		get '/mail' do
+			ews = get_ews
+			mail = MailFolder.new(ews.get_folder_by_name("Inbox"))
+			msgs = mail.get_todays_messages
+			haml :mail, :layout => false, :locals => {:msgs => msgs}
+			#msgs.each do |msg|
+			#	output += "#{msg.sender}		| #{msg.subject}		|#{msg.date_time_recieved}<br/>"
+			#end
+			#output
+		end
+
+		post '/msg' do
+			ews = get_ews
+			mail = MailFolder.new(ews.get_folder_by_name("Inbox"))
+			puts "FETCHING2: #{params[:msg_id]}"
+			msg = mail.get_item(params[:msg_id])
+			puts "MSG: #{msg.class.to_s}"
+			msg.body
+		end
+
+		get '/encrypt' do
+			puts "SESS: #{session[:id]}"
+			access_handler = EWSAccessHandler.new(:session_id => session[:id])
+			encpass = encrypt_password(pass, session[:passkey])
+			access_handler.pass = encpass
+			access_handler.save
+			"Encrypted #{pass} to #{encpass} with<br/>SESS: #{session[:id]}"
+		end
+
+		get '/decrypt' do
+			puts "SESS: #{session[:id]}"
+			access_handler = EWSAccessHandler.first(:session_id => session[:id])
+			puts "ACC: #{access_handler.inspect.to_s}"
+			pass = decrypt_password(access_handler.pass, session[:passkey])
+			"Decrypted #{access_handler.pass} to #{pass}"
+		end
+
+		get '/authenticate' do
+			# http://74.125.47.132/search?q=cache:Rhxa86QRnsAJ:paterni.org/wiki/Sinatra_temp_file_sessions+sintatra+session+id&cd=1&hl=en&ct=clnk&gl=us&client=firefox-a
+			session[:id] ||= "#{Time.now.to_i.to_s}.#{rand(1000)}.#{ request.ip.gsub(/\./,".")}#{request.port}"
+			session[:passkey] ||= gen_passkey
+
+			begin
+				user = "user"
+				pass = "pass"
+				endpoint = "endpoint.asmx"
+				access_handler = EWSAccessHandler.new(:session_id => session[:id])
+				access_handler.endpoint = endpoint
+				access_handler.user = user
+				encpass = encrypt_password(pass,session[:passkey])
+				access_handler.pass = encpass
+				access_handler.save
+
+				ews = get_ews(access_handler)
+				session[:authenticated] = true
+				puts "REQ from AUTH: #{request.instance_variables.join(', ')}"
+				redirect (params[:redirect] ? params[:redirect] : '/')
+			rescue SOAP::HTTPStreamError => error
+				"Could Not Authenticate user #{user} to #{endpoint} \n => #{error}"
+			end
 		end
 
 		get '/demo' do
@@ -180,6 +249,46 @@ module Viewpoint::WEB
 			@env['rack.session.options'][:expire_after] = 0
 		end
 
+		# Thanks! : http://snippets.dzone.com/posts/show/491
+		def gen_passkey
+			len = 36
+			chars = ("a".."z").to_a + ("A".."Z").to_a + ("0".."9").to_a
+			newpass = ""
+			1.upto(len) { |i| newpass << chars[rand(chars.size-1)] }
+			return newpass
+		end
+
+		# This method encrypts the EWS password so we can store in in a server-side
+		# DataMapper database.  The reasoning behind this is so the EWS password isn't
+		# stored in plaintext on the client.
+		def encrypt_password(pass, passkey)
+			c = OpenSSL::Cipher::Cipher.new("aes-256-cbc")
+			c.encrypt
+			# your pass is what is used to encrypt/decrypt
+			c.key = Digest::SHA1.hexdigest(passkey)
+			c.iv = session[:ssl_iv] = c.random_iv
+			e = c.update(pass)  # encrypt this text
+			e << c.final
+			return e
+		end
+
+		def decrypt_password(encpass, passkey)
+			c = OpenSSL::Cipher::Cipher.new("aes-256-cbc")
+			c.decrypt
+			c.key = Digest::SHA1.hexdigest(passkey)
+			c.iv = session[:ssl_iv]
+			d = c.update(encpass)
+			d << c.final
+			return d
+		end
+
+		def get_ews(access_handler = nil)
+			access_handler ||= EWSAccessHandler.first(:session_id => session[:id])
+			pass = decrypt_password(access_handler.pass, session[:passkey])
+			ews = ExchWebServ.instance
+			ews.authenticate( access_handler.user, pass, access_handler.endpoint )
+			return ews
+		end
 	end
 end
 

@@ -1,0 +1,33 @@
+.sender, .subject, .date{
+	height: 20px;
+	float: left;
+	margin: 0;
+	padding: 0;
+}
+.sender {
+	width: 20%;
+}
+
+.subject {
+	width: 65%;
+	overflow: hidden;
+}
+
+.date {
+	width: 10%;
+	clear: both;
+}
+
+.msg_header {
+	width: 80%;
+	height: 20px;
+	clear: both;
+	cursor: pointer;
+}
+
+.even_msg {
+	background-color: #fef;
+}
+.odd_msg {
+	background-color: #CCCCCC;
+}

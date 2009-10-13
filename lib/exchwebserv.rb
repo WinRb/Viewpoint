@@ -39,20 +39,21 @@ class Viewpoint::ExchWebServ
 
 	attr_reader :ews, :user, :authenticated
 
-	def initialize(user = nil, pass = nil, ews_endpoint = nil)
+	def initialize
 		@authenticated = false
-		# Exchange webservice URL (probably ends in /exchange.asmx)
-		@user = user
-		@pass = pass
-		@ews_endpoint  = ews_endpoint
-		# Connection to Exchange web services.  You can get fetch this from an accessor later
+		@user = nil
+		@pass = nil
+		@ews_endpoint  = nil
+
+		# Connection to Exchange web services.
+		# You can get fetch this from an accessor later.
 		@ews  = nil
 
 		# Stores folders returned from 'find_folders'
 		@folders = {}
 
 		# Do initial authentication
-		do_auth
+		#do_auth
 	end
 
 
@@ -118,7 +119,7 @@ class Viewpoint::ExchWebServ
 		folder_shape = FolderResponseShapeType.new( folder_shape )
 		get_folder = GetFolderType.new(folder_shape, folder_ids)
 		
-		resp = @ews.getFolder(get_folder).responseMessages.getFolderResponseMessage[0]
+		resp = @ews.getFolder(get_folder).responseMessages.getFolderResponseMessage[0].folders.folder[0]
 	end
 
 	# Parameters:
@@ -150,6 +151,15 @@ class Viewpoint::ExchWebServ
 		get_folder(folder_ids, true, folder_shape)
 	end
 
+	def authenticate(user = nil, pass = nil, endpoint = nil)
+		unless @authenticated
+			@user = user
+			@pass = pass
+			@ews_endpoint = endpoint
+			do_auth unless @authenticated
+		end
+		@authenticated
+	end
 
 	private
 	def do_auth
