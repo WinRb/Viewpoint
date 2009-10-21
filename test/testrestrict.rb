@@ -7,7 +7,7 @@ include Viewpoint
 $DEBUG = true
 
 vp = ExchWebServ.instance
-
+vp.authenticate
 vp.find_folders
 
 fit = FindItemType.new

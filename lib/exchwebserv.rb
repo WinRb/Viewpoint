@@ -151,6 +151,14 @@ class Viewpoint::ExchWebServ
 		get_folder(folder_ids, true, folder_shape)
 	end
 
+	def get_mail_folders
+		return @folders['MailFolder']
+	end
+
+	def get_calendar_folders
+		return @folders['CalendarFolder']
+	end
+
 	def authenticate(user = nil, pass = nil, endpoint = nil)
 		unless @authenticated
 			@user = user

@@ -18,6 +18,7 @@
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
 require 'fusefs'
+require 'time'
 include FuseFS
 require File.dirname(__FILE__) + '/../lib/exchwebserv'
 require File.dirname(__FILE__) + '/../lib/folder'
@@ -31,8 +32,10 @@ class EWSFuse < FuseDir
 
 	def initialize(mountpoint)
 		@vp = ExchWebServ.instance
+		@vp.authenticate
 		@vp.find_folders
-		@mf = MailFolder.all
+		@mf = (@vp.get_mail_folders)
+		puts "MF: #{@mf.class.to_s}"
 		@messages = {}    # Message objects
 		@open_files = {}  # Files open for RAW IO
 		@mountpoint = mountpoint
@@ -54,21 +57,25 @@ class EWSFuse < FuseDir
 			parts = scan_path(path)
 			case parts.pop
 			when nil
-				output = @mf.map do |m|
-					m.display_name
+				puts "--- IN: contents: else --- while 'nil'"
+				output = @mf.keys do |folder_name|
+					folder_name
 				end
 				output + Dir.entries(local_path(path))
 			when 'cur'
 				np = parts.pop
 				puts "folder: #{np}"
-				mdir = MailFolder.first(:display_name => np)
+				mdir = @mf[np]
 				if( mdir == nil )
 					[]
 				else
+					mdir = @vp.get_folder(mdir.display_name)
+					puts "Fetching todays messages for #{mdir.display_name} of type #{mdir.class.to_s}"
 					mdir.get_todays_messages.map do |msg|
+						puts "Got message of type: #{msg.class.to_s}"
 						msg_hash = msg.item_id.hash.abs
 						@messages[msg_hash.to_s] = msg
-						"#{msg.date_time_recieved.to_time.to_i}_#{msg_hash}"
+						"#{msg.date_time_recieved.strftime('%s')}_#{msg_hash}"
 					end
 				end
 			when 'new','tmp'
@@ -94,7 +101,7 @@ class EWSFuse < FuseDir
 				puts "IS DIR: #{path}"
 				return true
 			else
-				if( (MailFolder.first(:display_name => part )) != nil )
+				if( (@mf[part] ) != nil )
 					puts "IS DIR: #{path}"
 					return true
 				else
@@ -317,7 +324,7 @@ class EWSFuse < FuseDir
 		else
 			ans = ((!@@maildir_dirs.include? parts.last) &&
 					parts.last !~ /^[0-9]{10,}_/ &&
-					((MailFolder.first(:display_name => parts.last )) == nil)
+					((@mf[parts.last]) == nil)
 					)
 		end
 

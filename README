@@ -6,17 +6,16 @@ Services (EWS) in Ruby.
 --------------------------------------------------------------------------
 REQUIRED GEMS:
 
-# DataMapper ( http://datamapper.org )
-gem install -r dm-core
-
-# Sqlite3 supporting drivers
-gem install -r sqlite3-ruby do_sqlite3
-
 # Current SOAP4R ( http://dev.ctor.org/soap4r )
 gem install -r soap4r
 
 CONFIGURATION:
 Configure your user/pass and EWS endpoint in lib/soap/viewpoint.conf
+
+
+Running Examples:
+To run the FuseFS example you need the 'fusefs' gem
+
 
 --------------------------------------------------------------------------
 DISCLAIMER:  I am by no means a Ruby or EWS expert.  There may be better
