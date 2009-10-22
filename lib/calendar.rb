@@ -19,6 +19,7 @@
 #############################################################################
 $:.unshift(File.dirname(__FILE__))
 require 'rubygems'
+require 'icalendar'
 require 'wsdl/exchangeServiceBinding'
 require 'viewpoint'
 # --- Folder Types ---
@@ -55,28 +56,8 @@ class Viewpoint::CalendarFolder < Viewpoint::Folder
 		find_item_t = FindItemType.new
 		find_item_t.xmlattr_Traversal = ItemQueryTraversalType::Shallow
 		item_shape = ItemResponseShapeType.new(DefaultShapeNamesType::Default, false)
-=begin
-		additional_props = NonEmptyArrayOfPathsToElementType.new
-		prop_a = PathToUnindexedFieldType.new
-		prop_b = PathToUnindexedFieldType.new
-		prop_c = PathToUnindexedFieldType.new
-		prop_d = PathToUnindexedFieldType.new
-		prop_e = PathToUnindexedFieldType.new
-		prop_a.xmlattr_FieldURI = UnindexedFieldURIType::ItemSubject
-		prop_b.xmlattr_FieldURI = UnindexedFieldURIType::ItemDateTimeReceived
-		prop_c.xmlattr_FieldURI = UnindexedFieldURIType::MessageSender 
-		prop_d.xmlattr_FieldURI = UnindexedFieldURIType::MessageFrom
-		prop_e.xmlattr_FieldURI = UnindexedFieldURIType::CalendarCalendarItemType
-		additional_props << prop_a
-		additional_props << prop_b
-		additional_props << prop_c
-		additional_props << prop_d
-		additional_props << prop_e
-		item_shape.additionalProperties = additional_props
-=end
+
 		find_item_t.itemShape = item_shape
-
-
 		
 		folder_ids = NonEmptyArrayOfBaseFolderIdsType.new()
 		dist_folder = DistinguishedFolderIdType.new
@@ -110,7 +91,16 @@ class Viewpoint::CalendarFolder < Viewpoint::Folder
 
 	# See docs for Folder::get_item
 	def get_item(item_id)
-		super(item_id, "calendarItem")
+		super(item_id, "calendarItem", true)
+	end
+
+	def to_ical
+		ical = Icalendar::Calendar.new
+		today = get_todays_events
+		today.each do |ev|
+			ical.add_event(ev.to_ical_event)
+		end
+		return ical
 	end
 end
 

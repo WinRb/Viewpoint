@@ -174,6 +174,23 @@ class Viewpoint::Folder
 		end
 
 		item_shape = ItemResponseShapeType.new( shape_name, false, BodyTypeResponseType::Text )
+
+		#additional_props = NonEmptyArrayOfPathsToElementType.new
+		#prop_a = PathToUnindexedFieldType.new
+		#prop_b = PathToUnindexedFieldType.new
+		#prop_c = PathToUnindexedFieldType.new
+		#prop_d = PathToUnindexedFieldType.new
+		#prop_a.xmlattr_FieldURI = UnindexedFieldURIType::CalendarMeetingTimeZone
+		#prop_b.xmlattr_FieldURI = UnindexedFieldURIType.new("calendar:EndTimeZone")
+		#prop_c.xmlattr_FieldURI = UnindexedFieldURIType::ItemInternetMessageHeaders
+		#prop_d.xmlattr_FieldURI = UnindexedFieldURIType::MessageFrom
+		#additional_props.upath << prop_a
+		#additional_props.upath << prop_b
+		#additional_props.upath << prop_c
+		#additional_props << prop_d
+		#item_shape.additionalProperties = additional_props
+
+
 		
 		item_id_t = ItemIdType.new
 		item_id_t.xmlattr_Id = item_id
