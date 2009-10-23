@@ -34,13 +34,13 @@ class Viewpoint::CalendarItem < Viewpoint::Item
 		# keep this now for debuging
 		@ews_item = ews_item if $DEBUG
 		@subject = ews_item.subject # String
-		@location = ews_item.location
+		@location = ews_item.location if ews_item.location
 		@cal_item_type = ews_item.calendarItemType
-		@organizer = ews_item.organizer.mailbox.name # String
-		@start = ews_item.start # DateTime
-		@end = ews_item.v_end # DateTime
-		@busy_status = ews_item.legacyFreeBusyStatus # String
-		@date_time_recieved = ews_item.dateTimeReceived # DateTime
+		@organizer = ews_item.organizer.mailbox.name if ews_item.organizer and ews_item.organizer.mailbox # String
+		@start = ews_item.start if ews_item.start # DateTime
+		@end = ews_item.v_end if ews_item.v_end # DateTime
+		@busy_status = ews_item.legacyFreeBusyStatus if ews_item.legacyFreeBusyStatus # String
+		@date_time_recieved = ews_item.dateTimeReceived if ews_item.dateTimeReceived # DateTime
 
 		# This is where the event object gets loaded if it
 		# is requested.  Think of it like IMAP downloading the
@@ -58,21 +58,24 @@ class Viewpoint::CalendarItem < Viewpoint::Item
 	# Returns Icalendar::Event object
 	def to_ical_event
 		get_calitem if @message == nil
-		puts "MESSAGE: #{@message.class.to_s}"
 		iev = Icalendar::Event.new
 		iev.uid = @message.uID
-		iev.organizer = "CN=\"#{@message.organizer.mailbox.name}\":MAILTO:#{@message.organizer.mailbox.emailAddress}"
+		unless(@message.organizer == nil)
+			iev.organizer = "CN=\"#{@message.organizer.mailbox.name}\"" if @message.organizer.mailbox.name
+			iev.organizer += ":MAILTO:#{@message.organizer.mailbox.emailAddress}" if @message.organizer.mailbox.emailAddress
+		end
 		# TODO: Handle EWS Timezones better.  TZ_HASH in viewpoint.rb is the start of this
 		require 'time'
 		dtstart = Time.at(@message.start.strftime('%s').to_i)
 		dtend   = Time.at(@message.v_end.strftime('%s').to_i)
 		dtstamp = Time.at(@message.dateTimeStamp.strftime('%s').to_i)
 		last_modified = Time.at(@message.lastModifiedTime.strftime('%s').to_i)
-		iev.dtstart = dtstart.strftime('%Y%m%d%H%M%S%Z')
-		iev.dtend   = dtend.strftime('%Y%m%d%H%M%S%Z')
+		timestr = "%Y%m%dT%H%M%S"
+		iev.dtstart = dtstart.strftime(timestr)
+		iev.dtend   = dtend.strftime(timestr)
 		iev.tzid    = dtstart.strftime('%Z')
-		iev.dtstamp = dtstamp.strftime('%Y%m%d%H%M%S%Z')
-		iev.last_modified = last_modified.strftime('%Y%m%d%H%M%S%Z')
+		iev.dtstamp = dtstamp.strftime(timestr)
+		iev.last_modified = last_modified.strftime(timestr)
 		iev.location = @message.location if @message.location
 		iev.klass = @message.sensitivity if @message.sensitivity
 		iev.summary = @message.subject if @message.subject
@@ -83,14 +86,18 @@ class Viewpoint::CalendarItem < Viewpoint::Item
 		iev.status = @message.myResponseType if @message.myResponseType
 		#iev.attach @message.attachments if @message.hasAttachments
 		@message.requiredAttendees.each do |pers|
-			iev.attendees << "ROLE=REQ-PARTICIPANT;CN=\"#{pers.mailbox.name}\":MAILTO:#{pers.mailbox.emailAddress}"
+			output =  "ROLE=REQ-PARTICIPANT;CN=\"#{pers.mailbox.name}\"" if pers.mailbox.respond_to?(:name)
+			output += ":MAILTO:#{pers.mailbox.emailAddress}" if pers.mailbox.respond_to?(:emailAddress)
+			iev.attendees << output if output
 		end if @message.requiredAttendees
 		@message.optionalAttendees.each do |pers|
-			iev.attendees << "ROLE=OPT-PARTICIPANT;CN=\"#{pers.mailbox.name}\":MAILTO:#{pers.mailbox.emailAddress}"
+			output =  "ROLE=OPT-PARTICIPANT;CN=\"#{pers.mailbox.name}\"" if pers.mailbox.respond_to?(:name)
+			output += ":MAILTO:#{pers.mailbox.emailAddress}" if pers.mailbox.respond_to?(:emailAddress)
+			iev.attendees << output if output
 		end if @message.optionalAttendees
 
-		iev.categories = @message.categories if @message.categories
-		iev.resources  = @message.resources if @message.resources
+		#iev.categories = @message.categories if @message.categories
+		#iev.resources  = @message.resources if @message.resources
 		return iev
 	end
 end

@@ -51,6 +51,7 @@ class Viewpoint::CalendarFolder < Viewpoint::Folder
 	end
 
 	# Get events between a certain time period.  Defaults to "today"
+	# You can get all events by passing 'nil, nil', but you should really consider using synchronization then.
 	# This method will return an Array of type (CalendarItemType)
 	def get_events(start_time = (DateTime.parse(Date.today.to_s).to_s), end_time = (DateTime.parse(Date.today.next.to_s).to_s))
 		find_item_t = FindItemType.new
@@ -65,10 +66,19 @@ class Viewpoint::CalendarFolder < Viewpoint::Folder
 		folder_ids.distinguishedFolderId = dist_folder
 		find_item_t.parentFolderIds = folder_ids
 		
+		# If we pass nil, force times to be:
+		# 	start:  1 years ago
+		# 	end:	1 years from now
 		cal_span =  CalendarViewType.new
-		cal_span.xmlattr_StartDate = DateTime.parse(Date.today.to_s).to_s
-		cal_span.xmlattr_EndDate = DateTime.parse(Date.today.next.to_s).to_s
-		find_item_t.calendarView = cal_span
+		if ( start_time == nil or end_time == nil)
+			cal_span.xmlattr_StartDate = DateTime.parse((Date.today - 365).to_s).to_s
+			cal_span.xmlattr_EndDate = DateTime.parse((Date.today + 365).to_s).to_s
+			find_item_t.calendarView = cal_span
+		else
+			cal_span.xmlattr_StartDate = DateTime.parse(Date.today.to_s).to_s
+			cal_span.xmlattr_EndDate = DateTime.parse(Date.today.next.to_s).to_s
+			find_item_t.calendarView = cal_span
+		end
 
 		resp = find_items(find_item_t)
 		if resp != nil
@@ -96,8 +106,8 @@ class Viewpoint::CalendarFolder < Viewpoint::Folder
 
 	def to_ical
 		ical = Icalendar::Calendar.new
-		today = get_todays_events
-		today.each do |ev|
+		events = get_events(nil,nil)
+		events.each do |ev|
 			ical.add_event(ev.to_ical_event)
 		end
 		return ical

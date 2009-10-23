@@ -94,7 +94,6 @@ class Viewpoint::Message < Viewpoint::Item
 	# Output the message in RFC 822 format: http://www.ietf.org/rfc/rfc0822.txt
 	def to_rfc822
 		get_message if @message == nil
-		puts "MESSAGE: #{@message.class.to_s}"
 		rfc822 = []
 		rfc822.push 'Return-Path'  => @message.sender.mailbox.emailAddress
 		rfc822.push 'Delivered-To' => @message.receivedBy.mailbox.emailAddress
