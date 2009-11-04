@@ -36,6 +36,12 @@ class Viewpoint::Folder
 		@watermark = nil
 	end
 
+	# These methods are marked 'private' because they return EWS Types and I am trying to 
+	# hide those because they are not elegant and a bit too tedious for the public interface.
+	private
+
+	# This is a proxy for the SyncFolderItems operation detailed here: http://msdn.microsoft.com/en-us/library/aa563967.aspx
+	# It returns a SyncFolderItemsResponseType object
 	def sync_folder(max_items = 256)
 		begin
 			# ItemResponseShapeType

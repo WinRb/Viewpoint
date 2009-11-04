@@ -40,20 +40,21 @@ class Viewpoint::CalendarFolder < Viewpoint::Folder
 	end
 
 	def get_todays_events
-		get_events(DateTime.parse(Date.today.to_s).to_s, DateTime.parse(Date.today.next.to_s).to_s)
+		get_events(DateTime.parse(Date.today.to_s), DateTime.parse(Date.today.next.to_s))
 	end
 
 	def get_weeks_events
 		start_date = Date.today
 		end_date = (start_date + ( 6 - start_date.wday))
 
-		get_events(DateTime.parse(start_date.to_s).to_s, DateTime.parse(end_date.to_s).to_s)
+		get_events(DateTime.parse(start_date.to_s), DateTime.parse(end_date.to_s))
 	end
 
 	# Get events between a certain time period.  Defaults to "today"
-	# You can get all events by passing 'nil, nil', but you should really consider using synchronization then.
-	# This method will return an Array of type (CalendarItemType)
-	def get_events(start_time = (DateTime.parse(Date.today.to_s).to_s), end_time = (DateTime.parse(Date.today.next.to_s).to_s))
+	# Input: DateTime of start, DateTime of end
+	# You can get a year of events by passing 'nil, nil', but you should really consider using synchronization then.
+	# This method will return an Array of CalendarItem
+	def get_events(start_time = (DateTime.parse(Date.today.to_s)), end_time = (DateTime.parse(Date.today.next.to_s)))
 		find_item_t = FindItemType.new
 		find_item_t.xmlattr_Traversal = ItemQueryTraversalType::Shallow
 		item_shape = ItemResponseShapeType.new(DefaultShapeNamesType::Default, false)
@@ -75,8 +76,8 @@ class Viewpoint::CalendarFolder < Viewpoint::Folder
 			cal_span.xmlattr_EndDate = DateTime.parse((Date.today + 365).to_s).to_s
 			find_item_t.calendarView = cal_span
 		else
-			cal_span.xmlattr_StartDate = DateTime.parse(Date.today.to_s).to_s
-			cal_span.xmlattr_EndDate = DateTime.parse(Date.today.next.to_s).to_s
+			cal_span.xmlattr_StartDate = start_time.to_s
+			cal_span.xmlattr_EndDate = end_time.to_s
 			find_item_t.calendarView = cal_span
 		end
 
@@ -95,22 +96,30 @@ class Viewpoint::CalendarFolder < Viewpoint::Folder
 
 			return cal_items
 		else
-			return resp
+			return resp  # return nil
 		end
 	end
 
-	# See docs for Folder::get_item
-	def get_item(item_id)
-		super(item_id, "calendarItem", true)
-	end
 
-	def to_ical
+	# Returns an Icalendar::Calendar object
+	# Input: DateTime of start, DateTime of end
+	def to_ical(dtstart = nil, dtend = nil)
 		ical = Icalendar::Calendar.new
-		events = get_events(nil,nil)
+		events = get_events(dtstart, dtend)
 		events.each do |ev|
 			ical.add_event(ev.to_ical_event)
 		end
 		return ical
+	end
+
+
+	# These methods are marked 'private' because they return EWS Types and I am trying to 
+	# hide those because they are not elegant and a bit too tedious for the public interface.
+	private
+
+	# See docs for Folder::get_item
+	def get_item(item_id)
+		cali = super(item_id, "calendarItem", true)
 	end
 end
 

@@ -66,6 +66,7 @@ class Viewpoint::CalendarItem < Viewpoint::Item
 		end
 		# TODO: Handle EWS Timezones better.  TZ_HASH in viewpoint.rb is the start of this
 		require 'time'
+		#tzoffset = @message.timeZone.sub(/^\(GMT([^\)]+)\).*$/,'\1')
 		dtstart = Time.at(@message.start.strftime('%s').to_i)
 		dtend   = Time.at(@message.v_end.strftime('%s').to_i)
 		dtstamp = Time.at(@message.dateTimeStamp.strftime('%s').to_i)

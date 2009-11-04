@@ -35,10 +35,12 @@ class Viewpoint::Item
 	end
 
 
+	# Returns a boolean value, true if the delete ocurred, false otherwise.
 	def delete!
 		@parent_folder.delete_item(@item_id)
 	end
 
+	# Returns a boolean value, true if the recycle ocurred, false otherwise.
 	def recycle!
 		@parent_folder.recycle_item(@item_id)
 	end
