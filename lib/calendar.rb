@@ -113,10 +113,6 @@ class Viewpoint::CalendarFolder < Viewpoint::Folder
 	end
 
 
-	# These methods are marked 'private' because they return EWS Types and I am trying to 
-	# hide those because they are not elegant and a bit too tedious for the public interface.
-	private
-
 	# See docs for Folder::get_item
 	def get_item(item_id)
 		cali = super(item_id, "calendarItem", true)

@@ -37,12 +37,13 @@ class Viewpoint::MailFolder < Viewpoint::Folder
 	end
 
 	def get_todays_messages
-		get_messages_since( DateTime.parse(Date.today.to_s).to_s )
+		get_messages( DateTime.parse(Date.today.to_s).to_s )
 	end
 
-	# Fetch messages since a particular date.  Default is today at midnight.
-	# Returns: Array of MessageType: http://msdn.microsoft.com/en-us/library/aa494306.aspx
-	def get_messages_since(since = (DateTime.parse(Date.today.to_s).to_s) )
+	# Get messages between a certain time period.  Defaults to "today"
+	# Input: DateTime of start, DateTime of end
+	# This method will return an Array of Message
+	def get_messages(since = (DateTime.parse(Date.today.to_s)) )
 		# Set-up FindItemType
 		find_item_t = FindItemType.new
 		find_item_t.xmlattr_Traversal = ItemQueryTraversalType::Shallow
@@ -109,11 +110,9 @@ class Viewpoint::MailFolder < Viewpoint::Folder
 
 	end
 	
-	
+
 	# See docs for Folder::get_item
 	def get_item(item_id)
 		msg = super(item_id, "message", true)
 	end
-
-
 end

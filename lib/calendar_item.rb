@@ -50,9 +50,6 @@ class Viewpoint::CalendarItem < Viewpoint::Item
 		super(ews_item, parent_folder)
 	end
 
-	def get_calitem
-		@message = @parent_folder.get_item(@item_id)
-	end
 
 	# Convert item to iCal format: http://www.ietf.org/rfc/rfc2445.txt
 	# Returns Icalendar::Event object
@@ -100,5 +97,14 @@ class Viewpoint::CalendarItem < Viewpoint::Item
 		#iev.categories = @message.categories if @message.categories
 		#iev.resources  = @message.resources if @message.resources
 		return iev
+	end
+
+
+	# These methods are marked 'private' because they return EWS Types and I am trying to 
+	# hide those because they are not elegant and a bit too tedious for the public interface.
+	private
+
+	def get_calitem
+		@message = @parent_folder.get_item(@item_id)
 	end
 end

@@ -36,39 +36,9 @@ class Viewpoint::Folder
 		@watermark = nil
 	end
 
-	# These methods are marked 'private' because they return EWS Types and I am trying to 
-	# hide those because they are not elegant and a bit too tedious for the public interface.
-	private
-
-	# This is a proxy for the SyncFolderItems operation detailed here: http://msdn.microsoft.com/en-us/library/aa563967.aspx
-	# It returns a SyncFolderItemsResponseType object
-	def sync_folder(max_items = 256)
-		begin
-			# ItemResponseShapeType
-			itemshapeT = ItemResponseShapeType.new(DefaultShapeNamesType::IdOnly, false)
- 
-			# TargetFolderIdType
-			tfolderidT = TargetFolderIdType.new
-			folderidT = FolderIdType.new
-			folderidT.xmlattr_Id = self.folder_id
-			tfolderidT.folderId = folderidT
-
-			# SyncFolderItemsType
-			syncitemsT = SyncFolderItemsType.new(itemshapeT,tfolderidT,self.sync_state,nil,max_items)
-
-			# Call Sync => returns SyncFolderItemsResponseType
-			resp = ExchWebServ.instance.ews.syncFolderItems(syncitemsT).responseMessages.syncFolderItemsResponseMessage[0]
-			@sync_state = resp.syncState
-			return resp
-		rescue
-			puts "** Something happened during synchronizing folder => #{self.display_name}"
-			raise
-		end
-	end
-
 	# Subscribe to folder and save the subscription_id into the database.  Subsequent calls
-	# to get_events will use that id.  We also return the SubscribeResponseMessageType in
-	# case any further processing is needed.
+	# to check_subscription will use that id.
+	# Returns true if the operation is successful, false otherwise
 	def subscribe
 		subscribe = SubscribeType.new
 		pull = PullSubscriptionRequestType.new
@@ -97,13 +67,13 @@ class Viewpoint::Folder
 		@subscription_id = resp.subscriptionId
 		@watermark = resp.watermark
 
-		return resp
+		return (resp.responseCode == "NoError")? true: false
 	end
 
 
 	# Fetch events with the subscription_id.  If one does not exists or is expired,
 	# call subscribe.
-	def get_events
+	def check_subscription
 		begin
 			if( @subscription_id == nil or @watermark == nil) then
 				self.subscribe
@@ -146,6 +116,40 @@ class Viewpoint::Folder
 
 		return resp
 	end
+
+
+
+
+	# These methods are marked 'private' because they return EWS Types and I am trying to 
+	# hide those because they are not elegant and a bit too tedious for the public interface.
+	private
+
+	# This is a proxy for the SyncFolderItems operation detailed here: http://msdn.microsoft.com/en-us/library/aa563967.aspx
+	# It returns a SyncFolderItemsResponseType object
+	def sync_folder(max_items = 256)
+		begin
+			# ItemResponseShapeType
+			itemshapeT = ItemResponseShapeType.new(DefaultShapeNamesType::IdOnly, false)
+ 
+			# TargetFolderIdType
+			tfolderidT = TargetFolderIdType.new
+			folderidT = FolderIdType.new
+			folderidT.xmlattr_Id = self.folder_id
+			tfolderidT.folderId = folderidT
+
+			# SyncFolderItemsType
+			syncitemsT = SyncFolderItemsType.new(itemshapeT,tfolderidT,self.sync_state,nil,max_items)
+
+			# Call Sync => returns SyncFolderItemsResponseType
+			resp = ExchWebServ.instance.ews.syncFolderItems(syncitemsT).responseMessages.syncFolderItemsResponseMessage[0]
+			@sync_state = resp.syncState
+			return resp
+		rescue
+			puts "** Something happened during synchronizing folder => #{self.display_name}"
+			raise
+		end
+	end
+
 
 	# Wrapper around EWS's FindItem method:  http://msdn.microsoft.com/en-us/library/aa566107.aspx
 	# The specifics of this method should be set up in the child classes and then this method should
