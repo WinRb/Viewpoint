@@ -17,11 +17,11 @@
 # You should have received a copy of the GNU General Public License along
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
+$: << File.dirname(__FILE__) + '/../lib/'
 require 'fusefs'
 require 'time'
 include FuseFS
-require File.dirname(__FILE__) + '/../lib/exchwebserv'
-require File.dirname(__FILE__) + '/../lib/folder'
+require 'viewpoint'
 include Viewpoint
 
 
@@ -35,7 +35,6 @@ class EWSFuse < FuseDir
 		@vp.authenticate
 		@vp.find_folders
 		@mf = (@vp.get_mail_folders)
-		puts "MF: #{@mf.class.to_s}"
 		@messages = {}    # Message objects
 		@open_files = {}  # Files open for RAW IO
 		@mountpoint = mountpoint
