@@ -20,7 +20,6 @@
 require 'rubygems'
 gem 'soap4r'
 require 'soap/header/simplehandler'
-require 'viewpoint'
 
 
 # Some functionality of EWS depends on setting the "RequestServerVersion"

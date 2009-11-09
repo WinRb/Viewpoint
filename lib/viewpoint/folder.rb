@@ -18,7 +18,6 @@
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
 require 'rubygems'
-require 'viewpoint'
 
 # This class is inherited by all folder subtypes such as Mail, Calendar,
 # Tasks and Search.  It will serve as the brain for all of the methods that

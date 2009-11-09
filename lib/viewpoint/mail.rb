@@ -25,8 +25,6 @@ require 'folder'
 # --- Item Types ---
 require 'message'
 
-require 'viewpoint'
-
 
 class Viewpoint::MailFolder < Viewpoint::Folder
 	include Viewpoint

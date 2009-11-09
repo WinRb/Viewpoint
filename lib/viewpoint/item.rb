@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU General Public License along
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
-require 'viewpoint'
 
 
 # This class is inherited by all Item subtypes such as Message, Event,

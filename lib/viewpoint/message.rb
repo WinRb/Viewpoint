@@ -19,7 +19,6 @@
 #############################################################################
 $:.unshift(File.dirname(__FILE__))
 require 'item'
-require 'viewpoint'
 
 class Viewpoint::Message < Viewpoint::Item
 	include Viewpoint

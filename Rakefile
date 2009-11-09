@@ -6,7 +6,7 @@ CLEAN.include("pkg")
 CLEAN.include("doc")
 
 GEMSPEC = Gem::Specification.new do |gem|
-  gem.name = "Viewpoint"
+  gem.name = "viewpoint"
   gem.version = File.open('VERSION').readline.chomp
   gem.date		= Date.today.to_s
   gem.platform = Gem::Platform::RUBY
@@ -37,3 +37,4 @@ Rake::GemPackageTask.new(GEMSPEC) do |pkg|
 end
 
 task :default => [:clean, :repackage]
+

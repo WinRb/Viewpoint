@@ -21,7 +21,6 @@ $:.unshift(File.dirname(__FILE__))
 require 'rubygems'
 require 'icalendar'
 require 'wsdl/exchangeServiceBinding'
-require 'viewpoint'
 # --- Folder Types ---
 require 'folder'
 # --- Item Types ---

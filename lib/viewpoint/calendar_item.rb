@@ -20,7 +20,6 @@
 $:.unshift(File.dirname(__FILE__))
 require 'rubygems'
 require 'icalendar'
-require 'viewpoint'
 require 'item'
 
 class Viewpoint::CalendarItem < Viewpoint::Item
