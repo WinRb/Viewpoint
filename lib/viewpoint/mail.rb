@@ -95,16 +95,13 @@ class Viewpoint::MailFolder < Viewpoint::Folder
 
 		resp = find_items(find_item_t)
 		
+		messages = []
 		if resp != nil
-			messages = []
 			resp.rootFolder.items.message.each do |msg|
 				messages << Message.new(msg, self)
 			end
-
-			return messages
-		else
-			return resp
 		end
+		return messages
 
 	end
 	

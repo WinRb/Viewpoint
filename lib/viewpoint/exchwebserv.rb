@@ -167,6 +167,15 @@ class Viewpoint::ExchWebServ
 		@authenticated
 	end
 
+
+	# Resolve a Contact name.
+	# More info: http://msdn.microsoft.com/en-us/library/aa563518.aspx
+	def resolve_name(unresolved_entry, full_contact_data = false)
+		rn_t = ResolveNamesType.new(nil,unresolved_entry)
+		rn_t.xmlattr_ReturnFullContactData = full_contact_data
+		ews.resolveNames(rn_t).responseMessages.resolveNamesResponseMessage.first
+	end
+
 	private
 	def do_auth
 		retry_count = 0
@@ -203,9 +212,7 @@ class Viewpoint::ExchWebServ
 			# were entered until later.  The ResolveNames operation is completely
 			# arbitrary and could be any EWS call.
 			# http://msdn.microsoft.com/en-us/library/bb409286.aspx
-			rnt = ResolveNamesType.new(nil,@user)
-			rnt.xmlattr_ReturnFullContactData = false
-			ews.resolveNames(rnt)
+			resolve_name(@user)
 
 		rescue SOAP::HTTPStreamError
 			puts "Bad Login!  Try Again."
