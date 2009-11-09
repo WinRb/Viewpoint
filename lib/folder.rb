@@ -118,12 +118,6 @@ class Viewpoint::Folder
 	end
 
 
-
-
-	# These methods are marked 'private' because they return EWS Types and I am trying to 
-	# hide those because they are not elegant and a bit too tedious for the public interface.
-	private
-
 	# This is a proxy for the SyncFolderItems operation detailed here: http://msdn.microsoft.com/en-us/library/aa563967.aspx
 	# It returns a SyncFolderItemsResponseType object
 	def sync_folder(max_items = 256)
@@ -224,6 +218,30 @@ class Viewpoint::Folder
 		end
 	end
 
+
+	# More info: http://msdn.microsoft.com/en-us/library/aa565781.aspx
+	def move_item(item_id, new_folder)
+		return false unless new_folder.kind_of?(Viewpoint::Folder)
+
+		folder_id_t = FolderIdType.new
+		folder_id_t.xmlattr_Id =  new_folder.folder_id
+		target_folder_t = TargetFolderIdType.new(folder_id_t)
+
+		item_ids = NonEmptyArrayOfBaseItemIdsType.new
+		item_t = ItemIdType.new
+		item_t.xmlattr_Id = item_id
+		item_ids.itemId << item_t
+
+		move_t = MoveItemType.new(target_folder_t, item_ids)
+		resp = ExchWebServ.instance.ews.moveItem(move_t).responseMessages.moveItemResponseMessage.first
+		#TODO: Error handling
+		if resp.xmlattr_ResponseClass == "Success"
+			return true
+		else
+			return false
+		end
+	end
+
 	# Delete item by item_id
 	# More info: http://msdn.microsoft.com/en-us/library/aa580484.aspx
 	def delete_item(item_id, delete_type=DisposalType::HardDelete)
@@ -234,7 +252,7 @@ class Viewpoint::Folder
 
 		delete = DeleteItemType.new(item_ids)
 		delete.xmlattr_DeleteType = delete_type
-		resp = ExchWebServ.instance.ews.deleteItem(delete).responseMessages.deleteItemResponseMessage[0]
+		resp = ExchWebServ.instance.ews.deleteItem(delete).responseMessages.deleteItemResponseMessage.first
 
 		#TODO: Error handling
 		if resp.xmlattr_ResponseClass == "Success"

@@ -14,14 +14,21 @@ gem install -r icalendar
 
 CONFIGURATION:
 Configure your user/pass and EWS endpoint in lib/soap/viewpoint.conf
+or $HOME/.viewpointrc.  If the file $HOME/.viewpointrc exists it takes
+presidence.  See the sample in lib/soap/viewpoint.conf for how this
+file should be configured.
 
 
 Running Examples:
 To run the FuseFS example you need the 'fusefs' gem
 
 
+******************** EXAMPLES *********************
+# In the following examples the following are used:
+# "item" is a type of Viewpoint::Item
+# "folder" is a type of Viewpoint::Folder
+# "new_folder" is a type of Viewpoint::Folder
 
-***** Examples ******
 # === Convert your Exchange Calendar to a Icalendar::Calendar object ===
 require 'lib/exchwebserv'
 vp = Viewpoint::ExchWebServ.instance
@@ -31,9 +38,16 @@ cal = vp.get_folder("Calendar")
 ical = cal.to_ical
 puts ical.to_ical
 
-
 # === Get a listing of todays messages ===
 # See test/test_client.rb
+
+# === Moving an item ===
+item.move_to!(new_folder)
+
+# === Deleting an item ===
+item.delete!
+item.recycle!   # Move to "Deleted Items"
+
 
 --------------------------------------------------------------------------
 DISCLAIMER:  I am by no means a Ruby or EWS expert.  There may be better

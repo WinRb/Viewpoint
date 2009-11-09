@@ -173,7 +173,12 @@ class Viewpoint::ExchWebServ
 	def do_auth
 		retry_count = 0
 		begin
-			if( File.exists?("#{File.dirname(__FILE__)}/soap/viewpoint.conf") )
+			if( File.exists?("#{ENV['HOME']}/.viewpointrc") )
+				props = SOAP::Property.load(File.new("#{ENV['HOME']}/.viewpointrc"))
+				@user = props['exchange.ews.user'] if @user == nil
+				@pass = props['exchange.ews.pass'] if @pass == nil
+				@ews_endpoint = props['exchange.ews.endpoint'] if @ews_endpoint == nil
+			elsif( File.exists?("#{File.dirname(__FILE__)}/soap/viewpoint.conf") )
 				props = SOAP::Property.load(File.new("#{File.dirname(__FILE__)}/soap/viewpoint.conf"))
 				@user = props['exchange.ews.user'] if @user == nil
 				@pass = props['exchange.ews.pass'] if @pass == nil

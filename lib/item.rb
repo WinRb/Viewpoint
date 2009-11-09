@@ -34,6 +34,15 @@ class Viewpoint::Item
 		@parent_folder = parent_folder
 	end
 
+	# Takes an object of type Viewpoint::Folder as an argument
+	# Returns a boolean value, true if the move ocurred, false otherwise.
+	def move_to!(new_folder)
+		retval = @parent_folder.move_item(@item_id, new_folder)
+		@parent_folder = new_folder if retval
+
+		return retval
+	end
+
 
 	# Returns a boolean value, true if the delete ocurred, false otherwise.
 	def delete!
