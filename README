@@ -35,7 +35,8 @@ To run the FuseFS example you need the 'fusefs' gem
 # "new_folder" is a type of Viewpoint::Folder
 
 # === Convert your Exchange Calendar to a Icalendar::Calendar object ===
-require 'lib/exchwebserv'
+require 'rubygems'
+require 'viewpoint'
 vp = Viewpoint::ExchWebServ.instance
 vp.authenticate
 vp.find_folders
