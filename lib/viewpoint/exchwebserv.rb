@@ -35,12 +35,13 @@ class Viewpoint::ExchWebServ
 	include Viewpoint
 	include Singleton
 
-	attr_reader :ews, :user, :authenticated
+	attr_reader :ews, :user, :authenticated, :email
 
 	def initialize
 		@authenticated = false
 		@user = nil
 		@pass = nil
+		@email = nil
 		@ews_endpoint  = nil
 
 		# Connection to Exchange web services.
@@ -212,7 +213,9 @@ class Viewpoint::ExchWebServ
 			# were entered until later.  The ResolveNames operation is completely
 			# arbitrary and could be any EWS call.
 			# http://msdn.microsoft.com/en-us/library/bb409286.aspx
-			resolve_name(@user)
+			resp = resolve_name(@user + '@')
+			# Set email while we're at it
+			@email = resp.resolutionSet.resolution.first.mailbox.emailAddress
 
 		rescue SOAP::HTTPStreamError
 			puts "Bad Login!  Try Again."
