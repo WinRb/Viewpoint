@@ -43,6 +43,26 @@ class Viewpoint::Item
 	end
 
 
+	# Return the OWA ID so we can link to webmail
+	def owa_id
+		vp = ExchWebServ.instance
+		altids_ar = NonEmptyArrayOfAlternateIdsType.new
+		
+		altid_t = AlternateIdType.new
+		altid_t.xmlattr_Format = IdFormatType::EwsId
+		altid_t.xmlattr_Id = @item_id
+		altid_t.xmlattr_Mailbox = vp.email
+		altids_ar.alternateId << altid_t
+		
+		convertid_t = ConvertIdType.new(altids_ar)
+		convertid_t.xmlattr_DestinationFormat = IdFormatType::OwaId
+		
+		resp = vp.ews.convertId(convertid_t)
+		resp.responseMessages.convertIdResponseMessage.first.alternateId.xmlattr_Id
+		#uri = "https://host/owa/?ae=Item&a=open&id=" + owa_id
+	end
+
+
 	# Returns a boolean value, true if the delete ocurred, false otherwise.
 	def delete!
 		@parent_folder.delete_item(@item_id)

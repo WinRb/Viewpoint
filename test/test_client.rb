@@ -1,5 +1,5 @@
 $: << File.dirname(__FILE__) + '/../lib/'
-require File.dirname(__FILE__) + '/../lib/viewpoint'
+require 'viewpoint'
 $DEBUG = true
 vp = Viewpoint::ExchWebServ.instance
 vp.authenticate
