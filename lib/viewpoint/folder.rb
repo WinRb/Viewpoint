@@ -43,30 +43,46 @@ class Viewpoint::Folder
 		pull = PullSubscriptionRequestType.new
 
 		# Set-up folder Id
-		dist_fid = DistinguishedFolderIdType.new
-		dist_fid.xmlattr_Id = DistinguishedFolderIdNameType::Calendar
-		f_ids = NonEmptyArrayOfBaseFolderIdsType.new()
-		f_ids.distinguishedFolderId = dist_fid
+		f_id_t = FolderIdType.new
+		f_id_t.xmlattr_Id = @folder_id
+		f_ids = NonEmptyArrayOfBaseFolderIdsType.new([f_id_t],nil)
 		pull.folderIds = f_ids
 
 		# Set-up event types
 		event_types = NonEmptyArrayOfNotificationEventTypesType.new
-		#event_types.push(NotificationEventTypeType::NewMailEvent)
+		event_types.push(NotificationEventTypeType::CopiedEvent)
 		event_types.push(NotificationEventTypeType::CreatedEvent)
 		event_types.push(NotificationEventTypeType::DeletedEvent)
-		#event_types.push(NotificationEventTypeType::ModifiedEvent)
+		event_types.push(NotificationEventTypeType::ModifiedEvent)
 		event_types.push(NotificationEventTypeType::MovedEvent)
+		event_types.push(NotificationEventTypeType::NewMailEvent)
 		pull.eventTypes = event_types
 
 		pull.timeout = 10
 
 		subscribe.pullSubscriptionRequest = pull
 		
-		resp = ExchWebServ.instance.ews.subscribe(subscribe).responseMessages.subscribeResponseMessage[0]
+		resp = ExchWebServ.instance.ews.subscribe(subscribe).responseMessages.subscribeResponseMessage.first
 		@subscription_id = resp.subscriptionId
 		@watermark = resp.watermark
 
 		return (resp.responseCode == "NoError")? true: false
+	end
+
+
+	# unsubscribe from folder
+	# Returns true if unsubscription succeeds, false otherwise
+	def unsubscribe
+		begin
+			if( @subscription_id == nil ) then
+				return true
+			end
+
+			unsub_t = UnsubscribeType.new(@subscription_id)
+			resp = ExchWebServ.instance.ews.unsubscribe(unsub_t).responseMessages.unsubscribeResponseMessage.first
+
+			return (resp.responseCode == "NoError")? true: false
+		end
 	end
 
 
@@ -79,14 +95,20 @@ class Viewpoint::Folder
 			end
 			ge = GetEventsType.new(@subscription_id, @watermark)
 
-			resp = ExchWebServ.instance.ews.getEvents(ge).responseMessages.getEventsResponseMessage[0] 
+			resp = ExchWebServ.instance.ews.getEvents(ge).responseMessages.getEventsResponseMessage
 
 			#TODO:  Add more event processing
 			
 
-			notifications = resp.notification
+			notifications = resp.first.notification
 
 			# Process Notifications
+			if( notifications.copiedEvent != nil)
+				notifications.copiedEvent .each do |note|
+					@watermark = note.watermark
+				end
+			end
+
 			if( notifications.createdEvent != nil)
 				notifications.createdEvent.each do |note|
 					@watermark = note.watermark
@@ -99,8 +121,20 @@ class Viewpoint::Folder
 				end
 			end
 
+			if( notifications.modifiedEvent != nil)
+				notifications.modifiedEvent.each do |note|
+					@watermark = note.watermark
+				end
+			end
+
 			if( notifications.movedEvent != nil)
 				notifications.movedEvent.each do |note|
+					@watermark = note.watermark
+				end
+			end
+
+			if( notifications.newMailEvent!= nil)
+				notifications.newMailEvent.each do |note|
 					@watermark = note.watermark
 				end
 			end
