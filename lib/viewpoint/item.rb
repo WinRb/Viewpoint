@@ -25,12 +25,16 @@
 class Viewpoint::Item
 	include Viewpoint
 
-	attr_accessor :item_id
+	attr_accessor :item_id, :parent_folder, :item_class
+	attr_reader :ews_item if $DEBUG
 
 	# Initialize an Exchange Web Services item
 	def initialize(ews_item, parent_folder)
+		@ews_item = ews_item if $DEBUG
+
 		@item_id = ews_item.itemId.xmlattr_Id
 		@parent_folder = parent_folder
+    @item_class = ews_item.itemClass
 	end
 
 	# Takes an object of type Viewpoint::Folder as an argument

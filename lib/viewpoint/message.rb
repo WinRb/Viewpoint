@@ -23,13 +23,12 @@ require 'item'
 class Viewpoint::Message < Viewpoint::Item
 	include Viewpoint
 
-	attr_reader :subject, :parent_folder, :sender, :date_time_recieved
-	attr_reader :ews_item if $DEBUG
+	attr_reader :subject, :sender, :date_time_recieved
 
 	# Initialize an Exchange Web Services item of MessageType
 	def initialize(ews_item, parent_folder)
-		# keep this now for debuging
-		@ews_item = ews_item if $DEBUG
+    raise InvalidEWSItemError if ews_item.nil?
+
 		@subject = ews_item.subject # String
 		@sender = ews_item.sender.mailbox.name if ews_item.sender # String
 		@recipients = 
