@@ -116,5 +116,13 @@ class Viewpoint::CalendarFolder < Viewpoint::Folder
 	def get_item(item_id)
 		cali = super(item_id, "calendarItem", true)
 	end
+
+  def get_event(item_id)
+    begin
+      return CalendarItem.new(get_item(item_id), self)
+    rescue InvalidEWSItemError => e
+      return nil
+    end
+  end
 end
 

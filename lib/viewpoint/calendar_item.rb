@@ -25,11 +25,12 @@ require 'item'
 class Viewpoint::CalendarItem < Viewpoint::Item
 	include Viewpoint
 
-	attr_reader :subject, :parent_folder, :sender
+  attr_reader :subject, :parent_folder, :organizer, :location, :start, :end, :cal_item_type
 	attr_reader :ews_item if $DEBUG
 
 	# Initialize an Exchange Web Services item
 	def initialize(ews_item, parent_folder)
+    raise InvalidEWSItemError if ews_item.nil?
 		# keep this now for debuging
 		@ews_item = ews_item if $DEBUG
 		@subject = ews_item.subject # String
@@ -48,6 +49,16 @@ class Viewpoint::CalendarItem < Viewpoint::Item
 
 		super(ews_item, parent_folder)
 	end
+
+
+  def body
+		get_calitem if @message == nil
+    @message.body
+  end
+
+  def sender
+    @organizer
+  end
 
 
 	# Convert item to iCal format: http://www.ietf.org/rfc/rfc2445.txt
