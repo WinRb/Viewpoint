@@ -110,4 +110,8 @@ class Viewpoint::MailFolder < Viewpoint::Folder
 	def get_item(item_id)
 		msg = super(item_id, "message", true)
 	end
+
+  def get_message(item_id)
+    Message.new(get_item(item_id), self)
+  end
 end
