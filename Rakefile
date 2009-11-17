@@ -29,6 +29,7 @@ GEMSPEC = Gem::Specification.new do |gem|
   gem.required_ruby_version	= '>= 1.8.7'
   gem.add_runtime_dependency  'soap4r', '>=1.5.8'
   gem.add_runtime_dependency  'icalendar'
+  gem.add_runtime_dependency  'rubyntlm', '>=0.1.1'
   gem.post_install_message	= "Don't forget to create .viewpointrc.  See README"
 end
  

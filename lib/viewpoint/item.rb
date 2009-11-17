@@ -47,26 +47,28 @@ class Viewpoint::Item
 	end
 
 
+  def entry_id
+    convert_id(IdFormatType::EntryId)
+  end
+
 	# Return the OWA ID so we can link to webmail
+	# Example usage: uri = "https://host/owa/?ae=Item&a=open&id=" + owa_id
 	def owa_id
-		vp = ExchWebServ.instance
-		altids_ar = NonEmptyArrayOfAlternateIdsType.new
-		
-		altid_t = AlternateIdType.new
-		altid_t.xmlattr_Format = IdFormatType::EwsId
-		altid_t.xmlattr_Id = @item_id
-		altid_t.xmlattr_Mailbox = vp.email
-		altids_ar.alternateId << altid_t
-		
-		convertid_t = ConvertIdType.new(altids_ar)
-		convertid_t.xmlattr_DestinationFormat = IdFormatType::OwaId
-		
-		resp = vp.ews.convertId(convertid_t)
-		resp.responseMessages.convertIdResponseMessage.first.alternateId.xmlattr_Id
-		#uri = "https://host/owa/?ae=Item&a=open&id=" + owa_id
+		convert_id(IdFormatType::OwaId)
 	end
 
+  def ews_legacy_id
+		convert_id(IdFormatType::EwsLegacyId)
+  end
 
+  def hex_id
+		convert_id(IdFormatType::HexEntryId)
+  end
+
+  def store_id
+		convert_id(IdFormatType::StoreId)
+  end
+  
 	# Returns a boolean value, true if the delete ocurred, false otherwise.
 	def delete!
 		@parent_folder.delete_item(@item_id)
@@ -76,4 +78,24 @@ class Viewpoint::Item
 	def recycle!
 		@parent_folder.recycle_item(@item_id)
 	end
+
+
+  private
+  
+  def convert_id(dest_type)
+    vp = ExchWebServ.instance
+		altids_ar = NonEmptyArrayOfAlternateIdsType.new
+		
+		altid_t = AlternateIdType.new
+		altid_t.xmlattr_Format = IdFormatType::EwsId
+		altid_t.xmlattr_Id = @item_id
+		altid_t.xmlattr_Mailbox = vp.email
+		altids_ar.alternateId << altid_t
+		
+		convertid_t = ConvertIdType.new(altids_ar)
+		convertid_t.xmlattr_DestinationFormat = dest_type
+		
+		resp = vp.ews.convertId(convertid_t)
+		resp.responseMessages.convertIdResponseMessage.first.alternateId.xmlattr_Id
+  end
 end
