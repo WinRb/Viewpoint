@@ -13,6 +13,9 @@ REQUIRED GEMS:
 
 # Current SOAP4R ( http://dev.ctor.org/soap4r )
 gem install -r soap4r
+# NTLM isn't an automatic dependency so you may need this if you are having issues.
+gem install -r rubyntlm
+
 
 # iCalendar
 gem install -r icalendar

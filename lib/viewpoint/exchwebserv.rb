@@ -19,7 +19,6 @@
 #############################################################################
 $:.unshift(File.dirname(__FILE__))
 require 'rubygems'
-#require 'highline/import'
 require 'singleton'
 require 'wsdl/exchangeServiceBinding'
 # --- Custom libs ---
@@ -192,6 +191,7 @@ class Viewpoint::ExchWebServ
 				@pass = props['exchange.ews.pass'] if @pass == nil
 				@ews_endpoint = props['exchange.ews.endpoint'] if @ews_endpoint == nil
 			elsif(@ews_endpoint == nil && @user == nil && @pass == nil)
+				require 'highline/import'
 				@ews_endpoint  = ask("Exchange EWS Endpoint:  ") { |q| q.echo = true }
 				@user = ask("User:  ") { |q| q.echo = true }
 				@pass = ask("Pass:  ") { |q| q.echo = "*"}
