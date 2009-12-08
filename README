@@ -32,6 +32,8 @@ To run the FuseFS example you need the 'fusefs' gem
 
 
 ******************** EXAMPLES *********************
+# I will be posting examples to my blog:
+#	http://distributed-frostbite.blogspot.com/
 # In the following examples the following are used:
 # "item" is a type of Viewpoint::Item
 # "folder" is a type of Viewpoint::Folder
@@ -65,5 +67,5 @@ could be done better or would like to help out in the development of this
 code please feel free to clone the 'git' repository:
 git clone git://github.com/zenchild/Viewpoint-for-MS-Exchange.git
 or add an issue on GitHub:
-http://github.com/zenchild/Viewpoint-for-MS-Exchange/issues
+http://github.com/zenchild/Viewpoint/issues
 --------------------------------------------------------------------------
