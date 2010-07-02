@@ -1,5 +1,5 @@
 #############################################################################
-# Copyright © 2009 Dan Wanek <dan.wanek@gmail.com>
+# Copyright © 2010 Dan Wanek <dan.wanek@gmail.com>
 #
 #
 # This file is part of Viewpoint.
