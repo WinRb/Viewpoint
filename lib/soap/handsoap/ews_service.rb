@@ -358,16 +358,18 @@ module Viewpoint
           parse_set_user_oof_settings(resp)
         end
 
+
+
         # Private Methods (Builders and Parsers)
         private
 
 
         def build!(node, opts = {}, &block)
-          ListBuilder.new(node, opts, &block)
+          EwsBuilder.new(node, opts, &block)
         end
 
         def parse!(response, opts = {})
-          ListParser.new(response).parse(opts)
+          EwsParser.new(response).parse(opts)
         end
 
       end # class ExchangeWebService
