@@ -17,4 +17,23 @@
 # You should have received a copy of the GNU General Public License along
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
+
+# This file requires the appropriate SOAP Library (Handsoap today) and also
+# defines certain contants that SOAP methods may use.
+module Viewpoint
+  module EWS
+    module SOAP
+
+      # CONSTANTS
+
+      # used in ResolveNames to determine where names are resolved
+      ActiveDirectory = 'ActiveDirectory'
+      ActiveDirectoryContacts = 'ActiveDirectoryContacts'
+      Contacts = 'Contacts'
+      ContactsActiveDirectory = 'ContactsActiveDirectory'
+
+    end # SOAP
+  end # EWS
+end # Viewpoint
+
 require 'soap/handsoap/ews_service'

@@ -26,7 +26,9 @@ module Viewpoint
           instance_eval(&block) if block_given?
         end
 
-        def resolve_names!(resolve_names)
+        def resolve_names!(name,full_contact_data)
+          @node.set_attr('ReturnFullContactData',full_contact_data)
+          @node.add('ewssoap:UnresolvedEntry',name)
         end
 
 
