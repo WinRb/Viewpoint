@@ -1,3 +1,7 @@
+# Exchange Web Service Builders
+require 'builders/ews_builder.rb'
+
+
 module Viewpoint
   class HandsoapBuilders
 
