@@ -96,33 +96,24 @@ module Viewpoint
           parse_expand_dl(resp)
         end
 
-        # http://msdn.microsoft.com/en-us/library/aa563918.aspx
-        # parent_folder_ids:  An Array of folder ids, either a DistinguishedFolderId
-        # (must me a Symbol) or a FolderId (String)
+        # Find subfolders of an identified folder
+        # @see http://msdn.microsoft.com/en-us/library/aa563918.aspx
         #
-        # The following extra configuration is available if a block is provided, in
-        # this order:
-        # _traversal = Shallow/Deep/SoftDeleted
-        # folder_shape:  A Hash that contains :base_shape and optionally
-        # :additional_props.
-        # adv_opts:  A Hash that contains additional elements like paging and
-        # restrictions.
-        # See the Microsoft docs for more info.
-        def find_folder(parent_folder_ids = [:root])
+        # @param [Array] parent_folder_ids An Array of folder ids, either a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+        # @param [String] traversal Shallow/Deep/SoftDeleted
+        # @param [Hash] folder_shape defines the FolderShape node @see http://msdn.microsoft.com/en-us/library/aa494311.aspx
+        # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
+        # @option folder_shape :additional_properties @see http://msdn.microsoft.com/en-us/library/aa563810.aspx
+        # @param [Hash] opts optional parameters to this method
+        def find_folder(parent_folder_ids = [:root], traversal = 'Shallow', folder_shape = {:base_shape => 'Default'}, opts = {})
           action = "#{SOAP_ACTION_PREFIX}/FindFolder"
-          resp = invoke('ewssoap:FindFolder', :soap_action => action) do |find_folder|
-            _traversal = :Deep
-            folder_shape = {:base_shape => :AllProperties}
-            adv_opts = {}
-            yield(_traversal, folder_shape, adv_opts) if block_given?
-
-            # These arguments are in a different order (the way Microsoft documents
-            # them).  The above method is in a frequency of
-            # use order so you don't have to fill a bunch of uneccessary arguments
-            # just to specify folder ids.
-            build_find_folder!(find_folder, _traversal, folder_shape, parent_folder_ids, adv_opts)
+          resp = invoke('ewssoap:FindFolder', :soap_action => action) do |root|
+            build!(root) do
+              find_folder!(parent_folder_ids, traversal, folder_shape, opts)
+            end
           end
-          parse_find_folder(resp)
+          resp
+          #parse!(resp)
         end
 
         def find_item
@@ -133,20 +124,24 @@ module Viewpoint
           parse_find_item(resp)
         end
 
-        # http://msdn.microsoft.com/en-us/library/aa580274.aspx
-        # folder_ids:  An Array of folder ids, either a DistinguishedFolderId (must
-        # me a Symbol) or a FolderId (String)
+        # Gets folders from the Exchange store
+        # @see http://msdn.microsoft.com/en-us/library/aa580274.aspx
         #
-        # The following extra configuration is available if a block is provided:
-        # folder_shape:  A Hash that contains :base_shape and optionally
-        # :additional_props.
-        def get_folder(folder_ids)
+        # @param [Array] folder_ids An Array of folder ids, either a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+        # @param [Hash] folder_shape defines the FolderShape node @see http://msdn.microsoft.com/en-us/library/aa494311.aspx
+        # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
+        # @option folder_shape :additional_properties @see http://msdn.microsoft.com/en-us/library/aa563810.aspx
+        # @param [Hash] opts optional parameters to this method
+
+        def get_folder(folder_ids, folder_shape = {:base_shape => 'Default'})
           action = "#{SOAP_ACTION_PREFIX}/GetFolder"
-          resp = invoke('ewssoap:GetFolder', :soap_action => action) do |get_folder|
-            folder_shape = {:base_shape => :AllProperties}
-            build_get_folder!(get_folder, folder_shape, folder_ids)
+          resp = invoke('ewssoap:GetFolder', :soap_action => action) do |root|
+            build!(root) do
+              get_folder!(folder_ids, folder_shape)
+            end
           end
-          #parse_get_folder(resp)
+          resp
+          #parse!(resp)
         end
 
         def convert_id

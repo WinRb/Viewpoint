@@ -26,20 +26,33 @@ module Viewpoint
           instance_eval(&block) if block_given?
         end
 
-        def resolve_names!(name,full_contact_data)
+        def resolve_names!(name, full_contact_data, opts)
           @node.set_attr('ReturnFullContactData',full_contact_data)
           @node.add('ewssoap:UnresolvedEntry',name)
         end
-
 
         def expand_dl!(expand_dl)
         end
 
 
-        def find_folder!(find_folder, _traversal, folder_shape, parent_folder_ids, adv_opts)
-          find_folder.set_attr('Traversal', _traversal)
-          build_folder_shape!(find_folder, folder_shape)
-          build_parent_folder_ids!(find_folder, parent_folder_ids)
+        def find_folder!(parent_folder_ids, traversal, folder_shape, opts)
+          @node.set_attr('Traversal', traversal)
+          @node.add('ewssoap:FolderShape') do |fs|
+            fs.add('t:BaseShape',folder_shape[:base_shape])
+          end
+          @node.add('ewssoap:ParentFolderIds') do |p|
+            parent_folder_ids.each do |id|
+              if( id.is_a?(Symbol) )
+                # @todo add change_key support to DistinguishedFolderId
+                p.add('t:DistinguishedFolderId') do |df|
+                  df.set_attr('Id', id.to_s)
+                end
+              else
+                # @todo add change_key support to FolderId
+                p.add('t:FolderId',id)
+              end
+            end
+          end
         end
 
 
@@ -47,9 +60,25 @@ module Viewpoint
         end
 
 
-        def get_folder!(get_folder, folder_shape, folder_ids)
-          build_folder_shape!(get_folder, folder_shape)
-          build_folder_ids!(get_folder, folder_ids)
+        
+        # @todo refactor so DistinguishedFolderId and FolderId have their own builders
+        def get_folder!(folder_ids, folder_shape)
+          @node.add('ewssoap:FolderShape') do |fs|
+            fs.add('t:BaseShape',folder_shape[:base_shape])
+          end
+          @node.add('ewssoap:FolderIds') do |p|
+            folder_ids.each do |id|
+              if( id.is_a?(Symbol) )
+                # @todo add change_key support to DistinguishedFolderId
+                p.add('t:DistinguishedFolderId') do |df|
+                  df.set_attr('Id', id.to_s)
+                end
+              else
+                # @todo add change_key support to FolderId
+                p.add('t:FolderId',id)
+              end
+            end
+          end
         end
 
 
