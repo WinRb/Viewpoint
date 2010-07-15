@@ -116,12 +116,25 @@ module Viewpoint
           #parse!(resp)
         end
 
-        def find_item
+
+        # Identifies items that are located in a specified folder
+        # @see http://msdn.microsoft.com/en-us/library/aa566107.aspx
+        #
+        # @param [Array] parent_folder_ids An Array of folder ids, either a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+        # @param [String] traversal Shallow/Deep/SoftDeleted
+        # @param [Hash] item_shape defines the FolderShape node @see http://msdn.microsoft.com/en-us/library/aa494311.aspx
+        # @option item_shape [String] :base_shape IdOnly/Default/AllProperties
+        # @option item_shape :additional_properties @see http://msdn.microsoft.com/en-us/library/aa563810.aspx
+        # @param [Hash] opts optional parameters to this method
+        def find_item(parent_folder_ids, traversal = 'Shallow', item_shape = {:base_shape => 'Default'})
           action = "#{SOAP_ACTION_PREFIX}/FindItem"
-          resp = invoke('ewssoap:FindItem', :soap_action => action) do |find_item|
-            build_find_item!(find_item)
+          resp = invoke('ewssoap:FindItem', :soap_action => action) do |root|
+            build!(root) do
+              find_item!(parent_folder_ids, traversal, item_shape)
+            end
           end
-          parse_find_item(resp)
+          resp
+          #parse!(resp)
         end
 
         # Gets folders from the Exchange store
@@ -232,12 +245,23 @@ module Viewpoint
           parse_sync_folder_items(resp)
         end
 
-        def get_item
+        # Gets items from the Exchange store
+        # @see http://msdn.microsoft.com/en-us/library/aa565934.aspx
+        #
+        # @param [String] item_id An Array of folder ids, either a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+        # @param [Hash] item_shape defines the ItemShape node @see http://msdn.microsoft.com/en-us/library/aa565261.aspx
+        # @option item_shape [String] :base_shape IdOnly/Default/AllProperties
+        # @option item_shape :additional_properties @see http://msdn.microsoft.com/en-us/library/aa563810.aspx
+        # @param [Hash] opts optional parameters to this method
+        def get_item(item_id, item_shape = {:base_shape => 'Default'})
           action = "#{SOAP_ACTION_PREFIX}/GetItem"
-          resp = invoke('ewssoap:GetItem', :soap_action => action) do |get_item|
-            build_get_item!(get_item)
+          resp = invoke('ewssoap:GetItem', :soap_action => action) do |root|
+            build!(root) do
+              get_item!(item_id, item_shape)
+            end
           end
-          parse_get_item(resp)
+          resp
+          #parse!(resp)
         end
 
         def create_item

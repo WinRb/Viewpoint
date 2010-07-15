@@ -56,7 +56,25 @@ module Viewpoint
         end
 
 
-        def find_item!(find_item)
+        def find_item!(parent_folder_ids, traversal, item_shape)
+          @node.set_attr('Traversal', traversal)
+          @node.add('ewssoap:ItemShape') do |is|
+            is.add('t:BaseShape',item_shape[:base_shape])
+          end
+
+          @node.add('ewssoap:ParentFolderIds') do |p|
+            parent_folder_ids.each do |id|
+              if( id.is_a?(Symbol) )
+                # @todo add change_key support to DistinguishedFolderId
+                p.add('t:DistinguishedFolderId') do |df|
+                  df.set_attr('Id', id.to_s)
+                end
+              else
+                # @todo add change_key support to FolderId
+                p.add('t:FolderId',id)
+              end
+            end
+          end
         end
 
 
@@ -126,7 +144,15 @@ module Viewpoint
         end
 
 
-        def get_item!(get_item)
+        def get_item!(item_id, item_shape)
+          @node.add('ewssoap:ItemShape') do |is|
+            is.add('t:BaseShape',item_shape[:base_shape])
+          end
+          @node.add('ewssoap:ItemIds') do |ids|
+            ids.add('t:ItemId') do |id|
+              id.set_attr('Id',item_id)
+            end
+          end
         end
 
 
