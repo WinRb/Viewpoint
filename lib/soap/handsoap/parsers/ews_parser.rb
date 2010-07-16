@@ -63,8 +63,21 @@ module Viewpoint
         end
         def subscribe_response(opts)
         end
+
+        # @todo Better handle error messages
+        #   Like a response object with methods
+        #   #success? (boolean)
+        #   #message (String) text message
         def unsubscribe_response(opts)
+          rclass = (@response/'//m:UnsubscribeResponseMessage').first['ResponseClass']
+          if rclass == 'Success'
+            return true
+          else
+            warn  (@response/'//m:MessageText').first.to_s
+            return false
+          end
         end
+
         def get_events_response(opts)
         end
         def sync_folder_hierarchy_response(opts)

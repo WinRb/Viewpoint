@@ -32,7 +32,6 @@ module Viewpoint
         def resolve_names!(name, full_contact_data, opts)
           @node.set_attr('ReturnFullContactData',full_contact_data)
           @node.add('ewssoap:UnresolvedEntry',name)
-          puts @node
         end
 
         def expand_dl!(expand_dl)
@@ -87,12 +86,24 @@ module Viewpoint
         def subscribe!(subscribe)
         end
 
+        # @see ExchangeWebService#subscribe
+        def pull_subscription_request!(folder_ids, event_types, timeout)
+          @node.add('ewssoap:PullSubscriptionRequest') do |ps|
+            folder_ids!(ps, folder_ids, 't:FolderIds')
+            event_types!(ps, event_types)
+            ps.add('t:Timeout', timeout)
+          end
+        end
+
 
         def unsubscribe!(unsubscribe)
         end
 
 
-        def get_events!(get_events)
+        # @see ExchangeWebService#get_events
+        def get_events!(subscription_id, watermark)
+          subscription_id!(@node, subscription_id)
+          watermark!(@node, watermark)
         end
 
 

@@ -33,9 +33,11 @@ module Viewpoint
         # @todo Decide on an appropriate response if a method does not exist.
         def parse(opts)
           resp_method = ruby_case(@response_type)
-          if(method_exists?(resp_method))
+          if(respond_to?(resp_method))
+            puts "Method Exists: #{resp_method}"
             method(resp_method).call(opts)
           else
+            puts "No Method: #{resp_method}"
             @response
           end
         end

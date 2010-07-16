@@ -54,7 +54,14 @@ module Viewpoint
           header.add('t:RequestServerVersion') { |rsv| rsv.set_attr('Version','Exchange2007_SP1') }
         end
 
+        # Adds knowledge of namespaces to the response object.  These have to be identical to the 
+        # URIs returned in the XML response.  For example, I had some issues with the 'soap'
+        # namespace because my original URI did not end in a '/'
+        # @example
+        #   Won't work: http://schemas.xmlsoap.org/soap/envelope
+        #   Works: http://schemas.xmlsoap.org/soap/envelope/
         def on_response_document(doc)
+          doc.add_namespace 'soap', 'http://schemas.xmlsoap.org/soap/envelope/'
           doc.add_namespace 't', 'http://schemas.microsoft.com/exchange/services/2006/types'
           doc.add_namespace 'm', 'http://schemas.microsoft.com/exchange/services/2006/messages'
         end
@@ -73,9 +80,11 @@ module Viewpoint
         # @param [String] name an unresolved entry
         # @param [Boolean] full_contact_data whether or not to return full contact info
         # @param [Hash] opts optional parameters to this method
-        # @option opts [String] :search_scope where to seach for this entry, one of SOAP::Contacts, SOAP::ActiveDirectory, SOAP::ActiveDirectoryContacts (default), SOAP::ContactsActiveDirectory
-        # @option opts [String, FolderId] :parent_folder_id either the name of a folder or it's numerical ID.  @see http://msdn.microsoft.com/en-us/library/aa565998.aspx
-        # @todo handle soap faults like this: Handsoap::Fault: Handsoap::Fault { :code => 'soap11:Client', :reason => 'The request failed schema validation: The required attribute 'ReturnFullContactData' is missing.' }
+        # @option opts [String] :search_scope where to seach for this entry, one of
+        #   SOAP::Contacts, SOAP::ActiveDirectory, SOAP::ActiveDirectoryContacts (default),
+        #   SOAP::ContactsActiveDirectory
+        # @option opts [String, FolderId] :parent_folder_id either the name of a folder or
+        #   it's numerical ID.  @see http://msdn.microsoft.com/en-us/library/aa565998.aspx
         def resolve_names(name, full_contact_data = true, opts = {})
           action = "#{SOAP_ACTION_PREFIX}/ResolveNames"
           resp = invoke('ewssoap:ResolveNames', :soap_action => action) do |root|
@@ -83,8 +92,7 @@ module Viewpoint
               resolve_names!(name,full_contact_data, opts)
             end
           end
-          resp
-          #parse!(resp)
+          parse!(resp)
         end
 
 
@@ -96,14 +104,18 @@ module Viewpoint
           parse_expand_dl(resp)
         end
 
+
         # Find subfolders of an identified folder
         # @see http://msdn.microsoft.com/en-us/library/aa563918.aspx
         #
-        # @param [Array] parent_folder_ids An Array of folder ids, either a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+        # @param [Array] parent_folder_ids An Array of folder ids, either a
+        #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
         # @param [String] traversal Shallow/Deep/SoftDeleted
-        # @param [Hash] folder_shape defines the FolderShape node @see http://msdn.microsoft.com/en-us/library/aa494311.aspx
+        # @param [Hash] folder_shape defines the FolderShape node
+        #   See: http://msdn.microsoft.com/en-us/library/aa494311.aspx
         # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
-        # @option folder_shape :additional_properties @see http://msdn.microsoft.com/en-us/library/aa563810.aspx
+        # @option folder_shape :additional_properties
+        #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
         # @param [Hash] opts optional parameters to this method
         def find_folder(parent_folder_ids = [:root], traversal = 'Shallow', folder_shape = {:base_shape => 'Default'}, opts = {})
           action = "#{SOAP_ACTION_PREFIX}/FindFolder"
@@ -112,19 +124,21 @@ module Viewpoint
               find_folder!(parent_folder_ids, traversal, folder_shape, opts)
             end
           end
-          resp
-          #parse!(resp)
+          parse!(resp)
         end
 
 
         # Identifies items that are located in a specified folder
         # @see http://msdn.microsoft.com/en-us/library/aa566107.aspx
         #
-        # @param [Array] parent_folder_ids An Array of folder ids, either a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+        # @param [Array] parent_folder_ids An Array of folder ids, either a
+        #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
         # @param [String] traversal Shallow/Deep/SoftDeleted
-        # @param [Hash] item_shape defines the FolderShape node @see http://msdn.microsoft.com/en-us/library/aa494311.aspx
+        # @param [Hash] item_shape defines the FolderShape node
+        #   See: http://msdn.microsoft.com/en-us/library/aa494311.aspx
         # @option item_shape [String] :base_shape IdOnly/Default/AllProperties
-        # @option item_shape :additional_properties @see http://msdn.microsoft.com/en-us/library/aa563810.aspx
+        # @option item_shape :additional_properties
+        #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
         # @param [Hash] opts optional parameters to this method
         def find_item(parent_folder_ids, traversal = 'Shallow', item_shape = {:base_shape => 'Default'})
           action = "#{SOAP_ACTION_PREFIX}/FindItem"
@@ -133,17 +147,20 @@ module Viewpoint
               find_item!(parent_folder_ids, traversal, item_shape)
             end
           end
-          resp
-          #parse!(resp)
+          parse!(resp)
         end
+
 
         # Gets folders from the Exchange store
         # @see http://msdn.microsoft.com/en-us/library/aa580274.aspx
         #
-        # @param [Array] folder_ids An Array of folder ids, either a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
-        # @param [Hash] folder_shape defines the FolderShape node @see http://msdn.microsoft.com/en-us/library/aa494311.aspx
+        # @param [Array] folder_ids An Array of folder ids, either a
+        #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+        # @param [Hash] folder_shape defines the FolderShape node
+        #   See: http://msdn.microsoft.com/en-us/library/aa494311.aspx
         # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
-        # @option folder_shape :additional_properties @see http://msdn.microsoft.com/en-us/library/aa563810.aspx
+        # @option folder_shape :additional_properties
+        #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
         # @param [Hash] opts optional parameters to this method
         def get_folder(folder_ids, folder_shape = {:base_shape => 'Default'})
           action = "#{SOAP_ACTION_PREFIX}/GetFolder"
@@ -152,9 +169,9 @@ module Viewpoint
               get_folder!(folder_ids, folder_shape)
             end
           end
-          resp
-          #parse!(resp)
+          parse!(resp)
         end
+
 
         def convert_id
           action = "#{SOAP_ACTION_PREFIX}/ConvertId"
@@ -204,28 +221,51 @@ module Viewpoint
           parse_copy_folder(resp)
         end
 
-        def subscribe
+        # Used to subscribe client applications to either push or pull notifications.
+        # @see http://msdn.microsoft.com/en-us/library/aa566188.aspx Subscribe on MSDN
+        #
+        # @param [Array] folder_ids An Array of folder ids, either a
+        #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+        # @param [Array] event_types An Array of EventTypes that we should track.
+        #   Available types are, CopiedEvent, CreatedEvent, DeletedEvent, ModifiedEvent,
+        #   MovedEvent, NewMailEvent, FreeBusyChangedEvent
+        # @param [Integer] timeout The number of minutes in which the subscription
+        #   will timeout after not receiving a get_events operation.
+        # @todo Decide how/if to handle the optional SubscribeToAllFolders attribute of
+        #   the PullSubscriptionRequest element.
+        def subscribe(folder_ids, event_types, timeout = 10)
           action = "#{SOAP_ACTION_PREFIX}/Subscribe"
-          resp = invoke('ewssoap:Subscribe', :soap_action => action) do |subscribe|
-            build_subscribe!(subscribe)
+          resp = invoke('ewssoap:Subscribe', :soap_action => action) do |root|
+            build!(root) do
+              pull_subscription_request!(folder_ids, event_types, timeout)
+            end
           end
-          parse_subscribe(resp)
+          parse!(resp)
         end
 
-        def unsubscribe
+        def unsubscribe(subscription_id)
           action = "#{SOAP_ACTION_PREFIX}/Unsubscribe"
-          resp = invoke('ewssoap:Unsubscribe', :soap_action => action) do |unsubscribe|
-            build_unsubscribe!(unsubscribe)
+          resp = invoke('ewssoap:Unsubscribe', :soap_action => action) do |root|
+            build!(root) do
+              subscription_id!(root, subscription_id)
+            end
           end
-          parse_unsubscribe(resp)
+          parse!(resp)
         end
 
-        def get_events
+        # Used by pull subscription clients to request notifications from the Client Access server
+        # @see http://msdn.microsoft.com/en-us/library/aa566199.aspx GetEvents on MSDN
+        #
+        # @param [String] subscription_id Subscription identifier
+        # @param [String] watermark Event bookmark in the events queue
+        def get_events(subscription_id, watermark)
           action = "#{SOAP_ACTION_PREFIX}/GetEvents"
-          resp = invoke('ewssoap:GetEvents', :soap_action => action) do |get_events|
-            build_get_events!(get_events)
+          resp = invoke('ewssoap:GetEvents', :soap_action => action) do |root|
+            build!(root) do
+              get_events!(subscription_id, watermark)
+            end
           end
-          parse_get_events(resp)
+          parse!(resp)
         end
 
         def sync_folder_hierarchy
@@ -248,9 +288,11 @@ module Viewpoint
         # @see http://msdn.microsoft.com/en-us/library/aa565934.aspx
         #
         # @param [Array] item_ids An Array of item ids
-        # @param [Hash] item_shape defines the ItemShape node @see http://msdn.microsoft.com/en-us/library/aa565261.aspx
-        # @option item_shape [String] :base_shape IdOnly/Default/AllProperties
-        # @option item_shape :additional_properties @see http://msdn.microsoft.com/en-us/library/aa563810.aspx
+        # @param [Hash] item_shape defines the ItemShape node
+        #   See: http://msdn.microsoft.com/en-us/library/aa565261.aspx
+        # @option item_shape [String] :base_shape ('Default') IdOnly/Default/AllProperties
+        # @option item_shape :additional_properties
+        #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
         # @param [Hash] opts optional parameters to this method
         def get_item(item_ids, item_shape = {:base_shape => 'Default'})
           action = "#{SOAP_ACTION_PREFIX}/GetItem"
@@ -259,19 +301,21 @@ module Viewpoint
               get_item!(item_ids, item_shape)
             end
           end
-          resp
-          #parse!(resp)
+          parse!(resp)
         end
 
 
         # Operation is used to create e-mail messages
-        # This is actually a CreateItem operation but they differ for different types of Exchange objects so
-        # it is named appropriately here.
+        # This is actually a CreateItem operation but they differ for different types
+        # of Exchange objects so it is named appropriately here.
         # @see http://msdn.microsoft.com/en-us/library/aa566468.aspx
         #
-        # @param [String, Symbol] folder_id The folder to create this item in. Either a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
-        # @param [Hash, Array] items An array of item Hashes or a single item Hash. Hash values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa494306.aspx
-        # @param [String] message_disposition "SaveOnly/SendOnly/SendAndSaveCopy" See: http://msdn.microsoft.com/en-us/library/aa565209.aspx
+        # @param [String, Symbol] folder_id The folder to create this item in. Either a
+        #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+        # @param [Hash, Array] items An array of item Hashes or a single item Hash. Hash
+        #   values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa494306.aspx
+        # @param [String] message_disposition "SaveOnly/SendOnly/SendAndSaveCopy"
+        #   See: http://msdn.microsoft.com/en-us/library/aa565209.aspx
         def create_mail_item(folder_id, items, message_disposition = 'SaveOnly')
           action = "#{SOAP_ACTION_PREFIX}/CreateItem"
           resp = invoke('ewssoap:CreateItem', :soap_action => action) do |node|
@@ -279,8 +323,7 @@ module Viewpoint
               create_item!(folder_id, items, message_disposition, send_invites=false)
             end
           end
-          resp
-          #parse!(resp)
+          parse!(resp)
         end
 
         # @param [String] send_invites "SendToNone/SendOnlyToAll/SendToAllAndSaveCopy
