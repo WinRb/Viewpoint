@@ -145,7 +145,6 @@ module Viewpoint
         # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
         # @option folder_shape :additional_properties @see http://msdn.microsoft.com/en-us/library/aa563810.aspx
         # @param [Hash] opts optional parameters to this method
-
         def get_folder(folder_ids, folder_shape = {:base_shape => 'Default'})
           action = "#{SOAP_ACTION_PREFIX}/GetFolder"
           resp = invoke('ewssoap:GetFolder', :soap_action => action) do |root|
@@ -248,28 +247,44 @@ module Viewpoint
         # Gets items from the Exchange store
         # @see http://msdn.microsoft.com/en-us/library/aa565934.aspx
         #
-        # @param [String] item_id An Array of folder ids, either a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+        # @param [Array] item_ids An Array of item ids
         # @param [Hash] item_shape defines the ItemShape node @see http://msdn.microsoft.com/en-us/library/aa565261.aspx
         # @option item_shape [String] :base_shape IdOnly/Default/AllProperties
         # @option item_shape :additional_properties @see http://msdn.microsoft.com/en-us/library/aa563810.aspx
         # @param [Hash] opts optional parameters to this method
-        def get_item(item_id, item_shape = {:base_shape => 'Default'})
+        def get_item(item_ids, item_shape = {:base_shape => 'Default'})
           action = "#{SOAP_ACTION_PREFIX}/GetItem"
           resp = invoke('ewssoap:GetItem', :soap_action => action) do |root|
             build!(root) do
-              get_item!(item_id, item_shape)
+              get_item!(item_ids, item_shape)
             end
           end
           resp
           #parse!(resp)
         end
 
-        def create_item
+
+        # Operation is used to create e-mail messages
+        # This is actually a CreateItem operation but they differ for different types of Exchange objects so
+        # it is named appropriately here.
+        # @see http://msdn.microsoft.com/en-us/library/aa566468.aspx
+        #
+        # @param [String, Symbol] folder_id The folder to create this item in. Either a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+        # @param [Hash, Array] items An array of item Hashes or a single item Hash. Hash values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa494306.aspx
+        # @param [String] message_disposition "SaveOnly/SendOnly/SendAndSaveCopy" See: http://msdn.microsoft.com/en-us/library/aa565209.aspx
+        def create_mail_item(folder_id, items, message_disposition = 'SaveOnly')
           action = "#{SOAP_ACTION_PREFIX}/CreateItem"
-          resp = invoke('ewssoap:CreateItem', :soap_action => action) do |create_item|
-            build_create_item!(create_item)
+          resp = invoke('ewssoap:CreateItem', :soap_action => action) do |node|
+            build!(node) do
+              create_item!(folder_id, items, message_disposition, send_invites=false)
+            end
           end
-          parse_create_item(resp)
+          resp
+          #parse!(resp)
+        end
+
+        # @param [String] send_invites "SendToNone/SendOnlyToAll/SendToAllAndSaveCopy
+        def create_meeting_item
         end
 
         def delete_item
