@@ -28,6 +28,9 @@ module Viewpoint
           @response_type = @response.native_element.name
         end
 
+        # This is the main parser method.  It takes the response type and tries to
+        # call a Ruby method of the same name.
+        # @todo Decide on an appropriate response if a method does not exist.
         def parse(opts)
           resp_method = ruby_case(@response_type)
           if(method_exists?(resp_method))
