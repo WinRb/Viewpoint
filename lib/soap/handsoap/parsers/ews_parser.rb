@@ -61,7 +61,17 @@ module Viewpoint
         end
         def copy_folder_response(opts)
         end
+
         def subscribe_response(opts)
+          rclass = (@response/'//m:SubscribeResponseMessage').first['ResponseClass']
+          if rclass == 'Success'
+            return {:subscription_id => (@response/'//m::SubscriptionId').first.to_s,
+              :watermark => (@response/'//m:Watermark').first.to_s}
+          else
+            raise EwsError.new((@response/'//m:MessageText').first.to_s)
+          end
+
+          SubscribeResponseMessage
         end
 
         # @todo Better handle error messages
@@ -73,8 +83,7 @@ module Viewpoint
           if rclass == 'Success'
             return true
           else
-            warn  (@response/'//m:MessageText').first.to_s
-            return false
+            raise EwsError.new((@response/'//m:MessageText').first.to_s)
           end
         end
 

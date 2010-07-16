@@ -1,5 +1,5 @@
 #############################################################################
-# Copyright © 2009 Dan Wanek <dan.wanek@gmail.com>
+# Copyright © 2010 Dan Wanek <dan.wanek@gmail.com>
 #
 #
 # This file is part of Viewpoint.
@@ -17,18 +17,10 @@
 # You should have received a copy of the GNU General Public License along
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
-$:.unshift(File.dirname(__FILE__))
-require 'viewpoint'
-
-class Viewpoint::InvalidEWSItemError < Exception
-  def message
-    "Invalid Item for Exchange Web Services"
-  end
-end
-
-
-class Viewpoint::NoSuchItemIdError < Exception
-  def message
-    "No such item_id found in Exchange"
-  end
-end
+module Viewpoint
+  module EWS
+    class EwsError < StandardError
+    end # EwsError
+  end # EWS
+end # Viewpoint
+ 

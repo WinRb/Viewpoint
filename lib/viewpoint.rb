@@ -26,6 +26,9 @@ require 'soap/soap_provider'
 # Load the model classes
 #require 'model/sp_message'
 
+# Load the Exception classes
+require 'viewpoint/exceptions/exceptions'
+
 
 module Viewpoint
   module EWS
