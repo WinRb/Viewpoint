@@ -103,20 +103,26 @@ module Viewpoint
           end
         end
 
-        def items!(node, items)
+        def items!(node, items, type)
           node.add('ewssoap:Items') do |i|
             if items.is_a? Hash
-              item!(i, items)
+              method("#{type}_item!").call(i, items)
             else
               items.each do |item|
-                item!(i,item)
+                method("#{type}_item!").call(i, item)
               end
             end
           end
         end
 
-        def item!(node, item)
+        def message_item!(node, item)
           node.add('t:Message') do |msg|
+            add_hierarchy!(msg, item, 't:')
+          end
+        end
+
+        def calendar_item!(node, item)
+          node.add('t:CalendarItem') do |msg|
             add_hierarchy!(msg, item, 't:')
           end
         end
@@ -139,20 +145,24 @@ module Viewpoint
 
         # Add a hierarchy of elements from hash data
         # @example Hash to XML
-        #   {'this' => 'that','top' => {'middle' => 'bottom'}}
+        #   {'this' => 'that','top' => {:attribs => {'Id' => '32fss'}, :text => 'TestText', :elements => {'middle' => 'bottom'}}}
         #   becomes...
         #   <this>that</this>
-        #   <top>
+        #   <top Id='32fss'>
+        #     TestText
         #     <middle>bottom</middle>
         #   </top>
         def add_hierarchy!(node,e_hash,prefix)
           e_hash.each_pair do |k,v|
             if v.is_a? Hash
-              node.add("#{prefix}#{k}") do |n|
-                add_hierarchy!(n,v,prefix)
+              node.add("#{prefix}#{k}", v[:text]) do |n|
+                v[:attribs].each_pair do |attrib, value|
+                  n.set_attr(attrib, value)
+                end unless v[:attribs].nil?
+                add_hierarchy!(n,v[:elements],prefix) unless v[:elements].nil?
               end
             else
-              node.add("#{prefix}#{k}", v)
+              node.add("#{prefix}#{k}", v.to_s)
             end
           end
         end

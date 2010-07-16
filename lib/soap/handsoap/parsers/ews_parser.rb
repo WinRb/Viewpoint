@@ -95,7 +95,14 @@ module Viewpoint
         end
         def get_item_response(opts)
         end
+
+        # @todo need to find out out to us XPath to get ItemId.  It doesn't seem to work now.
         def create_item_response(opts)
+          if ((@response/'//m:UnsubscribeResponseMessage').first['ResponseClass']) == 'Success'
+            return {:id => (@response/'//@Id').first.to_s, :change_key => (@response/'//@ChangeKey').first.to_s }
+          else
+            raise EwsError.new((@response/'//m:MessageText').first.to_s)
+          end
         end
         def delete_item_response(opts)
         end

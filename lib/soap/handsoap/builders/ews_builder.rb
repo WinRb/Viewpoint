@@ -121,12 +121,13 @@ module Viewpoint
         end
 
 
-        def create_item!(folder_id, items, message_disposition, send_invites)
-          @node.set_attr('MessageDisposition', message_disposition)
+        # @param [String] type The type of items in the items array message/calendar
+        def create_item!(folder_id, items, message_disposition, send_invites, type)
+          @node.set_attr('MessageDisposition', message_disposition) if message_disposition
           @node.set_attr('SendMeetingInvitations', send_invites) if send_invites
 
           saved_item_folder_id!(@node, folder_id)
-          items!(node, items)
+          items!(@node, items, type)
         end
 
 

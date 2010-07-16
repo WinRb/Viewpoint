@@ -326,8 +326,22 @@ module Viewpoint
           parse!(resp)
         end
 
+        # Operation is used to create calendar items
+        # @see http://msdn.microsoft.com/en-us/library/aa564690.aspx
+        #
+        # @param [String, Symbol] folder_id The folder to create this item in. Either a
+        #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+        # @param [Hash, Array] items An array of item Hashes or a single item Hash. Hash
+        #   values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa564765.aspx
         # @param [String] send_invites "SendToNone/SendOnlyToAll/SendToAllAndSaveCopy
-        def create_meeting_item
+        def create_calendar_item(folder_id, items, send_invites = 'SendToAllAndSaveCopy')
+          action = "#{SOAP_ACTION_PREFIX}/CreateItem"
+          resp = invoke('ewssoap:CreateItem', :soap_action => action) do |node|
+            build!(node) do
+              create_item!(folder_id, items, message_disposition=false, send_invites, 'calendar')
+            end
+          end
+          parse!(resp)
         end
 
         def delete_item
