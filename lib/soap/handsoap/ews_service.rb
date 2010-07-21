@@ -30,7 +30,6 @@ module Viewpoint
   module EWS
     module SOAP
       class ExchangeWebService < Handsoap::Service
-        #endpoint :uri => Viewpoint::EWS::EWS.endpoint, :version => 1
 
         SOAP_ACTION_PREFIX = "http://schemas.microsoft.com/exchange/services/2006/messages"
 
