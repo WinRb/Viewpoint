@@ -20,7 +20,6 @@
 require 'singleton'
 
 # Load the backend SOAP infrastructure.  Today this is Handsoap.
-#require 'soap/soap_provider'
 require 'soap/soap_provider'
 
 # Load the model classes
@@ -51,8 +50,6 @@ module Viewpoint
       end
 
       def initialize
-        #require 'soap/soap_provider'
-
         @ews = SOAP::ExchangeWebService.new
       end
 
