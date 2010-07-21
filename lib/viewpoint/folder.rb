@@ -25,12 +25,12 @@ module Viewpoint
   module EWS
     class Folder
 
-      @@distinguished_folder_ids = [ "calendar", "contacts", "deleteditems", "drafts",
-        "inbox", "journal", "notes", "outbox", "sentitems", "tasks", "msgfolderroot", "root",
-        "junkemail", "searchfolders", "voicemail", "recoverableitemsroot", "recoverableitemsdeletions",
-        "recoverableitemsversions", "recoverableitemspurges", "archiveroot", "archivemsgfolderroot",
-        "archivedeleteditems", "archiverecoverableitemsroot", "archiverecoverableitemsdeletions",
-        "archiverecoverableitemsversions", "archiverecoverableitemspurges" ]
+      @@distinguished_folder_ids = %w{ calendar contacts deleteditems drafts
+        inbox journal notes outbox sentitems tasks msgfolderroot root
+        junkemail searchfolders voicemail recoverableitemsroot recoverableitemsdeletions
+        recoverableitemsversions recoverableitemspurges archiveroot archivemsgfolderroot
+        archivedeleteditems archiverecoverableitemsroot archiverecoverableitemsdeletions
+        archiverecoverableitemsversions archiverecoverableitemspurges }
 
       def self.get_folder(folder_id)
         tfolder_id = folder_id.downcase
