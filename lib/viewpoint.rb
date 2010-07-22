@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License along
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
+
+# We only what one instance of this class so include Singleton
 require 'singleton'
 
 # Load the backend SOAP infrastructure.  Today this is Handsoap.
@@ -33,6 +35,11 @@ require 'model/calendar'
 require 'exceptions/exceptions'
 
 
+# This is the Singlenton class that controls access and presentation to Exchange
+# Web Services.  It is possible to just use the SOAP classes themselves but this
+# is what ties all the pieces together.
+# @attr_reader [SOAP::ExchangeWebService] :ews The SOAP object used to make calls
+#   to the Exchange Web Service.
 module Viewpoint
   module EWS
     class EWS

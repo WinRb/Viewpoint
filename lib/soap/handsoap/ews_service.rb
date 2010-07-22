@@ -45,6 +45,11 @@ module Viewpoint
           @@pass = pass
         end
 
+        # Turn off parsing and just return the soap response
+        def self.raw_soap!
+          @@raw_soap = true
+        end
+
         # ********* Begin Hooks *********
         def on_create_document(doc)
           doc.alias 't', 'http://schemas.microsoft.com/exchange/services/2006/types'
@@ -482,6 +487,7 @@ module Viewpoint
         end
 
         def parse!(response, opts = {})
+          return response if @@raw_soap
           EwsParser.new(response).parse(opts)
         end
 
