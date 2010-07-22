@@ -23,10 +23,10 @@ require 'singleton'
 require 'soap/soap_provider'
 
 # Load the model classes
-require 'viewpoint/models'
+require 'model/models'
 
 # Load the Exception classes
-require 'viewpoint/exceptions/exceptions'
+require 'exceptions/exceptions'
 
 
 module Viewpoint

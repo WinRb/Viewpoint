@@ -19,5 +19,10 @@
 #############################################################################
 
 # Require all of the model files here
+#
+# Base Models
 require 'viewpoint/folder'
 require 'viewpoint/item'
+
+# Specific Models
+require 'viewpoint/calendar'
