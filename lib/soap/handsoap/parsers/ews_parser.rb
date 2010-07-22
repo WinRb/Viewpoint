@@ -96,7 +96,9 @@ module Viewpoint
         end
         def sync_folder_items_response(opts)
         end
+
         def get_item_response(opts)
+          @response
         end
 
         # @todo need to find out out to us XPath to get ItemId.  It doesn't seem to work now.

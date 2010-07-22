@@ -1,5 +1,5 @@
 #############################################################################
-# Copyright © 2009 Dan Wanek <dan.wanek@gmail.com>
+# Copyright © 2010 Dan Wanek <dan.wanek@gmail.com>
 #
 #
 # This file is part of Viewpoint.
@@ -32,9 +32,11 @@ module Viewpoint
       # This is a Class method that fetches an existing Item from the
       #  Exchange Store.  To create a new item that does not exist in
       #  the store use Item#new
+      # @param [String] item_id The id of the item.
+      # @todo Add support to fetch an item with a ChangeKey
       def self.get_item(item_id)
         conn = Viewpoint::EWS::EWS.instance
-        conn.ews.
+        conn.ews.get_item([item_id])
       end
 
       # Initialize an Exchange Web Services item

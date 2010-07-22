@@ -27,9 +27,9 @@ require 'soap/soap_provider'
 # Load the model classes
 # Base Models
 require 'model/folder'
-require 'model/item'
+#require 'model/item'
 # Specific Models
-require 'model/calendar'
+#require 'model/calendar'
 
 # Load the Exception classes
 require 'exceptions/exceptions'

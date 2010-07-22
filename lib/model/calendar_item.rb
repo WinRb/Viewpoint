@@ -1,5 +1,5 @@
 #############################################################################
-# Copyright © 2009 Dan Wanek <dan.wanek@gmail.com>
+# Copyright © 2010 Dan Wanek <dan.wanek@gmail.com>
 #
 #
 # This file is part of Viewpoint.
@@ -18,7 +18,6 @@
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
 $:.unshift(File.dirname(__FILE__))
-require 'rubygems'
 require 'icalendar'
 require 'item'
 

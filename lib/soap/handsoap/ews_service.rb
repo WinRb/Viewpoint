@@ -33,6 +33,8 @@ module Viewpoint
 
         SOAP_ACTION_PREFIX = "http://schemas.microsoft.com/exchange/services/2006/messages"
 
+        @@raw_soap = false
+
         def initialize()
           if $DEBUG
             @debug = File.new('ews_debug.out', 'w')
@@ -74,7 +76,6 @@ module Viewpoint
           req.set_auth @@user, @@pass
         end
         # ********** End Hooks **********
-
 
 
         # Resolve ambiguous e-mail addresses and display names
