@@ -23,7 +23,11 @@ require 'singleton'
 require 'soap/soap_provider'
 
 # Load the model classes
-require 'model/models'
+# Base Models
+require 'model/folder'
+require 'model/item'
+# Specific Models
+require 'model/calendar'
 
 # Load the Exception classes
 require 'exceptions/exceptions'
