@@ -87,18 +87,15 @@ module Viewpoint
       end
 
 
-      # unsubscribe from folder
-      # Returns true if unsubscription succeeds, false otherwise
+      # Unsubscribe this folder from further Exchange events.
+      # @return [Boolean] Did we unsubscribe successfully?
       def unsubscribe
         begin
-          if( @subscription_id == nil ) then
-            return true
-          end
+          return true if @subscription_id.nil?
 
-          unsub_t = UnsubscribeType.new(@subscription_id)
-          resp = ExchWebServ.instance.ews.unsubscribe(unsub_t).responseMessages.unsubscribeResponseMessage.first
-
-          return (resp.responseCode == "NoError")? true: false
+          (Viewpoint::EWS::EWS.instance).ews.unsubscribe(@subscription_id)
+        rescue
+          return false
         end
       end
 
