@@ -32,6 +32,10 @@ module Viewpoint
         archivedeleteditems archiverecoverableitemsroot archiverecoverableitemsdeletions
         archiverecoverableitemsversions archiverecoverableitemspurges }
 
+      @@event_types = %w{CopiedEvent CreatedEvent DeletedEvent ModifiedEvent
+        MovedEvent NewMailEvent FreeBusyChangedEvent}
+
+
       def self.get_folder(folder_id)
         tfolder_id = folder_id.downcase
         # If the folder_id is a DistinguishedFolderId change it to a symbol so our SOAP
@@ -54,44 +58,30 @@ module Viewpoint
         @watermark = nil
       end
 
-      # Subscribe to folder and save the subscription_id into the database.  Subsequent calls
-      # to check_subscription will use that id.
-      # Returns true if the operation is successful, false otherwise
-      def subscribe
+      # Subscribe this folder to events.  This method initiates an Exchange pull
+      # type subscription.
+      #
+      # @param [Array] event_types Which event types to subscribe to.  By default
+      #   we subscribe to all Exchange event types: CopiedEvent, CreatedEvent,
+      #   DeletedEvent, ModifiedEvent, MovedEvent, NewMailEvent, FreeBusyChangedEvent
+      # @return [Boolean] Did the subscription happen successfully?
+      def subscribe(event_types = @@event_types)
         # Refresh the subscription if already subscribed
-        if( subscribed? )
-          unsubscribe
+        unsubscribe if subscribed?
+
+        begin
+          resp = (Viewpoint::EWS::EWS.instance).ews.subscribe([folder_id],event_types)
+
+          @subscription_id = resp[:subscription_id]
+          @watermark = resp[:watermark]
+          return true
+        rescue
+          return false
         end
-        subscribe = SubscribeType.new
-        pull = PullSubscriptionRequestType.new
-
-        # Set-up folder Id
-        f_id_t = FolderIdType.new
-        f_id_t.xmlattr_Id = @folder_id
-        f_ids = NonEmptyArrayOfBaseFolderIdsType.new([f_id_t],nil)
-        pull.folderIds = f_ids
-
-        # Set-up event types
-        event_types = NonEmptyArrayOfNotificationEventTypesType.new
-        event_types.push(NotificationEventTypeType::CopiedEvent)
-        event_types.push(NotificationEventTypeType::CreatedEvent)
-        event_types.push(NotificationEventTypeType::DeletedEvent)
-        event_types.push(NotificationEventTypeType::ModifiedEvent)
-        event_types.push(NotificationEventTypeType::MovedEvent)
-        event_types.push(NotificationEventTypeType::NewMailEvent)
-        pull.eventTypes = event_types
-
-        pull.timeout = 10
-
-        subscribe.pullSubscriptionRequest = pull
-
-        resp = ExchWebServ.instance.ews.subscribe(subscribe).responseMessages.subscribeResponseMessage.first
-        @subscription_id = resp.subscriptionId
-        @watermark = resp.watermark
-
-        return (resp.responseCode == "NoError")? true: false
       end
 
+      # Check if there is a subscription for this folder.
+      # @return [Boolean] Are we subscribed to this folder?
       def subscribed?
         ( @subscription_id.nil? or @watermark.nil? )? false : true
       end

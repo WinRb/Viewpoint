@@ -62,6 +62,11 @@ module Viewpoint
         def copy_folder_response(opts)
         end
 
+        # Parsers the response from the SOAP Subscribe operation
+        # @see http://msdn.microsoft.com/en-us/library/aa566188.aspx
+        #
+        # @return [Hash] A hash with the keys :watermark and :subscription_id
+        # @raise [EwsError] Raise an error if the ResponseClass is not Success
         def subscribe_response(opts)
           rclass = (@response/'//m:SubscribeResponseMessage').first['ResponseClass']
           if rclass == 'Success'
@@ -70,8 +75,6 @@ module Viewpoint
           else
             raise EwsError.new((@response/'//m:MessageText').first.to_s)
           end
-
-          SubscribeResponseMessage
         end
 
         # @todo Better handle error messages
