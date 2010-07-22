@@ -17,42 +17,7 @@
 # You should have received a copy of the GNU General Public License along
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
-require 'singleton'
 
-# Load the backend SOAP infrastructure.  Today this is Handsoap.
-require 'soap/soap_provider'
-
-# Load the model classes
-require 'viewpoint/models'
-
-# Load the Exception classes
-require 'viewpoint/exceptions/exceptions'
-
-
-module Viewpoint
-  module EWS
-    class EWS
-      include Singleton
-
-      attr_reader :ews
-
-      def self.endpoint=(endpoint)
-        @@endpoint = endpoint
-        SOAP::ExchangeWebService.endpoint(:uri => endpoint, :version => 1)
-      end
-
-      def self.endpoint
-        @@endpoint
-      end
-      
-      def self.set_auth(user,pass)
-        SOAP::ExchangeWebService.set_auth(user,pass)
-      end
-
-      def initialize
-        @ews = SOAP::ExchangeWebService.new
-      end
-
-    end # class EWS
-  end # EWS
-end
+# Require all of the model files here
+require 'viewpoint/folder'
+require 'viewpoint/item'
