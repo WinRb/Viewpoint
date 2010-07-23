@@ -26,12 +26,6 @@ module Viewpoint
         # Parsing Methods
         # ---------------
 
-        def resolve_names_response(opts)
-        end
-        def expand_dl_response(opts)
-        end
-
-
         def find_folder_response(opts)
           folders = []
           (resp/'//m:RootFolder/t:Folders/t:Folder').each do |f|
@@ -44,23 +38,6 @@ module Viewpoint
           folders
         end
 
-
-        def find_item_response(opts)
-        end
-        def get_folder_response(opts)
-        end
-        def convert_id_response(opts)
-        end
-        def create_folder_response(opts)
-        end
-        def delete_folder_response(opts)
-        end
-        def update_folder_response(opts)
-        end
-        def move_folder_response(opts)
-        end
-        def copy_folder_response(opts)
-        end
 
         # Parsers the response from the SOAP Subscribe operation
         # @see http://msdn.microsoft.com/en-us/library/aa566188.aspx
@@ -90,12 +67,6 @@ module Viewpoint
           end
         end
 
-        def get_events_response(opts)
-        end
-        def sync_folder_hierarchy_response(opts)
-        end
-        def sync_folder_items_response(opts)
-        end
 
         def get_item_response(opts)
           @response
@@ -108,38 +79,6 @@ module Viewpoint
           else
             raise EwsError.new((@response/'//m:MessageText').first.to_s)
           end
-        end
-        def delete_item_response(opts)
-        end
-        def update_item_response(opts)
-        end
-        def send_item_response(opts)
-        end
-        def move_item_response(opts)
-        end
-        def copy_item_response(opts)
-        end
-        def create_attachment_response(opts)
-        end
-        def delete_attachment_response(opts)
-        end
-        def get_attachment_response(opts)
-        end
-        def create_managed_folder_response(opts)
-        end
-        def get_delegate_response(opts)
-        end
-        def add_delegate_response(opts)
-        end
-        def remove_delegate_response(opts)
-        end
-        def update_delegate_response(opts)
-        end
-        def get_user_availability_response(opts)
-        end
-        def get_user_oof_settings_response(opts)
-        end
-        def set_user_oof_settings_response(opts)
         end
 
       end # EwsParser

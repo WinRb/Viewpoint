@@ -34,9 +34,6 @@ module Viewpoint
           @node.add('ewssoap:UnresolvedEntry',name)
         end
 
-        def expand_dl!(expand_dl)
-        end
-
 
         def find_folder!(parent_folder_ids, traversal, folder_shape, opts)
           @node.set_attr('Traversal', traversal)
@@ -59,33 +56,6 @@ module Viewpoint
         end
 
 
-        def convert_id!(convert_id)
-        end
-
-
-        def create_folder!(create_folder)
-        end
-
-
-        def delete_folder!(delete_folder)
-        end
-
-
-        def update_folder!(update_folder)
-        end
-
-
-        def move_folder!(move_folder)
-        end
-
-
-        def copy_folder!(copy_folder)
-        end
-
-
-        def subscribe!(subscribe)
-        end
-
         # @see ExchangeWebService#subscribe
         def pull_subscription_request!(folder_ids, event_types, timeout)
           @node.add('ewssoap:PullSubscriptionRequest') do |ps|
@@ -96,22 +66,10 @@ module Viewpoint
         end
 
 
-        def unsubscribe!(unsubscribe)
-        end
-
-
         # @see ExchangeWebService#get_events
         def get_events!(subscription_id, watermark)
           subscription_id!(@node, subscription_id)
           watermark!(@node, watermark)
-        end
-
-
-        def sync_folder_hierarchy!(sync_folder_hierarchy)
-        end
-
-
-        def sync_folder_items!(sync_folder_items)
         end
 
 
@@ -128,70 +86,6 @@ module Viewpoint
 
           saved_item_folder_id!(@node, folder_id)
           items!(@node, items, type)
-        end
-
-
-        def delete_item!(delete_item)
-        end
-
-
-        def update_item!(update_item)
-        end
-
-
-        def send_item!(send_item)
-        end
-
-
-        def move_item!(move_item)
-        end
-
-
-        def copy_item!(copy_item)
-        end
-
-
-        def create_attachment!(create_attachment)
-        end
-
-
-        def delete_attachment!(delete_attachment)
-        end
-
-
-        def get_attachment!(get_attachment)
-        end
-
-
-        def create_managed_folder!(create_managed_folder)
-        end
-
-
-        def get_delegate!(get_delegate)
-        end
-
-
-        def add_delegate!(add_delegate)
-        end
-
-
-        def remove_delegate!(remove_delegate)
-        end
-
-
-        def update_delegate!(update_delegate)
-        end
-
-
-        def get_user_availability!(get_user_availability)
-        end
-
-
-        def get_user_oof_settings!(get_user_oof_settings)
-        end
-
-
-        def set_user_oof_settings!(set_user_oof_settings)
         end
 
 
