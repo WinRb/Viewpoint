@@ -28,11 +28,11 @@ module Viewpoint
 
         def find_folder_response(opts)
           folders = []
-          (resp/'//m:RootFolder/t:Folders/t:Folder').each do |f|
+          (resp/"//#{NS_EWS_MESSAGES}:RootFolder/#{NS_EWS_TYPES}:Folders/#{NS_EWS_TYPES}:Folder").each do |f|
             parms = {}
-            parms[:id] = (f/('t:FolderId')).first['Id']
-            parms[:parent_id] = (f/('t:ParentFolderId')).first['Id']
-            parms[:disp_name] = (f/('t:DisplayName')).first.to_s
+            parms[:id] = (f/("#{NS_EWS_TYPES}:FolderId")).first['Id']
+            parms[:parent_id] = (f/("#{NS_EWS_TYPES}:ParentFolderId")).first['Id']
+            parms[:disp_name] = (f/("#{NS_EWS_TYPES}:DisplayName")).first.to_s
             folders << parms
           end
           folders
@@ -45,12 +45,12 @@ module Viewpoint
         # @return [Hash] A hash with the keys :watermark and :subscription_id
         # @raise [EwsError] Raise an error if the ResponseClass is not Success
         def subscribe_response(opts)
-          rclass = (@response/'//m:SubscribeResponseMessage').first['ResponseClass']
+          rclass = (@response/"//#{NS_EWS_MESSAGES}:SubscribeResponseMessage").first['ResponseClass']
           if rclass == 'Success'
-            return {:subscription_id => (@response/'//m::SubscriptionId').first.to_s,
-              :watermark => (@response/'//m:Watermark').first.to_s}
+            return {:subscription_id => (@response/"//#{NS_EWS_MESSAGES}::SubscriptionId").first.to_s,
+              :watermark => (@response/"//#{NS_EWS_MESSAGES}:Watermark").first.to_s}
           else
-            raise EwsError.new((@response/'//m:MessageText').first.to_s)
+            raise EwsError.new((@response/"//#{NS_EWS_MESSAGES}:MessageText").first.to_s)
           end
         end
 
@@ -59,11 +59,11 @@ module Viewpoint
         #   #success? (boolean)
         #   #message (String) text message
         def unsubscribe_response(opts)
-          rclass = (@response/'//m:UnsubscribeResponseMessage').first['ResponseClass']
+          rclass = (@response/"//#{NS_EWS_MESSAGES}:UnsubscribeResponseMessage").first['ResponseClass']
           if rclass == 'Success'
             return true
           else
-            raise EwsError.new((@response/'//m:MessageText').first.to_s)
+            raise EwsError.new((@response/"//#{NS_EWS_MESSAGES}:MessageText").first.to_s)
           end
         end
 
@@ -74,10 +74,10 @@ module Viewpoint
 
         # @todo need to find out out to us XPath to get ItemId.  It doesn't seem to work now.
         def create_item_response(opts)
-          if ((@response/'//m:UnsubscribeResponseMessage').first['ResponseClass']) == 'Success'
+          if ((@response/"//#{NS_EWS_MESSAGES}:UnsubscribeResponseMessage").first['ResponseClass']) == 'Success'
             return {:id => (@response/'//@Id').first.to_s, :change_key => (@response/'//@ChangeKey').first.to_s }
           else
-            raise EwsError.new((@response/'//m:MessageText').first.to_s)
+            raise EwsError.new((@response/"//#{NS_EWS_MESSAGES}:MessageText").first.to_s)
           end
         end
 

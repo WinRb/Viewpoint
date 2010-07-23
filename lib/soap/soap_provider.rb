@@ -26,6 +26,10 @@ module Viewpoint
 
       # CONSTANTS
 
+      NS_SOAP         = 'soap' # http://schemas.xmlsoap.org/soap/envelope/
+      NS_EWS_TYPES    = 't'    # http://schemas.microsoft.com/exchange/services/2006/types
+      NS_EWS_MESSAGES = 'm'    # http://schemas.microsoft.com/exchange/services/2006/messages
+
       # used in ResolveNames to determine where names are resolved
       ActiveDirectory = 'ActiveDirectory'
       ActiveDirectoryContacts = 'ActiveDirectoryContacts'

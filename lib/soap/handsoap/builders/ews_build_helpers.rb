@@ -28,17 +28,17 @@ module Viewpoint
     module SOAP
       module EwsBuildHelpers
 
-        def folder_ids!(node, folder_ids, element_name='ewssoap:FolderIds')
+        def folder_ids!(node, folder_ids, element_name="#{NS_EWS_MESSAGES}:FolderIds")
           node.add(element_name) do |p|
             folder_ids.each do |id|
               if( id.is_a?(Symbol) )
                 # @todo add change_key support to DistinguishedFolderId
-                p.add('t:DistinguishedFolderId') do |df|
+                p.add("#{NS_EWS_TYPES}:DistinguishedFolderId") do |df|
                   df.set_attr('Id', id.to_s)
                 end
               else
                 # @todo add change_key support to FolderId
-                p.add('t:FolderId',id)
+                p.add("#{NS_EWS_TYPES}:FolderId",id)
               end
             end
           end
@@ -46,14 +46,14 @@ module Viewpoint
 
         # For now this is the same as folder_ids! so just use that method
         def parent_folder_ids!(node, folder_ids)
-          folder_ids!(node, folder_ids, 'ewssoap:ParentFolderIds')
+          folder_ids!(node, folder_ids, "#{NS_EWS_MESSAGES}:ParentFolderIds")
         end
 
 
         def item_ids!(node, item_ids)
-          node.add('ewssoap:ItemIds') do |ids|
+          node.add("#{NS_EWS_MESSAGES}:ItemIds") do |ids|
             item_ids.each do |id|
-              ids.add('t:ItemId') do |iid|
+              ids.add("#{NS_EWS_TYPES}:ItemId") do |iid|
                 iid.set_attr('Id',id)
               end
             end
@@ -62,15 +62,15 @@ module Viewpoint
 
 
         def saved_item_folder_id!(node, folder_id)
-          node.add('ewssoap:SavedItemFolderId') do |sfid|
+          node.add("#{NS_EWS_MESSAGES}:SavedItemFolderId") do |sfid|
             if( folder_id.is_a?(Symbol) )
               # @todo add change_key support to DistinguishedFolderId
-              sfid.add('t:DistinguishedFolderId') do |df|
+              sfid.add("#{NS_EWS_TYPES}:DistinguishedFolderId") do |df|
                 df.set_attr('Id', folder_id.to_s)
               end
             else
               # @todo add change_key support to FolderId
-              sfid.add('t:FolderId',folder_id)
+              sfid.add("#{NS_EWS_TYPES}:FolderId",folder_id)
             end
           end
         end
@@ -78,14 +78,14 @@ module Viewpoint
 
         # @todo This only supports the FieldURI extended property right now
         def folder_shape!(node, folder_shape)
-          node.add('ewssoap:FolderShape') do |fshape|
-            fshape.add('t:BaseShape', folder_shape[:base_shape])
+          node.add("#{NS_EWS_MESSAGES}:FolderShape") do |fshape|
+            fshape.add("#{NS_EWS_TYPES}:BaseShape", folder_shape[:base_shape])
 
             unless( folder_shape[:additional_props].nil? )
               unless( folder_shape[:additional_props][:FieldURI].nil? )
-                fshape.add('t:AdditionalProperties') do |addprops|
+                fshape.add("#{NS_EWS_TYPES}:AdditionalProperties") do |addprops|
                   folder_shape[:additional_props][:FieldURI].each do |uri|
-                    addprops.add('t:FieldURI') { |furi| furi.set_attr('FieldURI', uri) }
+                    addprops.add("#{NS_EWS_TYPES}:FieldURI") { |furi| furi.set_attr('FieldURI', uri) }
                   end
                 end
               end
@@ -95,8 +95,8 @@ module Viewpoint
 
         # @todo Finish AdditionalProperties implementation
         def item_shape!(node, item_shape)
-          node.add('ewssoap:ItemShape') do |is|
-            is.add('t:BaseShape', item_shape[:base_shape])
+          node.add("#{NS_EWS_MESSAGES}:ItemShape") do |is|
+            is.add("#{NS_EWS_TYPES}:BaseShape", item_shape[:base_shape])
           end
           
           unless( item_shape[:additional_props].nil? )
@@ -104,7 +104,7 @@ module Viewpoint
         end
 
         def items!(node, items, type)
-          node.add('ewssoap:Items') do |i|
+          node.add("#{NS_EWS_MESSAGES}:Items") do |i|
             if items.is_a? Hash
               method("#{type}_item!").call(i, items)
             else
@@ -116,31 +116,31 @@ module Viewpoint
         end
 
         def message_item!(node, item)
-          node.add('t:Message') do |msg|
-            add_hierarchy!(msg, item, 't:')
+          node.add("#{NS_EWS_TYPES}:Message") do |msg|
+            add_hierarchy!(msg, item)
           end
         end
 
         def calendar_item!(node, item)
-          node.add('t:CalendarItem') do |msg|
-            add_hierarchy!(msg, item, 't:')
+          node.add("#{NS_EWS_TYPES}:CalendarItem") do |msg|
+            add_hierarchy!(msg, item)
           end
         end
 
         def event_types!(node, event_types)
-          node.add('t:EventTypes') do |ets|
+          node.add("#{NS_EWS_TYPES}:EventTypes") do |ets|
             event_types.each do |event_type|
-              ets.add('t:EventType', event_type)
+              ets.add("#{NS_EWS_TYPES}:EventType", event_type)
             end
           end
         end
 
         def subscription_id!(node, subscription_id)
-          node.add('ewssoap:SubscriptionId', subscription_id)
+          node.add("#{NS_EWS_MESSAGES}:SubscriptionId", subscription_id)
         end
 
         def watermark!(node, watermark)
-          node.add('ewssoap:Watermark', watermark)
+          node.add("#{NS_EWS_MESSAGES}:Watermark", watermark)
         end
 
         # Add a hierarchy of elements from hash data
@@ -152,7 +152,7 @@ module Viewpoint
         #     TestText
         #     <middle>bottom</middle>
         #   </top>
-        def add_hierarchy!(node,e_hash,prefix)
+        def add_hierarchy!(node, e_hash, prefix = NS_EWS_TYPES)
           e_hash.each_pair do |k,v|
             if v.is_a? Hash
               node.add("#{prefix}#{k}", v[:text]) do |n|

@@ -24,7 +24,7 @@ module Viewpoint
 
         def initialize(response)
           # Unwrap SOAP Envelope
-          @response = (response/'//soap:Body/*').first
+          @response = (response/"//#{NS_SOAP}:Body/*").first
           @response_type = @response.native_element.name
         end
 
