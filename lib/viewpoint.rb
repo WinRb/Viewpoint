@@ -66,4 +66,9 @@ module Viewpoint
 
     end # class EWS
   end # EWS
+  
+  # Change CamelCased strings to ruby_cased strings
+  def ruby_case(string)
+    string.split(/(?=[A-Z])/).join('_').downcase
+  end
 end

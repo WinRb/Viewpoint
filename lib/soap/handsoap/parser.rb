@@ -44,12 +44,6 @@ module Viewpoint
 
         private
 
-        # CamelCase to ruby_case
-        # This is used to turn the response message into the correct ruby method for parsing
-        def ruby_case(string)
-          string.split(/(?=[A-Z])/).join('_').downcase
-        end
-
         def method_exists?(method_name)
           return self.methods.include?(method_name)
         end
