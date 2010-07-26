@@ -31,6 +31,10 @@ module Viewpoint
           @response_message.items << resolution_set
         end
 
+        def get_folder_response(opts)
+          @response_message.items = folders
+        end
+
         def find_folder_response(opts)
           folders = []
           (resp/"//#{NS_EWS_MESSAGES}:RootFolder/#{NS_EWS_TYPES}:Folders/#{NS_EWS_TYPES}:Folder").each do |f|
@@ -107,6 +111,14 @@ module Viewpoint
             resolution_set << mbox_hash.merge(contact_hash)
           end
           resolution_set
+        end
+
+        def folders
+          folders = []
+          (@response/'//m:Folders/*').each do |f|
+            folders << xml_to_hash!(f.native_element)
+          end
+          folders
         end
 
       end # EwsParser

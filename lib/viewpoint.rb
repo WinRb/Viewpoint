@@ -27,10 +27,10 @@ require 'soap/soap_provider'
 # Load the model classes
 # Base Models
 require 'model/mailbox_user'
-#require 'model/folder'
+require 'model/folder'
 #require 'model/item'
 # Specific Models
-#require 'model/calendar'
+require 'model/calendar_folder'
 
 # Load the Exception classes
 require 'exceptions/exceptions'
@@ -45,6 +45,7 @@ module Viewpoint
   module EWS
     class EWS
       include Singleton
+      include Viewpoint
 
       attr_reader :ews
 
@@ -65,8 +66,27 @@ module Viewpoint
         @ews = SOAP::ExchangeWebService.new
       end
 
-      def find_contact(contact_name)
+      # Search Contacts for this string
+      # @param [String] contact_name The string to search for
+      # @returns [EwsSoapResponse] A Response message with an items array: EwsSoapResponse#items
+      def search_contacts(contact_name)
         @ews.resolve_names(contact_name)
+      end
+
+      # Get a Viewpoint folder object
+      # @param [Symbol, String] fid The Id of the folder.  If you want to get the folder by name
+      #   pass a Symbol like :calendar, if you know the Exchange Id of the folder pass that as
+      #   a String
+      # @return The folder asked for
+      def get_folder(fid)
+        resp_msg = @ews.get_folder([fid])
+        folder = resp_msg.items.first
+        case folder.keys.first
+        when :calendar_folder
+          return CalendarFolder.new(folder[folder.keys.first])
+        else
+          raise StandardError "Unknow Folder Type"
+        end
       end
 
     end # class EWS
@@ -82,8 +102,9 @@ module Viewpoint
   end
 
   # Change a ruby_cased string to CamelCased
+  # The String#to_s is done in case we are passed a Symbol
   # @see Viewpoint::ruby_case
   def camel_case(string)
-    string.split(/_/).map {|i| i.capitalize}.join
+    string.to_s.split(/_/).map {|i| i.capitalize}.join
   end
 end

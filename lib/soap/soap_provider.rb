@@ -42,7 +42,7 @@ module Viewpoint
       # @attr_reader [String] :message The text from the EWS element <m:ResponseCode>
       class EwsSoapResponse
 
-        attr_reader :success, :code, :message
+        attr_reader :success, :code, :message, :soap_response
         attr_accessor :items
 
         def initialize(success, code, message)
@@ -52,7 +52,11 @@ module Viewpoint
           @items = []
         end
 
-      end
+        def set_soap_resp(response)
+          @soap_response = response
+        end
+
+      end # EwsSoapResponse
 
 
     end # SOAP
