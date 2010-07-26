@@ -21,6 +21,7 @@ module Viewpoint
   module EWS
     module SOAP
       module Parser
+        include Viewpoint # contains ruby_case and camel_case convenience methods
 
         def initialize(response)
           # Unwrap SOAP Envelope
@@ -47,6 +48,40 @@ module Viewpoint
         def method_exists?(method_name)
           return self.methods.include?(method_name)
         end
+
+        # Create a Hash from a Nokogiri element tree
+        # @param [Nokogiri::XML::Element, Nokogiri::XML::Text] nokoelem The Nokogiri element passed to this method
+        # @example XML
+        #   <tiptop>
+        #     <top Id="32fss">TestText</top>
+        #     <middle Id='TestTestMiddle' />
+        #     <bottom />
+        #   </tiptop>
+        #   becomes...
+        #   {:tiptop=>{:top=>{:id=>"32fss", :text=>"TestText"}, :middle=>{:id=>"TestTestMiddle"}}} 
+        def xml_to_hash!(nokoelem)
+          e_hash = {}
+          node_name = ruby_case(nokoelem.name).to_sym
+
+          if nokoelem.is_a? Nokogiri::XML::Element
+            nokoelem.attributes.each_pair do |k, v|
+              e_hash[ruby_case(k).to_sym] = v.value
+            end
+            nokoelem.children.each do |c|
+              new_hash = xml_to_hash!(c)
+              e_hash.merge!(new_hash) unless new_hash.nil?
+            end
+            return e_hash.empty? ? nil : {node_name => e_hash}
+          elsif nokoelem.is_a? Nokogiri::XML::Text
+            # Return a :text to value hash or nil if the text is empty
+            return {node_name => nokoelem.text} if nokoelem.text != "\n"
+            nil
+          else
+            # If something strange gets passed just return nil
+            return nil
+          end
+        end
+
 
       end # Parser
     end # SOAP
