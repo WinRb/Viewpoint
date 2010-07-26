@@ -24,8 +24,8 @@ module Viewpoint
 
         def initialize(response)
           # Unwrap SOAP Envelope
-          @response = (response/"//#{NS_SOAP}:Body/*").first
-          @response_type = @response.native_element.name
+          @response = response
+          @response_type = (response/"//#{NS_SOAP}:Body/*").first.node_name
         end
 
         # This is the main parser method.  It takes the response type and tries to
@@ -34,10 +34,10 @@ module Viewpoint
         def parse(opts)
           resp_method = ruby_case(@response_type)
           if(respond_to?(resp_method))
-            puts "Method Exists: #{resp_method}"
+            puts "Method Exists: #{resp_method}" if $DEBUG
             method(resp_method).call(opts)
           else
-            puts "No Method: #{resp_method}"
+            puts "No Method: #{resp_method}" if $DEBUG
             @response
           end
         end

@@ -26,7 +26,8 @@ require 'soap/soap_provider'
 
 # Load the model classes
 # Base Models
-require 'model/folder'
+require 'model/mailbox_user'
+#require 'model/folder'
 #require 'model/item'
 # Specific Models
 #require 'model/calendar'

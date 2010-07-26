@@ -18,7 +18,6 @@
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
 $: << File.dirname(__FILE__)
-require 'rubygems'
 require 'handsoap'
 require 'builder'
 require 'parser'

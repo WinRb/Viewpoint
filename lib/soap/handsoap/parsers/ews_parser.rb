@@ -81,6 +81,17 @@ module Viewpoint
           end
         end
 
+        # Parse out a Mailbox element
+        # @param [XML] mbox The <t:Mailbox> element set
+        # @return [Array] Values of EWS Mailbox type name, email, routing_type, mailbox_type, item_id
+        def mailbox(mbox)
+          name = (mbox/"#{NS_EWS_TYPES}:Name").to_s
+          email = (mbox/"#{NS_EWS_TYPES}:EmailAddress").to_s
+          routing_type = (mbox/"#{NS_EWS_TYPES}:RoutingType").to_s
+          mailbox_type = (mbox/"#{NS_EWS_TYPES}:MailboxType").to_s
+          item_id = (mbox/"#{NS_EWS_TYPES}:ItemId").to_s
+        end
+
       end # EwsParser
     end # SOAP
   end # EWS

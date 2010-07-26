@@ -36,8 +36,36 @@ module Viewpoint
       Contacts = 'Contacts'
       ContactsActiveDirectory = 'ContactsActiveDirectory'
 
+
+
+      # A Generic Class for SOAP returns.
+      # @attr_reader [String] :message The text from the EWS element <m:ResponseCode>
+      class EwsSoapResponse
+
+        attr_reader :message
+
+        def initialize(success, message)
+          @success, @message = success, message
+        end
+
+        # @return [Boolean] Whether or not the SOAP request was successful
+        def success?
+          @success
+        end
+      end
+
+
     end # SOAP
   end # EWS
 end # Viewpoint
 
 require 'soap/handsoap/ews_service'
+
+module Viewpoint
+  module EWS
+    module SOAP
+    end
+  end
+end
+
+
