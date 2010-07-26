@@ -42,16 +42,16 @@ module Viewpoint
       # @attr_reader [String] :message The text from the EWS element <m:ResponseCode>
       class EwsSoapResponse
 
-        attr_reader :message
+        attr_reader :success, :code, :message
+        attr_accessor :items
 
-        def initialize(success, message)
-          @success, @message = success, message
+        def initialize(success, code, message)
+          @success, @code, @message = success, code, message
+
+          # Items is an array where hash types get stored for return
+          @items = []
         end
 
-        # @return [Boolean] Whether or not the SOAP request was successful
-        def success?
-          @success
-        end
       end
 
 

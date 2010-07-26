@@ -27,6 +27,10 @@ module Viewpoint
         # Parsing Methods
         # ---------------
 
+        def resolve_names_response(opts)
+          @response_message.items << resolution_set
+        end
+
         def find_folder_response(opts)
           folders = []
           (resp/"//#{NS_EWS_MESSAGES}:RootFolder/#{NS_EWS_TYPES}:Folders/#{NS_EWS_TYPES}:Folder").each do |f|
@@ -83,14 +87,26 @@ module Viewpoint
         end
 
         # Parse out a Mailbox element
-        # @param [XML] mbox The <t:Mailbox> element set
-        # @return [Array] Values of EWS Mailbox type name, email, routing_type, mailbox_type, item_id
-        def mailbox(mbox)
-          name = (mbox/"#{NS_EWS_TYPES}:Name").to_s
-          email = (mbox/"#{NS_EWS_TYPES}:EmailAddress").to_s
-          routing_type = (mbox/"#{NS_EWS_TYPES}:RoutingType").to_s
-          mailbox_type = (mbox/"#{NS_EWS_TYPES}:MailboxType").to_s
-          item_id = (mbox/"#{NS_EWS_TYPES}:ItemId").to_s
+        # @param [XML] mbox The <t:Mailbox> element
+        # @return [Hash] Values of EWS Mailbox type :name, :email_address, :routing_type, :mailbox_type, :item_id
+        def mailbox(mbox_xml)
+          xml_to_hash!(mbox_xml.native_element)
+        end
+
+        def contact(contact_xml)
+          xml_to_hash!(contact_xml.native_element)
+        end
+
+        # Parse out Resolutions from a ResolutionSet from the ResolveNames operation
+        # @return [Array] An array of :mailbox,:contact Hashes that resolved.
+        def resolution_set
+          resolution_set = []
+          (@response/'//m:ResolutionSet/*').each do |r|
+            mbox_hash    = mailbox((r/'t:Mailbox').first)
+            contact_hash = contact((r/'t:Contact').first)
+            resolution_set << mbox_hash.merge(contact_hash)
+          end
+          resolution_set
         end
 
       end # EwsParser

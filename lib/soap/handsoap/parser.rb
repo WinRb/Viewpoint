@@ -27,6 +27,12 @@ module Viewpoint
           # Unwrap SOAP Envelope
           @response = response
           @response_type = (response/"//#{NS_SOAP}:Body/*").first.node_name
+
+          rmsg = (response/'//m:ResponseMessages/*[@ResponseClass]').first
+          @response_message = EwsSoapResponse.new(rmsg['ResponseClass'],
+                                                  (rmsg/'m:ResponseCode/text()').first.to_s,
+                                                  (rmsg/'m:MessageText/text()').first.to_s)
+
         end
 
         # This is the main parser method.  It takes the response type and tries to
@@ -41,6 +47,7 @@ module Viewpoint
             puts "No Method: #{resp_method}" if $DEBUG
             @response
           end
+          @response_message
         end
 
         private

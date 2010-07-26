@@ -65,6 +65,10 @@ module Viewpoint
         @ews = SOAP::ExchangeWebService.new
       end
 
+      def find_contact(contact_name)
+        @ews.resolve_names(contact_name)
+      end
+
     end # class EWS
   end # EWS
   
