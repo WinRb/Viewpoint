@@ -68,7 +68,17 @@ module Viewpoint
   end # EWS
   
   # Change CamelCased strings to ruby_cased strings
+  # It uses the lookahead assertion ?=  In this case it basically says match
+  # anything followed by a capital letter, but not the capital letter itself.
+  # @see http://www.pcre.org/pcre.txt The PCRE guide for more details
+  # @see Viewpoint::camel_case
   def ruby_case(string)
     string.split(/(?=[A-Z])/).join('_').downcase
+  end
+
+  # Change a ruby_cased string to CamelCased
+  # @see Viewpoint::ruby_case
+  def camel_case(string)
+    string.split(/_/).map {|i| i.capitalize}.join
   end
 end
