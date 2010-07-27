@@ -80,12 +80,21 @@ module Viewpoint
 
 
         # @param [String] type The type of items in the items array message/calendar
+        # @todo Fix max_changes_returned to be more flexible
         def create_item!(folder_id, items, message_disposition, send_invites, type)
           @node.set_attr('MessageDisposition', message_disposition) if message_disposition
           @node.set_attr('SendMeetingInvitations', send_invites) if send_invites
 
           saved_item_folder_id!(@node, folder_id)
           items!(@node, items, type)
+        end
+
+        def sync_folder_items!(folder_id, item_shape, opts)
+          item_shape!(@node, item_shape)
+          @node.add("#{NS_EWS_MESSAGES}:SyncFolderId") do |sfid|
+            folder_id!(sfid, folder_id)
+          end
+          @node.add("#{NS_EWS_MESSAGES}:MaxChangesReturned", 100)
         end
 
 

@@ -37,7 +37,7 @@ module Viewpoint
 
         def find_folder_response(opts)
           folders = []
-          (resp/"//#{NS_EWS_MESSAGES}:RootFolder/#{NS_EWS_TYPES}:Folders/#{NS_EWS_TYPES}:Folder").each do |f|
+          (@response/"//#{NS_EWS_MESSAGES}:RootFolder/#{NS_EWS_TYPES}:Folders/#{NS_EWS_TYPES}:Folder").each do |f|
             parms = {}
             parms[:id] = (f/("#{NS_EWS_TYPES}:FolderId")).first['Id']
             parms[:parent_id] = (f/("#{NS_EWS_TYPES}:ParentFolderId")).first['Id']
@@ -47,6 +47,35 @@ module Viewpoint
           folders
         end
 
+        def get_events_response(opts)
+          if @response_message.status == 'Success'
+            events = []
+            events << {}
+            events.first[:subscription_id] = (@response/"//#{NS_EWS_MESSAGES}:Notification/#{NS_EWS_TYPES}:SubscriptionId").first.to_s
+            events.first[:more_events] = (@response/"//#{NS_EWS_MESSAGES}:Notification/#{NS_EWS_TYPES}:SubscriptionId").first.to_boolean
+
+            (@response/"//#{NS_EWS_MESSAGES}:Notification/*[position()>3]").each do |e|
+              events << xml_to_hash!(e.native_element)
+              events.first[:watermark] = events.last[events.last.keys.first][:watermark][:text]
+            end
+
+            @response_message.items = events
+          else
+            raise EwsSubscriptionTimeout.new("#{@response_message.code}: #{@response_message.message}")
+          end
+        end
+
+        def find_item_response(opts)
+          items = []
+          items << {}
+          items.first[:total_items_in_view] = (@response/"//#{NS_EWS_MESSAGES}:FindItemResponseMessage/#{NS_EWS_MESSAGES}:RootFolder/@TotalItemsInView").first.to_i
+
+          (@response/"//#{NS_EWS_MESSAGES}:FindItemResponseMessage//#{NS_EWS_TYPES}:Items/*").each do |i|
+            items << xml_to_hash!(i.native_element)
+          end
+
+          @response_message.items = items
+        end
 
         # Parsers the response from the SOAP Subscribe operation
         # @see http://msdn.microsoft.com/en-us/library/aa566188.aspx
@@ -54,39 +83,40 @@ module Viewpoint
         # @return [Hash] A hash with the keys :watermark and :subscription_id
         # @raise [EwsError] Raise an error if the ResponseClass is not Success
         def subscribe_response(opts)
-          rclass = (@response/"//#{NS_EWS_MESSAGES}:SubscribeResponseMessage").first['ResponseClass']
-          if rclass == 'Success'
-            return {:subscription_id => (@response/"//#{NS_EWS_MESSAGES}::SubscriptionId").first.to_s,
-              :watermark => (@response/"//#{NS_EWS_MESSAGES}:Watermark").first.to_s}
-          else
-            raise EwsError.new((@response/"//#{NS_EWS_MESSAGES}:MessageText").first.to_s)
-          end
+          subscription = []
+          sid = xml_to_hash!((@response/"//#{NS_EWS_MESSAGES}:SubscriptionId").first.native_element)
+          wmk = xml_to_hash!((@response/"//#{NS_EWS_MESSAGES}:Watermark").first.native_element)
+          subscription << sid.merge(wmk)
+          @response_message.items = subscription
         end
 
         # @todo Better handle error messages
-        #   Like a response object with methods
-        #   #success? (boolean)
-        #   #message (String) text message
         def unsubscribe_response(opts)
-          rclass = (@response/"//#{NS_EWS_MESSAGES}:UnsubscribeResponseMessage").first['ResponseClass']
-          if rclass == 'Success'
-            return true
-          else
-            raise EwsError.new((@response/"//#{NS_EWS_MESSAGES}:MessageText").first.to_s)
-          end
+          @response_message
         end
 
-
         def get_item_response(opts)
-          @response
+          if(@response_message.status == 'Success')
+            @response_message.items << xml_to_hash!((@response/"//m:Items/*").first.native_element)
+          else
+            raise EwsError, "#{@response_message.code}: #{@response_message.message}"
+          end
         end
 
         # @todo need to find out out to us XPath to get ItemId.  It doesn't seem to work now.
         def create_item_response(opts)
-          if ((@response/"//#{NS_EWS_MESSAGES}:UnsubscribeResponseMessage").first['ResponseClass']) == 'Success'
+          if(@response_message.status == 'Success')
             return {:id => (@response/'//@Id').first.to_s, :change_key => (@response/'//@ChangeKey').first.to_s }
           else
-            raise EwsError.new((@response/"//#{NS_EWS_MESSAGES}:MessageText").first.to_s)
+            raise EwsError, "#{@response_message.code}: #{@response_message.message}"
+          end
+        end
+
+        def sync_folder_items_response(opts)
+          if(@response_message.status == 'Success')
+            true
+          else
+            raise EwsError, "#{@response_message.code}: #{@response_message.message}"
           end
         end
 
@@ -105,9 +135,9 @@ module Viewpoint
         # @return [Array] An array of :mailbox,:contact Hashes that resolved.
         def resolution_set
           resolution_set = []
-          (@response/'//m:ResolutionSet/*').each do |r|
-            mbox_hash    = mailbox((r/'t:Mailbox').first)
-            contact_hash = contact((r/'t:Contact').first)
+          (@response/"//#{NS_EWS_MESSAGES}:ResolutionSet/*").each do |r|
+            mbox_hash    = mailbox((r/"#{NS_EWS_TYPES}:Mailbox").first)
+            contact_hash = contact((r/"#{NS_EWS_TYPES}:Contact").first)
             resolution_set << mbox_hash.merge(contact_hash)
           end
           resolution_set
@@ -115,7 +145,7 @@ module Viewpoint
 
         def folders
           folders = []
-          (@response/'//m:Folders/*').each do |f|
+          (@response/"//#{NS_EWS_MESSAGES}:Folders/*").each do |f|
             folders << xml_to_hash!(f.native_element)
           end
           folders

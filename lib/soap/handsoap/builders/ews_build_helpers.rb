@@ -31,18 +31,25 @@ module Viewpoint
         def folder_ids!(node, folder_ids, element_name="#{NS_EWS_MESSAGES}:FolderIds")
           node.add(element_name) do |p|
             folder_ids.each do |id|
-              if( id.is_a?(Symbol) )
-                # @todo add change_key support to DistinguishedFolderId
-                p.add("#{NS_EWS_TYPES}:DistinguishedFolderId") do |df|
-                  df.set_attr('Id', id.to_s)
-                end
-              else
-                # @todo add change_key support to FolderId
-                p.add("#{NS_EWS_TYPES}:FolderId",id)
-              end
+              folder_id!(p,id)
             end
           end
         end
+
+        def folder_id!(node, folder_id)
+          if( folder_id.is_a?(Symbol) )
+            # @todo add change_key support to DistinguishedFolderId
+            node.add("#{NS_EWS_TYPES}:DistinguishedFolderId") do |df|
+              df.set_attr('Id', folder_id.to_s)
+            end
+          else
+            # @todo add change_key support to FolderId
+            node.add("#{NS_EWS_TYPES}:FolderId") do |fi|
+              fi.set_attr('Id', folder_id)
+            end
+          end
+        end
+
 
         # For now this is the same as folder_ids! so just use that method
         def parent_folder_ids!(node, folder_ids)

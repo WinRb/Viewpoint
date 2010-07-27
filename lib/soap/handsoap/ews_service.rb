@@ -280,12 +280,25 @@ module Viewpoint
           parse_sync_folder_hierarchy(resp)
         end
 
-        def sync_folder_items
+        # Synchronizes items between the Exchange server and the client
+        # @see http://msdn.microsoft.com/en-us/library/aa563967.aspx
+        #
+        # @param [String, Symbol] folder_id either a DistinguishedFolderId
+        #   (must me a Symbol) or a FolderId (String)
+        # @param [Hash] item_shape defines the ItemShape node
+        #   See: http://msdn.microsoft.com/en-us/library/aa565261.aspx
+        # @option item_shape [String] :base_shape IdOnly/Default/AllProperties
+        # @option item_shape :additional_properties
+        #   See: http://msdn.microsoft.com/en-us/library/aa565261.aspx
+        # @param [Hash] opts optional parameters to this method
+        def sync_folder_items(folder_id, item_shape = {:base_shape => 'Default'}, opts = {})
           action = "#{SOAP_ACTION_PREFIX}/SyncFolderItems"
-          resp = invoke("#{NS_EWS_MESSAGES}:SyncFolderItems", :soap_action => action) do |sync_folder_items|
-            build_sync_folder_items!(sync_folder_items)
+          resp = invoke("#{NS_EWS_MESSAGES}:SyncFolderItems", :soap_action => action) do |root|
+            build!(root) do
+              sync_folder_items!(folder_id, item_shape, opts)
+            end
           end
-          parse_sync_folder_items(resp)
+          parse!(resp)
         end
 
         # Gets items from the Exchange store

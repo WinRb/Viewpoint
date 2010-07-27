@@ -25,93 +25,124 @@ module Viewpoint
   module EWS
     class Folder
 
-      @@distinguished_folder_ids = %w{ calendar contacts deleteditems drafts
-        inbox journal notes outbox sentitems tasks msgfolderroot root
-        junkemail searchfolders voicemail recoverableitemsroot recoverableitemsdeletions
-        recoverableitemsversions recoverableitemspurges archiveroot archivemsgfolderroot
-        archivedeleteditems archiverecoverableitemsroot archiverecoverableitemsdeletions
-        archiverecoverableitemsversions archiverecoverableitemspurges}
+      @@distinguished_folder_ids = %w{calendar contacts deleteditems drafts inbox journal
+      notes outbox sentitems tasks msgfolderroot root junkemail searchfolders voicemail
+      recoverableitemsroot recoverableitemsdeletions recoverableitemsversions
+      recoverableitemspurges archiveroot archivemsgfolderroot archivedeleteditems
+      archiverecoverableitemsroot archiverecoverableitemsdeletions
+      archiverecoverableitemsversions archiverecoverableitemspurges}
 
-        @@event_types = %w{CopiedEvent CreatedEvent DeletedEvent ModifiedEvent
-        MovedEvent NewMailEvent FreeBusyChangedEvent}
+      @@event_types = %w{CopiedEvent CreatedEvent DeletedEvent ModifiedEvent MovedEvent NewMailEvent}
 
 
-        def self.get_folder(folder_id)
-          tfolder_id = folder_id.downcase
-          # If the folder_id is a DistinguishedFolderId change it to a symbol so our SOAP
-          # method does the right thing.
-          folder_id = @@distinguished_folder_ids.find_index(tfolder_id) ? tfolder_id.to_sym : folder_id
-          (Viewpoint::EWS::EWS.instance).get_folder(folder_id)
+      def self.get_folder(folder_id)
+        tfolder_id = folder_id.downcase
+        # If the folder_id is a DistinguishedFolderId change it to a symbol so our SOAP
+        # method does the right thing.
+        folder_id = @@distinguished_folder_ids.find_index(tfolder_id) ? tfolder_id.to_sym : folder_id
+        (Viewpoint::EWS::EWS.instance).get_folder(folder_id)
+      end
+
+      def self.delete_folder(folder_id)
+        # @todo Implement Folder::delete_folder
+      end
+
+      attr_accessor :folder_id, :change_key, :parent_id, :display_name
+      attr_reader :subscription_id, :watermark
+      alias :id :folder_id
+
+      def initialize(folder)
+        @folder_id = folder[:folder_id][:id]
+        @change_key = folder[:folder_id][:change_key]
+        @parent_id = folder[:parent_folder_id] unless folder[:parent_folder_id].nil?
+        @display_name = folder[:display_name][:text]
+
+        @sync_state = nil
+        @subscription_id = nil
+        @watermark = nil
+        @shallow = true
+      end
+
+      # Subscribe this folder to events.  This method initiates an Exchange pull
+      # type subscription.
+      #
+      # @param [Array] event_types Which event types to subscribe to.  By default
+      #   we subscribe to all Exchange event types: CopiedEvent, CreatedEvent,
+      #   DeletedEvent, ModifiedEvent, MovedEvent, NewMailEvent, FreeBusyChangedEvent
+      # @return [Boolean] Did the subscription happen successfully?
+      # @todo Add custom Exception for EWS
+      def subscribe(event_types = @@event_types)
+        # Refresh the subscription if already subscribed
+        unsubscribe if subscribed?
+
+        resp = (Viewpoint::EWS::EWS.instance).ews.subscribe([folder_id],event_types)
+        if(resp.status == 'Success')
+          @subscription_id = resp.items.first[:subscription_id][:text]
+          @watermark = resp.items.first[:watermark][:text]
+          return true
+        else
+          raise StandardError, "Error: #{resp.message}"
         end
+      end
 
-        def self.delete_folder(folder_id)
-          # @todo Implement Folder::delete_folder
+      # Check if there is a subscription for this folder.
+      # @return [Boolean] Are we subscribed to this folder?
+      def subscribed?
+        ( @subscription_id.nil? or @watermark.nil? )? false : true
+      end
+
+
+      # Unsubscribe this folder from further Exchange events.
+      # @return [Boolean] Did we unsubscribe successfully?
+      # @todo Add custom Exception for EWS
+      def unsubscribe
+        return true if @subscription_id.nil?
+
+        resp = (Viewpoint::EWS::EWS.instance).ews.unsubscribe(@subscription_id)
+        if(resp.status == 'Success')
+          @subscription_id, @watermark = nil, nil
+          return true
+        else
+          raise StandardError, "Error: #{resp.message}"
         end
+      end
 
-        attr_accessor :folder_id, :change_key, :parent_id, :display_name
-        def initialize(folder)
-          @folder_id = folder[:folder_id][:id]
-          @change_key = folder[:folder_id][:change_key]
-          @parent_id = folder[:parent_folder_id] unless folder[:parent_folder_id].nil?
-          @display_name = folder[:display_name][:text]
-
-          @sync_state = nil
-          @subscription_id = nil
-          @watermark = nil
-          @shallow = true
-        end
-
-        # Subscribe this folder to events.  This method initiates an Exchange pull
-        # type subscription.
-        #
-        # @param [Array] event_types Which event types to subscribe to.  By default
-        #   we subscribe to all Exchange event types: CopiedEvent, CreatedEvent,
-        #   DeletedEvent, ModifiedEvent, MovedEvent, NewMailEvent, FreeBusyChangedEvent
-        # @return [Boolean] Did the subscription happen successfully?
-        def subscribe(event_types = @@event_types)
-          # Refresh the subscription if already subscribed
-          unsubscribe if subscribed?
-
-          begin
-            resp = (Viewpoint::EWS::EWS.instance).ews.subscribe([folder_id],event_types)
-
-            @subscription_id = resp[:subscription_id]
-            @watermark = resp[:watermark]
-            return true
-          rescue
-            return false
+      # Checks a subscribed folder for events
+      # @returns [Array] An array of Event items
+      # @todo check for subscription expiry
+      def get_events
+        begin
+          if(subscribed?)
+            resp = (Viewpoint::EWS::EWS.instance).ews.get_events(@subscription_id, @watermark)
+            parms = resp.items.shift
+            @watermark = parms[:watermark]
+            # @todo if parms[:more_events] # get more events
+            return resp.items
+          else
+            raise StandardError, "Folder <#{self.display_name}> not subscribed to. Issue a Folder#subscribe before checking events."
           end
+        rescue EwsSubscriptionTimeout => e
+          @subscription_id, @watermark = nil, nil
+          raise e
         end
+      end
 
-        # Check if there is a subscription for this folder.
-        # @return [Boolean] Are we subscribed to this folder?
-        def subscribed?
-          ( @subscription_id.nil? or @watermark.nil? )? false : true
+      # Find Items
+      def find_items
+        resp = (Viewpoint::EWS::EWS.instance).ews.find_item([@folder_id])
+        parms = resp.items.shift
+        resp.items
+      end
+
+      # Get Item
+      def get_item(item_id, change_key = nil)
+        resp = (Viewpoint::EWS::EWS.instance).ews.get_item([item_id])
+        if(resp.status == 'Success')
+          return resp.items.shift
+        else
+          raise EwsError, "Could not retrieve item. #{resp.code}: #{resp.message}"
         end
-
-
-        # Unsubscribe this folder from further Exchange events.
-        # @return [Boolean] Did we unsubscribe successfully?
-        def unsubscribe
-          begin
-            return true if @subscription_id.nil?
-
-            (Viewpoint::EWS::EWS.instance).ews.unsubscribe(@subscription_id)
-          rescue
-            return false
-          end
-        end
-
-
-        # Fetch events with the subscription_id.  If one does not exists or is expired,
-        # call subscribe.
-        # Returns a hash with the event type as the key and an Array of Hashes that
-        # represent each event's data
-        # An :error key is set if there is a problem
-#        def check_subscription
-#          if subscribed?
-#          end
-#        end
+      end
 
     end # Folder
   end # EWS

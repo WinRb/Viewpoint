@@ -31,6 +31,7 @@ require 'model/folder'
 #require 'model/item'
 # Specific Models
 require 'model/calendar_folder'
+require 'model/mail_folder'
 
 # Load the Exception classes
 require 'exceptions/exceptions'
@@ -82,10 +83,12 @@ module Viewpoint
         resp_msg = @ews.get_folder([fid])
         folder = resp_msg.items.first
         case folder.keys.first
+        when :folder
+          return MailFolder.new(folder[folder.keys.first])
         when :calendar_folder
           return CalendarFolder.new(folder[folder.keys.first])
         else
-          raise StandardError "Unknow Folder Type"
+          raise StandardError, "<#{fid}> Unknow Folder Type"
         end
       end
 

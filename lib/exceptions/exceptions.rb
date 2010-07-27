@@ -19,8 +19,16 @@
 #############################################################################
 module Viewpoint
   module EWS
+
+    # Generic Ews Error
     class EwsError < StandardError
-    end # EwsError
+    end
+
+    # Raised when a user tries to query a folder subscription after the
+    # subscription has timed out.
+    class EwsSubscriptionTimeout < StandardError
+    end
+
   end # EWS
 end # Viewpoint
  

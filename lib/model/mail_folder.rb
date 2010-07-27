@@ -98,10 +98,10 @@ module Viewpoint
 
       end
 
-
-      # See docs for Folder::get_item
-      def get_item(item_id)
-        msg = super(item_id, "message", true)
+      # @see Folder#get_item
+      def get_item(item_id, change_key = nil)
+        items = super(item_id, change_key)
+        items[:message]
       end
 
       def get_message(item_id)

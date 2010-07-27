@@ -42,11 +42,11 @@ module Viewpoint
       # @attr_reader [String] :message The text from the EWS element <m:ResponseCode>
       class EwsSoapResponse
 
-        attr_reader :success, :code, :message, :soap_response
+        attr_reader :status, :code, :message, :soap_response
         attr_accessor :items
 
-        def initialize(success, code, message)
-          @success, @code, @message = success, code, message
+        def initialize(status, code, message)
+          @status, @code, @message = status, code, message
 
           # Items is an array where hash types get stored for return
           @items = []
