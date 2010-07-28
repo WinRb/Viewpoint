@@ -25,13 +25,12 @@ module Viewpoint
     # @see http://msdn.microsoft.com/en-us/library/aa565036.aspx MSDN docs
     # @todo Design a Class method that resolves to an Array of MailboxUsers
     class MailboxUser
+      include Model
 
-      attr_reader :name, :email, :routing_type, :mailbox_type, :item_id
-
-      def initialize(name, email=nil, routing_type = nil, mailbox_type = nil, item_id=nil)
-        @name, @email = name, email
-        @routing_type, @mailbox_type = routing_type, mailbox_type
-        @item_id = item_id
+      def initialize(mbox_user)
+        super() # Calls initialize in Model (creates @ews_methods Array)
+        @ews_item = mbox_user
+        define_str_var :name, :email_address, :routing_type, :mailbox_type, :item_id
       end
 
     end # MailboxUser

@@ -25,9 +25,7 @@
 module Viewpoint
   module EWS
     class Item
-
-      attr_accessor :item_id, :item_class
-      attr_reader :ews_item
+      include Model
 
       # This is a Class method that fetches an existing Item from the
       #  Exchange Store.  To create a new item that does not exist in
@@ -39,73 +37,38 @@ module Viewpoint
         conn.ews.get_item([item_id])
       end
 
+      attr_reader :item_id, :body_type
+      alias :id :item_id
+
       # Initialize an Exchange Web Services item
       def initialize(ews_item)
+        super() # Calls initialize in Model (creates @ews_methods Array)
         @ews_item = ews_item
         @item_id = ews_item[:item_id][:id]
+        @ews_methods << :item_id
+        if(ews_item[:body] && ews_item[:body][:body_type])
+          @body_type = ews_item[:body][:body_type]
+          @ews_methods << :body_type
+        end
+        define_str_var :subject, :sensitivity, :body
+        define_int_var :size
+        define_bool_var :is_read, :has_attachments, :is_read_receipt_requested, :is_delivery_receipt_requested
+        define_datetime_var :date_time_sent, :date_time_created
+        define_mbox_users :to_recipients, :cc_recipients
+        define_mbox_user :from
+        # @todo Handle:  :attachments
       end
 
-      # Takes an object of type Viewpoint::Folder as an argument
-      # Returns a boolean value, true if the move ocurred, false otherwise.
       def move_to!(new_folder)
-        retval = @parent_folder.move_item(@item_id, new_folder)
-        @parent_folder = new_folder if retval
-
-        return retval
       end
 
-
-      def entry_id
-        convert_id(IdFormatType::EntryId)
-      end
-
-      # Return the OWA ID so we can link to webmail
-      # Example usage: uri = "https://host/owa/?ae=Item&a=open&id=" + owa_id
-      def owa_id
-        convert_id(IdFormatType::OwaId)
-      end
-
-      def ews_legacy_id
-        convert_id(IdFormatType::EwsLegacyId)
-      end
-
-      def hex_id
-        convert_id(IdFormatType::HexEntryId)
-      end
-
-      def store_id
-        convert_id(IdFormatType::StoreId)
-      end
-
-      # Returns a boolean value, true if the delete ocurred, false otherwise.
       def delete!
-        @parent_folder.delete_item(@item_id)
       end
 
-      # Returns a boolean value, true if the recycle ocurred, false otherwise.
       def recycle!
-        @parent_folder.recycle_item(@item_id)
       end
 
 
-      private
-
-      def convert_id(dest_type)
-        vp = ExchWebServ.instance
-        altids_ar = NonEmptyArrayOfAlternateIdsType.new
-
-        altid_t = AlternateIdType.new
-        altid_t.xmlattr_Format = IdFormatType::EwsId
-        altid_t.xmlattr_Id = @item_id
-        altid_t.xmlattr_Mailbox = vp.email
-        altids_ar.alternateId << altid_t
-
-        convertid_t = ConvertIdType.new(altids_ar)
-        convertid_t.xmlattr_DestinationFormat = dest_type
-
-        resp = vp.ews.convertId(convertid_t)
-        resp.responseMessages.convertIdResponseMessage.first.alternateId.xmlattr_Id
-      end
     end # Item
   end # EWS
 end # Viewpoint

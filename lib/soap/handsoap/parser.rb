@@ -78,7 +78,15 @@ module Viewpoint
             end
             nokoelem.children.each do |c|
               new_hash = xml_to_hash!(c)
-              e_hash.merge!(new_hash) unless new_hash.nil?
+              unless new_hash.nil?
+                e_hash.merge!(new_hash) do |k,v1,v2|
+                  if(v1.is_a?(Array))
+                    v1 << v2
+                  else
+                    [v1, v2]
+                  end
+                end
+              end
             end
             return e_hash.empty? ? nil : {node_name => e_hash}
           elsif nokoelem.is_a? Nokogiri::XML::Text

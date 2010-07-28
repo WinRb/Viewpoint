@@ -24,6 +24,7 @@
 module Viewpoint
   module EWS
     class Folder
+      include Model
 
       @@distinguished_folder_ids = %w{calendar contacts deleteditems drafts inbox journal
       notes outbox sentitems tasks msgfolderroot root junkemail searchfolders voicemail
@@ -47,17 +48,26 @@ module Viewpoint
         # @todo Implement Folder::delete_folder
       end
 
-      attr_accessor :folder_id, :change_key, :parent_id, :display_name
+      attr_accessor :folder_id, :change_key, :parent_id
       attr_reader :subscription_id, :watermark
       alias :id :folder_id
 
-      def initialize(folder)
-        @folder_id = folder[:folder_id][:id]
-        @change_key = folder[:folder_id][:change_key]
-        @parent_id = folder[:parent_folder_id] unless folder[:parent_folder_id].nil?
-        @display_name = folder[:display_name][:text]
+      def initialize(ews_item)
+        super() # Calls initialize in Model (creates @ews_methods Array)
+        @ews_item = ews_item
+        @folder_id = ews_item[:folder_id][:id]
+        @ews_methods << :folder_id
+        @ews_methods << :id
+        @change_key = ews_item[:folder_id][:change_key]
+        @ews_methods << :change_key
+        unless ews_item[:parent_folder_id].nil?
+          @parent_id = ews_item[:parent_folder_id]
+          @ews_methods << :parent_id
+        end
+        define_str_var :display_name
 
-        @sync_state = nil
+        @sync_state = nil # Base-64 encoded sync data
+        @synced = false   # Whether or not the synchronization process is complete
         @subscription_id = nil
         @watermark = nil
         @shallow = true
@@ -142,6 +152,21 @@ module Viewpoint
         else
           raise EwsError, "Could not retrieve item. #{resp.code}: #{resp.message}"
         end
+      end
+
+      # Syncronize Items in this folder. If this method is issued multiple
+      # times it will continue where the last sync completed.
+      # @param [Integer] sync_amount The number of items to synchronize per sync
+      # @param [Boolean] sync_all Whether to sync all the data by looping through.
+      #   The default is to just sync the first set.  You can manually loop through
+      #   with multiple calls to #sync_items!
+      def sync_items!(sync_amount = 256, sync_all = false)
+        resp = (Viewpoint::EWS::EWS.instance).ews.sync_folder_items(@folder_id, @sync_state, sync_amount)
+        parms = resp.items.shift
+        @sync_state = parms[:sync_state]
+        @synced = parms[:includes_last_item_in_range]
+        items = {}
+        resp.items
       end
 
     end # Folder

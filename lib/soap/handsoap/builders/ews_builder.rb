@@ -89,12 +89,13 @@ module Viewpoint
           items!(@node, items, type)
         end
 
-        def sync_folder_items!(folder_id, item_shape, opts)
+        def sync_folder_items!(folder_id, sync_state, max_changes, item_shape, opts)
           item_shape!(@node, item_shape)
           @node.add("#{NS_EWS_MESSAGES}:SyncFolderId") do |sfid|
             folder_id!(sfid, folder_id)
           end
-          @node.add("#{NS_EWS_MESSAGES}:MaxChangesReturned", 100)
+          sync_state!(@node, sync_state) unless sync_state.nil?
+          @node.add("#{NS_EWS_MESSAGES}:MaxChangesReturned", max_changes)
         end
 
 

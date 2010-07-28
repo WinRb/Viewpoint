@@ -20,15 +20,17 @@
 
 # We only what one instance of this class so include Singleton
 require 'singleton'
+require 'date'
 
 # Load the backend SOAP infrastructure.  Today this is Handsoap.
 require 'soap/soap_provider'
 
 # Load the model classes
 # Base Models
+require 'model/model'
 require 'model/mailbox_user'
 require 'model/folder'
-#require 'model/item'
+require 'model/item'
 # Specific Models
 require 'model/calendar_folder'
 require 'model/mail_folder'

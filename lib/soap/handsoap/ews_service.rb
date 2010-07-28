@@ -285,17 +285,21 @@ module Viewpoint
         #
         # @param [String, Symbol] folder_id either a DistinguishedFolderId
         #   (must me a Symbol) or a FolderId (String)
+        # @param [String] sync_state Base-64 encoded string used to determine
+        #   where we are in the sync process.
+        # @param [Integer] max_changes The amount of items to sync per call
+        #   to SyncFolderItems
         # @param [Hash] item_shape defines the ItemShape node
         #   See: http://msdn.microsoft.com/en-us/library/aa565261.aspx
         # @option item_shape [String] :base_shape IdOnly/Default/AllProperties
         # @option item_shape :additional_properties
         #   See: http://msdn.microsoft.com/en-us/library/aa565261.aspx
         # @param [Hash] opts optional parameters to this method
-        def sync_folder_items(folder_id, item_shape = {:base_shape => 'Default'}, opts = {})
+        def sync_folder_items(folder_id, sync_state = nil, max_changes = 256, item_shape = {:base_shape => 'Default'}, opts = {})
           action = "#{SOAP_ACTION_PREFIX}/SyncFolderItems"
           resp = invoke("#{NS_EWS_MESSAGES}:SyncFolderItems", :soap_action => action) do |root|
             build!(root) do
-              sync_folder_items!(folder_id, item_shape, opts)
+              sync_folder_items!(folder_id, sync_state, max_changes, item_shape, opts)
             end
           end
           parse!(resp)

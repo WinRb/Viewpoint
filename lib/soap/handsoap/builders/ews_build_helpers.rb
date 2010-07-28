@@ -150,6 +150,10 @@ module Viewpoint
           node.add("#{NS_EWS_MESSAGES}:Watermark", watermark)
         end
 
+        def sync_state!(node, sync_state)
+          node.add("#{NS_EWS_MESSAGES}:SyncState", sync_state)
+        end
+
         # Add a hierarchy of elements from hash data
         # @example Hash to XML
         #   {'this' => 'that','top' => {:attribs => {'Id' => '32fss'}, :text => 'TestText', :elements => {'middle' => 'bottom'}}}

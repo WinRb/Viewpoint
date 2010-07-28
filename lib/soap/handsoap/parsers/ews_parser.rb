@@ -97,7 +97,7 @@ module Viewpoint
 
         def get_item_response(opts)
           if(@response_message.status == 'Success')
-            @response_message.items << xml_to_hash!((@response/"//m:Items/*").first.native_element)
+            @response_message.items << xml_to_hash!((@response/"//#{NS_EWS_MESSAGES}:Items/*").first.native_element)
           else
             raise EwsError, "#{@response_message.code}: #{@response_message.message}"
           end
@@ -114,10 +114,18 @@ module Viewpoint
 
         def sync_folder_items_response(opts)
           if(@response_message.status == 'Success')
-            true
+            sync = []
+            sync << {}
+            sync.first[:sync_state] = (@response/"//#{NS_EWS_MESSAGES}:SyncState").first.to_s
+            sync.first[:includes_last_item_in_range] = (@response/"//#{NS_EWS_MESSAGES}:IncludesLastItemInRange").first.to_boolean
+            (@response/"//m:Changes/*").each do |c|
+              sync << xml_to_hash!(c.native_element)
+            end
+            @response_message.items = sync
           else
             raise EwsError, "#{@response_message.code}: #{@response_message.message}"
           end
+
         end
 
         # Parse out a Mailbox element
