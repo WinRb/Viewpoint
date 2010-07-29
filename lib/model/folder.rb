@@ -28,6 +28,7 @@ module Viewpoint
       # used to house mail messages.
       def initialize(folder)
         super(folder)
+        define_int_var :unread_count
       end
 
     end # Folder

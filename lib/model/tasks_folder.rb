@@ -20,16 +20,14 @@
 
 module Viewpoint
   module EWS
-    class CalendarFolder < GenericFolder
+    # This class represents a TaskFolderType object in the Exchange Data store.
+    class TasksFolder < GenericFolder
 
-      # initialize with an item of CalendarFolderType
       def initialize(folder)
         super(folder)
-
-        # @todo Handle:
-        #   <SharingEffectiveRights/>
+        define_int_var :unread_count
       end
 
-    end # CalendarFolder
+    end # TasksFolder
   end # EWS
 end # Viewpoint

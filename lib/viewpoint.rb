@@ -29,12 +29,15 @@ require 'soap/soap_provider'
 # Base Models
 require 'model/model'
 require 'model/mailbox_user'
-require 'model/folder'
+require 'model/generic_folder'
 require 'model/item'
 # Specific Models
 # Folders
+require 'model/folder'
 require 'model/calendar_folder'
-require 'model/mail_folder'
+require 'model/contacts_folder'
+require 'model/search_folder'
+require 'model/tasks_folder'
 # Items
 require 'model/message'
 require 'model/calendar_item'

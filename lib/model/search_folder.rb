@@ -20,16 +20,17 @@
 
 module Viewpoint
   module EWS
-    class CalendarFolder < GenericFolder
+    # This class represents a SearchFolderType object in the Exchange Data store.
+    class SearchFolder < GenericFolder
 
-      # initialize with an item of CalendarFolderType
       def initialize(folder)
         super(folder)
+        define_int_var :unread_count
 
         # @todo Handle:
-        #   <SharingEffectiveRights/>
+        #   <SearchParameters/>
       end
 
-    end # CalendarFolder
+    end # SearchFolder
   end # EWS
 end # Viewpoint

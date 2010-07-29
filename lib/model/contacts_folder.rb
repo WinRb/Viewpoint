@@ -20,7 +20,7 @@
 
 module Viewpoint
   module EWS
-    class CalendarFolder < GenericFolder
+    class ContactsFolder < GenericFolder
 
       # initialize with an item of CalendarFolderType
       def initialize(folder)
@@ -30,6 +30,6 @@ module Viewpoint
         #   <SharingEffectiveRights/>
       end
 
-    end # CalendarFolder
+    end # ContactsFolder
   end # EWS
 end # Viewpoint

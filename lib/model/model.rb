@@ -24,6 +24,7 @@
 # each of these Item types have in common.
 module Viewpoint
   module EWS
+    # This is the base model Module for shared code among all Model classes.
     # @attr_reader [Array] :ews_methods The EWS methods created for this Model.
     module Model
 
@@ -37,6 +38,7 @@ module Viewpoint
       def initialize
         @ews_methods = []
       end
+
       def define_str_var(*vars)
         vars.each do |var|
           @ews_methods << var
