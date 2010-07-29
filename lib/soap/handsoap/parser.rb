@@ -21,7 +21,6 @@ module Viewpoint
   module EWS
     module SOAP
       module Parser
-        include Viewpoint # contains ruby_case and camel_case convenience methods
 
         def initialize(response)
           # Unwrap SOAP Envelope
@@ -41,7 +40,7 @@ module Viewpoint
         # call a Ruby method of the same name.
         # @todo Decide on an appropriate response if a method does not exist.
         def parse(opts)
-          resp_method = ruby_case(@response_type)
+          resp_method = @response_type.ruby_case
           if(respond_to?(resp_method))
             puts "Method Exists: #{resp_method}" if $DEBUG
             method(resp_method).call(opts)
@@ -69,11 +68,11 @@ module Viewpoint
         #   {:tiptop=>{:top=>{:id=>"32fss", :text=>"TestText"}, :middle=>{:id=>"TestTestMiddle"}}} 
         def xml_to_hash!(nokoelem)
           e_hash = {}
-          node_name = ruby_case(nokoelem.name).to_sym
+          node_name = nokoelem.name.ruby_case.to_sym
 
           if nokoelem.is_a? Nokogiri::XML::Element
             nokoelem.attributes.each_pair do |k, v|
-              e_hash[ruby_case(k).to_sym] = v.value
+              e_hash[k.ruby_case.to_sym] = v.value
             end
             nokoelem.children.each do |c|
               new_hash = xml_to_hash!(c)

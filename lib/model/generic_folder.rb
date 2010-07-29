@@ -39,14 +39,16 @@ module Viewpoint
       archiverecoverableitemsversions archiverecoverableitemspurges}
 
       @@event_types = %w{CopiedEvent CreatedEvent DeletedEvent ModifiedEvent MovedEvent NewMailEvent}
-
-
+      
       def self.get_folder(folder_id)
-        (Viewpoint::EWS::EWS.instance).ews.get_folder( normalize_id(folder_id) )
+        resp = (Viewpoint::EWS::EWS.instance).ews.get_folder( [normalize_id(folder_id)] )
+        folder = resp.items.first
+        f_type = folder.keys.first.to_s.camel_case
+        eval "#{f_type}.new(folder[folder.keys.first])"
       end
 
+      # @todo Implement Folder::delete_folder
       def self.delete_folder(folder_id)
-        # @todo Implement Folder::delete_folder
       end
 
       # Find subfolders of the passed root folder.  If no parameters are passed
@@ -85,8 +87,6 @@ module Viewpoint
         @subscription_id = nil
         @watermark = nil
         @shallow = true
-
-
       end
 
       # Subscribe this folder to events.  This method initiates an Exchange pull
@@ -160,7 +160,7 @@ module Viewpoint
         items = []
         resp.items.each do |i|
           i_type = i.keys.first
-          items << (eval "#{camel_case(i_type)}.new(i[i_type])")
+          items << (eval "#{i_type.to_s.camel_case}.new(i[i_type])")
         end
         items
       end
@@ -181,6 +181,12 @@ module Viewpoint
       # @param [Boolean] sync_all Whether to sync all the data by looping through.
       #   The default is to just sync the first set.  You can manually loop through
       #   with multiple calls to #sync_items!
+      # @return [Hash] Returns a hash with keys for each change type that ocurred.
+      #   Possible key values are (:create/:udpate/:delete).  For create and update
+      #   changes the values are Arrays of Item or a subclass of Item.  For deletes
+      #   an array of ItemIds are returned wich is a Hash in the form:
+      #   {:id=>"item id", :change_key=>"change key"}
+      #   See: http://msdn.microsoft.com/en-us/library/aa565609.aspx
       def sync_items!(sync_amount = 256, sync_all = false)
         resp = (Viewpoint::EWS::EWS.instance).ews.sync_folder_items(@folder_id, @sync_state, sync_amount)
         parms = resp.items.shift
@@ -190,8 +196,12 @@ module Viewpoint
         resp.items.each do |i|
           key = i.keys.first
           items[key] = [] unless items[key].is_a?(Array)
-          i_type = i[key].keys.first
-          items[key] << (eval "#{camel_case(i_type)}.new(i[key][i_type])")
+          if(key == :delete)
+            items[key] << i[key][:item_id]
+          else
+            i_type = i[key].keys.first
+            items[key] << (eval "#{i_type.to_s.camel_case}.new(i[key][i_type])")
+          end
         end
         items
       end

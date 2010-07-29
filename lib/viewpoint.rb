@@ -22,6 +22,9 @@
 require 'singleton'
 require 'date'
 
+# Class Extensions
+require 'extensions/string'
+
 # Load the backend SOAP infrastructure.  Today this is Handsoap.
 require 'soap/soap_provider'
 
@@ -74,7 +77,7 @@ module Viewpoint
       def self.endpoint
         @@endpoint
       end
-      
+
       def self.set_auth(user,pass)
         SOAP::ExchangeWebService.set_auth(user,pass)
       end
@@ -83,41 +86,6 @@ module Viewpoint
         @ews = SOAP::ExchangeWebService.new
       end
 
-      # Search Contacts for this string
-      # @param [String] contact_name The string to search for
-      # @returns [EwsSoapResponse] A Response message with an items array: EwsSoapResponse#items
-      def search_contacts(contact_name)
-        @ews.resolve_names(contact_name)
-      end
-
-      # Get a Viewpoint folder object
-      # @param [Symbol, String] fid The Id of the folder.  If you want to get the folder by name
-      #   pass a Symbol like :calendar, if you know the Exchange Id of the folder pass that as
-      #   a String
-      # @return The folder asked for
-      def get_folder(fid)
-        resp_msg = @ews.get_folder([fid])
-        folder = resp_msg.items.first
-        f_type = camel_case(folder.keys.first)
-        eval "#{f_type}.new(folder[folder.keys.first])"
-      end
-
     end # class EWS
   end # EWS
-  
-  # Change CamelCased strings to ruby_cased strings
-  # It uses the lookahead assertion ?=  In this case it basically says match
-  # anything followed by a capital letter, but not the capital letter itself.
-  # @see http://www.pcre.org/pcre.txt The PCRE guide for more details
-  # @see Viewpoint::camel_case
-  def ruby_case(string)
-    string.split(/(?=[A-Z])/).join('_').downcase
-  end
-
-  # Change a ruby_cased string to CamelCased
-  # The String#to_s is done in case we are passed a Symbol
-  # @see Viewpoint::ruby_case
-  def camel_case(string)
-    string.to_s.split(/_/).map {|i| i.capitalize}.join
-  end
 end
