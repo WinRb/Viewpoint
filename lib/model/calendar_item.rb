@@ -22,6 +22,28 @@ module Viewpoint
   module EWS
     class CalendarItem < Message
 
+      # This is a class method that creates a new CalendarItem in the
+      #   Exchange Data Store.
+      # @param [Hash] item A Hash of values based on values found here:
+      #   http://msdn.microsoft.com/en-us/library/aa564765.aspx
+      # @param [String, Symbol] folder_id The folder to create this item in. Either a
+      #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+      # @param [String] send_invites "SendToNone/SendOnlyToAll/SendToAllAndSaveCopy"
+      #   See:  http://msdn.microsoft.com/en-us/library/aa565209.aspx
+      # @example
+      #   item = { :subject => {:text => 'Planning'},
+      #     :body => {:body_type => 'Text', :text => 'This is a test'},
+      #     :start => {:text => '2010-07-29T14:00:00'},
+      #     :end => {:text => '2010-07-29T15:00:00'},
+      #     :is_all_day_event => {:text => 'false'},
+      #     :location => {:text => 'Room 234'},
+      #     :required_attendees => {:attendee => {:mailbox => {:email_address => {:text => 'test@test.com'}}}}
+      #   }
+      def self.create_item(item, folder_id = :calendar, send_invites = 'SendToAllAndSaveCopy')
+        conn = Viewpoint::EWS::EWS.instance
+        resp = conn.ews.create_calendar_item(folder_id, item, send_invites)
+      end
+
       # Initialize an Exchange Web Services item of type CalendarItem
       def initialize(ews_item)
         super(ews_item)

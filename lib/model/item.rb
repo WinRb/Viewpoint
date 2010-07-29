@@ -27,9 +27,8 @@ module Viewpoint
     class Item
       include Model
 
-      # This is a Class method that fetches an existing Item from the
-      #  Exchange Store.  To create a new item that does not exist in
-      #  the store use Item#new
+      # This is a class method that fetches an existing Item from the
+      #  Exchange Store.
       # @param [String] item_id The id of the item.
       # @return [Item] Returns an Item or subclass of Item
       # @todo Add support to fetch an item with a ChangeKey

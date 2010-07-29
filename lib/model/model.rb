@@ -39,6 +39,8 @@ module Viewpoint
         @ews_methods = []
       end
 
+      protected
+
       def define_str_var(*vars)
         vars.each do |var|
           @ews_methods << var
@@ -127,8 +129,6 @@ module Viewpoint
           end
         end
       end
-
-      protected
 
       # After a delete is called on an object this method will clear
       # out all of the defined EWS methods so they can't be called on the

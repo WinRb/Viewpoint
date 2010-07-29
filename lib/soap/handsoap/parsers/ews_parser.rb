@@ -102,7 +102,11 @@ module Viewpoint
         # @todo need to find out out to us XPath to get ItemId.  It doesn't seem to work now.
         def create_item_response(opts)
           if(@response_message.status == 'Success')
-            return {:id => (@response/'//@Id').first.to_s, :change_key => (@response/'//@ChangeKey').first.to_s }
+            items = []
+            (@response/"//#{NS_EWS_MESSAGES}:Items/*").each do |i|
+              items << xml_to_hash!(i.native_element)
+            end
+            @response_message.items = items
           else
             raise EwsError, "#{@response_message.code}: #{@response_message.message}"
           end
