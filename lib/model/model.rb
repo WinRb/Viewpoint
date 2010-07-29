@@ -33,70 +33,81 @@ module Viewpoint
       # These functions depend on each model type saving the passed Hash
       # in an instance variable called @ews_item.
 
-      attr_reader :ews_methods
+      attr_reader :ews_methods, :ews_methods_undef
 
       def initialize
+        # Defined EWS methods
         @ews_methods = []
+        # Undefined EWS methods
+        @ews_methods_undef = []
       end
 
       protected
 
       def define_str_var(*vars)
         vars.each do |var|
-          @ews_methods << var
           if(@ews_item[var])
+            @ews_methods << var
             self.instance_eval <<-EOF
             def #{var.to_s}
               @ews_item[:#{var}][:text]
             end
             EOF
+          else
+            @ews_methods_undef << var
           end
         end
       end
       
       def define_int_var(*vars)
         vars.each do |var|
-          @ews_methods << var
           if(@ews_item[var])
+            @ews_methods << var
             self.instance_eval <<-EOF
             def #{var}
               @#{var} ||= @ews_item[:#{var}][:text].to_i
             end
             EOF
+          else
+            @ews_methods_undef << var
           end
         end
       end
 
       def define_bool_var(*vars)
         vars.each do |var|
-          @ews_methods << "#{var}?".to_sym
           if(@ews_item[var])
+            @ews_methods << "#{var}?".to_sym
             self.instance_eval <<-EOF
             def #{var}?
               @#{var} ||= (@ews_item[:#{var}][:text] == 'true') ? true : false
             end
             EOF
+          else
+            @ews_methods_undef << "#{var}?".to_sym
           end
         end
       end
 
       def define_datetime_var(*vars)
         vars.each do |var|
-          @ews_methods << var
           if(@ews_item[var])
+            @ews_methods << var
             self.instance_eval <<-EOF
             def #{var}
               @#{var} ||= DateTime.parse(@ews_item[:#{var}][:text])
             end
             EOF
+          else
+            @ews_methods_undef << var
           end
         end
       end
 
       def define_mbox_users(*vars)
         vars.each do |var|
-          @ews_methods << var
           if(@ews_item[var])
+            @ews_methods << var
             self.instance_eval <<-EOF
             def #{var}
               return @#{var} if defined?(@#{var})
@@ -113,19 +124,23 @@ module Viewpoint
               @#{var}
             end
             EOF
+          else
+            @ews_methods_undef << var
           end
         end
       end
 
       def define_mbox_user(*vars)
         vars.each do |var|
-          @ews_methods << var
           if(@ews_item[var])
+            @ews_methods << var
             self.instance_eval <<-EOF
             def #{var}
               @#{var} ||= MailboxUser.new(@ews_item[:#{var}][:mailbox])
             end
             EOF
+          else
+            @ews_methods_undef << var
           end
         end
       end

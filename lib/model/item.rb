@@ -60,6 +60,8 @@ module Viewpoint
         resp = resp.items.shift
         @ews_item = resp[resp.keys.first]
         @shallow = false
+        @ews_methods = []
+        @ews_methods_undef = []
         init_methods
       end
 

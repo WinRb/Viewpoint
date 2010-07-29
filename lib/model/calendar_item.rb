@@ -46,11 +46,79 @@ module Viewpoint
       def self.create_item_from_hash(item, folder_id = :calendar, send_invites = 'SendToAllAndSaveCopy')
         conn = Viewpoint::EWS::EWS.instance
         resp = conn.ews.create_calendar_item(folder_id, item, send_invites)
+        resp = resp.items.shift
+        self.new(resp[resp.keys.first])
+      end
+
+      # Create a new CalendarItem.
+      # @param [DateTime] v_start The date and time when the CalendarItem begins
+      # @param [DateTime] v_end The date and time when the CalendarItem ends
+      # @param [String] subject The subject of this Item
+      # @param [String,optional] body The body of this object
+      # @param [String,optional] location The location where this calendar item will ocurr
+      # @param [Array<String>,optional] required_attendees An Array of e-mail addresses of required attendees
+      # @param [Array<String>,optional] optional_attendees An Array of e-mail addresses of optional attendees
+      # @param [Array<String>,optional] resources An Array of e-mail addresses of resources
+      def self.create_item(v_start, v_end, subject, body = nil, location = nil, required_attendees=[], optional_attendees=[], resources=[])
+        item = {}
+        item[:start] = {:text => v_start.to_s}
+        item[:end] = {:text => v_end.to_s}
+        item[:subject] = {:text => subject}
+        item[:body] = {:text => body, :body_type => 'Text'} unless body.nil?
+        item[:location] = {:text => location} unless location.nil?
+        required_attendees.each do |a|
+          item[:required_attendees] = [] unless item[:required_attendees].is_a?(Array)
+          item[:required_attendees] << {:attendee => {:mailbox => {:email_address => {:text => a}}}}
+        end
+        optional_attendees.each do |a|
+          item[:optional_attendees] = [] unless item[:optional_attendees].is_a?(Array)
+          item[:optional_attendees] << {:attendee => {:mailbox => {:email_address => {:text => a}}}}
+        end
+        resources.each do |a|
+          item[:resources] = [] unless item[:resources].is_a?(Array)
+          item[:resources] << {:attendee => {:mailbox => {:email_address => {:text => a}}}}
+        end
+        puts item
+        self.create_item_from_hash(item)
       end
 
       # Initialize an Exchange Web Services item of type CalendarItem
       def initialize(ews_item)
         super(ews_item)
+      end
+      
+      # Delete this item
+      # @param [Boolean] soft Whether or not to do a soft delete.  By default EWS will do a 
+      #   hard delete of this item.  See the MSDN docs for more info:
+      #   http://msdn.microsoft.com/en-us/library/aa562961.aspx
+      # @param [String] cancel_type "SendToNone/SendOnlyToAll/SendToAllAndSaveCopy"
+      #   Default is SendOnlyToAll
+      # @return [Boolean] Whether or not the item was deleted
+      # @todo Add exception handling for failed deletes
+      #
+      def delete!(soft=false, cancel_type='SendOnlyToAll')
+        deltype = soft ? 'SoftDelete' : 'HardDelete'
+        resp = (Viewpoint::EWS::EWS.instance).ews.delete_item([@item_id], deltype, cancel_type)
+        self.clear_object!
+        resp.status == 'Success'
+      end
+
+      # Delete this item by moving it to the Deleted Items folder
+      # @see  http://msdn.microsoft.com/en-us/library/aa562961.aspx
+      # @return [Boolean] Whether or not the item was deleted
+      # @todo Add exception handling for failed deletes
+      def recycle!(cancel_type='SendOnlyToAll')
+        resp = (Viewpoint::EWS::EWS.instance).ews.delete_item([@item_id], 'MoveToDeletedItems', cancel_type)
+        self.clear_object!
+        resp.status == 'Success'
+      end
+
+
+
+      private
+
+      def init_methods
+        super
         define_str_var :calendar_item_type, :duration, :time_zone, :when, :location
         define_str_var :legacy_free_busy_status, :my_response_type, :meeting_workspace_url, :net_show_url
         define_int_var :adjacent_meeting_count, :appointment_sequence_number, :appointment_state
@@ -66,7 +134,6 @@ module Viewpoint
         #   <StartTimeZone/> <EndTimeZone/> <MeetingTimeZone/>
         #   <OptionalAttendees/> <RequiredAttendees/> <Resources/>
         #   <Recurrence/>
-
       end
 
     end # CalendarItem
