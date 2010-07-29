@@ -63,9 +63,9 @@ module Viewpoint
 
       attr_reader :ews
 
-      def self.endpoint=(endpoint)
+      def self.endpoint=(endpoint, version = 1)
         @@endpoint = endpoint
-        SOAP::ExchangeWebService.endpoint(:uri => endpoint, :version => 1)
+        SOAP::ExchangeWebService.endpoint(:uri => endpoint, :version => version)
       end
 
       def self.endpoint
