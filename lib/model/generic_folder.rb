@@ -196,7 +196,7 @@ module Viewpoint
         resp.items.each do |i|
           key = i.keys.first
           items[key] = [] unless items[key].is_a?(Array)
-          if(key == :delete)
+          if(key == :delete || key == :read_flag_change)
             items[key] << i[key][:item_id]
           else
             i_type = i[key].keys.first
@@ -211,7 +211,7 @@ module Viewpoint
       # Return the appropriate id based on whether it is a DistinguishedFolderId or
       # simply just a FolderId
       def self.normalize_id(folder_id)
-        tfolder_id = folder_id.downcase
+        tfolder_id = folder_id.to_s.downcase
         # If the folder_id is a DistinguishedFolderId change it to a symbol so our SOAP
         # method does the right thing.
         @@distinguished_folder_ids.find_index(tfolder_id) ? tfolder_id.to_sym : folder_id
