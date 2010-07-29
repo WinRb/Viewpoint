@@ -89,6 +89,13 @@ module Viewpoint
           items!(@node, items, type)
         end
 
+        def delete_item!(item_ids, delete_type, send_meeting_cancellations, affected_task_occurrences)
+          @node.set_attr('DeleteType', delete_type)
+          @node.set_attr('SendMeetingCancellations', send_meeting_cancellations) unless send_meeting_cancellations.nil?
+          @node.set_attr('AffectedTaskOccurrences', affected_task_occurrences) unless affected_task_occurrences.nil?
+          item_ids!(@node, item_ids)
+        end
+
         def sync_folder_items!(folder_id, sync_state, max_changes, item_shape, opts)
           item_shape!(@node, item_shape)
           @node.add("#{NS_EWS_MESSAGES}:SyncFolderId") do |sfid|

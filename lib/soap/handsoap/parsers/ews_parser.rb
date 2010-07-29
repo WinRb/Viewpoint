@@ -37,14 +37,10 @@ module Viewpoint
 
         def find_folder_response(opts)
           folders = []
-          (@response/"//#{NS_EWS_MESSAGES}:RootFolder/#{NS_EWS_TYPES}:Folders/#{NS_EWS_TYPES}:Folder").each do |f|
-            parms = {}
-            parms[:id] = (f/("#{NS_EWS_TYPES}:FolderId")).first['Id']
-            parms[:parent_id] = (f/("#{NS_EWS_TYPES}:ParentFolderId")).first['Id']
-            parms[:disp_name] = (f/("#{NS_EWS_TYPES}:DisplayName")).first.to_s
-            folders << parms
+          (@response/"//#{NS_EWS_MESSAGES}:FindFolderResponseMessage//#{NS_EWS_TYPES}:Folders/*").each do |f|
+            folders << xml_to_hash!(f.native_element)
           end
-          folders
+          @response_message.items = folders
         end
 
         def get_events_response(opts)

@@ -20,7 +20,7 @@
 
 module Viewpoint
   module EWS
-    class Task < Item
-    end # Task
+    class DistributionList < Item
+    end # DistributionList
   end # EWS
 end # Viewpoint

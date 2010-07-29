@@ -20,7 +20,9 @@
 
 module Viewpoint
   module EWS
-    class Task < Item
-    end # Task
+    # Meeting cancellations have the exact same elements as a Meeting Message
+    # so MeetingCancellation is just a subclass of that.
+    class MeetingCancellation < MeetingMessage
+    end # MeetingCancellation
   end # EWS
 end # Viewpoint

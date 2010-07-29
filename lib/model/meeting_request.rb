@@ -20,7 +20,7 @@
 
 module Viewpoint
   module EWS
-    class Task < Item
-    end # Task
+    class MeetingRequest < Item
+    end # MeetingRequest
   end # EWS
 end # Viewpoint

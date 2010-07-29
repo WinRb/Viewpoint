@@ -39,8 +39,8 @@ module Viewpoint
       end
       def define_str_var(*vars)
         vars.each do |var|
+          @ews_methods << var
           if(@ews_item[var])
-            @ews_methods << var
             self.instance_eval <<-EOF
             def #{var.to_s}
               @ews_item[:#{var}][:text]
@@ -52,8 +52,8 @@ module Viewpoint
       
       def define_int_var(*vars)
         vars.each do |var|
+          @ews_methods << var
           if(@ews_item[var])
-            @ews_methods << var
             self.instance_eval <<-EOF
             def #{var}
               @#{var} ||= @ews_item[:#{var}][:text].to_i
@@ -65,8 +65,8 @@ module Viewpoint
 
       def define_bool_var(*vars)
         vars.each do |var|
+          @ews_methods << "#{var}?".to_sym
           if(@ews_item[var])
-            @ews_methods << "#{var}?".to_sym
             self.instance_eval <<-EOF
             def #{var}?
               @#{var} ||= (@ews_item[:#{var}][:text] == 'true') ? true : false
@@ -78,8 +78,8 @@ module Viewpoint
 
       def define_datetime_var(*vars)
         vars.each do |var|
+          @ews_methods << var
           if(@ews_item[var])
-            @ews_methods << var
             self.instance_eval <<-EOF
             def #{var}
               @#{var} ||= DateTime.parse(@ews_item[:#{var}][:text])
@@ -91,8 +91,8 @@ module Viewpoint
 
       def define_mbox_users(*vars)
         vars.each do |var|
+          @ews_methods << var
           if(@ews_item[var])
-            @ews_methods << var
             self.instance_eval <<-EOF
             def #{var}
               return @#{var} if defined?(@#{var})
@@ -113,14 +113,16 @@ module Viewpoint
         end
       end
 
-      def define_mbox_user(var)
-        if(@ews_item[var])
+      def define_mbox_user(*vars)
+        vars.each do |var|
           @ews_methods << var
-          self.instance_eval <<-EOF
+          if(@ews_item[var])
+            self.instance_eval <<-EOF
             def #{var}
               @#{var} ||= MailboxUser.new(@ews_item[:#{var}][:mailbox])
             end
-          EOF
+            EOF
+          end
         end
       end
 

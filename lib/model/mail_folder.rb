@@ -101,7 +101,6 @@ module Viewpoint
       # @see Folder#get_item
       def get_item(item_id, change_key = nil)
         items = super(item_id, change_key)
-        #items[:message]
       end
 
       def get_message(item_id)

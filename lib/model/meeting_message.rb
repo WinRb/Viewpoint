@@ -20,7 +20,11 @@
 
 module Viewpoint
   module EWS
-    class Task < Item
-    end # Task
+    class MeetingMessage < Item
+
+      def initialize(ews_item)
+        super(ews_item)
+      end
+    end # MeetingMessage
   end # EWS
 end # Viewpoint

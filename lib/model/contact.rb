@@ -18,6 +18,9 @@
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
 
-#@todo Design the Contact model. It is different than the MailboxUser, but
-#  similar.
-#@see http://msdn.microsoft.com/en-us/library/aa581315.aspx The MSDN Contact info
+module Viewpoint
+  module EWS
+    class Contact < Item
+    end # Contact
+  end # EWS
+end # Viewpoint

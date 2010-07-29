@@ -24,6 +24,7 @@
 module Viewpoint
   module EWS
     class Folder
+      include Viewpoint
       include Model
 
       @@distinguished_folder_ids = %w{calendar contacts deleteditems drafts inbox journal
@@ -37,15 +38,21 @@ module Viewpoint
 
 
       def self.get_folder(folder_id)
-        tfolder_id = folder_id.downcase
-        # If the folder_id is a DistinguishedFolderId change it to a symbol so our SOAP
-        # method does the right thing.
-        folder_id = @@distinguished_folder_ids.find_index(tfolder_id) ? tfolder_id.to_sym : folder_id
-        (Viewpoint::EWS::EWS.instance).get_folder(folder_id)
+        (Viewpoint::EWS::EWS.instance).ews.get_folder( normalize_id(folder_id) )
       end
 
       def self.delete_folder(folder_id)
         # @todo Implement Folder::delete_folder
+      end
+
+      # Find subfolders of the passed root folder.  If no parameters are passed
+      # this method will search from the Root folder.
+      # @param [Array] root An folder id, either a DistinguishedFolderId (must me a Symbol)
+      #   or a FolderId (String)
+      # @param [String] traversal Shallow/Deep/SoftDeleted
+      # @return [Array] Returns an Array of Folder or subclasses of Folder
+      def self.find_folders(root = :root, traversal = 'Shallow')
+        (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal )
       end
 
       attr_accessor :folder_id, :change_key, :parent_id
@@ -141,7 +148,12 @@ module Viewpoint
       def find_items
         resp = (Viewpoint::EWS::EWS.instance).ews.find_item([@folder_id])
         parms = resp.items.shift
-        resp.items
+        items = []
+        resp.items.each do |i|
+          i_type = i.keys.first
+          items << (eval "#{camel_case(i_type)}.new(i[i_type])")
+        end
+        items
       end
 
       # Get Item
@@ -166,7 +178,24 @@ module Viewpoint
         @sync_state = parms[:sync_state]
         @synced = parms[:includes_last_item_in_range]
         items = {}
-        resp.items
+        resp.items.each do |i|
+          key = i.keys.first
+          items[key] = [] unless items[key].is_a?(Array)
+          i_type = i[key].keys.first
+          items[key] << (eval "#{camel_case(i_type)}.new(i[key][i_type])")
+        end
+        items
+      end
+
+      private
+
+      # Return the appropriate id based on whether it is a DistinguishedFolderId or
+      # simply just a FolderId
+      def self.normalize_id(folder_id)
+        tfolder_id = folder_id.downcase
+        # If the folder_id is a DistinguishedFolderId change it to a symbol so our SOAP
+        # method does the right thing.
+        @@distinguished_folder_ids.find_index(tfolder_id) ? tfolder_id.to_sym : folder_id
       end
 
     end # Folder

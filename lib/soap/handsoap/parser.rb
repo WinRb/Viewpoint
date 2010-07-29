@@ -47,7 +47,6 @@ module Viewpoint
             method(resp_method).call(opts)
           else
             puts "No Method: #{resp_method}" if $DEBUG
-            @response
           end
           @response_message
         end

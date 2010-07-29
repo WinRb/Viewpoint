@@ -32,8 +32,19 @@ require 'model/mailbox_user'
 require 'model/folder'
 require 'model/item'
 # Specific Models
+# Folders
 require 'model/calendar_folder'
 require 'model/mail_folder'
+# Items
+require 'model/message'
+require 'model/calendar_item'
+require 'model/contact'
+require 'model/distribution_list'
+require 'model/meeting_message'
+require 'model/meeting_request'
+require 'model/meeting_response'
+require 'model/meeting_cancellation'
+require 'model/task'
 
 # Load the Exception classes
 require 'exceptions/exceptions'

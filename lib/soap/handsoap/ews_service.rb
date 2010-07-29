@@ -354,7 +354,7 @@ module Viewpoint
         #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
         # @param [Hash, Array] items An array of item Hashes or a single item Hash. Hash
         #   values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa564765.aspx
-        # @param [String] send_invites "SendToNone/SendOnlyToAll/SendToAllAndSaveCopy
+        # @param [String] send_invites "SendToNone/SendOnlyToAll/SendToAllAndSaveCopy"
         def create_calendar_item(folder_id, items, send_invites = 'SendToAllAndSaveCopy')
           action = "#{SOAP_ACTION_PREFIX}/CreateItem"
           resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", :soap_action => action) do |node|
@@ -365,12 +365,22 @@ module Viewpoint
           parse!(resp)
         end
 
-        def delete_item
+        # Delete an item from a mailbox in the Exchange store
+        # @see http://msdn.microsoft.com/en-us/library/aa562961.aspx
+        # @param [Array] item_ids An Array of item ids
+        # @param [String] delete_type Type of deletion: "HardDelete/SoftDelete/MoveToDeletedItems"
+        # @param [String, nil] send_meeting_cancellations "SendToNone/SendOnlyToAll/SendToAllAndSaveCopy"
+        #   This is only applicable to CalendarItems and should be nil otherwise, which is the default
+        # @param [String, nil] affected_task_occurrences "AllOccurrences/SpecifiedOccurrenceOnly"
+        #   This is really only related to tasks and can be nil otherwise, which is the default.
+        def delete_item(item_ids, delete_type, send_meeting_cancellations = nil, affected_task_occurrences = nil)
           action = "#{SOAP_ACTION_PREFIX}/DeleteItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:DeleteItem", :soap_action => action) do |delete_item|
-            build_delete_item!(delete_item)
+          resp = invoke("#{NS_EWS_MESSAGES}:DeleteItem", :soap_action => action) do |root|
+            build!(root) do
+              delete_item!(item_ids, delete_type, send_meeting_cancellations, affected_task_occurrences)
+            end
           end
-          parse_delete_item(resp)
+          parse!(resp)
         end
 
         def update_item
