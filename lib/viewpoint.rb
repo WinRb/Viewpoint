@@ -98,14 +98,8 @@ module Viewpoint
       def get_folder(fid)
         resp_msg = @ews.get_folder([fid])
         folder = resp_msg.items.first
-        case folder.keys.first
-        when :folder
-          return MailFolder.new(folder[folder.keys.first])
-        when :calendar_folder
-          return CalendarFolder.new(folder[folder.keys.first])
-        else
-          raise StandardError, "<#{fid}> Unknow Folder Type"
-        end
+        f_type = camel_case(folder.keys.first)
+        eval "#{f_type}.new(folder[folder.keys.first])"
       end
 
     end # class EWS

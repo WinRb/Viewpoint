@@ -3,6 +3,17 @@
 --------------------------------------------------------------------------
 This program attempts to create a client access library for Exchange Web
 Services (EWS) in Ruby.
+
+!!!CAUTION!!!  This is currently BETA code and has changed dramatically from
+the original version of Viewpoint which was based on Soap4r.  This version
+has essentially been gutted and written on top of Handsoap.  Development
+has been much more flexible, but the interface to Viewpoint has changed
+quite a bit.  I have tried to write good code comments and I will keep
+enhancing this.  I will also try and post examples on my blog as I write
+them or they are asked for.
+
+BLOG:  http://distributed-frostbite.blogspot.com/
+Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
 --------------------------------------------------------------------------
 TO USE:
 require 'rubygems'
@@ -11,61 +22,25 @@ require 'viewpoint'
 
 REQUIRED GEMS:
 
-# Current SOAP4R ( http://dev.ctor.org/soap4r )
-gem install -r soap4r
-# NTLM isn't an automatic dependency so you may need this if you are having issues.
+# Handsoap (Thanks jrun for pointing me this way!)
+gem install -r handsoap
+# Nokogiri XML Parser
+gem install -r nokogiri
+# HttpClient
+gem install -r httpclient
+# NTLM Library
 gem install -r rubyntlm
-
 
 # iCalendar
 gem install -r icalendar
 
-CONFIGURATION:
-Configure your user/pass and EWS endpoint in lib/soap/viewpoint.conf
-or $HOME/.viewpointrc.  If the file $HOME/.viewpointrc exists it takes
-presidence.  See the sample in lib/soap/viewpoint.conf for how this
-file should be configured.
-
-
-Running Examples:
-To run the FuseFS example you need the 'fusefs' gem
-
-
-******************** EXAMPLES *********************
-# I will be posting examples to my blog:
-#	http://distributed-frostbite.blogspot.com/
-# In the following examples the following are used:
-# "item" is a type of Viewpoint::Item
-# "folder" is a type of Viewpoint::Folder
-# "new_folder" is a type of Viewpoint::Folder
-
-# === Convert your Exchange Calendar to a Icalendar::Calendar object ===
-require 'rubygems'
-require 'viewpoint'
-vp = Viewpoint::ExchWebServ.instance
-vp.authenticate
-vp.find_folders
-cal = vp.get_folder("Calendar")
-ical = cal.to_ical
-puts ical.to_ical
-
-# === Get a listing of todays messages ===
-# See test/test_client.rb
-
-# === Moving an item ===
-item.move_to!(new_folder)
-
-# === Deleting an item ===
-item.delete!
-item.recycle!   # Move to "Deleted Items"
-
-
 --------------------------------------------------------------------------
-DISCLAIMER:  I am by no means a Ruby or EWS expert.  There may be better
-means of doing what I am attempting to do.  If you see something that
-could be done better or would like to help out in the development of this
-code please feel free to clone the 'git' repository:
-git clone git://github.com/zenchild/Viewpoint-for-MS-Exchange.git
+DISCLAIMER:  If you see something that could be done better or would like
+to help out in the development of this code please feel free to clone the
+'git' repository and send me patches:
+git clone git@github.com:zenchild/Viewpoint.git
 or add an issue on GitHub:
 http://github.com/zenchild/Viewpoint/issues
+
+Cheers!
 --------------------------------------------------------------------------
