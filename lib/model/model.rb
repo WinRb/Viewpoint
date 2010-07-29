@@ -128,6 +128,19 @@ module Viewpoint
         end
       end
 
+      protected
+
+      # After a delete is called on an object this method will clear
+      # out all of the defined EWS methods so they can't be called on the
+      # instantiated object.
+      def clear_object!
+        @ews_methods.each do |m|
+          self.instance_variables.each do |iv|
+            self.instance_variable_set("#{iv}",nil)
+          end
+        end
+      end
+
     end # Model
   end # EWS
 end # Viewpoint

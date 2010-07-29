@@ -73,6 +73,7 @@ module Viewpoint
       def delete!(soft=false)
         deltype = soft ? 'SoftDelete' : 'HardDelete'
         resp = (Viewpoint::EWS::EWS.instance).ews.delete_item([@item_id], deltype)
+        self.clear_object!
         resp.status == 'Success'
       end
 
@@ -82,6 +83,7 @@ module Viewpoint
       # @todo Add exception handling for failed deletes
       def recycle!
         resp = (Viewpoint::EWS::EWS.instance).ews.delete_item([@item_id], 'MoveToDeletedItems')
+        self.clear_object!
         resp.status == 'Success'
       end
 

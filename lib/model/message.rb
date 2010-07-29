@@ -28,48 +28,6 @@ module Viewpoint
         init_methods
       end
 
-
-      # Output the message in RFC 822 format: http://www.ietf.org/rfc/rfc0822.txt
-      def to_rfc822
-        get_message if @message == nil
-        rfc822 = []
-        rfc822.push 'Return-Path'  => @message.sender.mailbox.emailAddress
-        rfc822.push 'Delivered-To' => @message.receivedBy.mailbox.emailAddress
-        @message.internetMessageHeaders.each do |hdr|
-          # TODO: Quick Fix... needs more research
-          if( hdr.xmlattr_HeaderName == 'Content-Type' && hdr =~ /tnef/ )
-            rfc822.push hdr.xmlattr_HeaderName => 'multipart/alternative'
-          else
-            rfc822.push hdr.xmlattr_HeaderName => hdr
-          end
-        end
-
-        # From
-        rfc822.push 'From'  => "#{@message.sender.mailbox.name} <#{@message.sender.mailbox.emailAddress}>"
-
-        # To
-        rfc822.push 'To' => self.recipients
-
-        # CC
-        if( ( cc = self.cc_recipients) != nil)
-          rfc822.push 'Cc' => cc
-        end
-
-        # BCC
-        if( ( bcc = self.bcc_recipients) != nil)
-          rfc822.push 'Bcc' => bcc
-        end
-
-        rfc822_msg = ""
-        rfc822.each do |line|
-          line.each_pair do |key,val|
-            rfc822_msg += "#{key}: #{val}\n"
-          end
-        end
-
-        rfc822_msg += "\n\n#{@message.body}"
-      end
-
       private
 
       def init_methods
