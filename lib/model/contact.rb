@@ -21,6 +21,38 @@
 module Viewpoint
   module EWS
     class Contact < Item
+
+      # Create a Contact in the Exchange Data Store
+      #
+      # @param [String] subject The task subject
+      # @param [String] body The task body
+      def self.add_contact()
+        item = {}
+        
+        conn = Viewpoint::EWS::EWS.instance
+        resp = conn.ews.create_contact_item()
+
+        if(resp.status == 'Success')
+          resp = resp.items.shift
+          self.new(resp[resp.keys.first])
+        else
+          raise EwsError, "Could not add contact. #{resp.code}: #{resp.message}"
+        end
+      end
+
+
+
+      # Initialize an Exchange Web Services item of type Contact
+      def initialize(ews_item)
+        super(ews_item)
+      end
+
+      private
+
+      def init_methods
+        super()
+      end
+
     end # Contact
   end # EWS
 end # Viewpoint

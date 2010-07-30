@@ -1,0 +1,6 @@
+
+- Automate "deepening" of Model objects by over-riding method_missing
+  … if object.is_shallow? && all_methods.index(method)
+      deepen!
+    else
+      raise the NoMethod error

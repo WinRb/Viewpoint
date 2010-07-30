@@ -118,7 +118,7 @@ module Viewpoint
       end
 
       def method_missing(m, *args, &block)
-        puts "There's no method called #{m} here -- please try again."
+        warn "!!! No such method: #{m}"
       end
 
     end # Item

@@ -21,6 +21,42 @@
 module Viewpoint
   module EWS
     class Task < Item
+      
+      # Create a Task in the Exchange Data Store
+      #
+      # @param [String] subject The task subject
+      # @param [String] body The task body
+      # @param [DateTime] v_start The date/time when this task begins
+      # @param [DateTime] v_end The date/time when this task is due
+      def self.create_task(subject, body, v_start = nil, v_end = nil)
+        item = {}
+        item[:subject] = {:text => subject}
+        item[:body] = {:text => body, :body_type => 'Text'} unless body.nil?
+        item[:start_date] = {:text => v_start.to_s} unless v_start.nil?
+        item[:due_date] = {:text => v_end.to_s} unless v_end.nil?
+        
+        conn = Viewpoint::EWS::EWS.instance
+        resp = conn.ews.create_task_item(nil, item, 'SaveOnly')
+        if(resp.status == 'Success')
+          resp = resp.items.shift
+          self.new(resp[resp.keys.first])
+        else
+          raise EwsError, "Could not create task. #{resp.code}: #{resp.message}"
+        end
+      end
+
+
+      # Initialize an Exchange Web Services item of type Task
+      def initialize(ews_item)
+        super(ews_item)
+      end
+
+      private
+
+      def init_methods
+        super()
+      end
+
     end # Task
   end # EWS
 end # Viewpoint

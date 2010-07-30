@@ -22,10 +22,40 @@ module Viewpoint
   module EWS
     class Message < Item
 
+      # Send an E-mail message
+      #
+      # @param [String] subject The message subject
+      # @param [String] body The message body
+      # @param [Array] to_recipients An array of e-mail addresses to send to
+      # @param [Array] cc_recipients An array of e-mail addresses to send to
+      # @param [Array] bcc_recipients An array of e-mail addresses to send to
+      # @return [true] Returns true on successful send or it raises an error with
+      #   a message stating why the e-mail could not be sent.
+      def self.send(subject, body, to_recipients, cc_recipients=[], bcc_recipients=[])
+        item = {}
+        item[:subject] = {:text => subject}
+        item[:body] = {:text => body, :body_type => 'Text'} unless body.nil?
+        to_recipients.each do |a|
+          item[:to_recipients] = [] unless item[:to_recipients].is_a?(Array)
+          item[:to_recipients] << {:mailbox => {:email_address => {:text => a}}}
+        end
+        cc_recipients.each do |a|
+          item[:cc_recipients] = [] unless item[:cc_recipients].is_a?(Array)
+          item[:cc_recipients] << {:mailbox => {:email_address => {:text => a}}}
+        end
+        bcc_recipients.each do |a|
+          item[:bcc_recipients] = [] unless item[:bcc_recipients].is_a?(Array)
+          item[:bcc_recipients] << {:mailbox => {:email_address => {:text => a}}}
+        end
+        
+        conn = Viewpoint::EWS::EWS.instance
+        resp = conn.ews.create_message_item(:sentitems, item, 'SendAndSaveCopy')
+        (resp.status == 'Success') || (raise EwsError, "Could not retrieve item. #{resp.code}: #{resp.message}")
+      end
+
       # Initialize an Exchange Web Services item of type Message
       def initialize(ews_item)
         super(ews_item)
-        init_methods
       end
 
       private

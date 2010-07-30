@@ -46,8 +46,12 @@ module Viewpoint
       def self.create_item_from_hash(item, folder_id = :calendar, send_invites = 'SendToAllAndSaveCopy')
         conn = Viewpoint::EWS::EWS.instance
         resp = conn.ews.create_calendar_item(folder_id, item, send_invites)
-        resp = resp.items.shift
-        self.new(resp[resp.keys.first])
+        if(resp.status == 'Success')
+          resp = resp.items.shift
+          self.new(resp[resp.keys.first])
+        else
+          raise EwsError, "Could not create CalendarItem. #{resp.code}: #{resp.message}"
+        end
       end
 
       # Create a new CalendarItem.

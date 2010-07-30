@@ -122,9 +122,24 @@ module Viewpoint
           end
         end
 
+        # Creates a CalendarItem Element structure.  It matters to Exchange which order Items are added in
+        # so it loops through an order Array to make sure things are added appropriately.
+        # @param [Element] node The <Items> element that is the parent to all of the elements that will
+        #   be created from the items param
+        # @param [Hash] item The item or items that will be added to the element in the parameter node
+        # @todo Make sure and watch this method for new Item elements when EWS versions change.
         def message_item!(node, item)
+          order=[:mime_content,:item_id,:parent_folder_id,:item_class,:subject,:sensitivity,:body,:attachments,:date_time_received,
+            :size,:categories,:importance,:in_reply_to,:is_submitted,:is_draft,:is_from_me,:is_resend,:is_unmodified,
+            :internet_message_headers,:date_time_sent,:date_time_created,:response_objects,:reminder_due_by,:reminder_is_set,
+            :reminder_minutes_before_start,:display_cc,:display_to,:has_attachments,:extended_property,:culture,:sender,
+            :to_recipients,:cc_recipients,:bcc_recipients,:is_read_receipt_requested,:is_delivery_receipt_requested,
+            :conversation_index,:conversation_topic,:from,:internet_message_id,:is_read,:is_response_requested,:references,
+            :reply_to,:effective_rights,:received_by,:received_representing,:last_modified_name,:last_modified_time,
+            :is_associated,:web_client_read_form_query_string,:web_client_edit_form_query_string,:conversation_id,:unique_body]
+
           node.add("#{NS_EWS_TYPES}:Message") do |msg|
-            add_hierarchy!(msg, item)
+            item!(msg, item, order)
           end
         end
 
@@ -150,23 +165,80 @@ module Viewpoint
             :last_modified_time,:is_associated,:web_client_read_form_query_string,:web_client_edit_form_query_string,:conversation_id,:unique_body]
 
           node.add("#{NS_EWS_TYPES}:CalendarItem") do |msg|
-            order.each do |id|
-              if(item[id])
-                if(item[id].is_a?(Hash))
-                  msg.add("#{NS_EWS_TYPES}:#{id.to_s.camel_case}", item[id][:text]) do |it|
-                    add_hierarchy!(it, item[id]) if item[id]
-                  end
-                elsif(item[id].is_a?(Array))
-                  msg.add("#{NS_EWS_TYPES}:#{id.to_s.camel_case}") do |it|
-                    item[id].each do |ai|
-                      add_hierarchy!(it, ai)
-                    end
+            item!(msg, item, order)
+          end
+        end
+        
+        # Creates a Contact Element structure.  It matters to Exchange which order Items are added in
+        # so it loops through an order Array to make sure things are added appropriately.
+        # @param [Element] node The <Items> element that is the parent to all of the elements that will
+        #   be created from the items param
+        # @param [Hash] item The item or items that will be added to the element in the parameter node
+        # @todo Make sure and watch this method for new Item elements when EWS versions change.
+        def contact_item!(node,item)
+          order=[:mime_content,:item_id,:parent_folder_id,:item_class,:subject,:sensitivity,:body,:attachments,:date_time_received,:size,
+            :categories,:importance,:in_reply_to,:is_submitted,:is_draft,:is_from_me,:is_resend,:is_unmodified, :internet_message_headers,
+            :date_time_sent,:date_time_created,:response_objects,:reminder_due_by,:reminder_is_set,:reminder_minutes_before_start,
+            :display_cc,:display_to,:has_attachments,:extended_property,:culture,:effective_rights,:last_modified_name,:last_modified_time,
+            :is_associated,:web_client_read_form_query_string,:web_client_edit_form_query_string,:conversation_id,:unique_body,:file_as,
+            :file_as_mapping,:display_name,:given_name,:initials,:middle_name,:nickname,:complete_name,:company_name,:email_addresses,
+            :physical_addresses,:phone_numbers,:assistant_name,:birthday,:business_home_page,:children,:companies,:contact_source,
+            :department,:generation,:im_addresses,:job_title,:manager,:mileage,:office_location,:postal_address_index,:profession,
+            :spouse_name,:surname,:wedding_anniversary,:has_picture]
+
+          node.add("#{NS_EWS_TYPES}:Contact") do |msg|
+            item!(msg, item, order)
+          end
+        end
+        
+        # Creates a Task Element structure.  It matters to Exchange which order Items are added in
+        # so it loops through an order Array to make sure things are added appropriately.
+        # @param [Element] node The <Items> element that is the parent to all of the elements that will
+        #   be created from the items param
+        # @param [Hash] item The item or items that will be added to the element in the parameter node
+        # @todo Make sure and watch this method for new Item elements when EWS versions change.
+        def task_item!(node,item)
+          order=[:mime_content,:item_id,:parent_folder_id,:item_class,:subject,:sensitivity,:body,:attachments,:date_time_received,
+            :size,:categories,:in_reply_to,:is_submitted,:is_draft,:is_from_me,:is_resend,:is_unmodified,:internet_message_headers,
+            :date_time_sent,:date_time_created,:response_objects,:reminder_due_by,:reminder_is_set,:reminder_minutes_before_start,
+            :display_cc,:display_to,:has_attachments,:extended_property,:culture,:actual_work,:assigned_time,:billing_information,
+            :change_count,:companies,:complete_date,:contacts,:delegation_state,:delegator,:due_date,:is_assignment_editable,
+            :is_complete,:is_recurring,:is_team_task,:mileage,:owner,:percent_complete,:recurrence,:start_date,:status,
+            :status_description,:total_work,:effective_rights,:last_modified_name,:last_modified_time,:is_associated,
+            :web_client_read_form_query_string,:web_client_edit_form_query_string,:conversation_id,:unique_body]
+
+          node.add("#{NS_EWS_TYPES}:Task") do |msg|
+            item!(msg, item, order)
+          end
+        end
+
+
+        # This is a convernience method used by the specific item types like
+        # CalendarItem and Message to create item structures.  It is the shared
+        # code between them.  
+        # @param [Element] node The <*Item> element that is the parent to all of the elements that will
+        #   be created from the elems param
+        # @param [Hash, Array] item The subelements that will be created under node
+        # @param [Array<Symbol] order The order that Exchange expects these elements to appear in
+        #   the SOAP request.
+        def item!(node, item, order)
+          order.each do |id|
+            if(item[id])
+              if(item[id].is_a?(Hash))
+                node.add("#{NS_EWS_TYPES}:#{id.to_s.camel_case}", item[id][:text]) do |it|
+                  add_hierarchy!(it, item[id]) if item[id]
+                end
+              elsif(item[id].is_a?(Array))
+                node.add("#{NS_EWS_TYPES}:#{id.to_s.camel_case}") do |it|
+                  item[id].each do |ai|
+                    add_hierarchy!(it, ai)
                   end
                 end
               end
             end
           end
         end
+
 
         def event_types!(node, event_types)
           node.add("#{NS_EWS_TYPES}:EventTypes") do |ets|

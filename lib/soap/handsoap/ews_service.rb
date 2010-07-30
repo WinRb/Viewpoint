@@ -331,17 +331,17 @@ module Viewpoint
         # of Exchange objects so it is named appropriately here.
         # @see http://msdn.microsoft.com/en-us/library/aa566468.aspx
         #
-        # @param [String, Symbol] folder_id The folder to create this item in. Either a
+        # @param [String, Symbol] folder_id The folder to save this message in. Either a
         #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
         # @param [Hash, Array] items An array of item Hashes or a single item Hash. Hash
         #   values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa494306.aspx
         # @param [String] message_disposition "SaveOnly/SendOnly/SendAndSaveCopy"
         #   See: http://msdn.microsoft.com/en-us/library/aa565209.aspx
-        def create_mail_item(folder_id, items, message_disposition = 'SaveOnly')
+        def create_message_item(folder_id, items, message_disposition = 'SaveOnly')
           action = "#{SOAP_ACTION_PREFIX}/CreateItem"
           resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", :soap_action => action) do |node|
             build!(node) do
-              create_item!(folder_id, items, message_disposition, send_invites=false)
+              create_item!(folder_id, items, message_disposition, send_invites=false, 'message')
             end
           end
           parse!(resp)
@@ -360,6 +360,27 @@ module Viewpoint
           resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", :soap_action => action) do |node|
             build!(node) do
               create_item!(folder_id, items, message_disposition=false, send_invites, 'calendar')
+            end
+          end
+          parse!(resp)
+        end
+        
+        # Operation is used to create task items
+        # This is actually a CreateItem operation but they differ for different types
+        # of Exchange objects so it is named appropriately here.
+        # @see http://msdn.microsoft.com/en-us/library/aa563439.aspx
+        #
+        # @param [String, Symbol] folder_id The folder to save this task in. Either a
+        #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+        # @param [Hash, Array] items An array of item Hashes or a single item Hash. Hash
+        #   values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa494306.aspx
+        # @param [String] message_disposition "SaveOnly/SendOnly/SendAndSaveCopy"
+        #   See: http://msdn.microsoft.com/en-us/library/aa565209.aspx
+        def create_task_item(folder_id, items, message_disposition = 'SaveOnly')
+          action = "#{SOAP_ACTION_PREFIX}/CreateItem"
+          resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", :soap_action => action) do |node|
+            build!(node) do
+              create_item!(folder_id, items, message_disposition, send_invites=false, 'task')
             end
           end
           parse!(resp)

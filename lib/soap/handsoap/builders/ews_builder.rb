@@ -85,7 +85,7 @@ module Viewpoint
           @node.set_attr('MessageDisposition', message_disposition) if message_disposition
           @node.set_attr('SendMeetingInvitations', send_invites) if send_invites
 
-          saved_item_folder_id!(@node, folder_id)
+          saved_item_folder_id!(@node, folder_id) unless folder_id.nil?
           items!(@node, items, type)
         end
 
