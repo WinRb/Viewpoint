@@ -165,12 +165,14 @@ module Viewpoint
         # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
         # @option folder_shape :additional_properties
         #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
+        # @param [String,nil] act_as User to act on behalf as.  This user must have been
+        #   given delegate access to this folder or else this operation will fail.
         # @param [Hash] opts optional parameters to this method
-        def get_folder(folder_ids, folder_shape = {:base_shape => 'Default'})
+        def get_folder(folder_ids, folder_shape = {:base_shape => 'Default'}, act_as = nil)
           action = "#{SOAP_ACTION_PREFIX}/GetFolder"
           resp = invoke("#{NS_EWS_MESSAGES}:GetFolder", :soap_action => action) do |root|
             build!(root) do
-              get_folder!(folder_ids, folder_shape)
+              get_folder!(folder_ids, folder_shape, act_as)
             end
           end
           parse!(resp)
@@ -334,7 +336,8 @@ module Viewpoint
         # @param [String, Symbol] folder_id The folder to save this message in. Either a
         #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
         # @param [Hash, Array] items An array of item Hashes or a single item Hash. Hash
-        #   values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa494306.aspx
+        #   This Hash will eventually be passed to add_hierarchy! in the builder so it is in that format.
+        #   Values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa494306.aspx
         # @param [String] message_disposition "SaveOnly/SendOnly/SendAndSaveCopy"
         #   See: http://msdn.microsoft.com/en-us/library/aa565209.aspx
         def create_message_item(folder_id, items, message_disposition = 'SaveOnly')
@@ -353,7 +356,8 @@ module Viewpoint
         # @param [String, Symbol] folder_id The folder to create this item in. Either a
         #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
         # @param [Hash, Array] items An array of item Hashes or a single item Hash. Hash
-        #   values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa564765.aspx
+        #   This Hash will eventually be passed to add_hierarchy! in the builder so it is in that format.
+        #   Values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa564765.aspx
         # @param [String] send_invites "SendToNone/SendOnlyToAll/SendToAllAndSaveCopy"
         def create_calendar_item(folder_id, items, send_invites = 'SendToAllAndSaveCopy')
           action = "#{SOAP_ACTION_PREFIX}/CreateItem"
@@ -374,6 +378,7 @@ module Viewpoint
         #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
         # @param [Hash, Array] items An array of item Hashes or a single item Hash. Hash
         #   values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa494306.aspx
+        #   This Hash will eventually be passed to add_hierarchy! in the builder so it is in that format.
         # @param [String] message_disposition "SaveOnly/SendOnly/SendAndSaveCopy"
         #   See: http://msdn.microsoft.com/en-us/library/aa565209.aspx
         def create_task_item(folder_id, items, message_disposition = 'SaveOnly')
@@ -476,12 +481,21 @@ module Viewpoint
           parse_get_delegate(resp)
         end
 
-        def add_delegate
+        # Adds one or more delegates to a principal's mailbox and sets specific access permissions.
+        # @see http://msdn.microsoft.com/en-us/library/bb856527.aspx
+        #
+        # @param [String] owner The user that is delegating permissions
+        # @param [String] delegate The user that is being given delegate permission
+        # @param [Hash] permissions A hash of permissions that will be delegated.
+        #   This Hash will eventually be passed to add_hierarchy! in the builder so it is in that format.
+        def add_delegate(owner, delegate, permissions)
           action = "#{SOAP_ACTION_PREFIX}/AddDelegate"
-          resp = invoke("#{NS_EWS_MESSAGES}:AddDelegate", :soap_action => action) do |add_delegate|
-            build_add_delegate!(add_delegate)
+          resp = invoke("#{NS_EWS_MESSAGES}:AddDelegate", :soap_action => action) do |root|
+            build!(root) do
+              add_delegate!(owner, delegate, permissions)
+            end
           end
-          parse_add_delegate(resp)
+          parse!(resp)
         end
 
         def remove_delegate

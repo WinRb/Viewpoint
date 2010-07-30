@@ -50,9 +50,9 @@ module Viewpoint
 
 
         # @todo refactor so DistinguishedFolderId and FolderId have their own builders
-        def get_folder!(folder_ids, folder_shape)
+        def get_folder!(folder_ids, folder_shape, act_as)
           folder_shape!(@node, folder_shape)
-          folder_ids!(@node, folder_ids)
+          folder_ids!(@node, folder_ids, act_as)
         end
 
 
@@ -105,6 +105,15 @@ module Viewpoint
           @node.add("#{NS_EWS_MESSAGES}:MaxChangesReturned", max_changes)
         end
 
+        def add_delegate!(owner, delegate, permissions)
+          d_user = {
+            :user_id => {:primary_smtp_address => {:text => delegate}},
+            :delegate_permissions => permissions
+          }
+          
+          mailbox!(@node, {:email_address => {:text => owner}})
+          delegate_users!(@node, [d_user])
+        end
 
       end # EwsBuilder
     end # SOAP

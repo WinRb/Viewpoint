@@ -28,19 +28,21 @@ module Viewpoint
     module SOAP
       module EwsBuildHelpers
 
-        def folder_ids!(node, folder_ids, element_name="#{NS_EWS_MESSAGES}:FolderIds")
+        def folder_ids!(node, folder_ids, act_as=nil, element_name="#{NS_EWS_MESSAGES}:FolderIds")
           node.add(element_name) do |p|
             folder_ids.each do |id|
-              folder_id!(p,id)
+              folder_id!(p,id,act_as)
             end
           end
         end
 
-        def folder_id!(node, folder_id)
+        def folder_id!(node, folder_id, act_as)
           if( folder_id.is_a?(Symbol) )
             # @todo add change_key support to DistinguishedFolderId
             node.add("#{NS_EWS_TYPES}:DistinguishedFolderId") do |df|
               df.set_attr('Id', folder_id.to_s)
+              # add optional delegate user
+              mailbox!(df, {:email_address => {:text => act_as}}, NS_EWS_TYPES) unless act_as.nil?
             end
           else
             # @todo add change_key support to FolderId
@@ -53,7 +55,7 @@ module Viewpoint
 
         # For now this is the same as folder_ids! so just use that method
         def parent_folder_ids!(node, folder_ids)
-          folder_ids!(node, folder_ids, "#{NS_EWS_MESSAGES}:ParentFolderIds")
+          folder_ids!(node, folder_ids, nil, "#{NS_EWS_MESSAGES}:ParentFolderIds")
         end
 
 
@@ -67,6 +69,24 @@ module Viewpoint
           end
         end
 
+        # @param [Element] node The node we are adding Mailbox elements to.
+        # @param [Hash] mailbox A Mailbox formated hash inside the :mailbox key
+        #   For example: {:email_address => 'test@test.com', :name => 'Test User'}
+        def mailbox!(node, mailbox, ns = NS_EWS_MESSAGES)
+          node.add("#{ns}:Mailbox") do |mbx|
+            add_hierarchy!(mbx, mailbox)
+          end
+        end
+
+        def delegate_users!(node, d_users)
+          node.add("#{NS_EWS_MESSAGES}:DelegateUsers") do |dus|
+            d_users.each do |du|
+              dus.add("#{NS_EWS_TYPES}:DelegateUser") do |dut|
+                add_hierarchy!(dut, du)
+              end
+            end
+          end
+        end
 
         def saved_item_folder_id!(node, folder_id)
           node.add("#{NS_EWS_MESSAGES}:SavedItemFolderId") do |sfid|

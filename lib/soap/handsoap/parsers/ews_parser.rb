@@ -28,7 +28,7 @@ module Viewpoint
         # ---------------
 
         def resolve_names_response(opts)
-          @response_message.items << resolution_set
+          @response_message.items = resolution_set
         end
 
         def get_folder_response(opts)

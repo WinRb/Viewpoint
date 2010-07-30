@@ -27,10 +27,56 @@ module Viewpoint
     class MailboxUser
       include Model
 
+      # Resolve a user in the Exchange Data Store
+      # @param [String] A user to resolve to.
+      # @return [MailboxUser,Array] If it resolves to one user then it returns a MailboxUser.
+      #   If it resolves to more than one user an Array of MailboxUsers are returned.  If an
+      #   error ocurrs an exception is raised.
+      def self.find_user(resolve)
+        resp = (Viewpoint::EWS::EWS.instance).ews.resolve_names(resolve)
+        if(resp.status == 'Success')
+          return self.new(resp.items.first[:mailbox])
+        elsif(resp.code == 'ErrorNameResolutionMultipleResults')
+          users = []
+          resp.items.each do |u|
+            users << self.new(u[:mailbox])
+          end
+          return users
+        else
+          raise EwsError, "Find User produced an error: #{resp.code}: #{resp.message}"
+        end
+      end
+
       def initialize(mbox_user)
         super() # Calls initialize in Model (creates @ews_methods Array)
         @ews_item = mbox_user
         define_str_var :name, :email_address, :routing_type, :mailbox_type, :item_id
+      end
+      
+      # Adds one or more delegates to a principal's mailbox and sets specific access permissions
+      # @see http://msdn.microsoft.com/en-us/library/bb856527.aspx
+      #
+      # @param [String,MailboxUser] delegate_email The user you would like to give delegate access to.
+      #   This can either be a simple String e-mail address or you can pass in a MailboxUser object.
+      # @param [Hash] permissions A hash of folder type keys and permission type values. An example
+      #   would be {:calendar_folder_permission_level => 'Editor'}.  Possible keys are:
+      #   :calendar_folder_permission_level, :tasks_folder_permission_level, :inbox_folder_permission_level
+      #   :contacts_folder_permission_level, :notes_folder_permission_level, :journal_folder_permission_level
+      #   and possible values are:  None/Editor/Reviewer/Author/Custom
+      # @return [true] This method either returns true or raises an error with the message
+      #   as to why this operation did not succeed.
+      def add_delegate!(delegate_email, permissions)
+        # Modify permissions so we can pass it to the builders
+        permissions.each_pair do |k,v|
+          permissions[k] = {:text => v}
+        end
+
+        resp = (Viewpoint::EWS::EWS.instance).ews.add_delegate(self.email_address, delegate_email, permissions)
+        if(resp.status == 'Success')
+          return true
+        else
+          raise EwsError, "Could not add delegate access for user #{delegate_email}: #{resp.code}, #{resp.message}"
+        end
       end
 
     end # MailboxUser

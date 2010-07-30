@@ -40,8 +40,8 @@ module Viewpoint
 
       @@event_types = %w{CopiedEvent CreatedEvent DeletedEvent ModifiedEvent MovedEvent NewMailEvent}
       
-      def self.get_folder(folder_id)
-        resp = (Viewpoint::EWS::EWS.instance).ews.get_folder( [normalize_id(folder_id)] )
+      def self.get_folder(folder_id, folder_shape = {:base_shape => 'Default'}, act_as = nil)
+        resp = (Viewpoint::EWS::EWS.instance).ews.get_folder( [normalize_id(folder_id)], folder_shape, act_as )
         folder = resp.items.first
         f_type = folder.keys.first.to_s.camel_case
         eval "#{f_type}.new(folder[folder.keys.first])"
@@ -169,7 +169,9 @@ module Viewpoint
       def get_item(item_id, change_key = nil)
         resp = (Viewpoint::EWS::EWS.instance).ews.get_item([item_id])
         if(resp.status == 'Success')
-          return resp.items.shift
+          item = resp.items.shift
+          type = item.keys.first
+          return eval "#{type.to_s.camel_case}.new(item[type])"
         else
           raise EwsError, "Could not retrieve item. #{resp.code}: #{resp.message}"
         end
