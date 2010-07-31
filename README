@@ -15,6 +15,42 @@ them or they are asked for.
 BLOG:  http://distributed-frostbite.blogspot.com/
 Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
 --------------------------------------------------------------------------
+Major Changes to the first version:
+
+New SOAP backend
+  Viewpoint now uses Handsoap as its back-end instead of soap4r.  While
+  soap4r does some very nice things for you automatically, it ends up
+  making your code base fairly large and it complicates any customizations
+  that you might want to make.  One example is adding custom headers. Soap4r
+  required you to create a subclass to use as a sort of hook. I can do the
+  same thing in Handsoap with a one-liner in the services #on_create_document
+  method.
+
+Models are completely rewritten
+  The models are completely new and not backward compatible with the old
+  version of Viewpoint.  Some of the methods still exist, but don't count
+  on them.  I've tried to make this version much more extensible than the
+  last.
+
+Delegate access is supported
+  One thing that was often asked for, but missing from the previous version
+  was delegate access to mailboxes and calendars.  This is now supported via
+  the 'act_as' parameter to the GenericFolder::get_folder method. For example:
+  ofolder = Folder.get_folder(:inbox,'otheruser@test.com')
+  If your user has delegate access to the Inbox for otheruser@test.com this
+  operation will retrieve their inbox and allow you to manipulate it as you
+  would with your own Inbox.
+
+  There is also some support for manipulation of delegate access itself via
+  the methods MailboxUser#add_delegate!, MailboxUser#update_delegate!, and 
+  MailboxUser#get_delegate_info.
+
+Misc other changes
+  Since it's a complete rewrite there are tons of other changes that you'll
+  notice.  I've tried to keep the code comments coming so stay tuned to the
+  API docs for library information.  I'll also be posting more examples to
+  my blog.
+--------------------------------------------------------------------------
 TO USE:
 require 'rubygems'
 require 'viewpoint'

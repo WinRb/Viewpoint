@@ -40,7 +40,7 @@ module Viewpoint
 
       @@event_types = %w{CopiedEvent CreatedEvent DeletedEvent ModifiedEvent MovedEvent NewMailEvent}
       
-      def self.get_folder(folder_id, folder_shape = {:base_shape => 'Default'}, act_as = nil)
+      def self.get_folder(folder_id, act_as = nil, folder_shape = {:base_shape => 'Default'})
         resp = (Viewpoint::EWS::EWS.instance).ews.get_folder( [normalize_id(folder_id)], folder_shape, act_as )
         folder = resp.items.first
         f_type = folder.keys.first.to_s.camel_case
