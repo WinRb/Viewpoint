@@ -93,21 +93,29 @@ module Viewpoint
           action = "#{SOAP_ACTION_PREFIX}/ResolveNames"
           resp = invoke("#{NS_EWS_MESSAGES}:ResolveNames", :soap_action => action) do |root|
             build!(root) do
-              resolve_names!(name,full_contact_data, opts)
+              root.set_attr('ReturnFullContactData',full_contact_data)
+              root.add("#{NS_EWS_MESSAGES}:UnresolvedEntry",name)
             end
           end
           parse!(resp)
         end
 
 
-        def expand_dl
+        # Exposes the full membership of distribution lists.
+        # @see http://msdn.microsoft.com/en-us/library/aa494152.aspx ExpandDL
+        #
+        # @param [String] dist_email The e-mail address associated with the Distribution List
+        # @todo Fully support all of the ExpandDL operations. Today it just supports
+        #   taking an e-mail address as an argument
+        def expand_dl(dist_email)
           action = "#{SOAP_ACTION_PREFIX}/ExpandDL"
-          resp = invoke("#{NS_EWS_MESSAGES}:ExpandDL", :soap_action => action) do |expand_dl|
-            build_expand_dl!(expand_dl)
+          resp = invoke("#{NS_EWS_MESSAGES}:ExpandDL", :soap_action => action) do |root|
+            build!(root) do
+              mailbox!(root, {:email_address => {:text => dist_email}})
+            end
           end
-          parse_expand_dl(resp)
+          parse!(resp)
         end
-
 
         # Find subfolders of an identified folder
         # @see http://msdn.microsoft.com/en-us/library/aa563918.aspx
@@ -125,12 +133,13 @@ module Viewpoint
           action = "#{SOAP_ACTION_PREFIX}/FindFolder"
           resp = invoke("#{NS_EWS_MESSAGES}:FindFolder", :soap_action => action) do |root|
             build!(root) do
-              find_folder!(parent_folder_ids, traversal, folder_shape, opts)
+              root.set_attr('Traversal', traversal)
+              folder_shape!(root, folder_shape)
+              parent_folder_ids!(root, parent_folder_ids)
             end
           end
           parse!(resp)
         end
-
 
         # Identifies items that are located in a specified folder
         # @see http://msdn.microsoft.com/en-us/library/aa566107.aspx
@@ -148,12 +157,13 @@ module Viewpoint
           action = "#{SOAP_ACTION_PREFIX}/FindItem"
           resp = invoke("#{NS_EWS_MESSAGES}:FindItem", :soap_action => action) do |root|
             build!(root) do
-              find_item!(parent_folder_ids, traversal, item_shape)
+              root.set_attr('Traversal', traversal)
+              item_shape!(root, item_shape)
+              parent_folder_ids!(root, parent_folder_ids)
             end
           end
           parse!(resp)
         end
-
 
         # Gets folders from the Exchange store
         # @see http://msdn.microsoft.com/en-us/library/aa580274.aspx
@@ -172,12 +182,12 @@ module Viewpoint
           action = "#{SOAP_ACTION_PREFIX}/GetFolder"
           resp = invoke("#{NS_EWS_MESSAGES}:GetFolder", :soap_action => action) do |root|
             build!(root) do
-              get_folder!(folder_ids, folder_shape, act_as)
+              folder_shape!(root, folder_shape)
+              folder_ids!(root, folder_ids, act_as)
             end
           end
           parse!(resp)
         end
-
 
         def convert_id
           action = "#{SOAP_ACTION_PREFIX}/ConvertId"
@@ -187,20 +197,46 @@ module Viewpoint
           parse_convert_id(resp)
         end
 
-        def create_folder
+        # Creates folders, calendar folders, contacts folders, tasks folders, and search folders.
+        # @see http://msdn.microsoft.com/en-us/library/aa563574.aspx CreateFolder
+        #
+        # @param [String,Symbol] parent_folder_id either the name of a folder or it's
+        #   numerical ID.  See: http://msdn.microsoft.com/en-us/library/aa565998.aspx
+        # @param [Array,String] folder_name The display name for the new folder or folders
+        def create_folder(parent_folder_id, folder_name)
           action = "#{SOAP_ACTION_PREFIX}/CreateFolder"
-          resp = invoke("#{NS_EWS_MESSAGES}:CreateFolder", :soap_action => action) do |create_folder|
-            build_create_folder!(create_folder)
+          resp = invoke("#{NS_EWS_MESSAGES}:CreateFolder", :soap_action => action) do |root|
+            build!(root) do
+              root.add("#{NS_EWS_MESSAGES}:ParentFolderId") do |pfid|
+                folder_id!(pfid, parent_folder_id)
+              end
+              folder_name = (folder_name.is_a?(Array)) ? folder_name : [folder_name]
+              root.add("#{NS_EWS_MESSAGES}:Folders") do |fids|
+                folder_name.each do |f|
+                  add_hierarchy!(fids, {:folder => {:display_name => {:text => f}}})
+                end
+              end
+            end
           end
-          parse_create_folder(resp)
+          parse!(resp)
         end
 
-        def delete_folder
+        # Deletes folders from a mailbox.
+        # @see http://msdn.microsoft.com/en-us/library/aa564767.aspx DeleteFolder
+        #
+        # @param [Array,String,Symbol] folder_id either the name of a folder or it's
+        #   numerical ID.  See: http://msdn.microsoft.com/en-us/library/aa565998.aspx
+        # @param [String,nil] delete_type Type of delete to do: HardDelete/SoftDelete/MoveToDeletedItems
+        def delete_folder(folder_id, delete_type = 'MoveToDeletedItems')
           action = "#{SOAP_ACTION_PREFIX}/DeleteFolder"
-          resp = invoke("#{NS_EWS_MESSAGES}:DeleteFolder", :soap_action => action) do |delete_folder|
-            build_delete_folder!(delete_folder)
+          resp = invoke("#{NS_EWS_MESSAGES}:DeleteFolder", :soap_action => action) do |root|
+            root.set_attr('DeleteType', delete_type)
+            build!(root) do
+              folder_id = (folder_id.is_a?(Array)) ? folder_id : [folder_id]
+              folder_ids!(root, folder_id)
+            end
           end
-          parse_delete_folder(resp)
+          parse!(resp)
         end
 
         def update_folder
@@ -249,6 +285,10 @@ module Viewpoint
           parse!(resp)
         end
 
+        # End a pull notification subscription.
+        # @see http://msdn.microsoft.com/en-us/library/aa564263.aspx
+        #
+        # @param [String] subscription_id The Id of the subscription
         def unsubscribe(subscription_id)
           action = "#{SOAP_ACTION_PREFIX}/Unsubscribe"
           resp = invoke("#{NS_EWS_MESSAGES}:Unsubscribe", :soap_action => action) do |root|
@@ -268,7 +308,8 @@ module Viewpoint
           action = "#{SOAP_ACTION_PREFIX}/GetEvents"
           resp = invoke("#{NS_EWS_MESSAGES}:GetEvents", :soap_action => action) do |root|
             build!(root) do
-              get_events!(subscription_id, watermark)
+              subscription_id!(root, subscription_id)
+              watermark!(root, watermark)
             end
           end
           parse!(resp)
@@ -301,7 +342,12 @@ module Viewpoint
           action = "#{SOAP_ACTION_PREFIX}/SyncFolderItems"
           resp = invoke("#{NS_EWS_MESSAGES}:SyncFolderItems", :soap_action => action) do |root|
             build!(root) do
-              sync_folder_items!(folder_id, sync_state, max_changes, item_shape, opts)
+              root.add("#{NS_EWS_MESSAGES}:MaxChangesReturned", max_changes)
+              root.add("#{NS_EWS_MESSAGES}:SyncFolderId") do |sfid|
+                folder_id!(sfid, folder_id)
+              end
+              item_shape!(root, item_shape)
+              sync_state!(root, sync_state) unless sync_state.nil?
             end
           end
           parse!(resp)
@@ -321,12 +367,12 @@ module Viewpoint
           action = "#{SOAP_ACTION_PREFIX}/GetItem"
           resp = invoke("#{NS_EWS_MESSAGES}:GetItem", :soap_action => action) do |root|
             build!(root) do
-              get_item!(item_ids, item_shape)
+              item_shape!(root, item_shape)
+              item_ids!(root, item_ids)
             end
           end
           parse!(resp)
         end
-
 
         # Operation is used to create e-mail messages
         # This is actually a CreateItem operation but they differ for different types
@@ -403,7 +449,10 @@ module Viewpoint
           action = "#{SOAP_ACTION_PREFIX}/DeleteItem"
           resp = invoke("#{NS_EWS_MESSAGES}:DeleteItem", :soap_action => action) do |root|
             build!(root) do
-              delete_item!(item_ids, delete_type, send_meeting_cancellations, affected_task_occurrences)
+              root.set_attr('DeleteType', delete_type)
+              root.set_attr('SendMeetingCancellations', send_meeting_cancellations) unless send_meeting_cancellations.nil?
+              root.set_attr('AffectedTaskOccurrences', affected_task_occurrences) unless affected_task_occurrences.nil?
+              item_ids!(root, item_ids)
             end
           end
           parse!(resp)

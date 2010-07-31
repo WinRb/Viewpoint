@@ -21,6 +21,11 @@ require 'builders/ews_build_helpers.rb'
 module Viewpoint
   module EWS
     module SOAP
+
+      # This class includes all the build helpers and also contains some root
+      # level methods to help code reuse.  The CreateItem operation is an example
+      # of this because the different item types share a lot but have a few subtle
+      # differences.
       class EwsBuilder
         include EwsBuildHelpers
 
@@ -28,33 +33,6 @@ module Viewpoint
           @node, @opts = node, opts
           instance_eval(&block) if block_given?
         end
-
-        def resolve_names!(name, full_contact_data, opts)
-          @node.set_attr('ReturnFullContactData',full_contact_data)
-          @node.add("#{NS_EWS_MESSAGES}:UnresolvedEntry",name)
-        end
-
-
-        def find_folder!(parent_folder_ids, traversal, folder_shape, opts)
-          @node.set_attr('Traversal', traversal)
-          folder_shape!(@node, folder_shape)
-          parent_folder_ids!(@node, parent_folder_ids)
-        end
-
-
-        def find_item!(parent_folder_ids, traversal, item_shape)
-          @node.set_attr('Traversal', traversal)
-          item_shape!(@node, item_shape)
-          parent_folder_ids!(@node, parent_folder_ids)
-        end
-
-
-        # @todo refactor so DistinguishedFolderId and FolderId have their own builders
-        def get_folder!(folder_ids, folder_shape, act_as)
-          folder_shape!(@node, folder_shape)
-          folder_ids!(@node, folder_ids, act_as)
-        end
-
 
         # @see ExchangeWebService#subscribe
         def pull_subscription_request!(folder_ids, event_types, timeout)
@@ -65,20 +43,6 @@ module Viewpoint
           end
         end
 
-
-        # @see ExchangeWebService#get_events
-        def get_events!(subscription_id, watermark)
-          subscription_id!(@node, subscription_id)
-          watermark!(@node, watermark)
-        end
-
-
-        def get_item!(item_ids, item_shape)
-          item_shape!(@node, item_shape)
-          item_ids!(@node, item_ids)
-        end
-
-
         # @param [String] type The type of items in the items array message/calendar
         # @todo Fix max_changes_returned to be more flexible
         def create_item!(folder_id, items, message_disposition, send_invites, type)
@@ -87,22 +51,6 @@ module Viewpoint
 
           saved_item_folder_id!(@node, folder_id) unless folder_id.nil?
           items!(@node, items, type)
-        end
-
-        def delete_item!(item_ids, delete_type, send_meeting_cancellations, affected_task_occurrences)
-          @node.set_attr('DeleteType', delete_type)
-          @node.set_attr('SendMeetingCancellations', send_meeting_cancellations) unless send_meeting_cancellations.nil?
-          @node.set_attr('AffectedTaskOccurrences', affected_task_occurrences) unless affected_task_occurrences.nil?
-          item_ids!(@node, item_ids)
-        end
-
-        def sync_folder_items!(folder_id, sync_state, max_changes, item_shape, opts)
-          item_shape!(@node, item_shape)
-          @node.add("#{NS_EWS_MESSAGES}:SyncFolderId") do |sfid|
-            folder_id!(sfid, folder_id)
-          end
-          sync_state!(@node, sync_state) unless sync_state.nil?
-          @node.add("#{NS_EWS_MESSAGES}:MaxChangesReturned", max_changes)
         end
 
         def add_delegate!(owner, delegate, permissions)

@@ -36,7 +36,7 @@ module Viewpoint
           end
         end
 
-        def folder_id!(node, folder_id, act_as)
+        def folder_id!(node, folder_id, act_as = nil)
           if( folder_id.is_a?(Symbol) )
             # @todo add change_key support to DistinguishedFolderId
             node.add("#{NS_EWS_TYPES}:DistinguishedFolderId") do |df|

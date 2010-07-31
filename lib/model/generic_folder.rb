@@ -208,6 +208,19 @@ module Viewpoint
         items
       end
 
+      # Create a subfolder of this folder
+      #
+      # @param [String] name The name of the new folder
+      def add_subfolder(name)
+        resp = (Viewpoint::EWS::EWS.instance).ews.create_folder(@folder_id, name)
+      end
+
+
+      # Deletes this folder from the Exchange Data Store
+      def delete!
+        resp = (Viewpoint::EWS::EWS.instance).ews.delete_folder(@folder_id)
+      end
+
       private
 
       # Return the appropriate id based on whether it is a DistinguishedFolderId or
