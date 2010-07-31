@@ -63,6 +63,9 @@ require 'exceptions/exceptions'
 #   to the Exchange Web Service.
 module Viewpoint
   module EWS
+    # @attr_reader [Viewpoint::EWS::SOAP::ExchangeWebService] :ews The EWS object used
+    #   to make SOAP calls.  You typically don't need to use this, but if you want to
+    #   play around with the SOAP back-end it's available.
     class EWS
       include Singleton
       include Viewpoint
@@ -79,11 +82,17 @@ module Viewpoint
       end
 
       def self.set_auth(user,pass)
+        @@user = user
         SOAP::ExchangeWebService.set_auth(user,pass)
       end
 
       def initialize
         @ews = SOAP::ExchangeWebService.new
+      end
+
+      # The MailboxUser object that represents the user connected to EWS.
+      def me
+        @me ||= MailboxUser.find_user("#{@@user}@")
       end
 
     end # class EWS
