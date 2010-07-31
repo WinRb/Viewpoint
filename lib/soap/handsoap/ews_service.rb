@@ -473,12 +473,19 @@ module Viewpoint
           parse_create_managed_folder(resp)
         end
 
-        def get_delegate
+        # Retrieves the delegate settings for a specific mailbox.
+        # @see http://msdn.microsoft.com/en-us/library/bb799735.aspx
+        #
+        # @param [String] owner The user that is delegating permissions
+        def get_delegate(owner)
           action = "#{SOAP_ACTION_PREFIX}/GetDelegate"
-          resp = invoke("#{NS_EWS_MESSAGES}:GetDelegate", :soap_action => action) do |get_delegate|
-            build_get_delegate!(get_delegate)
+          resp = invoke("#{NS_EWS_MESSAGES}:GetDelegate", :soap_action => action) do |root|
+            root.set_attr('IncludePermissions', 'true')
+            build!(root) do
+              mailbox!(root, {:email_address => {:text => owner}})
+            end
           end
-          parse_get_delegate(resp)
+          parse!(resp)
         end
 
         # Adds one or more delegates to a principal's mailbox and sets specific access permissions.
@@ -498,20 +505,36 @@ module Viewpoint
           parse!(resp)
         end
 
-        def remove_delegate
+        # Removes one or more delegates from a user's mailbox.
+        # @see http://msdn.microsoft.com/en-us/library/bb856564.aspx
+        #
+        # @param [String] owner The user that is delegating permissions
+        # @param [String] delegate The user that is being given delegate permission
+        def remove_delegate(owner, delegate)
           action = "#{SOAP_ACTION_PREFIX}/RemoveDelegate"
-          resp = invoke("#{NS_EWS_MESSAGES}:RemoveDelegate", :soap_action => action) do |remove_delegate|
-            build_remove_delegate!(remove_delegate)
+          resp = invoke("#{NS_EWS_MESSAGES}:RemoveDelegate", :soap_action => action) do |root|
+            build!(root) do
+              remove_delegate!(owner, delegate)
+            end
           end
-          parse_remove_delegate(resp)
+          parse!(resp)
         end
-
-        def update_delegate
+        
+        # Updates delegate permissions on a principal's mailbox
+        # @see http://msdn.microsoft.com/en-us/library/bb856529.aspx
+        #
+        # @param [String] owner The user that is delegating permissions
+        # @param [String] delegate The user that is being given delegate permission
+        # @param [Hash] permissions A hash of permissions that will be delegated.
+        #   This Hash will eventually be passed to add_hierarchy! in the builder so it is in that format.
+        def update_delegate(owner, delegate, permissions)
           action = "#{SOAP_ACTION_PREFIX}/UpdateDelegate"
-          resp = invoke("#{NS_EWS_MESSAGES}:UpdateDelegate", :soap_action => action) do |update_delegate|
-            build_update_delegate!(update_delegate)
+          resp = invoke("#{NS_EWS_MESSAGES}:UpdateDelegate", :soap_action => action) do |root|
+            build!(root) do
+              add_delegate!(owner, delegate, permissions)
+            end
           end
-          parse_update_delegate(resp)
+          parse!(resp)
         end
 
         def get_user_availability

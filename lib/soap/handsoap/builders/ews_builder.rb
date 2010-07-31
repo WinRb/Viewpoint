@@ -115,6 +115,13 @@ module Viewpoint
           delegate_users!(@node, [d_user])
         end
 
+        def remove_delegate!(owner, delegate)
+          mailbox!(@node, {:email_address => {:text => owner}})
+          @node.add("#{NS_EWS_MESSAGES}:UserIds") do |uids|
+            user_id!(uids, {:user_id => {:primary_smtp_address => {:text => delegate}}})
+          end
+        end
+
       end # EwsBuilder
     end # SOAP
   end # EWS

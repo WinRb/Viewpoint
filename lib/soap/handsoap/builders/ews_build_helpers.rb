@@ -69,6 +69,10 @@ module Viewpoint
           end
         end
 
+        def user_id!(node, uid)
+          add_hierarchy!(node, uid)
+        end
+
         # @param [Element] node The node we are adding Mailbox elements to.
         # @param [Hash] mailbox A Mailbox formated hash inside the :mailbox key
         #   For example: {:email_address => 'test@test.com', :name => 'Test User'}

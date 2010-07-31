@@ -79,6 +79,29 @@ module Viewpoint
         end
       end
 
+      def update_delegate!(delegate_email, permissions)
+        # Modify permissions so we can pass it to the builders
+        permissions.each_pair do |k,v|
+          permissions[k] = {:text => v}
+        end
+
+        resp = (Viewpoint::EWS::EWS.instance).ews.update_delegate(self.email_address, delegate_email, permissions)
+        if(resp.status == 'Success')
+          return true
+        else
+          raise EwsError, "Could not update delegate access for user #{delegate_email}: #{resp.code}, #{resp.message}"
+        end
+      end
+
+      def get_delegate_info()
+        resp = (Viewpoint::EWS::EWS.instance).ews.get_delegate(self.email_address)
+       # if(resp.status == 'Success')
+       #   return true
+       # else
+       #   raise EwsError, "Could not update delegate access for user #{delegate_email}: #{resp.code}, #{resp.message}"
+       # end
+      end
+
     end # MailboxUser
   end # EWS
 end # Viewpoint
