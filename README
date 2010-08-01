@@ -14,8 +14,9 @@ them or they are asked for.
 
 BLOG:  http://distributed-frostbite.blogspot.com/
 Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
+
 --------------------------------------------------------------------------
-Major Changes to the first version:
+MAJOR CHANGES TO THE FIRST VERSION:
 
 New SOAP backend
   Viewpoint now uses Handsoap as its back-end instead of soap4r.  While
@@ -50,6 +51,7 @@ Misc other changes
   notice.  I've tried to keep the code comments coming so stay tuned to the
   API docs for library information.  I'll also be posting more examples to
   my blog.
+
 --------------------------------------------------------------------------
 TO USE:
 require 'rubygems'
@@ -69,6 +71,30 @@ gem install -r rubyntlm
 
 # iCalendar (still forthcoming in this release)
 gem install -r icalendar
+
+--------------------------------------------------------------------------
+DESIGN GOALS/GUIDELINES:
+
+  1. The SOAP back-end should not know about the Model.
+    I went around and around on this one for awhile.  There are some
+    simplicity advantages to creating Model objects within the SOAP
+    responses, but I ultimately decided against it so that one could use
+    the SOAP back-end without the Model.  Essentially the SOAP classes
+    pass back a Hash that the Model uses to create its own objects.
+
+  2. The use of Hashes is not a crime.
+    While some people decidedly do not like Hashes and believe complex
+    hashing should be in the form of objects, there are some instances
+    where hashing is just plain simpler and flexible.  To that end, I use
+    hashes pretty extensively in Viewpoint, both for objects being passed
+    to the SOAP back-end and returned from it.
+
+  3. Follow EWS naming conventions where it makes sense.
+    I try and follow the naming conventions of the Exchange Web Service
+    operations as much as it makes sense.  There are some things howerver
+    where they do not and I have deviated somewhat.  For example,
+    an instance method named delete_folder doesn't make much sense, but
+    an instance method named delete! is pretty clear what it deletes.
 
 --------------------------------------------------------------------------
 DISCLAIMER:  If you see something that could be done better or would like
