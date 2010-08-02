@@ -72,7 +72,7 @@ module Viewpoint
       end
 
       attr_accessor :folder_id, :change_key, :parent_id
-      attr_reader :subscription_id, :watermark
+      attr_reader :subscription_id, :watermark, :sync_state
       alias :id :folder_id
 
       def initialize(ews_item)

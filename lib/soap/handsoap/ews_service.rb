@@ -295,7 +295,6 @@ module Viewpoint
           resp = invoke("#{NS_EWS_MESSAGES}:Subscribe", :soap_action => action) do |root|
             build!(root) do
               pull_subscription_request!(folder_ids, event_types, timeout)
-              puts "NODE!!!\n#{root.to_s}"
             end
           end
           parse!(resp)
