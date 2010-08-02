@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'rake/clean'
 require 'rake/gempackagetask'
+require 'date'
 
 CLEAN.include("pkg")
 CLEAN.include("doc")
@@ -18,19 +19,20 @@ GEMSPEC = Gem::Specification.new do |gem|
 
   gem.summary = "A Ruby client access library for Microsoft Exchange Web Services (EWS)"
   gem.description	= <<-EOF
-  	A Ruby client access library for Microsoft Exchange Web Services (EWS).  It is a work in progress.  Methods are still being added from the EWS API docs.  Please see them for further information: http://msdn.microsoft.com/en-us/library/bb204119.aspx
+  	A Ruby client access library for Microsoft Exchange Web Services (EWS).  Examples can be found here: http://distributed-frostbite.blogspot.com
   EOF
 
   gem.files = `git ls-files`.split(/\n/)
   gem.require_path = "lib"
-  gem.rdoc_options	= %w(-x wsdl/ -x test/ -x examples/)
+  gem.rdoc_options	= %w(-x test/ -x examples/)
   gem.extra_rdoc_files = %w(README COPYING.txt)
 
   gem.required_ruby_version	= '>= 1.8.7'
-  gem.add_runtime_dependency  'soap4r', '>=1.5.8'
+  gem.add_runtime_dependency  'handsoap'
+  gem.add_runtime_dependency  'nokogiri'
+  gem.add_runtime_dependency  'httpclient'
+  gem.add_runtime_dependency  'rubyntlm'
   gem.add_runtime_dependency  'icalendar'
-  gem.add_runtime_dependency  'rubyntlm', '>=0.1.1'
-  gem.post_install_message	= "Don't forget to create .viewpointrc.  See README"
 end
  
 Rake::GemPackageTask.new(GEMSPEC) do |pkg|
