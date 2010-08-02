@@ -37,7 +37,7 @@ module Viewpoint
         # @see ExchangeWebService#subscribe
         def pull_subscription_request!(folder_ids, event_types, timeout)
           @node.add("#{NS_EWS_MESSAGES}:PullSubscriptionRequest") do |ps|
-            folder_ids!(ps, folder_ids, "#{NS_EWS_TYPES}:FolderIds")
+            folder_ids!(ps, folder_ids, nil, "#{NS_EWS_TYPES}:FolderIds")
             event_types!(ps, event_types)
             ps.add("#{NS_EWS_TYPES}:Timeout", timeout)
           end
@@ -67,6 +67,16 @@ module Viewpoint
           mailbox!(@node, {:email_address => {:text => owner}})
           @node.add("#{NS_EWS_MESSAGES}:UserIds") do |uids|
             user_id!(uids, {:user_id => {:primary_smtp_address => {:text => delegate}}})
+          end
+        end
+
+        # This is forthcoming in Exchange 2010.  It will replace much of the Restriction
+        # based code.
+        # @param [Array] An array of query strings
+        # @see http://msdn.microsoft.com/en-us/library/ee693615.aspx
+        def query_strings!(query_strings)
+          query_strings.each do |qs|
+            @node.add("#{NS_EWS_MESSAGES}:QueryString", qs)
           end
         end
 

@@ -153,12 +153,27 @@ module Viewpoint
         # @option item_shape :additional_properties
         #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
         # @param [Hash] opts optional parameters to this method
-        def find_item(parent_folder_ids, traversal = 'Shallow', item_shape = {:base_shape => 'Default'})
+        # @option opts [Hash] :calendar_view Limit FindItem by a start and end date
+        #   {:calendar_view => {:max_entries_returned => 2, :start => <DateTime Obj>, :end => <DateTime Obj>}}
+        def find_item(parent_folder_ids, traversal = 'Shallow', item_shape = {:base_shape => 'Default'}, opts = {})
           action = "#{SOAP_ACTION_PREFIX}/FindItem"
           resp = invoke("#{NS_EWS_MESSAGES}:FindItem", :soap_action => action) do |root|
             build!(root) do
               root.set_attr('Traversal', traversal)
               item_shape!(root, item_shape)
+              query_strings = opts.delete(:query_string)
+              restriction = opts.delete(:restriction)
+              if(opts.has_key?(:calendar_view))
+                cal_view = opts[:calendar_view]
+                cal_view.each_pair do |k,v|
+                  cal_view[k] = v.to_s
+                end
+              end
+              add_hierarchy!(root, opts, NS_EWS_MESSAGES)
+              #query_strings!(query_strings)
+              root.add("#{NS_EWS_MESSAGES}:Restriction") do |r|
+                add_hierarchy!(r, restriction)
+              end unless restriction.nil?
               parent_folder_ids!(root, parent_folder_ids)
             end
           end
@@ -280,6 +295,7 @@ module Viewpoint
           resp = invoke("#{NS_EWS_MESSAGES}:Subscribe", :soap_action => action) do |root|
             build!(root) do
               pull_subscription_request!(folder_ids, event_types, timeout)
+              puts "NODE!!!\n#{root.to_s}"
             end
           end
           parse!(resp)
@@ -342,12 +358,12 @@ module Viewpoint
           action = "#{SOAP_ACTION_PREFIX}/SyncFolderItems"
           resp = invoke("#{NS_EWS_MESSAGES}:SyncFolderItems", :soap_action => action) do |root|
             build!(root) do
-              root.add("#{NS_EWS_MESSAGES}:MaxChangesReturned", max_changes)
+              item_shape!(root, item_shape)
               root.add("#{NS_EWS_MESSAGES}:SyncFolderId") do |sfid|
                 folder_id!(sfid, folder_id)
               end
-              item_shape!(root, item_shape)
               sync_state!(root, sync_state) unless sync_state.nil?
+              root.add("#{NS_EWS_MESSAGES}:MaxChangesReturned", max_changes)
             end
           end
           parse!(resp)

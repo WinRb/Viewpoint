@@ -30,6 +30,16 @@ module Viewpoint
         #   <SharingEffectiveRights/>
       end
 
+      # Find Items
+      # @see GenericFolder#find_items
+      def find_items(start_date = nil, end_date = nil)
+        opts ||= {}
+        if(!start_date.nil? && !end_date.nil?)
+          opts = {:calendar_view => {:max_entries_returned => 256, :start_date => start_date, :end_date => end_date}}
+        end
+        super(opts)
+      end
+
     end # CalendarFolder
   end # EWS
 end # Viewpoint

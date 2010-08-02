@@ -39,16 +39,16 @@ module Viewpoint
       archiverecoverableitemsversions archiverecoverableitemspurges}
 
       @@event_types = %w{CopiedEvent CreatedEvent DeletedEvent ModifiedEvent MovedEvent NewMailEvent}
-      
+
       def self.get_folder(folder_id, act_as = nil, folder_shape = {:base_shape => 'Default'})
         resp = (Viewpoint::EWS::EWS.instance).ews.get_folder( [normalize_id(folder_id)], folder_shape, act_as )
-        folder = resp.items.first
-        f_type = folder.keys.first.to_s.camel_case
-        eval "#{f_type}.new(folder[folder.keys.first])"
-      end
-
-      # @todo Implement Folder::delete_folder
-      def self.delete_folder(folder_id)
+        if(resp.status == 'Success')
+          folder = resp.items.first
+          f_type = folder.keys.first.to_s.camel_case
+          return(eval "#{f_type}.new(folder[folder.keys.first])")
+        else
+          raise EwsError, "Could not retrieve folder. #{resp.code}: #{resp.message}"
+        end
       end
 
       # Find subfolders of the passed root folder.  If no parameters are passed
@@ -58,7 +58,17 @@ module Viewpoint
       # @param [String] traversal Shallow/Deep/SoftDeleted
       # @return [Array] Returns an Array of Folder or subclasses of Folder
       def self.find_folders(root = :root, traversal = 'Shallow')
-        (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal )
+        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal )
+        if(resp.status == 'Success')
+          folders = []
+          resp.items.each do |f|
+            f_type = f.keys.first.to_s.camel_case
+            folders << (eval "#{f_type}.new(f[f.keys.first])")
+          end
+          return folders
+        else
+          raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
+        end
       end
 
       attr_accessor :folder_id, :change_key, :parent_id
@@ -154,15 +164,39 @@ module Viewpoint
       end
 
       # Find Items
-      def find_items
-        resp = (Viewpoint::EWS::EWS.instance).ews.find_item([@folder_id])
-        parms = resp.items.shift
-        items = []
-        resp.items.each do |i|
-          i_type = i.keys.first
-          items << (eval "#{i_type.to_s.camel_case}.new(i[i_type])")
+      def find_items(opts = {})
+        resp = (Viewpoint::EWS::EWS.instance).ews.find_item([@folder_id], 'Shallow', {:base_shape => 'Default'}, opts)
+        if(resp.status == 'Success')
+          parms = resp.items.shift
+          items = []
+          resp.items.each do |i|
+            i_type = i.keys.first
+            items << (eval "#{i_type.to_s.camel_case}.new(i[i_type])")
+          end
+          return items
+        else
+          raise EwsError, "Could not find items. #{resp.code}: #{resp.message}"
         end
-        items
+      end
+
+      def todays_items
+        #opts = {:query_string => ["Received:today"]}
+        items_since(Date.today.to_datetime)
+      end
+
+      def items_since(date_time)
+        restr = {:restriction =>
+          {:is_greater_than_or_equal_to => 
+            {:field_uRI => {:field_uRI=>'item:DateTimeReceived'}, :field_uRI_or_constant =>{:constant => {:value=>date_time}}}}}
+        find_items(restr)
+      end
+
+      def items_between(start_date, end_date)
+        restr = {:restriction =>  {:and => [
+          {:is_greater_than_or_equal_to => {:field_uRI => {:field_uRI=>'item:DateTimeReceived'},:field_uRI_or_constant=>{:constant => {:value =>start_date}}}},
+          {:is_less_than_or_equal_to => {:field_uRI => {:field_uRI=>'item:DateTimeReceived'},:field_uRI_or_constant=>{:constant => {:value =>end_date}}}}
+        ]}}
+        find_items(restr)
       end
 
       # Get Item

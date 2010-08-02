@@ -300,8 +300,10 @@ module Viewpoint
                 add_hierarchy!(n, v)
               end
             elsif v.is_a? Array
-              v.each do |i|
-                add_hierarchy!(n, i)
+              node.add("#{prefix}:#{k.to_s.camel_case}") do |n|
+                v.each do |i|
+                  add_hierarchy!(n, i)
+                end
               end
             else
               node.set_attr(k.to_s.camel_case, v) unless k == :text

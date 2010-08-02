@@ -30,6 +30,8 @@ class String
 
   # Change a ruby_cased string to CamelCased
   def camel_case
-    self.split(/_/).map {|i| i.capitalize}.join
+    self.split(/_/).map { |i|
+      i.sub(/^./) { |s| s.upcase }
+    }.join
   end
 end # String
