@@ -199,6 +199,37 @@ module Viewpoint
         find_items(restr)
       end
 
+      # Search on the item subject
+      # @param [String] match_str A simple string paramater to match against the subject.  The search ignores
+      #   case and does not accept regexes... only strings.
+      # @param [String,nil] exclude_str A string to exclude from matches against the subject.  This is optional.
+      def search_by_subject(match_str, exclude_str = nil)
+        match = {:contains =>
+          {
+            :containment_mode => 'Substring',
+            :containment_comparison => 'IgnoreCase',
+            :field_uRI => {:field_uRI=>'item:Subject'},
+            :constant => {:value =>match_str}
+          }
+        }
+        unless exclude_str.nil?
+          excl = {:not =>
+            {:contains =>
+              {
+                :containment_mode => 'Substring',
+                :containment_comparison => 'IgnoreCase',
+                :field_uRI => {:field_uRI=>'item:Subject'},
+                :constant => {:value =>exclude_str}
+              }
+            }
+          }
+
+          match[:and] = [{:contains => match.delete(:contains)}, excl]
+        end
+
+        find_items({:restriction => match})
+      end
+
       # Get Item
       def get_item(item_id, change_key = nil)
         resp = (Viewpoint::EWS::EWS.instance).ews.get_item([item_id])
