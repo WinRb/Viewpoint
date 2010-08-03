@@ -72,18 +72,35 @@ module Viewpoint
 
       attr_reader :ews
 
+      # Set the endpoint for Exchange Web Services.  
+      # @param [String] endpoint The URL of the endpoint. This should end in
+      #   'exchange.asmx' and is typically something like this:
+      #   https://myexch/ews/exchange.asmx
+      # @param [Integer] version The SOAP version to use.  This defaults to 1
+      #   and you should not need to pass this parameter.
       def self.endpoint=(endpoint, version = 1)
         @@endpoint = endpoint
         SOAP::ExchangeWebService.endpoint(:uri => endpoint, :version => version)
       end
 
+      # Fetch the current endpoint
       def self.endpoint
         @@endpoint
       end
 
+      # Set the SOAP username and password.
+      # @param [String] user The user name
+      # @param [String] pass The password
       def self.set_auth(user,pass)
         @@user = user
         SOAP::ExchangeWebService.set_auth(user,pass)
+      end
+
+      # Set the http driver that the SOAP back-end will use.
+      # @param [Symbol] driver The HTTP driver.  Available drivers:
+      #   :curb, :net_http, :http_client(Default)
+      def self.set_http_driver(driver)
+        Handsoap.http_driver = driver
       end
 
       def initialize
