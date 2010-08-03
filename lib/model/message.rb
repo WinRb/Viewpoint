@@ -58,6 +58,18 @@ module Viewpoint
         super(ews_item)
       end
 
+      def headers
+        deepen! if @shallow
+        return @headers if defined?(@headers) && !@headers.empty?
+        @headers = {}
+        # @todo When ruby 1.9 becomes more pervasive the Enumerator#each_with_object
+        #@headers ||= @ews_item[:internet_message_headers][:internet_message_header].each_with_object({}) do |h,obj|
+        @ews_item[:internet_message_headers][:internet_message_header].each do |h|
+          @headers[h[:header_name]] = h[:text]
+        end
+        @headers
+      end
+
       private
 
       def init_methods
