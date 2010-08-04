@@ -57,7 +57,7 @@ module Viewpoint
       #   or a FolderId (String)
       # @param [String] traversal Shallow/Deep/SoftDeleted
       # @return [Array] Returns an Array of Folder or subclasses of Folder
-      def self.find_folders(root = :root, traversal = 'Shallow')
+      def self.find_folders(root = :msgfolderroot, traversal = 'Shallow')
         resp = (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal )
         if(resp.status == 'Success')
           folders = []
@@ -68,6 +68,37 @@ module Viewpoint
           return folders
         else
           raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
+        end
+      end
+
+      # Return a list of folder names
+      # @return [Array<String>] Return an Array of folder names.
+      def self.folder_names
+        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([:msgfolderroot], 'Shallow')
+        if(resp.status == 'Success')
+          flds = []
+          resp.items.each do |f|
+            flds << f[f.keys.first][:display_name][:text]
+          end
+          flds
+        else
+          raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
+        end
+      end
+
+      # Gets a folder by name.  This name must match the folder name exactly.
+      # @param [String] name The name of the folder to fetch.
+      def self.get_folder_by_name(name)
+        restr = {:restriction =>
+          {:is_equal_to => 
+            {:field_uRI => {:field_uRI=>'folder:DisplayName'}, :field_uRI_or_constant =>{:constant => {:value=>name}}}}}
+        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([:msgfolderroot], 'Shallow', {:base_shape => 'Default'}, restr)
+        if(resp.status == 'Success')
+          f = resp.items.first
+          f_type = f.keys.first.to_s.camel_case
+          eval "#{f_type}.new(f[f.keys.first])"
+        else
+          raise EwsError, "Could not retrieve folder. #{resp.code}: #{resp.message}"
         end
       end
 

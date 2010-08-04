@@ -133,8 +133,12 @@ module Viewpoint
           action = "#{SOAP_ACTION_PREFIX}/FindFolder"
           resp = invoke("#{NS_EWS_MESSAGES}:FindFolder", :soap_action => action) do |root|
             build!(root) do
+              restriction = opts.delete(:restriction)
               root.set_attr('Traversal', traversal)
               folder_shape!(root, folder_shape)
+              root.add("#{NS_EWS_MESSAGES}:Restriction") do |r|
+                add_hierarchy!(r, restriction)
+              end unless restriction.nil?
               parent_folder_ids!(root, parent_folder_ids)
             end
           end
