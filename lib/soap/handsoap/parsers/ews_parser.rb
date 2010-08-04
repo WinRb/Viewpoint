@@ -127,6 +127,28 @@ module Viewpoint
             raise EwsError, "#{@response_message.code}: #{@response_message.message}"
           end
         end
+        
+        def send_item_response(opts)
+          if(@response_message.status == 'Success')
+            items = []
+            (@response/"//#{NS_EWS_MESSAGES}:Items/*").each do |i|
+              items << xml_to_hash!(i.native_element)
+            end
+            @response_message.items = items
+          else
+            raise EwsError, "#{@response_message.code}: #{@response_message.message}"
+          end
+        end
+
+        def create_attachment_response(opts)
+          if(@response_message.status == 'Success')
+            att_id = (@response/"//#{NS_EWS_TYPES}:FileAttachment/*").last
+            att_id = xml_to_hash!(att_id.native_element)
+            @response_message.items = [att_id]
+          else
+            raise EwsError, "#{@response_message.code}: #{@response_message.message}"
+          end
+        end
 
         def sync_folder_items_response(opts)
           if(@response_message.status == 'Success')

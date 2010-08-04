@@ -21,6 +21,7 @@
 # We only what one instance of this class so include Singleton
 require 'singleton'
 require 'date'
+require 'base64'
 
 # Class Extensions
 require 'extensions/string'

@@ -64,12 +64,30 @@ module Viewpoint
           end
         end
 
+        # Create the ItemIds Element
+        # @param [Element] node The node we are adding Mailbox elements to.
+        # @param [Array] item_ids The item ids to add in.
         def item_ids!(node, item_ids)
           node.add("#{NS_EWS_MESSAGES}:ItemIds") do |ids|
             item_ids.each do |id|
-              ids.add("#{NS_EWS_TYPES}:ItemId") do |iid|
-                iid.set_attr('Id',id)
-              end
+              item_id!(ids,id)
+            end
+          end
+        end
+
+        # Builds an ItemId element out of a String or Hash object
+        # @param [Element] node The node we are adding Mailbox elements to.
+        # @param [String,Hash] item_id The id of the Item.  If this is a Hash
+        #   it should contain the Id and the ChangeKey.
+        # @option item_ids [String] :id The item Id
+        # @option item_ids [String] :change_key The ChangeKey
+        def item_id!(node, item_id, element_name="#{NS_EWS_TYPES}:ItemId")
+          node.add(element_name) do |iid|
+            if(item_id.is_a?(String))
+              iid.set_attr('Id',item_id)
+            else
+              iid.set_attr('Id',item_id[:id])
+              iid.set_attr('ChangeKey',item_id[:change_key])
             end
           end
         end
@@ -99,18 +117,9 @@ module Viewpoint
 
         def saved_item_folder_id!(node, folder_id)
           node.add("#{NS_EWS_MESSAGES}:SavedItemFolderId") do |sfid|
-            if( folder_id.is_a?(Symbol) )
-              # @todo add change_key support to DistinguishedFolderId
-              sfid.add("#{NS_EWS_TYPES}:DistinguishedFolderId") do |df|
-                df.set_attr('Id', folder_id.to_s)
-              end
-            else
-              # @todo add change_key support to FolderId
-              sfid.add("#{NS_EWS_TYPES}:FolderId",folder_id)
-            end
+            folder_id!(sfid, folder_id)
           end
         end
-
 
         # @todo This only supports the FieldURI extended property right now
         def folder_shape!(node, folder_shape)
@@ -287,6 +296,17 @@ module Viewpoint
 
         def sync_state!(node, sync_state)
           node.add("#{NS_EWS_MESSAGES}:SyncState", sync_state)
+        end
+
+        # @todo Add support of ItemAttachment
+        def attachments!(node, files, items)
+          node.add("#{NS_EWS_MESSAGES}:Attachments") do |att|
+            files.each do |f|
+              att.add("#{NS_EWS_TYPES}:FileAttachment") do |fatt|
+                add_hierarchy!(fatt, f)
+              end
+            end
+          end
         end
 
         # Add a hierarchy of elements from hash data

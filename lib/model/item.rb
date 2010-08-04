@@ -39,7 +39,23 @@ module Viewpoint
         self.new(resp[resp.keys.first])
       end
 
-      attr_reader :item_id, :body_type
+      # Add attachments to the passed in ParentId
+      # @param [String,Hash] parent_id Either a String ItemId or a Hash ItemId with a ChangeKey
+      # @option parent_id [String] :id The Id
+      # @option parent_id [String] :change_key The ChangeKey
+      # @param [Array<File>] attachments An Array of File objects to read in.
+      def self.add_attachments(parent_id, attachments)
+        conn = Viewpoint::EWS::EWS.instance
+        b64attach = []
+        attachments.each do |a|
+          b64attach << {:name => {:text =>(File.basename a.path)}, :content => {:text => Base64.encode64(a.read)}}
+        end
+        resp = conn.ews.create_attachment(parent_id, b64attach) 
+        (resp.status == 'Success') || (raise EwsError, "Could not create attachments. #{resp.code}: #{resp.message}")
+        {:id => resp.items.first[:attachment_id][:root_item_id], :change_key => resp.items.first[:attachment_id][:root_item_change_key]}
+      end
+
+      attr_reader :item_id, :change_key, :body_type
       alias :id :item_id
 
       # Initialize an Exchange Web Services item
@@ -50,6 +66,7 @@ module Viewpoint
         @ews_item = ews_item
         @shallow = shallow
         @item_id = ews_item[:item_id][:id]
+        @change_key = ews_item[:item_id][:change_key]
 
         init_methods
       end
@@ -106,7 +123,7 @@ module Viewpoint
         deltype = soft ? 'SoftDelete' : 'HardDelete'
         resp = (Viewpoint::EWS::EWS.instance).ews.delete_item([@item_id], deltype)
         self.clear_object!
-        resp.status == 'Success'
+        (resp.status == 'Success') || (raise EwsError, "Could not delete message. #{resp.code}: #{resp.message}")
       end
 
       # Delete this item by moving it to the Deleted Items folder
@@ -116,7 +133,7 @@ module Viewpoint
       def recycle!
         resp = (Viewpoint::EWS::EWS.instance).ews.delete_item([@item_id], 'MoveToDeletedItems')
         self.clear_object!
-        resp.status == 'Success'
+        (resp.status == 'Success') || (raise EwsError, "Could not recycle message. #{resp.code}: #{resp.message}")
       end
 
       private

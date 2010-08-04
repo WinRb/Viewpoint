@@ -4,3 +4,5 @@
       deepen!
     else
       raise the NoMethod error
+
+- Clean-up exceptions.  There is exception raising in the Model that will never ocurr because it is already being checked for in the Parser

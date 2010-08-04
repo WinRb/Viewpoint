@@ -29,6 +29,7 @@ module Viewpoint
   module EWS
     module SOAP
       class ExchangeWebService < Handsoap::Service
+        include Viewpoint::EWS::SOAP
 
         SOAP_ACTION_PREFIX = "http://schemas.microsoft.com/exchange/services/2006/messages"
 
@@ -249,8 +250,8 @@ module Viewpoint
         def delete_folder(folder_id, delete_type = 'MoveToDeletedItems')
           action = "#{SOAP_ACTION_PREFIX}/DeleteFolder"
           resp = invoke("#{NS_EWS_MESSAGES}:DeleteFolder", :soap_action => action) do |root|
-            root.set_attr('DeleteType', delete_type)
             build!(root) do
+              root.set_attr('DeleteType', delete_type)
               folder_id = (folder_id.is_a?(Array)) ? folder_id : [folder_id]
               folder_ids!(root, folder_id)
             end
@@ -485,12 +486,24 @@ module Viewpoint
           parse_update_item(resp)
         end
 
-        def send_item
+        # Used to send e-mail messages that are located in the Exchange store.
+        # @see http://msdn.microsoft.com/en-us/library/aa580238.aspx
+        # @param [Array<Hash>] item_ids An Array of item ids.  These item_ids should be a Hash of
+        #   :id and :change_key.
+        # @param [Boolean] save_item Save item after sending (Think sent-items)
+        # @param [String, Symbol,nil] saved_item_folder The folder to save this item in. Either a
+        #   DistinguishedFolderId (must me a Symbol) or a FolderId (String).  Just leave
+        #   it blank for the default :sentitems
+        def send_item(item_ids, save_item=true, saved_item_folder=nil)
           action = "#{SOAP_ACTION_PREFIX}/SendItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:SendItem", :soap_action => action) do |send_item|
-            build_send_item!(send_item)
+          resp = invoke("#{NS_EWS_MESSAGES}:SendItem", :soap_action => action) do |root|
+            build!(root) do
+              root.set_attr('SaveItemToFolder', save_item)
+              item_ids!(root,item_ids)
+              saved_item_folder_id!(root,saved_item_folder) unless saved_item_folder.nil?
+            end
           end
-          parse_send_item(resp)
+          parse!(resp)
         end
 
         # Used to move one or more items to a single destination folder.
@@ -525,12 +538,25 @@ module Viewpoint
           parse!(resp)
         end
 
-        def create_attachment
+        # Creates either an item or file attachment and attaches it to the specified item.
+        # @see http://msdn.microsoft.com/en-us/library/aa565877.aspx
+        # @param [String,Hash] parent_id The id of the Item.  If this is a Hash
+        #   it should contain the Id and the ChangeKey.
+        # @option parent_id [String] :id The item Id
+        # @option parent_id [String] :change_key The ChangeKey
+        # @param [Array<Hash>] files An Array of Base64 encoded Strings with an associated name
+        #   hash format= :name => <name>, :content => <Base64 encoded string>
+        # @param [Array] items Exchange Items to attach to this Item
+        # @todo Need to implement attachment of Item types
+        def create_attachment(parent_id, files = [], items = [])
           action = "#{SOAP_ACTION_PREFIX}/CreateAttachment"
-          resp = invoke("#{NS_EWS_MESSAGES}:CreateAttachment", :soap_action => action) do |create_attachment|
-            build_create_attachment!(create_attachment)
+          resp = invoke("#{NS_EWS_MESSAGES}:CreateAttachment", :soap_action => action) do |root|
+            build!(root) do
+              item_id!(root, parent_id, "#{NS_EWS_MESSAGES}:ParentItemId")
+              attachments!(root, files, items)
+            end
           end
-          parse_create_attachment(resp)
+          parse!(resp)
         end
 
         def delete_attachment
@@ -621,6 +647,9 @@ module Viewpoint
           parse!(resp)
         end
 
+        # Provides detailed information about the availability of a set of users, rooms, and resources
+        # within a specified time window.
+        # @see http://msdn.microsoft.com/en-us/library/aa564001.aspx
         def get_user_availability
           action = "#{SOAP_ACTION_PREFIX}/GetUserAvailability"
           resp = invoke("#{NS_EWS_MESSAGES}:GetUserAvailability", :soap_action => action) do |get_user_availability|
@@ -649,7 +678,6 @@ module Viewpoint
 
         # Private Methods (Builders and Parsers)
         private
-
 
         def build!(node, opts = {}, &block)
           EwsBuilder.new(node, opts, &block)

@@ -1,0 +1,7 @@
+spec/basic_functions.spec
+spec/item_tests.spec
+spec/folder_subscriptions.spec
+spec/folder_synchronization.spec
+--format
+nested
+--color

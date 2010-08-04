@@ -22,6 +22,15 @@ describe "Test the basic features of Viewpoint" do
     (Viewpoint::EWS::GenericFolder.get_folder :tasks).should be_instance_of(Viewpoint::EWS::TasksFolder)
   end
 
+  it 'should retrive the Inbox by name' do
+    (Viewpoint::EWS::GenericFolder.get_folder_by_name 'Inbox').should be_instance_of(Viewpoint::EWS::Folder)
+  end
+
+  it 'should retrive the Inbox by FolderId' do
+    inbox = Viewpoint::EWS::GenericFolder.get_folder_by_name 'Inbox'
+    (Viewpoint::EWS::GenericFolder.get_folder inbox.id).should be_instance_of(Viewpoint::EWS::Folder)
+  end
+
   it 'should retrieve an Array of Folder Types' do
     flds = Viewpoint::EWS::GenericFolder.find_folders
     flds.should be_instance_of(Array)
