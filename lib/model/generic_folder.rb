@@ -89,9 +89,11 @@ module Viewpoint
       # Gets a folder by name.  This name must match the folder name exactly.
       # @param [String] name The name of the folder to fetch.
       def self.get_folder_by_name(name)
+        # For now the :field_uRI and :field_uRI_or_constant must be in an Array for Ruby 1.8.7 because Hashes
+        # are not positional at insertion until 1.9
         restr = {:restriction =>
           {:is_equal_to => 
-            {:field_uRI => {:field_uRI=>'folder:DisplayName'}, :field_uRI_or_constant =>{:constant => {:value=>name}}}}}
+            [{:field_uRI => {:field_uRI=>'folder:DisplayName'}}, {:field_uRI_or_constant =>{:constant => {:value=>name}}}]}}
         resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([:msgfolderroot], 'Shallow', {:base_shape => 'Default'}, restr)
         if(resp.status == 'Success')
           f = resp.items.first
