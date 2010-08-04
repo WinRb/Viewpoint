@@ -48,4 +48,13 @@ describe "Test the basic features of Viewpoint" do
     end
   end
 
+  it 'should retrieve a folder by name' do
+    inbox = Viewpoint::EWS::GenericFolder.get_folder_by_name("Inbox")
+    inbox.should be_instance_of(Viewpoint::EWS::Folder)
+  end
+
+  it 'should retrieve a list of folder names' do
+    Viewpoint::EWS::GenericFolder.folder_names.should_not be_empty
+  end
+
 end
