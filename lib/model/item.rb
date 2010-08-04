@@ -65,6 +65,37 @@ module Viewpoint
         init_methods
       end
 
+      # Move this item to a new folder
+      # @param [String,Symbol,GenericFolder] new_folder The new folder to move it to. This should
+      #   be a subclass of GenericFolder, a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+      def move!(new_folder)
+        new_folder = new_folder.id if new_folder.kind_of?(GenericFolder)
+        resp = (Viewpoint::EWS::EWS.instance).ews.move_item([@item_id], new_folder)
+        if(resp.status == 'Success')
+          @item_id = resp.items.first[resp.items.first.keys.first][:item_id][:id]
+          @change_key = resp.items.first[resp.items.first.keys.first][:item_id][:change_key]
+          true
+        else
+          raise EwsError, "Could not move item. #{resp.code}: #{resp.message}"
+        end
+      end
+
+      # Copy this item to a new folder
+      # @param [String,Symbol,GenericFolder] new_folder The new folder to move it to. This should
+      #   be a subclass of GenericFolder, a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+      # @return [Item] The Item object of the copy
+      def copy(new_folder)
+        new_folder = new_folder.id if new_folder.kind_of?(GenericFolder)
+        resp = (Viewpoint::EWS::EWS.instance).ews.copy_item([@item_id], new_folder)
+        if(resp.status == 'Success')
+          item = resp.items.first
+          i_type = item.keys.first.to_s.camel_case
+          return(eval "#{i_type}.new(item[item.keys.first])")
+        else
+          raise EwsError, "Could not copy item. #{resp.code}: #{resp.message}"
+        end
+      end
+
       # Delete this item
       # @param [Boolean] soft Whether or not to do a soft delete.  By default EWS will do a 
       #   hard delete of this item.  See the MSDN docs for more info:

@@ -52,12 +52,17 @@ module Viewpoint
           end
         end
 
-
         # For now this is the same as folder_ids! so just use that method
         def parent_folder_ids!(node, folder_ids)
           folder_ids!(node, folder_ids, nil, "#{NS_EWS_MESSAGES}:ParentFolderIds")
         end
 
+        # @see http://msdn.microsoft.com/en-us/library/aa565020.aspx
+        def to_folder_id!(node, folder_id)
+          node.add("#{NS_EWS_MESSAGES}:ToFolderId") do |tfi|
+            folder_id!(tfi, folder_id)
+          end
+        end
 
         def item_ids!(node, item_ids)
           node.add("#{NS_EWS_MESSAGES}:ItemIds") do |ids|

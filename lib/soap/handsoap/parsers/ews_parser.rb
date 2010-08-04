@@ -99,6 +99,22 @@ module Viewpoint
           end
         end
 
+        def copy_item_response(opts)
+          if(@response_message.status == 'Success')
+            @response_message.items << xml_to_hash!((@response/"//#{NS_EWS_MESSAGES}:Items/*").first.native_element)
+          else
+            raise EwsError, "#{@response_message.code}: #{@response_message.message}"
+          end
+        end
+        
+        def move_item_response(opts)
+          if(@response_message.status == 'Success')
+            @response_message.items << xml_to_hash!((@response/"//#{NS_EWS_MESSAGES}:Items/*").first.native_element)
+          else
+            raise EwsError, "#{@response_message.code}: #{@response_message.message}"
+          end
+        end
+
         # @todo need to find out out to us XPath to get ItemId.  It doesn't seem to work now.
         def create_item_response(opts)
           if(@response_message.status == 'Success')

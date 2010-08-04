@@ -489,20 +489,36 @@ module Viewpoint
           parse_send_item(resp)
         end
 
-        def move_item
+        # Used to move one or more items to a single destination folder.
+        # @see http://msdn.microsoft.com/en-us/library/aa565781.aspx
+        # @param [Array] item_ids An Array of item ids
+        # @param [String, Symbol] folder_id either a DistinguishedFolderId
+        #   (must me a Symbol) or a FolderId (String)
+        def move_item(item_ids, folder_id)
           action = "#{SOAP_ACTION_PREFIX}/MoveItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:MoveItem", :soap_action => action) do |move_item|
-            build_move_item!(move_item)
+          resp = invoke("#{NS_EWS_MESSAGES}:MoveItem", :soap_action => action) do |root|
+            build!(root) do
+              to_folder_id!(root, folder_id)
+              item_ids!(root, item_ids)
+            end
           end
-          parse_move_item(resp)
+          parse!(resp)
         end
 
-        def copy_item
+        # Copies items and puts the items in a different folder
+        # @see http://msdn.microsoft.com/en-us/library/aa565012.aspx
+        # @param [Array] item_ids An Array of item ids
+        # @param [String, Symbol] folder_id either a DistinguishedFolderId
+        #   (must me a Symbol) or a FolderId (String)
+        def copy_item(item_ids, folder_id)
           action = "#{SOAP_ACTION_PREFIX}/CopyItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:CopyItem", :soap_action => action) do |copy_item|
-            build_copy_item!(copy_item)
+          resp = invoke("#{NS_EWS_MESSAGES}:CopyItem", :soap_action => action) do |root|
+            build!(root) do
+              to_folder_id!(root, folder_id)
+              item_ids!(root, item_ids)
+            end
           end
-          parse_copy_item(resp)
+          parse!(resp)
         end
 
         def create_attachment
