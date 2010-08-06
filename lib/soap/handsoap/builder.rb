@@ -18,5 +18,5 @@
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
 # Exchange Web Service Builders
-require 'builders/ews_builder.rb'
+require 'soap/handsoap/builders/ews_builder.rb'
 

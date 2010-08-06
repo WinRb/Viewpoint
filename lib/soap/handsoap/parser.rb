@@ -103,4 +103,4 @@ module Viewpoint
   end # SPWS
 end # Viewpoint
 
-require 'parsers/ews_parser'
+require 'soap/handsoap/parsers/ews_parser'

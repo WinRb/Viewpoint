@@ -71,5 +71,3 @@ module Viewpoint
     end
   end
 end
-
-

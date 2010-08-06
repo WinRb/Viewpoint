@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License along
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
-require 'builders/ews_build_helpers.rb'
+require 'soap/handsoap/builders/ews_build_helpers.rb'
 module Viewpoint
   module EWS
     module SOAP

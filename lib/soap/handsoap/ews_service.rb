@@ -17,11 +17,9 @@
 # You should have received a copy of the GNU General Public License along
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
-$: << File.dirname(__FILE__)
 require 'handsoap'
-require 'builder'
-require 'parser'
-
+require 'soap/handsoap/builder'
+require 'soap/handsoap/parser'
 
 Handsoap.http_driver = :http_client
 
