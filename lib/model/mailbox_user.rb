@@ -52,6 +52,19 @@ module Viewpoint
         @ews_item = mbox_user
         define_str_var :name, :email_address, :routing_type, :mailbox_type, :item_id
       end
+
+      def get_oof
+        mailbox = {:mailbox => {:address => {:text => email_address}}}
+        resp = (Viewpoint::EWS::EWS.instance).ews.get_user_oof_settings(mailbox)
+        s = resp[:oof_settings]
+        @oof_state = s[:oof_state][:text]
+        @oof_ext_audience = s[:external_audience][:text]
+        @oof_start = DateTime.parse(s[:duration][:start_time][:text])
+        @oof_end = DateTime.parse(s[:duration][:end_time][:text])
+        @oof_internal_reply = s[:internal_reply][:message][:text]
+        @oof_external_reply = s[:internal_reply][:message][:text]
+        true
+      end
       
       # Adds one or more delegates to a principal's mailbox and sets specific access permissions
       # @see http://msdn.microsoft.com/en-us/library/bb856527.aspx

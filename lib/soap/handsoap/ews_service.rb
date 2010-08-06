@@ -51,6 +51,8 @@ module Viewpoint
         end
 
         # ********* Begin Hooks *********
+
+
         def on_create_document(doc)
           doc.alias NS_EWS_TYPES, 'http://schemas.microsoft.com/exchange/services/2006/types'
           doc.alias NS_EWS_MESSAGES, 'http://schemas.microsoft.com/exchange/services/2006/messages'
@@ -73,6 +75,8 @@ module Viewpoint
         def on_after_create_http_request(req)
           req.set_auth @@user, @@pass
         end
+
+
         # ********** End Hooks **********
 
 
@@ -656,22 +660,27 @@ module Viewpoint
           parse_get_user_availability(resp)
         end
 
-        def get_user_oof_settings
+        # Gets a mailbox user's Out of Office (OOF) settings and messages.
+        # @see http://msdn.microsoft.com/en-us/library/aa563465.aspx
+        def get_user_oof_settings(mailbox)
           action = "#{SOAP_ACTION_PREFIX}/GetUserOofSettings"
-          resp = invoke("#{NS_EWS_MESSAGES}:GetUserOofSettings", :soap_action => action) do |get_user_oof_settings|
-            build_get_user_oof_settings!(get_user_oof_settings)
+          resp = invoke("#{NS_EWS_MESSAGES}:GetUserOofSettingsRequest", :soap_action => action) do |root|
+            build!(root) do
+              mailbox!(root,mailbox[:mailbox],NS_EWS_TYPES)
+            end
           end
-          parse_get_user_oof_settings(resp)
+          parse!(resp)
         end
 
-        def set_user_oof_settings
+        # Sets a mailbox user's Out of Office (OOF) settings and message.
+        # @see http://msdn.microsoft.com/en-us/library/aa580294.aspx
+        def set_user_oof_settings(mailbox, oof_state, ext_audience, dt_start, dt_end, int_msg, ext_mg)
           action = "#{SOAP_ACTION_PREFIX}/SetUserOofSettings"
-          resp = invoke("#{NS_EWS_MESSAGES}:SetUserOofSettings", :soap_action => action) do |set_user_oof_settings|
-            build_set_user_oof_settings!(set_user_oof_settings)
+          resp = invoke("#{NS_EWS_MESSAGES}:SetUserOofSettings", :soap_action => action) do |root|
+            build!(root)
           end
-          parse_set_user_oof_settings(resp)
+          parse!(resp)
         end
-
 
 
         # Private Methods (Builders and Parsers)

@@ -27,13 +27,12 @@ module Viewpoint
           @response = response
           @response_type = (response/"//#{NS_SOAP}:Body/*").first.node_name
 
-          rmsg = (response/'//m:ResponseMessages/*[@ResponseClass]').first
+          rmsg = (response/'//*[@ResponseClass]').first
           @response_message = EwsSoapResponse.new(rmsg['ResponseClass'],
                                                   (rmsg/'m:ResponseCode/text()').first.to_s,
                                                   (rmsg/'m:MessageText/text()').first.to_s)
 
           @response_message.set_soap_resp(response)
-
         end
 
         # This is the main parser method.  It takes the response type and tries to

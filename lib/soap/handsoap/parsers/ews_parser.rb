@@ -163,7 +163,10 @@ module Viewpoint
           else
             raise EwsError, "#{@response_message.code}: #{@response_message.message}"
           end
+        end
 
+        def get_user_oof_settings_response(opts)
+          @response_message.items = xml_to_hash!((@response/"//#{NS_EWS_TYPES}:OofSettings").first.native_element)
         end
 
         # Parse out a Mailbox element
