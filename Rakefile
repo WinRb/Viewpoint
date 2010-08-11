@@ -2,6 +2,7 @@ require 'rubygems'
 require 'rake/clean'
 require 'rake/gempackagetask'
 require 'date'
+require 'metric_fu'
 
 CLEAN.include("pkg")
 CLEAN.include("doc")
@@ -67,3 +68,11 @@ def up_min_version
 	f.write(ver)
 	ver
 end
+
+MetricFu::Configuration.run do |config|
+  #define which metrics you want to use
+#  config.metrics  = [:churn, :saikuro, :stats, :flog, :flay]
+  config.metrics  = [:flog, :flay]
+  config.graphs   = [:flog, :flay]
+end
+

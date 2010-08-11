@@ -53,12 +53,12 @@ module Viewpoint
 
       # Find subfolders of the passed root folder.  If no parameters are passed
       # this method will search from the Root folder.
-      # @param [Array] root An folder id, either a DistinguishedFolderId (must me a Symbol)
+      # @param [String,Symbol] root An folder id, either a DistinguishedFolderId (must me a Symbol)
       #   or a FolderId (String)
       # @param [String] traversal Shallow/Deep/SoftDeleted
       # @return [Array] Returns an Array of Folder or subclasses of Folder
-      def self.find_folders(root = :msgfolderroot, traversal = 'Shallow')
-        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal )
+      def self.find_folders(root = :msgfolderroot, traversal = 'Shallow', shape = 'Default')
+        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal, {:base_shape => shape} )
         if(resp.status == 'Success')
           folders = []
           resp.items.each do |f|
@@ -88,13 +88,13 @@ module Viewpoint
 
       # Gets a folder by name.  This name must match the folder name exactly.
       # @param [String] name The name of the folder to fetch.
-      def self.get_folder_by_name(name)
+      def self.get_folder_by_name(name, shape = 'Default')
         # For now the :field_uRI and :field_uRI_or_constant must be in an Array for Ruby 1.8.7 because Hashes
         # are not positional at insertion until 1.9
         restr = {:restriction =>
           {:is_equal_to => 
             [{:field_uRI => {:field_uRI=>'folder:DisplayName'}}, {:field_uRI_or_constant =>{:constant => {:value=>name}}}]}}
-        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([:msgfolderroot], 'Shallow', {:base_shape => 'Default'}, restr)
+        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([:msgfolderroot], 'Shallow', {:base_shape => shape}, restr)
         if(resp.status == 'Success')
           f = resp.items.first
           f_type = f.keys.first.to_s.camel_case

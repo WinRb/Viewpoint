@@ -22,6 +22,31 @@ module Viewpoint
   module EWS
     # This class represents a TaskFolderType object in the Exchange Data store.
     class TasksFolder < GenericFolder
+      
+      # Find Task subfolders of the passed root folder.  If no parameters are passed
+      # this method will search from the Root folder.
+      # @param [Str] root An folder id, either a DistinguishedFolderId (must me a Symbol)
+      #   or a FolderId (String)
+      # @param [String] traversal Shallow/Deep/SoftDeleted
+      # @return [Array] Returns an Array of Folder or subclasses of Folder
+      def self.find_folders(root = :msgfolderroot, traversal = 'Deep', shape = 'Default')
+        restr = {:restriction => 
+          {:is_equal_to => {:field_uRI => {:field_uRI=>'folder:FolderClass'},:field_uRI_or_constant=>{:constant => {:value => 'IPF.Task'}}}}
+        }
+        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal, {:base_shape => shape}, restr)
+        if(resp.status == 'Success')
+          folders = []
+          resp.items.each do |f|
+            f_type = f.keys.first.to_s.camel_case
+            folders << (eval "#{f_type}.new(f[f.keys.first])")
+          end
+          return folders
+        else
+          raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
+        end
+      end
+
+
 
       def initialize(folder)
         super(folder)

@@ -118,7 +118,6 @@ module Viewpoint
       end
 
 
-
       private
 
       def init_methods

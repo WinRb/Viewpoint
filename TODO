@@ -6,3 +6,5 @@
       raise the NoMethod error
 
 - Clean-up exceptions.  There is exception raising in the Model that will never ocurr because it is already being checked for in the Parser
+
+- Refactor #find_folders methods.  There is a lot of duplicate code right now and it could be simplified quite a bit.

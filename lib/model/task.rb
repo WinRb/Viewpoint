@@ -51,6 +51,37 @@ module Viewpoint
         super(ews_item)
       end
 
+      # Delete this item
+      # @param [Boolean] soft Whether or not to do a soft delete.  By default EWS will do a 
+      #   hard delete of this item.  See the MSDN docs for more info:
+      #   http://msdn.microsoft.com/en-us/library/aa562961.aspx
+      # @param [String, nil] affected_task_occurrences "AllOccurrences/SpecifiedOccurrenceOnly"
+      #   Default is AllOccurrences
+      #   If you use 'SpecifiedOccurrenceOnly' on a non-reocurring task you will receive and error.
+      # @return [Boolean] Whether or not the item was deleted
+      # @todo Add exception handling for failed deletes
+      #
+      def delete!(soft=false, affected_task_occurrences='AllOccurrences')
+        deltype = soft ? 'SoftDelete' : 'HardDelete'
+        resp = (Viewpoint::EWS::EWS.instance).ews.delete_item([@item_id], deltype, nil, affected_task_occurrences)
+        self.clear_object!
+        resp.status == 'Success'
+      end
+
+      # Delete this item by moving it to the Deleted Items folder
+      # @see  http://msdn.microsoft.com/en-us/library/aa562961.aspx
+      # @param [String, nil] affected_task_occurrences "AllOccurrences/SpecifiedOccurrenceOnly"
+      #   Default is AllOccurrences
+      #   If you use 'SpecifiedOccurrenceOnly' on a non-reocurring task you will receive and error.
+      # @return [Boolean] Whether or not the item was deleted
+      # @todo Add exception handling for failed deletes
+      def recycle!(affected_task_occurrences='AllOccurrences')
+        resp = (Viewpoint::EWS::EWS.instance).ews.delete_item([@item_id], 'MoveToDeletedItems', nil, affected_task_occurrences)
+        self.clear_object!
+        resp.status == 'Success'
+      end
+
+
       private
 
       def init_methods
