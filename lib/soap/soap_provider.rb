@@ -64,10 +64,3 @@ module Viewpoint
 end # Viewpoint
 
 require 'soap/handsoap/ews_service'
-
-module Viewpoint
-  module EWS
-    module SOAP
-    end
-  end
-end

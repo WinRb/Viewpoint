@@ -43,6 +43,17 @@ module Viewpoint
           end
         end
 
+        # @see ExchangeWebService#subscribe
+        def push_subscription_request!(folder_ids, event_types, url, watermark=nil, status_frequency=5)
+          @node.add("#{NS_EWS_MESSAGES}:PushSubscriptionRequest") do |ps|
+            folder_ids!(ps, folder_ids, nil, "#{NS_EWS_TYPES}:FolderIds")
+            event_types!(ps, event_types)
+            ps.add("#{NS_EWS_TYPES}:Watermark", watermark) unless watermark.nil?
+            ps.add("#{NS_EWS_TYPES}:StatusFrequency", status_frequency)
+            ps.add("#{NS_EWS_TYPES}:URL", url)
+          end
+        end
+
         # @param [String] type The type of items in the items array message/calendar
         # @todo Fix max_changes_returned to be more flexible
         def create_item!(folder_id, items, message_disposition, send_invites, type)

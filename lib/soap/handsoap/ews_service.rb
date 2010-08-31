@@ -307,6 +307,19 @@ module Viewpoint
           parse!(resp)
         end
 
+        # Used to subscribe client applications to either push or pull notifications.
+        # @see http://msdn.microsoft.com/en-us/library/aa566188.aspx Subscribe on MSDN
+        def push_subscribe(folder_ids, event_types, url, watermark=nil, status_frequency=5)
+          action = "#{SOAP_ACTION_PREFIX}/Subscribe"
+          resp = invoke("#{NS_EWS_MESSAGES}:Subscribe", :soap_action => action) do |root|
+            build!(root) do
+              push_subscription_request!(folder_ids, event_types, url, watermark, status_frequency)
+            end
+          end
+          parse!(resp)
+
+        end
+
         # End a pull notification subscription.
         # @see http://msdn.microsoft.com/en-us/library/aa564263.aspx
         #
@@ -453,7 +466,27 @@ module Viewpoint
           action = "#{SOAP_ACTION_PREFIX}/CreateItem"
           resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", :soap_action => action) do |node|
             build!(node) do
-              create_item!(folder_id, items, message_disposition, send_invites=false, 'task')
+              create_item!(folder_id, items, message_disposition, false, 'task')
+            end
+          end
+          parse!(resp)
+        end
+        
+        # Operation is used to create contact items
+        # This is actually a CreateItem operation but they differ for different types
+        # of Exchange objects so it is named appropriately here.
+        # @see # http://msdn.microsoft.com/en-us/library/aa580529.aspx
+        #
+        # @param [String, Symbol] folder_id The folder to save this task in. Either a
+        #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+        # @param [Hash, Array] items An array of item Hashes or a single item Hash. Hash
+        #   values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa581315.aspx
+        #   This Hash will eventually be passed to add_hierarchy! in the builder so it is in that format.
+        def create_contact_item(folder_id, items)
+          action = "#{SOAP_ACTION_PREFIX}/CreateItem"
+          resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", :soap_action => action) do |node|
+            build!(node) do
+              create_item!(folder_id, items, nil, false, 'contact')
             end
           end
           parse!(resp)
