@@ -94,7 +94,7 @@ module Viewpoint
         restr = {:restriction =>
           {:is_equal_to => 
             [{:field_uRI => {:field_uRI=>'folder:DisplayName'}}, {:field_uRI_or_constant =>{:constant => {:value=>name}}}]}}
-        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([:msgfolderroot], 'Shallow', {:base_shape => shape}, restr)
+        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([:msgfolderroot], 'Deep', {:base_shape => shape}, restr)
         if(resp.status == 'Success')
           f = resp.items.first
           f_type = f.keys.first.to_s.camel_case
