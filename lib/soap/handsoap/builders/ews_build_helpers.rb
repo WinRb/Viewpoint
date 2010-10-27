@@ -308,6 +308,18 @@ module Viewpoint
             end
           end
         end
+        
+        def attachment_ids!(node, attachment_ids)
+          node.add("#{NS_EWS_MESSAGES}:AttachmentIds") do |att|
+            attachment_ids.each do |id|
+              add_hierarchy!(att, {:attachment_id => {:id => id}})
+            end
+          end
+        end
+
+        def attachment_shape!(node)
+          node.add("#{NS_EWS_MESSAGES}:AttachmentShape")
+        end
 
         # Add a hierarchy of elements from hash data
         # @example Hash to XML
