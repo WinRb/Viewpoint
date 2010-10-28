@@ -139,6 +139,20 @@ module Viewpoint
             raise EwsError, "#{@response_message.code}: #{@response_message.message}"
           end
         end
+        
+        def get_attachment_response(opts)
+          atts = []
+          if(@response_message.status == 'Success')
+            att_id = (@response/"//#{NS_EWS_MESSAGES}:Attachments/*").each do |a|
+              atts << xml_to_hash!(a.native_element)
+            end
+            @response_message.items = atts
+            #@response_message.items = @response
+          else
+            raise EwsError, "#{@response_message.code}: #{@response_message.message}"
+          end
+        end
+
 
         def create_attachment_response(opts)
           if(@response_message.status == 'Success')

@@ -613,7 +613,7 @@ module Viewpoint
               attachment_ids!(root, attachment_ids)
             end
           end
-          #parse!(resp)
+          parse!(resp)
         end
 
         def create_managed_folder

@@ -72,6 +72,7 @@ module Viewpoint
       end
 
       def deepen!
+        return true unless @shallow
         conn = Viewpoint::EWS::EWS.instance
         resp = conn.ews.get_item([@item_id], {:base_shape => 'AllProperties'})
         resp = resp.items.shift
@@ -80,6 +81,7 @@ module Viewpoint
         @ews_methods = []
         @ews_methods_undef = []
         init_methods
+        true
       end
 
       # Move this item to a new folder
@@ -111,6 +113,25 @@ module Viewpoint
         else
           raise EwsError, "Could not copy item. #{resp.code}: #{resp.message}"
         end
+      end
+
+      # Return the attachments for this Item
+      # @return [Array,Attachment] An array of Attachments for this Item
+      def attachments
+        return [] unless has_attachments?
+        deepen!
+        attmts = []
+        @ews_item[:attachments].each_pair do |k,v|
+          puts "Processing attachments of type #{k}"
+          if(v.is_a?(Hash))
+            attmts << Attachment.new(v[:attachment_id][:id])
+          else
+            v.each do |att|
+              attmts << Attachment.new(att[:attachment_id][:id])
+            end
+          end
+        end
+        attmts
       end
 
       # Delete this item
@@ -166,7 +187,12 @@ module Viewpoint
       end
 
       def method_missing(m, *args, &block)
-        warn "!!! No such method: #{m}"
+        if(@shallow)
+          deepen!
+          send(m, *args, &block)
+        else
+          warn "!!! No such method: #{m}"
+        end
       end
 
     end # Item
