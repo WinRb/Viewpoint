@@ -1,5 +1,6 @@
 --------------------------------------------------------------------------
                    Viewpoint for Exchange Web Services
+                http://github.com/zenchild/Viewpoint/wiki
 --------------------------------------------------------------------------
 This program attempts to create a client access library for Exchange Web
 Services (EWS) in Ruby.
