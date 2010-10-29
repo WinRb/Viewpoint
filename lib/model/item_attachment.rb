@@ -17,22 +17,18 @@
 # You should have received a copy of the GNU General Public License along
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
+
 module Viewpoint
   module EWS
+    # An attachment that represents an attachment to another Exchange Item.
+    # This is not yet implemented.
+    class ItemAttachment < Attachment
 
-    # Generic Ews Error
-    class EwsError < StandardError
-    end
+      # @param [String] attachment_id The unique ID for the attachment.
+      def initialize(attachment_id)
+        raise EwsNotImplemented, "ItemAttachments are not yet implemented in Viewpoint"
+      end
 
-    # Raised when a user tries to query a folder subscription after the
-    # subscription has timed out.
-    class EwsSubscriptionTimeout < StandardError
-    end
-
-    # Represents a function in EWS that is not yet implemented in Viewpoint
-    class EwsNotImplemented < StandardError
-    end
-
+    end # ItemAttachment
   end # EWS
 end # Viewpoint
- 

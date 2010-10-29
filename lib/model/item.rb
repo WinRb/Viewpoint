@@ -122,12 +122,12 @@ module Viewpoint
         deepen!
         attmts = []
         @ews_item[:attachments].each_pair do |k,v|
-          puts "Processing attachments of type #{k}"
+          # k should be file_attachment or item_attachment
           if(v.is_a?(Hash))
-            attmts << Attachment.new(v[:attachment_id][:id])
+            attmts << (eval "#{k.to_s.camel_case}.new(v[:attachment_id][:id])")
           else
             v.each do |att|
-              attmts << Attachment.new(att[:attachment_id][:id])
+              attmts << (eval "#{k.to_s.camel_case}.new(att[:attachment_id][:id])")
             end
           end
         end

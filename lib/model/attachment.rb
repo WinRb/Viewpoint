@@ -18,32 +18,16 @@
 # with Viewpoint.  If not, see <http://www.gnu.org/licenses/>.
 #############################################################################
 
-
-# This class represents a generic attachment type for Exchange.
 module Viewpoint
   module EWS
+    # A generic Attachment.  This class should not be instantiated directly.  You
+    # should use one of the subclasses like FileAttachment or ItemAttachment.
     class Attachment
       include Model
 
-      attr_reader :id, :ews_item
-      # @param [String] attachment_id The unique ID for the attachment.
-      def initialize(attachment_id)
-        @id = attachment_id
-        conn = Viewpoint::EWS::EWS.instance
-        resp = conn.ews.get_attachments([attachment_id])
-        @file_name = resp.items.first[:file_attachment][:name][:text]
+      # All Attachment types will have an id.
+      attr_reader :id
 
-        # content in Base64
-        @content = resp.items.first[:file_attachment][:content][:text]
-        #@ews_item = resp
-      end
-
-      def save_to_file(file_name = @file_name)
-        File.open("/tmp/#{file_name}", 'w+') do |f|
-          f.write(Base64.decode64(@content))
-        end
-      end
-      
     end # Attachment
   end # EWS
 end # Viewpoint

@@ -53,6 +53,8 @@ require 'model/meeting_response'
 require 'model/meeting_cancellation'
 require 'model/task'
 require 'model/attachment'
+require 'model/file_attachment'
+require 'model/item_attachment'
 
 # Load the Exception classes
 require 'exceptions/exceptions'

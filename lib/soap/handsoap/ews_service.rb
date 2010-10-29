@@ -605,7 +605,7 @@ module Viewpoint
         # Used to retrieve existing attachments on items in the Exchange store
         # @see http://msdn.microsoft.com/en-us/library/aa494316.aspx
         # @param [Array] attachment_ids Attachment Ids to fetch
-        def get_attachments(attachment_ids)
+        def get_attachment(attachment_ids)
           action = "#{SOAP_ACTION_PREFIX}/GetAttachment"
           resp = invoke("#{NS_EWS_MESSAGES}:GetAttachment", :soap_action => action) do |root|
             build!(root) do
