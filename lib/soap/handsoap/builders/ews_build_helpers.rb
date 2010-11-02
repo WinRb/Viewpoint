@@ -298,17 +298,18 @@ module Viewpoint
           node.add("#{NS_EWS_MESSAGES}:SyncState", sync_state)
         end
 
-        # @todo Add support of ItemAttachment
         def attachments!(node, files, items)
+          # Order matters and ruby 1.8.x does not have ordered hashes.
+          order=[:name, :content] 
           node.add("#{NS_EWS_MESSAGES}:Attachments") do |att|
             files.each do |f|
               att.add("#{NS_EWS_TYPES}:FileAttachment") do |fatt|
-                add_hierarchy!(fatt, f)
+                item!(fatt, f, order)
               end
             end
           end
         end
-        
+
         def attachment_ids!(node, attachment_ids)
           node.add("#{NS_EWS_MESSAGES}:AttachmentIds") do |att|
             attachment_ids.each do |id|

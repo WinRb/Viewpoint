@@ -55,10 +55,11 @@ module Viewpoint
         (resp.status == 'Success') || (raise EwsError, "Could not send message. #{resp.code}: #{resp.message}")
         msg_key = resp.items.first.keys.first
         msg_id = resp.items.first[msg_key][:item_id]
-        msg_id = add_attachments(msg_id, file_attachments) unless file_attachments.nil?
+        msg_id = add_attachments(msg_id, file_attachments) unless (file_attachments.nil? || file_attachments.empty?)
         if !draft
           resp = conn.ews.send_item([msg_id])
           (resp.status == 'Success') || (raise EwsError, "Could not send message. #{resp.code}: #{resp.message}")
+          self.get_item(msg_id)
         else
           self.new({:item_id => msg_id})
         end

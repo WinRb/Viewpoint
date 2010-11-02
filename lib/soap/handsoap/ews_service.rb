@@ -515,10 +515,12 @@ module Viewpoint
 
         def update_item
           action = "#{SOAP_ACTION_PREFIX}/UpdateItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:UpdateItem", :soap_action => action) do |update_item|
-            build_update_item!(update_item)
+          resp = invoke("#{NS_EWS_MESSAGES}:UpdateItem", :soap_action => action) do |root|
+            build!(root) do
+            end
           end
-          parse_update_item(resp)
+          resp
+          #parse_update_item(resp)
         end
 
         # Used to send e-mail messages that are located in the Exchange store.

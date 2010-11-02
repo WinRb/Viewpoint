@@ -84,7 +84,7 @@ module Viewpoint
       #   and you should not need to pass this parameter.
       def self.endpoint=(endpoint, version = 1)
         @@endpoint = endpoint
-        SOAP::ExchangeWebService.endpoint(:uri => endpoint, :version => version)
+        SOAP::ExchangeWebService.endpoint(:uri => endpoint, :version => version) && true
       end
 
       # Fetch the current endpoint
@@ -97,7 +97,7 @@ module Viewpoint
       # @param [String] pass The password
       def self.set_auth(user,pass)
         @@user = user
-        SOAP::ExchangeWebService.set_auth(user,pass)
+        SOAP::ExchangeWebService.set_auth(user,pass) && true
       end
 
       # Set the http driver that the SOAP back-end will use.
