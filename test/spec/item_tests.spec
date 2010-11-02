@@ -15,8 +15,9 @@ describe "Test the basic functionality of Items" do
     @ews = Viewpoint::EWS::EWS.instance
   end
 
-  it 'should create a new Message Item that we can test with.' do
-    $message = Viewpoint::EWS::Message.send('RSPEC test subject', 'RSPEC test body', [@ews.me.email_address],nil,nil,nil,true)
+  it 'should create a new Message Item (with attachments) that we can test with.' do
+    f = File.open(File.expand_path(__FILE__), 'r+')
+    $message = Viewpoint::EWS::Message.send('RSPEC test subject', 'RSPEC test body', [@ews.me.email_address],nil,nil,[f],true)
     $message.should be_instance_of(Viewpoint::EWS::Message)
   end
 
