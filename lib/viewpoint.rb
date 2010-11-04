@@ -107,6 +107,13 @@ module Viewpoint
         Handsoap.http_driver = driver
       end
 
+      # Sets the CA path to a certificate or hashed certificate directory.
+      # This is the same as HTTPClient::SSLConfig.set_trust_ca
+      # @param [String] ca_path A path to an OpenSSL::X509::Certificate or a 'c-rehash'ed directory
+      def self.set_trust_ca(ca_path)
+        SOAP::ExchangeWebService.set_http_options(:trust_ca_file => ca_path) && true
+      end
+
       def initialize
         @ews = SOAP::ExchangeWebService.new
       end

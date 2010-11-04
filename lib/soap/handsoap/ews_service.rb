@@ -32,6 +32,7 @@ module Viewpoint
         SOAP_ACTION_PREFIX = "http://schemas.microsoft.com/exchange/services/2006/messages"
 
         @@raw_soap = false
+        @@http_options = nil
 
         def initialize()
           if $DEBUG
@@ -48,6 +49,14 @@ module Viewpoint
         # Turn off parsing and just return the soap response
         def self.raw_soap!
           @@raw_soap = true
+        end
+
+        def self.set_http_options(option_hash)
+          if @@http_options.nil?
+            @@http_options = option_hash
+          else
+            @@http_options.merge option_hash
+          end
         end
 
         # ********* Begin Hooks *********
@@ -94,7 +103,7 @@ module Viewpoint
         #   it's numerical ID.  @see http://msdn.microsoft.com/en-us/library/aa565998.aspx
         def resolve_names(name, full_contact_data = true, opts = {})
           action = "#{SOAP_ACTION_PREFIX}/ResolveNames"
-          resp = invoke("#{NS_EWS_MESSAGES}:ResolveNames", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:ResolveNames", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               root.set_attr('ReturnFullContactData',full_contact_data)
               root.add("#{NS_EWS_MESSAGES}:UnresolvedEntry",name)
@@ -112,7 +121,7 @@ module Viewpoint
         #   taking an e-mail address as an argument
         def expand_dl(dist_email)
           action = "#{SOAP_ACTION_PREFIX}/ExpandDL"
-          resp = invoke("#{NS_EWS_MESSAGES}:ExpandDL", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:ExpandDL", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               mailbox!(root, {:email_address => {:text => dist_email}})
             end
@@ -134,7 +143,7 @@ module Viewpoint
         # @param [Hash] opts optional parameters to this method
         def find_folder(parent_folder_ids = [:root], traversal = 'Shallow', folder_shape = {:base_shape => 'Default'}, opts = {})
           action = "#{SOAP_ACTION_PREFIX}/FindFolder"
-          resp = invoke("#{NS_EWS_MESSAGES}:FindFolder", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:FindFolder", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               restriction = opts.delete(:restriction)
               root.set_attr('Traversal', traversal)
@@ -164,7 +173,7 @@ module Viewpoint
         #   {:calendar_view => {:max_entries_returned => 2, :start => <DateTime Obj>, :end => <DateTime Obj>}}
         def find_item(parent_folder_ids, traversal = 'Shallow', item_shape = {:base_shape => 'Default'}, opts = {})
           action = "#{SOAP_ACTION_PREFIX}/FindItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:FindItem", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:FindItem", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               root.set_attr('Traversal', traversal)
               item_shape!(root, item_shape)
@@ -202,7 +211,7 @@ module Viewpoint
         # @param [Hash] opts optional parameters to this method
         def get_folder(folder_ids, folder_shape = {:base_shape => 'Default'}, act_as = nil)
           action = "#{SOAP_ACTION_PREFIX}/GetFolder"
-          resp = invoke("#{NS_EWS_MESSAGES}:GetFolder", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:GetFolder", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               folder_shape!(root, folder_shape)
               folder_ids!(root, folder_ids, act_as)
@@ -213,7 +222,7 @@ module Viewpoint
 
         def convert_id
           action = "#{SOAP_ACTION_PREFIX}/ConvertId"
-          resp = invoke("#{NS_EWS_MESSAGES}:ConvertId", :soap_action => action) do |convert_id|
+          resp = invoke("#{NS_EWS_MESSAGES}:ConvertId", {:soap_action => action, :http_options => @@http_options}) do |convert_id|
             build_convert_id!(convert_id)
           end
           parse_convert_id(resp)
@@ -227,7 +236,7 @@ module Viewpoint
         # @param [Array,String] folder_name The display name for the new folder or folders
         def create_folder(parent_folder_id, folder_name)
           action = "#{SOAP_ACTION_PREFIX}/CreateFolder"
-          resp = invoke("#{NS_EWS_MESSAGES}:CreateFolder", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:CreateFolder", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               root.add("#{NS_EWS_MESSAGES}:ParentFolderId") do |pfid|
                 folder_id!(pfid, parent_folder_id)
@@ -251,7 +260,7 @@ module Viewpoint
         # @param [String,nil] delete_type Type of delete to do: HardDelete/SoftDelete/MoveToDeletedItems
         def delete_folder(folder_id, delete_type = 'MoveToDeletedItems')
           action = "#{SOAP_ACTION_PREFIX}/DeleteFolder"
-          resp = invoke("#{NS_EWS_MESSAGES}:DeleteFolder", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:DeleteFolder", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               root.set_attr('DeleteType', delete_type)
               folder_id = (folder_id.is_a?(Array)) ? folder_id : [folder_id]
@@ -263,7 +272,7 @@ module Viewpoint
 
         def update_folder
           action = "#{SOAP_ACTION_PREFIX}/UpdateFolder"
-          resp = invoke("#{NS_EWS_MESSAGES}:UpdateFolder", :soap_action => action) do |update_folder|
+          resp = invoke("#{NS_EWS_MESSAGES}:UpdateFolder", {:soap_action => action, :http_options => @@http_options}) do |update_folder|
             build_update_folder!(update_folder)
           end
           parse_update_folder(resp)
@@ -271,7 +280,7 @@ module Viewpoint
 
         def move_folder
           action = "#{SOAP_ACTION_PREFIX}/MoveFolder"
-          resp = invoke("#{NS_EWS_MESSAGES}:MoveFolder", :soap_action => action) do |move_folder|
+          resp = invoke("#{NS_EWS_MESSAGES}:MoveFolder", {:soap_action => action, :http_options => @@http_options}) do |move_folder|
             build_move_folder!(move_folder)
           end
           parse_move_folder(resp)
@@ -279,7 +288,7 @@ module Viewpoint
 
         def copy_folder
           action = "#{SOAP_ACTION_PREFIX}/CopyFolder"
-          resp = invoke("#{NS_EWS_MESSAGES}:CopyFolder", :soap_action => action) do |copy_folder|
+          resp = invoke("#{NS_EWS_MESSAGES}:CopyFolder", {:soap_action => action, :http_options => @@http_options}) do |copy_folder|
             build_copy_folder!(copy_folder)
           end
           parse_copy_folder(resp)
@@ -299,7 +308,7 @@ module Viewpoint
         #   the PullSubscriptionRequest element.
         def subscribe(folder_ids, event_types, timeout = 10)
           action = "#{SOAP_ACTION_PREFIX}/Subscribe"
-          resp = invoke("#{NS_EWS_MESSAGES}:Subscribe", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:Subscribe", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               pull_subscription_request!(folder_ids, event_types, timeout)
             end
@@ -311,7 +320,7 @@ module Viewpoint
         # @see http://msdn.microsoft.com/en-us/library/aa566188.aspx Subscribe on MSDN
         def push_subscribe(folder_ids, event_types, url, watermark=nil, status_frequency=5)
           action = "#{SOAP_ACTION_PREFIX}/Subscribe"
-          resp = invoke("#{NS_EWS_MESSAGES}:Subscribe", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:Subscribe", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               push_subscription_request!(folder_ids, event_types, url, watermark, status_frequency)
             end
@@ -326,7 +335,7 @@ module Viewpoint
         # @param [String] subscription_id The Id of the subscription
         def unsubscribe(subscription_id)
           action = "#{SOAP_ACTION_PREFIX}/Unsubscribe"
-          resp = invoke("#{NS_EWS_MESSAGES}:Unsubscribe", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:Unsubscribe", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               subscription_id!(root, subscription_id)
             end
@@ -341,7 +350,7 @@ module Viewpoint
         # @param [String] watermark Event bookmark in the events queue
         def get_events(subscription_id, watermark)
           action = "#{SOAP_ACTION_PREFIX}/GetEvents"
-          resp = invoke("#{NS_EWS_MESSAGES}:GetEvents", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:GetEvents", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               subscription_id!(root, subscription_id)
               watermark!(root, watermark)
@@ -352,7 +361,7 @@ module Viewpoint
 
         def sync_folder_hierarchy
           action = "#{SOAP_ACTION_PREFIX}/SyncFolderHierarchy"
-          resp = invoke("#{NS_EWS_MESSAGES}:SyncFolderHierarchy", :soap_action => action) do |sync_folder_hierarchy|
+          resp = invoke("#{NS_EWS_MESSAGES}:SyncFolderHierarchy", {:soap_action => action, :http_options => @@http_options}) do |sync_folder_hierarchy|
             build_sync_folder_hierarchy!(sync_folder_hierarchy)
           end
           parse_sync_folder_hierarchy(resp)
@@ -375,7 +384,7 @@ module Viewpoint
         # @param [Hash] opts optional parameters to this method
         def sync_folder_items(folder_id, sync_state = nil, max_changes = 256, item_shape = {:base_shape => 'Default'}, opts = {})
           action = "#{SOAP_ACTION_PREFIX}/SyncFolderItems"
-          resp = invoke("#{NS_EWS_MESSAGES}:SyncFolderItems", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:SyncFolderItems", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               item_shape!(root, item_shape)
               root.add("#{NS_EWS_MESSAGES}:SyncFolderId") do |sfid|
@@ -400,7 +409,7 @@ module Viewpoint
         # @param [Hash] opts optional parameters to this method
         def get_item(item_ids, item_shape = {:base_shape => 'Default'})
           action = "#{SOAP_ACTION_PREFIX}/GetItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:GetItem", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:GetItem", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               item_shape!(root, item_shape)
               item_ids!(root, item_ids)
@@ -423,7 +432,7 @@ module Viewpoint
         #   See: http://msdn.microsoft.com/en-us/library/aa565209.aspx
         def create_message_item(folder_id, items, message_disposition = 'SaveOnly')
           action = "#{SOAP_ACTION_PREFIX}/CreateItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", :soap_action => action) do |node|
+          resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", {:soap_action => action, :http_options => @@http_options}) do |node|
             build!(node) do
               create_item!(folder_id, items, message_disposition, send_invites=false, 'message')
             end
@@ -442,7 +451,7 @@ module Viewpoint
         # @param [String] send_invites "SendToNone/SendOnlyToAll/SendToAllAndSaveCopy"
         def create_calendar_item(folder_id, items, send_invites = 'SendToAllAndSaveCopy')
           action = "#{SOAP_ACTION_PREFIX}/CreateItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", :soap_action => action) do |node|
+          resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", {:soap_action => action, :http_options => @@http_options}) do |node|
             build!(node) do
               create_item!(folder_id, items, message_disposition=false, send_invites, 'calendar')
             end
@@ -464,7 +473,7 @@ module Viewpoint
         #   See: http://msdn.microsoft.com/en-us/library/aa565209.aspx
         def create_task_item(folder_id, items, message_disposition = 'SaveOnly')
           action = "#{SOAP_ACTION_PREFIX}/CreateItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", :soap_action => action) do |node|
+          resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", {:soap_action => action, :http_options => @@http_options}) do |node|
             build!(node) do
               create_item!(folder_id, items, message_disposition, false, 'task')
             end
@@ -484,7 +493,7 @@ module Viewpoint
         #   This Hash will eventually be passed to add_hierarchy! in the builder so it is in that format.
         def create_contact_item(folder_id, items)
           action = "#{SOAP_ACTION_PREFIX}/CreateItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", :soap_action => action) do |node|
+          resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", {:soap_action => action, :http_options => @@http_options}) do |node|
             build!(node) do
               create_item!(folder_id, items, nil, false, 'contact')
             end
@@ -502,7 +511,7 @@ module Viewpoint
         #   This is really only related to tasks and can be nil otherwise, which is the default.
         def delete_item(item_ids, delete_type, send_meeting_cancellations = nil, affected_task_occurrences = nil)
           action = "#{SOAP_ACTION_PREFIX}/DeleteItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:DeleteItem", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:DeleteItem", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               root.set_attr('DeleteType', delete_type)
               root.set_attr('SendMeetingCancellations', send_meeting_cancellations) unless send_meeting_cancellations.nil?
@@ -515,7 +524,7 @@ module Viewpoint
 
         def update_item
           action = "#{SOAP_ACTION_PREFIX}/UpdateItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:UpdateItem", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:UpdateItem", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
             end
           end
@@ -533,7 +542,7 @@ module Viewpoint
         #   it blank for the default :sentitems
         def send_item(item_ids, save_item=true, saved_item_folder=nil)
           action = "#{SOAP_ACTION_PREFIX}/SendItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:SendItem", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:SendItem", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               root.set_attr('SaveItemToFolder', save_item)
               item_ids!(root,item_ids)
@@ -550,7 +559,7 @@ module Viewpoint
         #   (must me a Symbol) or a FolderId (String)
         def move_item(item_ids, folder_id)
           action = "#{SOAP_ACTION_PREFIX}/MoveItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:MoveItem", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:MoveItem", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               to_folder_id!(root, folder_id)
               item_ids!(root, item_ids)
@@ -566,7 +575,7 @@ module Viewpoint
         #   (must me a Symbol) or a FolderId (String)
         def copy_item(item_ids, folder_id)
           action = "#{SOAP_ACTION_PREFIX}/CopyItem"
-          resp = invoke("#{NS_EWS_MESSAGES}:CopyItem", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:CopyItem", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               to_folder_id!(root, folder_id)
               item_ids!(root, item_ids)
@@ -587,7 +596,7 @@ module Viewpoint
         # @todo Need to implement attachment of Item types
         def create_attachment(parent_id, files = [], items = [])
           action = "#{SOAP_ACTION_PREFIX}/CreateAttachment"
-          resp = invoke("#{NS_EWS_MESSAGES}:CreateAttachment", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:CreateAttachment", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               item_id!(root, parent_id, "#{NS_EWS_MESSAGES}:ParentItemId")
               attachments!(root, files, items)
@@ -598,7 +607,7 @@ module Viewpoint
 
         def delete_attachment
           action = "#{SOAP_ACTION_PREFIX}/DeleteAttachment"
-          resp = invoke("#{NS_EWS_MESSAGES}:DeleteAttachment", :soap_action => action) do |delete_attachment|
+          resp = invoke("#{NS_EWS_MESSAGES}:DeleteAttachment", {:soap_action => action, :http_options => @@http_options}) do |delete_attachment|
             build_delete_attachment!(delete_attachment)
           end
           parse_delete_attachment(resp)
@@ -609,7 +618,7 @@ module Viewpoint
         # @param [Array] attachment_ids Attachment Ids to fetch
         def get_attachment(attachment_ids)
           action = "#{SOAP_ACTION_PREFIX}/GetAttachment"
-          resp = invoke("#{NS_EWS_MESSAGES}:GetAttachment", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:GetAttachment", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               attachment_shape!(root)
               attachment_ids!(root, attachment_ids)
@@ -620,7 +629,7 @@ module Viewpoint
 
         def create_managed_folder
           action = "#{SOAP_ACTION_PREFIX}/CreateManagedFolder"
-          resp = invoke("#{NS_EWS_MESSAGES}:CreateManagedFolder", :soap_action => action) do |create_managed_folder|
+          resp = invoke("#{NS_EWS_MESSAGES}:CreateManagedFolder", {:soap_action => action, :http_options => @@http_options}) do |create_managed_folder|
             build_create_managed_folder!(create_managed_folder)
           end
           parse_create_managed_folder(resp)
@@ -632,7 +641,7 @@ module Viewpoint
         # @param [String] owner The user that is delegating permissions
         def get_delegate(owner)
           action = "#{SOAP_ACTION_PREFIX}/GetDelegate"
-          resp = invoke("#{NS_EWS_MESSAGES}:GetDelegate", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:GetDelegate", {:soap_action => action, :http_options => @@http_options}) do |root|
             root.set_attr('IncludePermissions', 'true')
             build!(root) do
               mailbox!(root, {:email_address => {:text => owner}})
@@ -650,7 +659,7 @@ module Viewpoint
         #   This Hash will eventually be passed to add_hierarchy! in the builder so it is in that format.
         def add_delegate(owner, delegate, permissions)
           action = "#{SOAP_ACTION_PREFIX}/AddDelegate"
-          resp = invoke("#{NS_EWS_MESSAGES}:AddDelegate", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:AddDelegate", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               add_delegate!(owner, delegate, permissions)
             end
@@ -665,7 +674,7 @@ module Viewpoint
         # @param [String] delegate The user that is being given delegate permission
         def remove_delegate(owner, delegate)
           action = "#{SOAP_ACTION_PREFIX}/RemoveDelegate"
-          resp = invoke("#{NS_EWS_MESSAGES}:RemoveDelegate", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:RemoveDelegate", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               remove_delegate!(owner, delegate)
             end
@@ -682,7 +691,7 @@ module Viewpoint
         #   This Hash will eventually be passed to add_hierarchy! in the builder so it is in that format.
         def update_delegate(owner, delegate, permissions)
           action = "#{SOAP_ACTION_PREFIX}/UpdateDelegate"
-          resp = invoke("#{NS_EWS_MESSAGES}:UpdateDelegate", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:UpdateDelegate", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               add_delegate!(owner, delegate, permissions)
             end
@@ -695,7 +704,7 @@ module Viewpoint
         # @see http://msdn.microsoft.com/en-us/library/aa564001.aspx
         def get_user_availability
           action = "#{SOAP_ACTION_PREFIX}/GetUserAvailability"
-          resp = invoke("#{NS_EWS_MESSAGES}:GetUserAvailability", :soap_action => action) do |get_user_availability|
+          resp = invoke("#{NS_EWS_MESSAGES}:GetUserAvailability", {:soap_action => action, :http_options => @@http_options}) do |get_user_availability|
             build_get_user_availability!(get_user_availability)
           end
           parse_get_user_availability(resp)
@@ -705,7 +714,7 @@ module Viewpoint
         # @see http://msdn.microsoft.com/en-us/library/aa563465.aspx
         def get_user_oof_settings(mailbox)
           action = "#{SOAP_ACTION_PREFIX}/GetUserOofSettings"
-          resp = invoke("#{NS_EWS_MESSAGES}:GetUserOofSettingsRequest", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:GetUserOofSettingsRequest", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root) do
               mailbox!(root,mailbox[:mailbox],NS_EWS_TYPES)
             end
@@ -717,7 +726,7 @@ module Viewpoint
         # @see http://msdn.microsoft.com/en-us/library/aa580294.aspx
         def set_user_oof_settings(mailbox, oof_state, ext_audience, dt_start, dt_end, int_msg, ext_mg)
           action = "#{SOAP_ACTION_PREFIX}/SetUserOofSettings"
-          resp = invoke("#{NS_EWS_MESSAGES}:SetUserOofSettings", :soap_action => action) do |root|
+          resp = invoke("#{NS_EWS_MESSAGES}:SetUserOofSettings", {:soap_action => action, :http_options => @@http_options}) do |root|
             build!(root)
           end
           parse!(resp)
