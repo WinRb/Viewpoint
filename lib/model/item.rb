@@ -118,20 +118,26 @@ module Viewpoint
       # Return the attachments for this Item
       # @return [Array,Attachment] An array of Attachments for this Item
       def attachments
+        # TODO: should an exception be raised if someone calls this method without first
+        # checking has_attachments?
         return [] unless has_attachments?
+
+        # If we've already called this don't waste the time to process attachments again.
+        return @attachments if defined?(@attachments)
+
         deepen!
-        attmts = []
+        @attachments = []
         @ews_item[:attachments].each_pair do |k,v|
           # k should be file_attachment or item_attachment
           if(v.is_a?(Hash))
-            attmts << (eval "#{k.to_s.camel_case}.new(v[:attachment_id][:id])")
+            @attachments << (eval "#{k.to_s.camel_case}.new(v[:attachment_id][:id])")
           else
             v.each do |att|
-              attmts << (eval "#{k.to_s.camel_case}.new(att[:attachment_id][:id])")
+              @attachments << (eval "#{k.to_s.camel_case}.new(att[:attachment_id][:id])")
             end
           end
         end
-        attmts
+        @attachments
       end
 
       # Delete this item

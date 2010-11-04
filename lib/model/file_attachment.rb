@@ -24,6 +24,7 @@ module Viewpoint
     # to a file withthe #save_to_file method.
     class FileAttachment < Attachment
 
+      attr_reader :file_name, :content
       # @param [String] attachment_id The unique ID for the attachment.
       def initialize(attachment_id)
         @id = attachment_id
