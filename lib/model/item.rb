@@ -55,7 +55,7 @@ module Viewpoint
         {:id => resp.items.first[:attachment_id][:root_item_id], :change_key => resp.items.first[:attachment_id][:root_item_change_key]}
       end
 
-      attr_reader :item_id, :change_key, :body_type
+      attr_reader :item_id, :change_key
       alias :id :item_id
 
       # Initialize an Exchange Web Services item
@@ -181,6 +181,7 @@ module Viewpoint
         define_str_var :subject, :sensitivity, :body, :item_class, :importance, :in_reply_to, :unique_body
         define_str_var :display_cc, :display_to, :culture, :last_modified_name, :mime_content
         define_str_var :web_client_read_form_query_string, :web_client_edit_form_query_string
+        define_attr_str_var :body, :body_type
         define_int_var :size, :reminder_minutes_before_start
         define_bool_var :has_attachments, :is_submitted, :is_draft, :is_from_me, :is_resend, :is_unmodified, :reminder_is_set, :is_associated
         define_datetime_var :date_time_sent, :date_time_created, :date_time_received, :reminder_due_by, :last_modified_time

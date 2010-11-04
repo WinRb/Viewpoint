@@ -44,12 +44,19 @@ module Viewpoint
 
       protected
 
+      # Define a method that returns a string.  The vars are the keys in the 
+      # hash that contain a :text key.  In the original SOAP packet this would
+      # look something like this:
+      # @example
+      #   <method_name>
+      #      This is the text
+      #   </method_name>
       def define_str_var(*vars)
         vars.each do |var|
           if(@ews_item[var])
             @ews_methods << var
             self.instance_eval <<-EOF
-            def #{var.to_s}
+            def #{var}
               @ews_item[:#{var}][:text]
             end
             EOF
@@ -58,7 +65,30 @@ module Viewpoint
           end
         end
       end
+
+      # This is similar to the #define_str_var method except of the text value
+      # is from an XML attribute in the original SOAP so the text won't be pointed
+      # to by :text.  In the orignal SOAP it may have looked like this:
+      # @example
+      #   <node my_method='this is the text'/>
+      # @param
+      def define_attr_str_var(parent, *vars)
+        return unless @ews_item[parent]
+        vars.each do |var|
+          if(@ews_item[parent][var])
+            @ews_methods << var
+            self.instance_eval <<-EOF
+            def #{var}
+              @ews_item[:#{parent}][:#{var}]
+            end
+            EOF
+          else
+            @ews_methods_undef << var
+          end
+        end
+      end
       
+
       def define_int_var(*vars)
         vars.each do |var|
           if(@ews_item[var])
