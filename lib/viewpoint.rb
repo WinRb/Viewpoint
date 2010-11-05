@@ -55,6 +55,9 @@ require 'model/task'
 require 'model/attachment'
 require 'model/file_attachment'
 require 'model/item_attachment'
+# Third Party Libraries
+require 'mail' # used to convert Message items to RFC822 compliant messages
+require 'icalendar' # used to convert Calendar items to iCalendar objects
 
 # Load the Exception classes
 require 'exceptions/exceptions'

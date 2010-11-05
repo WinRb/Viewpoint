@@ -73,6 +73,7 @@ module Viewpoint
       def headers
         deepen! if @shallow
         return @headers if defined?(@headers) && !@headers.empty?
+        return nil unless @ews_item.has_key?(:internet_message_headers)
         @headers = {}
         # @todo When ruby 1.9 becomes more pervasive the Enumerator#each_with_object
         #@headers ||= @ews_item[:internet_message_headers][:internet_message_header].each_with_object({}) do |h,obj|
@@ -81,6 +82,40 @@ module Viewpoint
         end
         @headers
       end
+
+
+      # This creates an object of type Mail (mail gem) and allows us to
+      # manipulate and output Message Items in standards compliant ways.
+      # @see http://www.ietf.org/rfc/rfc2822.txt
+      def to_mail
+        mail = Mail.new
+        unless(headers.nil?)
+          mail.received = headers['Received']
+          mail.content_type headers['Content-Type']
+          mail.content_transfer_encoding headers['Content-Transfer-Encoding']
+        end
+        mail.message_id internet_message_id unless internet_message_id.nil?
+        mail.in_reply_to in_reply_to unless in_reply_to.nil?
+        mail.references references unless references.nil?
+        mail.subject subject
+        mail.return_path = sender.email_address
+        mail.to to_recipients.map {|r| r.email_address}
+        mail.cc cc_recipients.map {|r| r.email_address}
+        mail.from from.email_address
+        # Because the mail gem does not pass an object to the block there are some issues with using self
+        msg = self
+        if(body_type == "HTML")
+          mail.html_part do
+            body msg.body
+          end
+        else
+          mail.text_part do
+            body msg.body
+          end
+        end
+        mail
+      end
+
 
       private
 

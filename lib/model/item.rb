@@ -198,7 +198,13 @@ module Viewpoint
           deepen!
           send(m, *args, &block)
         else
-          warn "!!! No such method: #{m}"
+          # These are some methods which may not always exist, but we don't want to say that they don't
+          if(m.match(/cc_recipients|to_recipients/))
+            return []
+          else
+            warn "!!! No such method: #{m}"
+            nil
+          end
         end
       end
 

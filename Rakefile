@@ -33,7 +33,8 @@ GEMSPEC = Gem::Specification.new do |gem|
   gem.add_runtime_dependency  'nokogiri'
   gem.add_runtime_dependency  'httpclient'
   gem.add_runtime_dependency  'rubyntlm'
-  gem.add_runtime_dependency  'icalendar'
+  gem.add_runtime_dependency  'icalendar', '>= 1.1.5'
+  gem.add_runtime_dependency  'mail', '>= 2.2.9'
 end
  
 Rake::GemPackageTask.new(GEMSPEC) do |pkg|
