@@ -90,18 +90,18 @@ module Viewpoint
       def to_mail
         mail = Mail.new
         unless(headers.nil?)
-          mail.received = headers['Received']
+          mail.received  headers['Received']
           mail.content_type headers['Content-Type']
           mail.content_transfer_encoding headers['Content-Transfer-Encoding']
         end
         mail.message_id internet_message_id unless internet_message_id.nil?
         mail.in_reply_to in_reply_to unless in_reply_to.nil?
         mail.references references unless references.nil?
-        mail.subject subject
-        mail.return_path = sender.email_address
-        mail.to to_recipients.map {|r| r.email_address}
-        mail.cc cc_recipients.map {|r| r.email_address}
-        mail.from from.email_address
+        mail.subject subject unless subject.nil?
+        mail.return_path = sender.email_address unless sender.nil?
+        mail.to to_recipients.map {|r| r.email_address} unless to_recipients.nil?
+        mail.cc cc_recipients.map {|r| r.email_address} unless cc_recipients.nil?
+        mail.from from.email_address unless from.nil?
         # Because the mail gem does not pass an object to the block there are some issues with using self
         msg = self
         if(body_type == "HTML")
