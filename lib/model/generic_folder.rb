@@ -214,20 +214,27 @@ module Viewpoint
 
       def todays_items
         #opts = {:query_string => ["Received:today"]}
-        items_since(Date.today.to_datetime)
+        #This is a bit convoluted for pre-1.9.x ruby versions that don't support to_datetime
+        items_since(DateTime.parse(Date.today.to_s))
       end
 
       def items_since(date_time)
         restr = {:restriction =>
           {:is_greater_than_or_equal_to => 
-            {:field_uRI => {:field_uRI=>'item:DateTimeReceived'}, :field_uRI_or_constant =>{:constant => {:value=>date_time}}}}}
+            [{:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
+            {:field_uRI_or_constant =>{:constant => {:value=>date_time}}}]
+          }}
         find_items(restr)
       end
 
       def items_between(start_date, end_date)
         restr = {:restriction =>  {:and => [
-          {:is_greater_than_or_equal_to => {:field_uRI => {:field_uRI=>'item:DateTimeReceived'},:field_uRI_or_constant=>{:constant => {:value =>start_date}}}},
-          {:is_less_than_or_equal_to => {:field_uRI => {:field_uRI=>'item:DateTimeReceived'},:field_uRI_or_constant=>{:constant => {:value =>end_date}}}}
+          {:is_greater_than_or_equal_to => 
+            [{:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
+            {:field_uRI_or_constant=>{:constant => {:value =>start_date}}}]},
+          {:is_less_than_or_equal_to =>
+            [{:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
+            {:field_uRI_or_constant=>{:constant => {:value =>end_date}}}]}
         ]}}
         find_items(restr)
       end
