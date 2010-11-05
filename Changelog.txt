@@ -1,3 +1,20 @@
+commit 62dbad34702f88505a846a6e9da730ab4c69ae2c
+Author: Dan Wanek <dan.wanek@gmail.com>
+Date:   Fri Nov 5 11:47:50 2010 -0500
+
+    Fixed some issues with the Item#method_missing logic.
+
+commit efe2ea11a1cc9ce523f9304af1de1f3b057b02a6
+Author: Dan Wanek <dan.wanek@gmail.com>
+Date:   Fri Nov 5 11:17:05 2010 -0500
+
+    Added a Message#to_mail method that returns an object of type Mail.
+      see the 'mail' gem for more info on this object type.  Its main
+      benefit is that it allows you to print a Message item in
+      RFC2822 compliant output.
+      Also added a Changlog.
+      Fixed a bug dealing with the #headers method
+
 commit 46b8482e0e399ddd32c794e2fdf832d6ee0ebc51
 Author: Dan Wanek <dan.wanek@gmail.com>
 Date:   Fri Nov 5 08:59:50 2010 -0500
