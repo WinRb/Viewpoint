@@ -524,14 +524,19 @@ module Viewpoint
           parse!(resp)
         end
 
-        def update_item
+        # Used to modify the properties of an existing item in the Exchange store
+        # @see http://msdn.microsoft.com/en-us/library/aa581084.aspx
+        # @param [Array] item_ids An Array of item ids
+        def update_item(item_ids, changes)
           action = "#{SOAP_ACTION_PREFIX}/UpdateItem"
           resp = invoke("#{NS_EWS_MESSAGES}:UpdateItem", action) do |root|
             build!(root) do
+              root.set_attr('MessageDisposition', 'SaveOnly')
+              root.set_attr('ConflictResolution', 'AutoResolve')
+              item_changes!(root, item_ids, changes)
             end
           end
-          resp
-          #parse_update_item(resp)
+          parse!(resp)
         end
 
         # Used to send e-mail messages that are located in the Exchange store.

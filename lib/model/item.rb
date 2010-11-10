@@ -73,12 +73,38 @@ module Viewpoint
       end
 
 
+      # See if this item is set to return only text in its body.
+      # @return [Boolean] if true the body will return only text, otherwise it may be HTML or text.
       def text_only?
         @text_only
       end
 
-      def text_only=(ans)
-        @text_only = ( ans == true ? true : false)
+      # Set whether or not the body should be text-only or not
+      # @param [Boolean] txt if true the body will return only text, otherwise it may be HTML or text.
+      def text_only=(txt)
+        @text_only = ( txt == true ? true : false)
+      end
+
+      # Call UpdateItem for this item with the passed updates
+      # @param [Hash] updates a well-formed update hash
+      # @example {:updates=>{:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>"message:IsRead"}, :message=>{:is_read=>{:text=>"true"}}}}}
+      def update!(updates)
+        conn = Viewpoint::EWS::EWS.instance
+        resp = conn.ews.update_item([{:id => @item_id, :change_key => @change_key}], updates)
+        (resp.status == 'Success') || (raise EwsError, "Trouble updating Item. #{resp.code}: #{resp.message}")
+      end
+
+      # Mark this Item as read
+      def mark_read!
+        update!({:updates=>{:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>"message:IsRead"}, :message=>{:is_read=>{:text=>"true"}}}}})
+        @is_read = true
+      end
+
+      # Mark this Item as unread
+      def mark_unread!
+        update!({:updates=>{:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>"message:IsRead"}, :message=>{:is_read=>{:text=>"false"}}}}})
+        @is_read = false
+        true
       end
 
       def deepen!
@@ -209,7 +235,7 @@ module Viewpoint
           deepen!
           send(m, *args, &block)
         else
-          warn "!!! No such method: #{m}"
+          warn "!!! No such method: #{m}" if $DEBUG
           nil
         end
       end

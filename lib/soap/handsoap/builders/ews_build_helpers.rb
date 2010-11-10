@@ -64,6 +64,16 @@ module Viewpoint
           end
         end
 
+        # Create the ItemChanges Element
+        def item_changes!(node, item_ids, changes)
+          node.add("#{NS_EWS_MESSAGES}:ItemChanges") do |chgs|
+            chgs.add("#{NS_EWS_TYPES}:ItemChange") do |chg|
+              item_id!(chg, item_ids.first)
+              add_hierarchy!(chg, changes)
+            end
+          end
+        end
+
         # Create the ItemIds Element
         # @param [Element] node The node we are adding Mailbox elements to.
         # @param [Array] item_ids The item ids to add in.
