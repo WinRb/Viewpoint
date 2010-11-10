@@ -21,6 +21,21 @@
 module Viewpoint
   module EWS
     class MeetingRequest < Item
+
+
+      private
+
+      def init_methods
+        super()
+        define_str_var :conversation_index, :conversation_topic, :internet_message_id, :references
+        define_mbox_users :to_recipients, :cc_recipients, :bcc_recipients, :reply_to, :required_attendees, :optional_attendees
+        define_mbox_user :from, :sender, :received_by, :received_representing, :organizer
+        define_bool_var :is_read, :is_read_receipt_requested, :is_response_requested, :is_delivery_receipt_requested, :is_draft, :is_from_me
+        define_bool_var :is_all_day_event, :is_cancelled, :is_delegated, :is_meeting, :is_out_of_date, :is_recurring, :is_resend
+        define_bool_var :is_submitted, :is_unmodified, :allow_new_time_proposal
+        define_int_var :adjacent_meeting_count, :appointment_sequence_number, :appointment_state, :conflicting_meeting_count
+        define_datetime_var :start, :end
+      end
     end # MeetingRequest
   end # EWS
 end # Viewpoint

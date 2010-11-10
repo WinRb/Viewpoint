@@ -142,6 +142,10 @@ module Viewpoint
         def item_shape!(node, item_shape)
           node.add("#{NS_EWS_MESSAGES}:ItemShape") do |is|
             is.add("#{NS_EWS_TYPES}:BaseShape", item_shape[:base_shape])
+            is.add("#{NS_EWS_TYPES}:IncludeMimeContent", item_shape[:include_mime_content]) if item_shape.has_key?(:include_mime_content)
+            is.add("#{NS_EWS_TYPES}:BodyType", item_shape[:body_type]) if item_shape.has_key?(:body_type)
+            is.add("#{NS_EWS_TYPES}:FilterHtmlContent", item_shape[:filter_html_content]) if item_shape.has_key?(:filter_html_content)
+            is.add("#{NS_EWS_TYPES}:ConvertHtmlCodePageToUTF8", item_shape[:convert_html_code_page_to_utf8]) if item_shape.has_key?(:convert_html_code_page_to_utf8)
           end
           
           unless( item_shape[:additional_props].nil? )

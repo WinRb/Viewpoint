@@ -408,8 +408,9 @@ module Viewpoint
         # @option item_shape :additional_properties
         #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
         # @param [Hash] opts optional parameters to this method
-        def get_item(item_ids, item_shape = {:base_shape => 'Default'})
+        def get_item(item_ids, item_shape = {})
           action = "#{SOAP_ACTION_PREFIX}/GetItem"
+          item_shape[:base_shape] = 'Default' unless item_shape.has_key?(:base_shape)
           resp = invoke("#{NS_EWS_MESSAGES}:GetItem", action) do |root|
             build!(root) do
               item_shape!(root, item_shape)

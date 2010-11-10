@@ -67,14 +67,25 @@ module Viewpoint
         @shallow = shallow
         @item_id = ews_item[:item_id][:id]
         @change_key = ews_item[:item_id][:change_key]
+        @text_only = false
 
         init_methods
+      end
+
+
+      def text_only?
+        @text_only
+      end
+
+      def text_only=(ans)
+        @text_only = ( ans == true ? true : false)
       end
 
       def deepen!
         return true unless @shallow
         conn = Viewpoint::EWS::EWS.instance
-        resp = conn.ews.get_item([@item_id], {:base_shape => 'AllProperties'})
+        shape = {:base_shape => 'AllProperties', :body_type => (@text_only ? 'Text' : 'Best')}
+        resp = conn.ews.get_item([@item_id], shape) 
         resp = resp.items.shift
         @ews_item = resp[resp.keys.first]
         @shallow = false
