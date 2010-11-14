@@ -16,10 +16,18 @@ describe "Folder Synchronization" do
     @inbox = Viewpoint::EWS::GenericFolder.get_folder :inbox
   end
 
-  describe "Example Folder Synchronization for the Inbox" do
+  describe "An unsynchronized Inbox Folder" do
+    after(:all) do
+      @inbox.clear_sync_state!
+    end
 
     it 'should start synchronization of the Inbox Folder' do
       @inbox.sync_items!(2)
+      @inbox.sync_state.should_not be_nil
+    end
+
+    it 'should synchronized to a given DateTime' do
+      @inbox.sync_items_since!((Date.today - 1).to_datetime)
       @inbox.sync_state.should_not be_nil
     end
 

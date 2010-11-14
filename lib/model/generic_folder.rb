@@ -104,8 +104,8 @@ module Viewpoint
         end
       end
 
-      attr_accessor :folder_id, :change_key, :parent_id
-      attr_reader :subscription_id, :watermark, :sync_state
+      attr_accessor :folder_id, :change_key, :parent_id, :sync_state
+      attr_reader :subscription_id, :watermark
       alias :id :folder_id
 
       def initialize(ews_item)
@@ -311,6 +311,29 @@ module Viewpoint
           end
         end
         items
+      end
+
+      # This is basically a work-around for Microsoft's BPOS hosted Exchange, which does not support
+      # subscriptions at the time of this writing.  This is the best way I could think of to get
+      # items from a specific period of time and track changes.
+      # !! Before using this method I would suggest trying a GenericFolder#items_since then using
+      # a subscription to track changes.
+      # This method should be followed by subsequent calls to GenericFolder#sync_items! to fetch
+      # additional items.  Calling this method again will clear the sync_state and synchronize
+      # everything again.
+      def sync_items_since!(datetime)
+        clear_sync_state!
+
+        begin
+          items = sync_items!
+        end until items.empty?
+
+        items_since(datetime)
+      end
+
+      # Clears out the @sync_state so you can freshly synchronize this folder if needed
+      def clear_sync_state!
+        @sync_state = nil
       end
 
       # Create a subfolder of this folder
