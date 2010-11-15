@@ -40,6 +40,12 @@ module Viewpoint
 
       @@event_types = %w{CopiedEvent CreatedEvent DeletedEvent ModifiedEvent MovedEvent NewMailEvent}
 
+      # Get a specific folder by its ID.
+      # @param [String,Symbol] folder_id either a DistinguishedFolderID or simply a FolderID
+      # @param [String,nil] act_as User to act on behalf as.  This user must have been given
+      #   delegate access to this folder or else this operation will fail.
+      # @param [Hash] folder_shape
+      # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
       def self.get_folder(folder_id, act_as = nil, folder_shape = {:base_shape => 'Default'})
         resp = (Viewpoint::EWS::EWS.instance).ews.get_folder( [normalize_id(folder_id)], folder_shape, act_as )
         if(resp.status == 'Success')
@@ -88,6 +94,7 @@ module Viewpoint
 
       # Gets a folder by name.  This name must match the folder name exactly.
       # @param [String] name The name of the folder to fetch.
+      # @param [String] shape the shape of the object to return IdOnly/Default/AllProperties
       def self.get_folder_by_name(name, shape = 'Default')
         # For now the :field_uRI and :field_uRI_or_constant must be in an Array for Ruby 1.8.7 because Hashes
         # are not positional at insertion until 1.9
@@ -212,12 +219,15 @@ module Viewpoint
         end
       end
 
+      # Fetch only items from today (since midnight)
       def todays_items
         #opts = {:query_string => ["Received:today"]}
         #This is a bit convoluted for pre-1.9.x ruby versions that don't support to_datetime
         items_since(DateTime.parse(Date.today.to_s))
       end
 
+      # Fetch items since a give DateTime
+      # @param [DateTime] date_time the time to fetch Items since.
       def items_since(date_time)
         restr = {:restriction =>
           {:is_greater_than_or_equal_to => 
@@ -227,6 +237,9 @@ module Viewpoint
         find_items(restr)
       end
 
+      # Fetch items between a given time period
+      # @param [DateTime] start_date the time to start fetching Items from
+      # @param [DateTime] end_date the time to stop fetching Items from
       def items_between(start_date, end_date)
         restr = {:restriction =>  {:and => [
           {:is_greater_than_or_equal_to => 
@@ -271,6 +284,9 @@ module Viewpoint
       end
 
       # Get Item
+      # @param [String] item_id the ID of the item to fetch
+      # @param [String] change_key specify an optional change_key if you want to
+      #   make sure you are fetching a specific version of the object.
       def get_item(item_id, change_key = nil)
         resp = (Viewpoint::EWS::EWS.instance).ews.get_item([item_id])
         if(resp.status == 'Success')
