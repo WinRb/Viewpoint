@@ -1,3 +1,57 @@
+commit 002a3562533991ff27270c6d44e2c055b63fc9d8
+Author: Dan Wanek <dan.wanek@gmail.com>
+Date:   Sun Nov 14 20:17:47 2010 -0600
+
+    changed Message.send back to returning true on success
+
+commit b756a46c4f9fc7ec54b0f954fd23b9ffa20e47a2
+Author: Dan Wanek <dan.wanek@gmail.com>
+Date:   Sun Nov 14 10:53:21 2010 -0600
+
+    Added BPOS work-around GenericFolder#sync_items_sync!
+    Added a way to clear out synchornization GenericFolder#clear_sync_state!
+    Added additional tests for new methods
+
+commit bfa1569fbeb9b7af81f0ebe84408dc376891e416
+Author: Dan Wanek <dan.wanek@gmail.com>
+Date:   Wed Nov 10 11:13:59 2010 -0600
+
+    Added ability to mark/unmark an Item read Item#mark_read!, Item#mark_unread!
+
+commit 40299edf5013e05427900bccea9d64db41b17942
+Author: Dan Wanek <dan.wanek@gmail.com>
+Date:   Wed Nov 10 10:09:15 2010 -0600
+
+    Added properties to ItemShape for get_item so that you can request
+    :body_type of Text only.
+    Added EWS init methods to meeting request
+
+commit 3c73c2556f6c4cdd33601eed90ab8815201e476d
+Author: Dan Wanek <dan.wanek@gmail.com>
+Date:   Fri Nov 5 14:13:55 2010 -0500
+
+    version up for hash insertion bugs
+
+commit ecac0e11754a436248688aca17c33bb1b2c4aaed
+Author: Dan Wanek <dan.wanek@gmail.com>
+Date:   Fri Nov 5 13:47:57 2010 -0500
+
+    version 0.1.5b
+
+commit d9bc83a83c83d832eb30b6e3f309c80e4e36350a
+Author: Dan Wanek <dan.wanek@gmail.com>
+Date:   Fri Nov 5 13:44:20 2010 -0500
+
+    Fixed issue with GenericFolder#items_since and #items_between for
+    versions of Ruby less than 1.8.7.  It had to do with insertion order
+    of Hashes.
+
+commit bf5426fec4862020b5186caf15d77550f00649ab
+Author: Dan Wanek <dan.wanek@gmail.com>
+Date:   Fri Nov 5 12:05:28 2010 -0500
+
+    version 0.1.5
+
 commit 62dbad34702f88505a846a6e9da730ab4c69ae2c
 Author: Dan Wanek <dan.wanek@gmail.com>
 Date:   Fri Nov 5 11:47:50 2010 -0500
