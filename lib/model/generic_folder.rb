@@ -321,6 +321,7 @@ module Viewpoint
       # This method should be followed by subsequent calls to GenericFolder#sync_items! to fetch
       # additional items.  Calling this method again will clear the sync_state and synchronize
       # everything again.
+      # @return [Array<Item>] returns an array of Items
       def sync_items_since!(datetime)
         clear_sync_state!
 

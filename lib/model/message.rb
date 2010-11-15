@@ -59,7 +59,6 @@ module Viewpoint
         if !draft
           resp = conn.ews.send_item([msg_id])
           (resp.status == 'Success') || (raise EwsError, "Could not send message. #{resp.code}: #{resp.message}")
-          self.get_item(msg_id)
         else
           self.new({:item_id => msg_id})
         end
