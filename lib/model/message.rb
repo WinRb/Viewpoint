@@ -112,6 +112,15 @@ module Viewpoint
             body msg.body
           end
         end
+
+        # add attachments
+        if(self.has_attachments?)
+          self.attachments.each do |att|
+            if(att.is_a?(FileAttachment))
+              mail.attachments[att.file_name] = Base64.decode64(att.content)
+            end
+          end
+        end
         mail
       end
 
