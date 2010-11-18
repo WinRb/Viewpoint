@@ -209,22 +209,12 @@ module Viewpoint
         @parent_folder_id = @ews_item[:parent_folder_id][:id] if @ews_item[:parent_folder_id].is_a?(Hash)
         @conversation_id  = @ews_item[:conversation_id][:id] if @ews_item[:conversation_id].is_a?(Hash)
         @ews_methods << :item_id
-        if(@ews_item[:body] && @ews_item[:body][:body_type])
-          @body_type = @ews_item[:body][:body_type]
-          @ews_methods << :body_type
-        end
-        if(@ews_item[:unique_body] && @ews_item[:unique_body][:body_type])
-          @unique_body_type = @ews_item[:body][:body_type]
-          @ews_methods << :unique_body_type
-        end
-        if(@ews_item[:mime_content] && @ews_item[:mime_content][:character_set])
-          @mime_charset = @ews_item[:mime_content][:character_set]
-          @ews_methods << :mime_charset
-        end
         define_str_var :subject, :sensitivity, :body, :item_class, :importance, :in_reply_to, :unique_body
         define_str_var :display_cc, :display_to, :culture, :last_modified_name, :mime_content
         define_str_var :web_client_read_form_query_string, :web_client_edit_form_query_string
         define_attr_str_var :body, :body_type
+        define_attr_str_var :unique_body, :body_type
+        define_attr_str_var :mime_content, :character_set
         define_int_var :size, :reminder_minutes_before_start
         define_bool_var :has_attachments, :is_submitted, :is_draft, :is_from_me, :is_resend, :is_unmodified, :reminder_is_set, :is_associated
         define_datetime_var :date_time_sent, :date_time_created, :date_time_received, :reminder_due_by, :last_modified_time

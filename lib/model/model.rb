@@ -47,16 +47,21 @@ module Viewpoint
       # Define a method that returns a string.  The vars are the keys in the 
       # hash that contain a :text key.  In the original SOAP packet this would
       # look something like this:
+      # @param [Array<Symbol,Hash>] *vars the symbols to map to methods.  If the
+      #   last item is a hash it will be used to map methods names.  For instance
+      #   UID comes through like this :u_i_d so we can map it like so {:u_i_d => :uid}
       # @example
       #   <method_name>
       #      This is the text
       #   </method_name>
       def define_str_var(*vars)
+        map = ( vars.last.is_a?(Hash) ? vars.pop : {}) 
         vars.each do |var|
           if(@ews_item[var])
-            @ews_methods << var
+            mname = ( map.has_key?(var) ? map[var] : var )
+            @ews_methods << mname
             self.instance_eval <<-EOF
-            def #{var}
+            def #{mname}
               @ews_item[:#{var}][:text]
             end
             EOF
@@ -71,7 +76,8 @@ module Viewpoint
       # to by :text.  In the orignal SOAP it may have looked like this:
       # @example
       #   <node my_method='this is the text'/>
-      # @param
+      #   so you would specify this...
+      #   define_attr_str_var :node, :my_method
       def define_attr_str_var(parent, *vars)
         return unless @ews_item[parent]
         vars.each do |var|

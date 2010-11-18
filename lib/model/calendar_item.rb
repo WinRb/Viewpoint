@@ -122,7 +122,7 @@ module Viewpoint
 
       def init_methods
         super
-        define_str_var :calendar_item_type, :duration, :time_zone, :when, :location
+        define_str_var :calendar_item_type, :duration, :time_zone, :when, :location, :u_i_d, {:u_i_d => :uid}
         define_str_var :legacy_free_busy_status, :my_response_type, :meeting_workspace_url, :net_show_url
         define_int_var :adjacent_meeting_count, :appointment_sequence_number, :appointment_state
         define_int_var :conference_type, :conflicting_meeting_count
