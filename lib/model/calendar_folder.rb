@@ -63,6 +63,25 @@ module Viewpoint
         end
         super(opts)
       end
+      
+      # Fetch only items from today (since midnight)
+      def todays_items
+        #This is a bit convoluted for pre-1.9.x ruby versions that don't support to_datetime
+        items_since(DateTime.parse(Date.today.to_s))
+      end
+
+      # Fetch items since a give DateTime
+      # @param [DateTime] start_date_time the time to fetch Items since.
+      def items_since(start_date_time)
+        find_items(start_date_time, DateTime.now)
+      end
+
+      # Fetch items between a given time period
+      # @param [DateTime] start_date the time to start fetching Items from
+      # @param [DateTime] end_date the time to stop fetching Items from
+      def items_between(start_date, end_date)
+        find_items(start_date, end_date)
+      end
 
     end # CalendarFolder
   end # EWS
