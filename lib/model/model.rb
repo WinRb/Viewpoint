@@ -206,7 +206,7 @@ module Viewpoint
             end
             EOF
           else
-            @ews_methods_undef << var
+            @ews_methods_undef << attendee_type
           end
         end
       end
