@@ -33,6 +33,7 @@ require 'soap/soap_provider'
 # Base Models
 require 'model/model'
 require 'model/mailbox_user'
+require 'model/attendee'
 require 'model/generic_folder'
 require 'model/item'
 # Specific Models

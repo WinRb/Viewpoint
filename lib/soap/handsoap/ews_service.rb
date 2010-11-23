@@ -360,12 +360,22 @@ module Viewpoint
           parse!(resp)
         end
 
+        # Defines a request to synchronize a folder hierarchy on a client
+        # @see http://msdn.microsoft.com/en-us/library/aa580990.aspx
         def sync_folder_hierarchy
+          sync_state = nil
+          folder_id = :publicfoldersroot
           action = "#{SOAP_ACTION_PREFIX}/SyncFolderHierarchy"
-          resp = invoke("#{NS_EWS_MESSAGES}:SyncFolderHierarchy", action) do |sync_folder_hierarchy|
-            build_sync_folder_hierarchy!(sync_folder_hierarchy)
+          resp = invoke("#{NS_EWS_MESSAGES}:SyncFolderHierarchy", action) do |root|
+            build!(root) do
+              folder_shape!(root, {:base_shape => 'Default'})
+              root.add("#{NS_EWS_MESSAGES}:SyncFolderId") do |sfid|
+                folder_id!(sfid, folder_id)
+              end
+              sync_state!(root, sync_state) unless sync_state.nil?
+            end
           end
-          parse_sync_folder_hierarchy(resp)
+          parse!(resp)
         end
 
         # Synchronizes items between the Exchange server and the client

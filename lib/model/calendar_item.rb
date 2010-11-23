@@ -130,12 +130,13 @@ module Viewpoint
         define_bool_var :is_all_day_event, :is_cancelled, :is_meeting, :is_online_meeting, :is_recurring
         define_bool_var :allow_new_time_proposal, :meeting_request_was_sent
         define_datetime_var :appointment_reply_time, :start, :end, :original_start
+        define_attendees :required_attendees, :optional_attendees
 
         # @todo Handle:
         #   <AdjacentMeetings/> <ConflictingMeetings/> <DeletedOccurrences/>
         #   <FirstOccurrence/> <LastOccurrence/> <ModifiedOccurrences/>
         #   <StartTimeZone/> <EndTimeZone/> <MeetingTimeZone/>
-        #   <OptionalAttendees/> <RequiredAttendees/> <Resources/>
+        #   <Resources/>
         #   <Recurrence/>
       end
 

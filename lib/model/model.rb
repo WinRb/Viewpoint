@@ -166,6 +166,7 @@ module Viewpoint
         end
       end
 
+
       def define_mbox_user(*vars)
         vars.each do |var|
           if(@ews_item[var])
@@ -180,6 +181,36 @@ module Viewpoint
           end
         end
       end
+      
+
+      # Define meeting attendees
+      # @param [String] *attendee_types the type of attendee we are defining :required_attendees, :optional_attendees
+      def define_attendees(*attendee_types)
+        attendee_types.each do |attendee_type|
+          if(@ews_item.has_key?(attendee_type))
+            @ews_methods << attendee_type
+            self.instance_eval <<-EOF
+            def #{attendee_type}
+              return @#{attendee_type} if defined?(@#{attendee_type})
+              if( (@ews_item[:#{attendee_type}][:attendee]).is_a?(Hash) )
+                @#{attendee_type} = [Attendee.new(@ews_item[:#{attendee_type}][:attendee])]
+              elsif( (@ews_item[:#{attendee_type}][:attendee]).is_a?(Array) )
+                @#{attendee_type} = []
+                @ews_item[:#{attendee_type}][:attendee].each do |i|
+                  @#{attendee_type} << Attendee.new(i)
+                end
+              else
+                raise EwsError, "Bad value for mailbox: " + @ews_item[:#{attendee_type}][:attendee]
+              end
+              @#{attendee_type}
+            end
+            EOF
+          else
+            @ews_methods_undef << var
+          end
+        end
+      end
+
 
       # After a delete is called on an object this method will clear
       # out all of the defined EWS methods so they can't be called on the
