@@ -215,7 +215,9 @@ module Viewpoint
 
       # Find Items
       def find_items(opts = {})
-        resp = (Viewpoint::EWS::EWS.instance).ews.find_item([@folder_id], 'Shallow', {:base_shape => 'Default'}, opts)
+        item_shape = {:base_shape => 'Default'}
+        item_shape[:additional_properties] = {:field_uRI => ['item:ParentFolderId']}
+        resp = (Viewpoint::EWS::EWS.instance).ews.find_item([@folder_id], 'Shallow', item_shape, opts)
         if(resp.status == 'Success')
           parms = resp.items.shift
           items = []
@@ -298,7 +300,8 @@ module Viewpoint
       # @param [String] change_key specify an optional change_key if you want to
       #   make sure you are fetching a specific version of the object.
       def get_item(item_id, change_key = nil)
-        resp = (Viewpoint::EWS::EWS.instance).ews.get_item([item_id])
+        item_shape = {:base_shape => 'Default', :additional_properties => {:field_uRI => ['item:ParentFolderId']}}
+        resp = (Viewpoint::EWS::EWS.instance).ews.get_item([item_id], item_shape)
         if(resp.status == 'Success')
           item = resp.items.shift
           type = item.keys.first

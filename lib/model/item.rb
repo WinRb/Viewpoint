@@ -200,6 +200,14 @@ module Viewpoint
         (resp.status == 'Success') || (raise EwsError, "Could not recycle message. #{resp.code}: #{resp.message}")
       end
 
+      # Get the parent folder of this item
+      # @return [GenericFolder] returns a GenericFolder of subclass of that type.
+      def parent_folder
+        #deepen!
+        GenericFolder.get_folder @parent_folder_id
+      end
+
+
       private
 
       # @todo Handle:

@@ -136,10 +136,10 @@ module Viewpoint
           node.add("#{NS_EWS_MESSAGES}:FolderShape") do |fshape|
             fshape.add("#{NS_EWS_TYPES}:BaseShape", folder_shape[:base_shape])
 
-            unless( folder_shape[:additional_props].nil? )
-              unless( folder_shape[:additional_props][:FieldURI].nil? )
+            unless( folder_shape[:additional_properties].nil? )
+              unless( folder_shape[:additional_properties][:FieldURI].nil? )
                 fshape.add("#{NS_EWS_TYPES}:AdditionalProperties") do |addprops|
-                  folder_shape[:additional_props][:FieldURI].each do |uri|
+                  folder_shape[:additional_properties][:FieldURI].each do |uri|
                     addprops.add("#{NS_EWS_TYPES}:FieldURI") { |furi| furi.set_attr('FieldURI', uri) }
                   end
                 end
@@ -156,9 +156,15 @@ module Viewpoint
             is.add("#{NS_EWS_TYPES}:BodyType", item_shape[:body_type]) if item_shape.has_key?(:body_type)
             is.add("#{NS_EWS_TYPES}:FilterHtmlContent", item_shape[:filter_html_content]) if item_shape.has_key?(:filter_html_content)
             is.add("#{NS_EWS_TYPES}:ConvertHtmlCodePageToUTF8", item_shape[:convert_html_code_page_to_utf8]) if item_shape.has_key?(:convert_html_code_page_to_utf8)
-          end
-          
-          unless( item_shape[:additional_props].nil? )
+            unless( item_shape[:additional_properties].nil? )
+              unless( item_shape[:additional_properties][:field_uRI].nil? )
+                is.add("#{NS_EWS_TYPES}:AdditionalProperties") do |addprops|
+                  item_shape[:additional_properties][:field_uRI].each do |uri|
+                    addprops.add("#{NS_EWS_TYPES}:FieldURI") { |furi| furi.set_attr('FieldURI', uri) }
+                  end
+                end
+              end
+            end
           end
         end
 
