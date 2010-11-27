@@ -23,6 +23,20 @@ module Viewpoint
     # This class represents a SearchFolderType object in the Exchange Data store.
     class SearchFolder < GenericFolder
 
+      # Find folders of type SearchFolder
+      # @see GenericFolder.find_folders
+      # @param [String,Symbol] root An folder id, either a DistinguishedFolderId (must me a Symbol)
+      #   or a FolderId (String).  SearchFolders must be created under the :searchfolders distinguished
+      #   id so we might as well only search from there.
+      # @param [String] traversal Shallow/Deep/SoftDeleted
+      # @param [String] shape the shape to return IdOnly/Default/AllProperties
+      # @param [optional, String] folder_type an optional folder type to limit the search to like 'IPF.Task'
+      # @return [Array] Returns an Array of Folder or subclasses of Folder
+      def self.find_folders(root = :searchfolders, traversal = 'Deep', shape = 'Default', folder_type = nil)
+        super(root, traversal, shape, folder_type)
+      end
+
+
       def initialize(folder)
         super(folder)
         define_int_var :unread_count

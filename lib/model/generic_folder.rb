@@ -62,9 +62,19 @@ module Viewpoint
       # @param [String,Symbol] root An folder id, either a DistinguishedFolderId (must me a Symbol)
       #   or a FolderId (String)
       # @param [String] traversal Shallow/Deep/SoftDeleted
+      # @param [String] shape the shape to return IdOnly/Default/AllProperties
+      # @param [optional, String] folder_type an optional folder type to limit the search to like 'IPF.Task'
       # @return [Array] Returns an Array of Folder or subclasses of Folder
-      def self.find_folders(root = :msgfolderroot, traversal = 'Shallow', shape = 'Default')
-        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal, {:base_shape => shape} )
+      def self.find_folders(root = :msgfolderroot, traversal = 'Shallow', shape = 'Default', folder_type = nil)
+        if( folder_type.nil? )
+          resp = (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal, {:base_shape => shape} )
+        else
+          restr = {:restriction => 
+            {:is_equal_to => {:field_uRI => {:field_uRI=>'folder:FolderClass'},:field_uRI_or_constant=>{:constant => {:value => folder_type}}}}
+          }
+          resp = (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal, {:base_shape => shape}, restr)
+        end
+
         if(resp.status == 'Success')
           folders = []
           resp.items.each do |f|
