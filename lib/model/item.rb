@@ -37,7 +37,7 @@ module Viewpoint
         resp = conn.ews.get_item([item_id])
         resp = resp.items.shift
         resp_type = resp.keys.first
-        self.const_get(resp_type.to_s.camel_case).new(resp[resp_type])
+        eval "#{resp_type.to_s.camel_case}.new(resp[resp_type])"
       end
 
       # Add attachments to the passed in ParentId
