@@ -24,6 +24,10 @@ module Viewpoint
     class EwsError < StandardError
     end
 
+    # Raise when authentication/authorization issues occur.
+    class EwsLoginError < StandardError
+    end
+
     # Raised when a user tries to query a folder subscription after the
     # subscription has timed out.
     class EwsSubscriptionTimeout < StandardError

@@ -83,9 +83,16 @@ module Viewpoint
         end
 
         def on_after_create_http_request(req)
-          req.set_auth @@user, @@pass
+          begin
+            req.set_auth @@user, @@pass
+          rescue NameError => e
+            raise EwsLoginError, "Please remember to set your credential information."
+          end
         end
 
+        def on_http_error(response)
+          raise EwsLoginError, "Failed to login to EWS at #{uri}. Please check your credentials." if(response.status == 401)
+        end
 
         # ********** End Hooks **********
 
@@ -764,7 +771,11 @@ module Viewpoint
 
         # Override the superclasses' invoke so we can add http_options to each request
         def invoke(msg, action)
-          super(msg, {:soap_action => action, :http_options => @@http_options})
+          begin
+            super(msg, {:soap_action => action, :http_options => @@http_options})
+          rescue SocketError
+            raise EwsError, "Could not connect to endpoint: #{uri}"
+          end
         end
 
       end # class ExchangeWebService
