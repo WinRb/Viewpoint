@@ -344,23 +344,32 @@ module Viewpoint
 
         # Add a hierarchy of elements from hash data
         # @example Hash to XML
-        #   {:this => {:text =>'that'},'top' => {:id => '32fss', :text => 'TestText', {'middle' => 'bottom'}}}
+        #   {:this => {:text =>'that'},'top' => {:id => '32fss', :text => 'TestText', :sub_elements => {'middle' => {:text => 'bottom'}}}}
         #   becomes...
         #   <this>that</this>
         #   <top Id='32fss'>
-        #     TestText
         #     <middle>bottom</middle>
         #   </top>
         def add_hierarchy!(node, e_hash, prefix = NS_EWS_TYPES)
           e_hash.each_pair do |k,v|
             if v.is_a? Hash
-              node.add("#{prefix}:#{k.to_s.camel_case}", v[:text]) do |n|
-                add_hierarchy!(n, v)
+              if(k == :sub_elements)
+                add_hierarchy!(node, v)
+              else
+                node.add("#{prefix}:#{k.to_s.camel_case}", v[:text]) do |n|
+                  add_hierarchy!(n, v)
+                end
               end
             elsif v.is_a? Array
-              node.add("#{prefix}:#{k.to_s.camel_case}") do |n|
+              if(k == :sub_elements)
                 v.each do |i|
-                  add_hierarchy!(n, i)
+                  add_hierarchy!(node, i)
+                end
+              else
+                node.add("#{prefix}:#{k.to_s.camel_case}") do |n|
+                  v.each do |i|
+                    add_hierarchy!(n, i)
+                  end
                 end
               end
             else

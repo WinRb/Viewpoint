@@ -20,12 +20,48 @@
 
 module Viewpoint
   module EWS
+    # Represents a Contact Item in the Exchange datastore.
     class Contact < Item
 
+      # This is a class method that creates a new Contact in the Exchange Data Store.
+      # @param [Hash] item A Hash of values based on values found here:
+      #   http://msdn.microsoft.com/en-us/library/aa581315.aspx
+      # @param [String, Symbol] folder_id The folder to create this item in. Either a
+      #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+      # @param [String] send_invites "SendToNone/SendOnlyToAll/SendToAllAndSaveCopy"
+      #   See:  http://msdn.microsoft.com/en-us/library/aa565209.aspx
+      # @example Typical Usage
+      #   item = {
+      #     :file_as => {:text => 'Dan Wanek'},
+      #     :given_name => {:text => 'Dan Wanek'},
+      #     :company_name => {:text => 'Test Company'},
+      #     :email_addresses => [
+      #       {:entry => {:key => 'EmailAddress1', :text => 'myemail@work.com'}},
+      #       {:entry => {:key => 'EmailAddress2', :text => 'myemail@home.com'}}
+      #     ],
+      #     :physical_addresses => [
+      #       {:entry => {:key => 'Business', :sub_elements => {:street => {:text => '6343 N Baltimore'}, :city => {:text => 'Bismarck'}, :state => {:text => 'ND'} }}}
+      #     ],
+      #     :phone_numbers => [
+      #       {:entry => {:key => 'BusinessPhone', :text => '7012220000'}}
+      #     ],
+      #     :job_title => {:text => 'Systems Architect'}
+      #   }
+      # @example Minimal Usage
+      def self.create_item_from_hash(item, folder_id = :contacts)
+        conn = Viewpoint::EWS::EWS.instance
+        resp = conn.ews.create_contact_item(folder_id, item)
+        if(resp.status == 'Success')
+          resp = resp.items.shift
+          self.new(resp[resp.keys.first])
+        else
+          raise EwsError, "Could not create Contact. #{resp.code}: #{resp.message}"
+        end
+      end
+
+
+
       # Create a Contact in the Exchange Data Store
-      #
-      # @param [String] subject The task subject
-      # @param [String] body The task body
       def self.add_contact()
         item = {}
         

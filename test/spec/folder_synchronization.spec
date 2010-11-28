@@ -27,7 +27,7 @@ describe "Folder Synchronization" do
     end
 
     it 'should synchronized to a given DateTime' do
-      @inbox.sync_items_since!((Date.today - 1).to_datetime)
+      @inbox.sync_items_since!(DateTime.parse((Date.today - 1).to_s))
       @inbox.sync_state.should_not be_nil
     end
 
