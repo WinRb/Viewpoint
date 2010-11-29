@@ -22,6 +22,34 @@ module Viewpoint
   module EWS
     class Task < Item
       
+
+      # Create a Task in the Exchange Data Store from a hash
+      # @param [Hash] item A Hash of values based on values found here:
+      #   http://msdn.microsoft.com/en-us/library/aa563930.aspx
+      # @param [String, Symbol] folder_id The folder to create this item in. Either a
+      #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+      # @param [String] disposition SaveOnly/SendOnly/SendAndSaveCopy
+      #   See:  http://msdn.microsoft.com/en-us/library/aa565209.aspx
+      # @example Typical Usage
+      #   item = {
+      #     :subject => {:text => 'Planning'},
+      #     :body => {:body_type => 'Text', :text => 'This is a test'},
+      #     :start_date => {:text => '2010-07-29T14:00:00'},
+      #     :due_date => {:text => '2010-07-29T15:00:00'},
+      #   }
+      # @example Minimal Usage
+      #   item = {:subject => {:text => 'This is a test'}}
+      def self.create_item_from_hash(item, folder_id = :tasks, disposition = 'SaveOnly')
+        conn = Viewpoint::EWS::EWS.instance
+        resp = conn.ews.create_task_item(folder_id, item, disposition)
+        if(resp.status == 'Success')
+          resp = resp.items.shift
+          self.new(resp[resp.keys.first])
+        else
+          raise EwsError, "Could not create Task. #{resp.code}: #{resp.message}"
+        end
+      end
+
       # Create a Task in the Exchange Data Store
       #
       # @param [nil, String] folder the folder to add the task to. If it is nil
