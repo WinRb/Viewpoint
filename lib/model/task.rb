@@ -115,7 +115,12 @@ module Viewpoint
       private
 
       def init_methods
-        super()
+        super
+
+        define_str_var :status, :owner
+        define_bool_var :is_complete, :is_recurring, :is_team_task
+        define_int_var :percent_complete, :actual_work, :change_count
+        define_datetime_var :start_date, :due_date, :complete_date
       end
 
     end # Task

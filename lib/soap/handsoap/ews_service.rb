@@ -771,6 +771,7 @@ module Viewpoint
 
         # Override the superclasses' invoke so we can add http_options to each request
         def invoke(msg, action)
+          raise EwsError, "EWS Endpoint not set." if uri.nil?
           begin
             super(msg, {:soap_action => action, :http_options => @@http_options})
           rescue SocketError
