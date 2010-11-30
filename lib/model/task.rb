@@ -65,14 +65,7 @@ module Viewpoint
         item[:start_date] = {:text => v_start.to_s} unless v_start.nil?
         item[:due_date] = {:text => v_end.to_s} unless v_end.nil?
         
-        conn = Viewpoint::EWS::EWS.instance
-        resp = conn.ews.create_task_item(folder, item, 'SaveOnly')
-        if(resp.status == 'Success')
-          resp = resp.items.shift
-          self.new(resp[resp.keys.first])
-        else
-          raise EwsError, "Could not create task. #{resp.code}: #{resp.message}"
-        end
+        self.create_item_from_hash(item, folder)
       end
 
 
