@@ -90,28 +90,36 @@ module Viewpoint
 
         define_str_var :file_as, :file_as_mapping, :display_name, :job_title
         define_attr_str_var :complete_name, :first_name, :middle_name, :last_name, :initials, :full_name
-        define_email_addresses :email_addresses, :im_addresses
+        define_inet_addresses :email_addresses, :im_addresses
         define_phone_numbers :phone_numbers
         define_physical_addresses :physical_addresses
       end
       
       # Define email_addresses or im_addresses for a Contact
-      def define_email_addresses(email_addresses)
-        @email_addresses ||= {}
-        return unless @email_addresses.empty?
-        if(@ews_item.has_key?(email_addresses))
-          @ews_methods << email_addresses
-          @ews_item[email_addresses][:entry].each do |entry|
-            next if entry.keys.length == 1
-            @email_addresses[entry[:key].ruby_case.to_sym] = (entry.has_key?(:text) ? entry[:text] : "")
-          end
-          self.instance_eval <<-EOF
-          def #{email_addresses}
-            @email_addresses
+      def define_inet_addresses(*inet_addresses)
+        inet_addresses.each do |itype|
+          eval "@#{itype} ||= {}"
+          return unless self.instance_variable_get("@#{itype}").empty?
+          if(@ews_item.has_key?(itype))
+            @ews_methods << itype
+            if(@ews_item[itype][:entry].is_a?(Array))
+              @ews_item[itype][:entry].each do |entry|
+                next if entry.keys.length == 1
+                eval "@#{itype}[entry[:key].ruby_case.to_sym] = (entry.has_key?(:text) ? entry[:text] : '')"
+              end
+            else
+              entry = @ews_item[itype][:entry]
+              next if entry.keys.length == 1
+              eval "@#{itype}[entry[:key].ruby_case.to_sym] = (entry.has_key?(:text) ? entry[:text] : '')"
+            end
+            self.instance_eval <<-EOF
+          def #{itype}
+            self.instance_variable_get "@#{itype}"
           end
           EOF
-        else
-          @ews_methods_undef << attendee_type
+          else
+            @ews_methods_undef << itype
+          end
         end
       end
       
@@ -130,7 +138,7 @@ module Viewpoint
           end
           EOF
         else
-          @ews_methods_undef << attendee_type
+          @ews_methods_undef << itype
         end
       end
 
@@ -154,7 +162,7 @@ module Viewpoint
           end
           EOF
         else
-          @ews_methods_undef << attendee_type
+          @ews_methods_undef << itype
         end
       end
 
