@@ -81,8 +81,14 @@ module Viewpoint
       def define_attr_str_var(parent, *vars)
         return unless @ews_item[parent]
         vars.each do |var|
-          if(@ews_item[parent][var])
-            @ews_methods << var
+          @ews_methods << var
+          if(@ews_item[parent][var].is_a?(Hash) && @ews_item[parent][var].has_key?(:text))
+            self.instance_eval <<-EOF
+            def #{var}
+              @ews_item[:#{parent}][:#{var}][:text]
+            end
+            EOF
+          elsif(@ews_item[parent][var])
             self.instance_eval <<-EOF
             def #{var}
               @ews_item[:#{parent}][:#{var}]
@@ -210,7 +216,6 @@ module Viewpoint
           end
         end
       end
-
 
       # After a delete is called on an object this method will clear
       # out all of the defined EWS methods so they can't be called on the

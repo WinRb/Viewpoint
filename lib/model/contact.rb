@@ -87,6 +87,75 @@ module Viewpoint
 
       def init_methods
         super()
+
+        define_str_var :file_as, :file_as_mapping, :display_name, :job_title
+        define_attr_str_var :complete_name, :first_name, :middle_name, :last_name, :initials, :full_name
+        define_email_addresses :email_addresses, :im_addresses
+        define_phone_numbers :phone_numbers
+        define_physical_addresses :physical_addresses
+      end
+      
+      # Define email_addresses or im_addresses for a Contact
+      def define_email_addresses(email_addresses)
+        @email_addresses ||= {}
+        return unless @email_addresses.empty?
+        if(@ews_item.has_key?(email_addresses))
+          @ews_methods << email_addresses
+          @ews_item[email_addresses][:entry].each do |entry|
+            next if entry.keys.length == 1
+            @email_addresses[entry[:key].ruby_case.to_sym] = (entry.has_key?(:text) ? entry[:text] : "")
+          end
+          self.instance_eval <<-EOF
+          def #{email_addresses}
+            @email_addresses
+          end
+          EOF
+        else
+          @ews_methods_undef << attendee_type
+        end
+      end
+      
+      def define_phone_numbers(phone_numbers)
+        @phone_numbers ||= {}
+        return unless @phone_numbers.empty?
+        if(@ews_item.has_key?(phone_numbers))
+          @ews_methods << phone_numbers
+          @ews_item[phone_numbers][:entry].each do |entry|
+            next if entry.keys.length == 1
+            @phone_numbers[entry[:key].ruby_case.to_sym] = (entry.has_key?(:text) ? entry[:text] : "")
+          end
+          self.instance_eval <<-EOF
+          def #{phone_numbers}
+            @phone_numbers
+          end
+          EOF
+        else
+          @ews_methods_undef << attendee_type
+        end
+      end
+
+      # Define physical_addresses for a Contact
+      def define_physical_addresses(physical_addresses)
+        @physical_addresses ||= {}
+        return unless @physical_addresses.empty?
+        if(@ews_item.has_key?(physical_addresses))
+          @ews_methods << physical_addresses
+          @ews_item[physical_addresses][:entry].each do |entry|
+            next if entry.keys.length == 1
+            key = entry.delete(:key)
+            @physical_addresses[key.ruby_case.to_sym] = {}
+            entry.each_pair do |ekey,ev|
+              @physical_addresses[key.ruby_case.to_sym][ekey] = ev[:text]
+            end
+          end
+          self.instance_eval <<-EOF
+          def #{physical_addresses}
+            @physical_addresses
+          end
+          EOF
+        else
+          @ews_methods_undef << attendee_type
+        end
       end
 
     end # Contact
