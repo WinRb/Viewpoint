@@ -90,6 +90,7 @@ module Viewpoint
 
       # Save any pending updates that were manipulated via setter methods.
       def save!
+        return true if @updates.empty?
         if update_attribs!(@updates)
           @updates = {}
           true
