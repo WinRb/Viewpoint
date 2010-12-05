@@ -88,22 +88,38 @@ module Viewpoint
 
       # Call UpdateItem for this item with the passed updates
       # @param [Hash] updates a well-formed update hash
-      # @example {:updates=>{:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>"message:IsRead"}, :message=>{:is_read=>{:text=>"true"}}}}}
+      # @example {:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>"message:IsRead"}, :message=>{:is_read=>{:text=>"true"}}}}
       def update!(updates)
         conn = Viewpoint::EWS::EWS.instance
-        resp = conn.ews.update_item([{:id => @item_id, :change_key => @change_key}], updates)
+        resp = conn.ews.update_item([{:id => @item_id, :change_key => @change_key}], {:updates => updates})
         (resp.status == 'Success') || (raise EwsError, "Trouble updating Item. #{resp.code}: #{resp.message}")
+      end
+
+      # This takes a hash of attributes with new values and builds the appropriate udpate hash
+      # @param [Hash] updates a hash that is formed like so :item_attr => newvalue
+      # @example  {:sensitivity => {:text => 'Normal'}, :display_name => {:text => 'Test User'}}
+      def update_attribs!(updates)
+        changes = []
+        type = self.class.name.split(/::/).last.ruby_case.to_sym
+
+        updates.each_pair do |k,v|
+          changes << {:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>FIELD_URIS[k]}, type=>{k => v}}}
+        end
+
+        update!(changes)
       end
 
       # Mark this Item as read
       def mark_read!
-        update!({:updates=>{:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>"message:IsRead"}, :message=>{:is_read=>{:text=>"true"}}}}})
+        field = :is_read
+        update!({:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>FIELD_URIS[field]}, :message=>{field=>{:text=>"true"}}}})
         @is_read = true
       end
 
       # Mark this Item as unread
       def mark_unread!
-        update!({:updates=>{:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>"message:IsRead"}, :message=>{:is_read=>{:text=>"false"}}}}})
+        field = :is_read
+        update!({:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>FIELD_URIS[field]}, :message=>{field=>{:text=>"false"}}}})
         @is_read = false
         true
       end
@@ -207,6 +223,75 @@ module Viewpoint
         #deepen!
         GenericFolder.get_folder @parent_folder_id
       end
+
+
+      FIELD_URIS= { :folder_id  =>  'older:FolderId', :parent_folder_id  =>  'folder:ParentFolderId', :display_name  =>  'folder:DisplayName',
+        :unread_count  =>  'folder:UnreadCount', :total_count  =>  'folder:TotalCount', :child_folder_count  =>  'folder:ChildFolderCount',
+        :folder_class  =>  'folder:FolderClass', :search_parameters  =>  'folder:SearchParameters', :managed_folder_information  =>  'folder:ManagedFolderInformation',
+        :permission_set  =>  'folder:PermissionSet', :effective_rights  =>  'folder:EffectiveRights', :sharing_effective_rights  =>  'folder:SharingEffectiveRights',
+        :item_id  =>  'item:ItemId', :parent_folder_id  =>  'item:ParentFolderId', :item_class  =>  'item:ItemClass', :mime_content  =>  'item:MimeContent',
+        :attachments  =>  'item:Attachments', :subject  =>  'item:Subject', :date_time_received  =>  'item:DateTimeReceived', :size  =>  'item:Size',
+        :categories  =>  'item:Categories', :has_attachments  =>  'item:HasAttachments', :importance  =>  'item:Importance', :in_reply_to  =>  'item:InReplyTo',
+        :internet_message_headers  =>  'item:InternetMessageHeaders', :is_associated  =>  'item:IsAssociated', :is_draft  =>  'item:IsDraft',
+        :is_from_me  =>  'item:IsFromMe', :is_resend  =>  'item:IsResend', :is_submitted  =>  'item:IsSubmitted', :is_unmodified  =>  'item:IsUnmodified',
+        :date_time_sent  =>  'item:DateTimeSent', :date_time_created  =>  'item:DateTimeCreated', :body  =>  'item:Body', :response_objects  =>  'item:ResponseObjects',
+        :sensitivity  =>  'item:Sensitivity', :reminder_due_by  =>  'item:ReminderDueBy', :reminder_is_set  =>  'item:ReminderIsSet',
+        :reminder_minutes_before_start  =>  'item:ReminderMinutesBeforeStart', :display_to  =>  'item:DisplayTo', :display_cc  =>  'item:DisplayCc',
+        :culture  =>  'item:Culture', :effective_rights  =>  'item:EffectiveRights', :last_modified_name  =>  'item:LastModifiedName',
+        :last_modified_time  =>  'item:LastModifiedTime', :conversation_id  =>  'item:ConversationId', :unique_body  =>  'item:UniqueBody',
+        :web_client_read_form_query_string  =>  'item:WebClientReadFormQueryString', :web_client_edit_form_query_string  =>  'item:WebClientEditFormQueryString',
+        :conversation_index  =>  'message:ConversationIndex', :conversation_topic  =>  'message:ConversationTopic', :internet_message_id  =>  'message:InternetMessageId',
+        :is_read  =>  'message:IsRead', :is_response_requested  =>  'message:IsResponseRequested', :is_read_receipt_requested  =>  'message:IsReadReceiptRequested',
+        :is_delivery_receipt_requested  =>  'message:IsDeliveryReceiptRequested', :references  =>  'message:References', :reply_to  =>  'message:ReplyTo',
+        :from  =>  'message:From', :sender  =>  'message:Sender', :to_recipients  =>  'message:ToRecipients', :cc_recipients  =>  'message:CcRecipients',
+        :bcc_recipients  =>  'message:BccRecipients', :associated_calendar_item_id  =>  'meeting:AssociatedCalendarItemId', :is_delegated  =>  'meeting:IsDelegated',
+        :is_out_of_date  =>  'meeting:IsOutOfDate', :has_been_processed  =>  'meeting:HasBeenProcessed', :response_type  =>  'meeting:ResponseType',
+        :meeting_request_type  =>  'meetingRequest:MeetingRequestType', :intended_free_busy_status  =>  'meetingRequest:IntendedFreeBusyStatus',
+        :start  =>  'calendar:Start', :end  =>  'calendar:End', :original_start  =>  'calendar:OriginalStart', :is_all_day_event  =>  'calendar:IsAllDayEvent',
+        :legacy_free_busy_status  =>  'calendar:LegacyFreeBusyStatus', :location  =>  'calendar:Location', :when  =>  'calendar:When',
+        :is_meeting  =>  'calendar:IsMeeting', :is_cancelled  =>  'calendar:IsCancelled', :is_recurring  =>  'calendar:IsRecurring',
+        :meeting_request_was_sent  =>  'calendar:MeetingRequestWasSent', :is_response_requested  =>  'calendar:IsResponseRequested',
+        :calendar_item_type  =>  'calendar:CalendarItemType', :my_response_type  =>  'calendar:MyResponseType', :organizer  =>  'calendar:Organizer',
+        :required_attendees  =>  'calendar:RequiredAttendees', :optional_attendees  =>  'calendar:OptionalAttendees', :resources  =>  'calendar:Resources',
+        :conflicting_meeting_count  =>  'calendar:ConflictingMeetingCount', :adjacent_meeting_count  =>  'calendar:AdjacentMeetingCount',
+        :conflicting_meetings  =>  'calendar:ConflictingMeetings', :adjacent_meetings  =>  'calendar:AdjacentMeetings', :duration  =>  'calendar:Duration',
+        :time_zone  =>  'calendar:TimeZone', :appointment_reply_time  =>  'calendar:AppointmentReplyTime',
+        :appointment_sequence_number  =>  'calendar:AppointmentSequenceNumber', :appointment_state  =>  'calendar:AppointmentState', :recurrence  =>  'calendar:Recurrence',
+        :first_occurrence  =>  'calendar:FirstOccurrence', :last_occurrence  =>  'calendar:LastOccurrence', :modified_occurrences  =>  'calendar:ModifiedOccurrences',
+        :deleted_occurrences  =>  'calendar:DeletedOccurrences', :meeting_time_zone  =>  'calendar:MeetingTimeZone', :conference_type  =>  'calendar:ConferenceType',
+        :allow_new_time_proposal  =>  'calendar:AllowNewTimeProposal', :is_online_meeting  =>  'calendar:IsOnlineMeeting',
+        :meeting_workspace_url  =>  'calendar:MeetingWorkspaceUrl', :net_show_url  =>  'calendar:NetShowUrl', :u_i_d  =>  'calendar:UID',
+        :recurrence_id  =>  'calendar:RecurrenceId', :date_time_stamp  =>  'calendar:DateTimeStamp', :start_time_zone  =>  'calendar:StartTimeZone',
+        :end_time_zone  =>  'calendar:EndTimeZone', :actual_work  =>  'task:ActualWork', :assigned_time  =>  'task:AssignedTime',
+        :billing_information  =>  'task:BillingInformation', :change_count  =>  'task:ChangeCount', :companies  =>  'task:Companies',
+        :complete_date  =>  'task:CompleteDate', :contacts  =>  'task:Contacts', :delegation_state  =>  'task:DelegationState',
+        :delegator  =>  'task:Delegator', :due_date  =>  'task:DueDate', :is_assignment_editable  =>  'task:IsAssignmentEditable', :is_complete  =>  'task:IsComplete',
+        :is_recurring  =>  'task:IsRecurring', :is_team_task  =>  'task:IsTeamTask', :mileage  =>  'task:Mileage', :owner  =>  'task:Owner',
+        :percent_complete  =>  'task:PercentComplete', :recurrence  =>  'task:Recurrence', :start_date  =>  'task:StartDate', :status  =>  'task:Status',
+        :status_description  =>  'task:StatusDescription', :total_work  =>  'task:TotalWork', :assistant_name  =>  'contacts:AssistantName',
+        :birthday  =>  'contacts:Birthday', :business_home_page  =>  'contacts:BusinessHomePage', :children  =>  'contacts:Children', :companies  =>  'contacts:Companies',
+        :company_name  =>  'contacts:CompanyName', :complete_name  =>  'contacts:CompleteName', :contact_source  =>  'contacts:ContactSource',
+        :culture  =>  'contacts:Culture', :department  =>  'contacts:Department', :display_name  =>  'contacts:DisplayName',
+        :email_addresses  =>  'contacts:EmailAddresses', :file_as  =>  'contacts:FileAs', :file_as_mapping  =>  'contacts:FileAsMapping',
+        :generation  =>  'contacts:Generation', :given_name  =>  'contacts:GivenName', :has_picture  =>  'contacts:HasPicture', :im_addresses  =>  'contacts:ImAddresses',
+        :initials  =>  'contacts:Initials', :job_title  =>  'contacts:JobTitle', :manager  =>  'contacts:Manager', :middle_name  =>  'contacts:MiddleName',
+        :mileage  =>  'contacts:Mileage', :nickname  =>  'contacts:Nickname', :office_location  =>  'contacts:OfficeLocation', :phone_numbers  =>  'contacts:PhoneNumbers',
+        :physical_addresses  =>  'contacts:PhysicalAddresses', :postal_address_index  =>  'contacts:PostalAddressIndex', :profession  =>  'contacts:Profession',
+        :spouse_name  =>  'contacts:SpouseName', :surname  =>  'contacts:Surname', :wedding_anniversary  =>  'contacts:WeddingAnniversary',
+        :members  =>  'distributionlist:Members', :posted_time  =>  'postitem:PostedTime', :conversation_id  =>  'conversation:ConversationId',
+        :conversation_topic  =>  'conversation:ConversationTopic', :unique_recipients  =>  'conversation:UniqueRecipients',
+        :global_unique_recipients  =>  'conversation:GlobalUniqueRecipients', :unique_unread_senders  =>  'conversation:UniqueUnreadSenders',
+        :global_unique_unread_senders  =>  'conversation:GlobalUniqueUnreadSenders', :unique_senders  =>  'conversation:UniqueSenders',
+        :global_unique_senders  =>  'conversation:GlobalUniqueSenders', :last_delivery_time  =>  'conversation:LastDeliveryTime',
+        :global_last_delivery_time  =>  'conversation:GlobalLastDeliveryTime', :categories  =>  'conversation:Categories',
+        :global_categories  =>  'conversation:GlobalCategories', :flag_status  =>  'conversation:FlagStatus', :global_flag_status  =>  'conversation:GlobalFlagStatus',
+        :has_attachments  =>  'conversation:HasAttachments', :global_has_attachments  =>  'conversation:GlobalHasAttachments',
+        :message_count  =>  'conversation:MessageCount', :global_message_count  =>  'conversation:GlobalMessageCount', :unread_count  =>  'conversation:UnreadCount',
+        :global_unread_count  =>  'conversation:GlobalUnreadCount', :size  =>  'conversation:Size', :global_size  =>  'conversation:GlobalSize',
+        :item_classes  =>  'conversation:ItemClasses', :global_item_classes  =>  'conversation:GlobalItemClasses', :importance  =>  'conversation:Importance',
+        :global_importance  =>  'conversation:GlobalImportance', :item_ids  =>  'conversation:ItemIds', :global_item_ids  =>  'conversation:GlobalItemIds'}
+
+
 
 
       private
