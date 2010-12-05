@@ -88,7 +88,7 @@ module Viewpoint
       def init_methods
         super()
 
-        define_str_var :file_as, :file_as_mapping, :display_name, :job_title
+        define_str_var :file_as, :file_as_mapping, :display_name, :job_title, :given_name, :surname
         define_attr_str_var :complete_name, :first_name, :middle_name, :last_name, :initials, :full_name
         define_inet_addresses :email_addresses, :im_addresses
         define_phone_numbers :phone_numbers

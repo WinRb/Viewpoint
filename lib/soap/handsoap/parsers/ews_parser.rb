@@ -127,6 +127,10 @@ module Viewpoint
             raise EwsError, "#{@response_message.code}: #{@response_message.message}"
           end
         end
+
+        def update_item_response(opts)
+          create_item_response(opts)
+        end
         
         def send_item_response(opts)
           if(@response_message.status == 'Success')
@@ -152,7 +156,6 @@ module Viewpoint
             raise EwsError, "#{@response_message.code}: #{@response_message.message}"
           end
         end
-
 
         def create_attachment_response(opts)
           if(@response_message.status == 'Success')

@@ -65,6 +65,14 @@ module Viewpoint
               @ews_item[:#{var}][:text]
             end
             EOF
+            if(Item::FIELD_URIS.has_key?(var.to_sym) && Item::FIELD_URIS[var.to_sym][:writable])
+              self.instance_eval <<-EOF
+              def #{mname}=(newtext)
+                @ews_item[:#{var}][:text] = newtext
+                @updates[:#{var}] = @ews_item[:#{var}]
+              end
+              EOF
+            end
           else
             @ews_methods_undef << var
           end
@@ -110,6 +118,14 @@ module Viewpoint
               @#{var} ||= @ews_item[:#{var}][:text].to_i
             end
             EOF
+            if(Item::FIELD_URIS.has_key?(var.to_sym) && Item::FIELD_URIS[var.to_sym][:writable])
+              self.instance_eval <<-EOF
+              def #{var}=(newint)
+                @ews_item[:#{var}][:text] = newint.to_s
+                @updates[:#{var}] = @ews_item[:#{var}]
+              end
+              EOF
+            end
           else
             @ews_methods_undef << var
           end
@@ -125,6 +141,15 @@ module Viewpoint
               @#{var} ||= (@ews_item[:#{var}][:text] == 'true') ? true : false
             end
             EOF
+            if(Item::FIELD_URIS.has_key?(var.to_sym) && Item::FIELD_URIS[var.to_sym][:writable])
+              self.instance_eval <<-EOF
+              def #{var}=(newbool)
+                raise EwsError, "Value not boolean for method #{var}=" unless(newbool.is_a?(TrueClass) || newbool.is_a?(FalseClass))
+                @ews_item[:#{var}][:text] = newbool.to_s
+                @updates[:#{var}] = @ews_item[:#{var}]
+              end
+              EOF
+            end
           else
             @ews_methods_undef << "#{var}?".to_sym
           end
@@ -140,6 +165,14 @@ module Viewpoint
               @#{var} ||= DateTime.parse(@ews_item[:#{var}][:text])
             end
             EOF
+            if(Item::FIELD_URIS.has_key?(var.to_sym) && Item::FIELD_URIS[var.to_sym][:writable])
+              self.instance_eval <<-EOF
+              def #{var}=(newdate)
+                @ews_item[:#{var}][:text] = newdate.to_s
+                @updates[:#{var}] = @ews_item[:#{var}]
+              end
+              EOF
+            end
           else
             @ews_methods_undef << var
           end

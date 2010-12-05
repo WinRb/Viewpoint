@@ -37,6 +37,7 @@ require 'model/model'
 require 'model/mailbox_user'
 require 'model/attendee'
 require 'model/generic_folder'
+require 'model/item_field_uri_map' # supports Item
 require 'model/item'
 # Specific Models
 # Folders
