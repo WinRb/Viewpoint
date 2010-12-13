@@ -1,9 +1,13 @@
+# -*- encoding: utf-8 -*-
+require 'date'
+
 version = File.read(File.expand_path("../VERSION", __FILE__)).strip
 
 Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.name = 'viewpoint'
   s.version = version
+  s.date		= Date.today.to_s
   s.summary = 'A Ruby client access library for Microsoft Exchange Web Services (EWS)'
   s.description = 'A Ruby client access library for Microsoft Exchange Web Services (EWS).  Examples can be found here: http://distributed-frostbite.blogspot.com'
 
@@ -16,6 +20,8 @@ Gem::Specification.new do |s|
 
   s.files = Dir['Changelog.txt', 'README', 'COPYING.txt', 'TODO', 'lib/**/*']
   s.require_path = 'lib'
+  s.rdoc_options	= %w(-x test/ -x examples/)
+  s.extra_rdoc_files = %w(README COPYING.txt)
 
   s.add_runtime_dependency  'handsoap'
   s.add_runtime_dependency  'nokogiri'
