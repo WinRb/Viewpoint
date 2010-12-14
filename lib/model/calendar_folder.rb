@@ -43,17 +43,6 @@ module Viewpoint
         #   <SharingEffectiveRights/>
       end
 
-      # Find Items
-      # @see GenericFolder#find_items
-      def find_items(start_date = nil, end_date = nil)
-        opts ||= {}
-        if(!start_date.nil? && !end_date.nil?)
-          opts = {:calendar_view => {:max_entries_returned => 256, :start_date => start_date, :end_date => end_date}}
-        end
-        super(opts)
-      end
-      alias :items_between :find_items
-      
       # Fetch only items from today (since midnight)
       def todays_items
         #This is a bit convoluted for pre-1.9.x ruby versions that don't support to_datetime
@@ -64,6 +53,15 @@ module Viewpoint
       # @param [DateTime] start_date_time the time to fetch Items since.
       def items_since(start_date_time)
         find_items(start_date_time, DateTime.now)
+      end
+
+      # Find Calendar Items between two dates
+      # @param [DateTime] start_date the date to start the search from
+      # @param [DateTime] end_date the date to end the search at
+      # @param [Hash] opts misc opts like restrictions, etc
+      def items_between(start_date, end_date, opts = {})
+        opts[:calendar_view] = {:max_entries_returned => 256, :start_date => start_date, :end_date => end_date}
+        find_items(opts)
       end
 
     end # CalendarFolder
