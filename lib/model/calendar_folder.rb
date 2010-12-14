@@ -44,14 +44,14 @@ module Viewpoint
       end
 
       # Fetch only items from today (since midnight)
-      def todays_items
+      def todays_items(opts = {})
         #This is a bit convoluted for pre-1.9.x ruby versions that don't support to_datetime
         find_items(DateTime.parse(Date.today.to_s), DateTime.parse((Date.today + 1).to_s))
       end
 
       # Fetch items since a give DateTime
       # @param [DateTime] start_date_time the time to fetch Items since.
-      def items_since(start_date_time)
+      def items_since(date_time, opts = {})
         find_items(start_date_time, DateTime.now)
       end
 
