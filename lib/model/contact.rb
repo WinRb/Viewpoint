@@ -127,9 +127,14 @@ module Viewpoint
         @phone_numbers ||= {}
         return unless @phone_numbers.empty?
         if(@ews_item.has_key?(phone_numbers))
-          @ews_methods << phone_numbers
-          @ews_item[phone_numbers][:entry].each do |entry|
-            next if entry.keys.length == 1
+          if(@ews_item[phone_numbers][:entry].is_a?(Array))
+            @ews_item[phone_numbers][:entry].each do |entry|
+              next if entry.keys.length == 1
+              @phone_numbers[entry[:key].ruby_case.to_sym] = (entry.has_key?(:text) ? entry[:text] : "")
+            end
+          else # it is a Hash then
+            entry = @ews_item[phone_numbers][:entry]
+            return if entry.keys.length == 1
             @phone_numbers[entry[:key].ruby_case.to_sym] = (entry.has_key?(:text) ? entry[:text] : "")
           end
           self.instance_eval <<-EOF
@@ -137,6 +142,7 @@ module Viewpoint
             @phone_numbers
           end
           EOF
+          @ews_methods << phone_numbers
         else
           @ews_methods_undef << itype
         end
