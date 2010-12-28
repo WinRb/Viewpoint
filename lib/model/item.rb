@@ -31,11 +31,12 @@ module Viewpoint
       # This is a class method that fetches an existing Item from the
       #  Exchange Store.
       # @param [String] item_id The id of the item.
+      # @param [Symbol] shape The optional shape of the item :id_only/:default/:all_properties
       # @return [Item] Returns an Item or subclass of Item
       # @todo Add support to fetch an item with a ChangeKey
-      def self.get_item(item_id)
-        conn = Viewpoint::EWS::EWS.instance
-        resp = conn.ews.get_item([item_id])
+      def self.get_item(item_id, shape = :default)
+        item_shape = {:base_shape => shape.to_s.camelcase}
+        resp = (Viewpoint::EWS::EWS.instance).ews.get_item([item_id], item_shape)
         resp = resp.items.shift
         resp_type = resp.keys.first
         eval "#{resp_type.to_s.camel_case}.new(resp[resp_type])"
