@@ -126,7 +126,7 @@ module Viewpoint
 
         updates.each_pair do |k,v|
           raise EwsError, "Field (#{FIELD_URIS[k][:text]}) not writable by update." unless FIELD_URIS[k][:writable]
-          changes << {:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>FIELD_URIS[k][:text]}, type=>{k => v}}}
+          changes << {:set_item_field=>[{:field_u_r_i => {:field_u_r_i=>FIELD_URIS[k][:text]}}, {type=>{k => v}}]}
         end
 
         update!(changes)
