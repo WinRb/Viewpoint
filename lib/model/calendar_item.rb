@@ -82,7 +82,6 @@ module Viewpoint
           item[:resources] = [] unless item[:resources].is_a?(Array)
           item[:resources] << {:attendee => {:mailbox => {:email_address => {:text => a}}}}
         end
-        puts item
         self.create_item_from_hash(item)
       end
 
