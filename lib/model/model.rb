@@ -230,7 +230,7 @@ module Viewpoint
             @ews_methods << attendee_type
             self.instance_eval <<-EOF
             def #{attendee_type}
-              return @#{attendee_type} if defined?(@#{attendee_type})
+              return @#{attendee_type} if(defined?(@#{attendee_type}) && !@#{attendee_type}.nil?)
               if( (@ews_item[:#{attendee_type}][:attendee]).is_a?(Hash) )
                 @#{attendee_type} = [Attendee.new(@ews_item[:#{attendee_type}][:attendee])]
               elsif( (@ews_item[:#{attendee_type}][:attendee]).is_a?(Array) )

@@ -102,7 +102,7 @@ module Viewpoint
 
       # Call UpdateItem for this item with the passed updates
       # @param [Hash] updates a well-formed update hash
-      # @example {:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>"message:IsRead"}, :message=>{:is_read=>{:text=>"true"}}}}
+      # @example {:set_item_field=>{:field_uRI=>{:field_uRI=>"message:IsRead"}, :message=>{:is_read=>{:text=>"true"}}}}
       def update!(updates)
         conn = Viewpoint::EWS::EWS.instance
         resp = conn.ews.update_item([{:id => @item_id, :change_key => @change_key}], {:updates => updates})
@@ -117,16 +117,27 @@ module Viewpoint
 
       end
 
-      # This takes a hash of attributes with new values and builds the appropriate udpate hash
+      # This takes a hash of attributes with new values and builds the appropriate udpate hash.
+      # It will replace any values that are currently set for those fields.
+      #
+      # You can also specify a preformatted Array of data like so:
+      #   {:preformatted => [misc data]}
+      #   This will simply be passed to the update! method
       # @param [Hash] updates a hash that is formed like so :item_attr => newvalue
+      # @param [Symbol] update_type :append, :replace, :delete
       # @example  {:sensitivity => {:text => 'Normal'}, :display_name => {:text => 'Test User'}}
-      def update_attribs!(updates)
+      def update_attribs!(updates, update_type = :replace)
+        utype_map = {:append => :append_to_item_field, :replace => :set_item_field, :delete => :delete_item_field}
         changes = []
         type = self.class.name.split(/::/).last.ruby_case.to_sym
 
         updates.each_pair do |k,v|
+          if(k == :preformatted)
+            changes += v
+            next
+          end
           raise EwsError, "Field (#{FIELD_URIS[k][:text]}) not writable by update." unless FIELD_URIS[k][:writable]
-          changes << {:set_item_field=>[{:field_u_r_i => {:field_u_r_i=>FIELD_URIS[k][:text]}}, {type=>{k => v}}]}
+          changes << {utype_map[update_type]=>[{:field_uRI => {:field_uRI=>FIELD_URIS[k][:text]}}, {type=>{k => v}}]}
         end
 
         update!(changes)
@@ -135,14 +146,14 @@ module Viewpoint
       # Mark this Item as read
       def mark_read!
         field = :is_read
-        update!({:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>FIELD_URIS[field][:text]}, :message=>{field=>{:text=>"true"}}}})
+        update!({:set_item_field=>{:field_uRI=>{:field_uRI=>FIELD_URIS[field][:text]}, :message=>{field=>{:text=>"true"}}}})
         @is_read = true
       end
 
       # Mark this Item as unread
       def mark_unread!
         field = :is_read
-        update!({:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>FIELD_URIS[field][:text]}, :message=>{field=>{:text=>"false"}}}})
+        update!({:set_item_field=>{:field_uRI=>{:field_uRI=>FIELD_URIS[field][:text]}, :message=>{field=>{:text=>"false"}}}})
         @is_read = false
         true
       end

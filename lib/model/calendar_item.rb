@@ -53,6 +53,26 @@ module Viewpoint
           raise EwsError, "Could not create CalendarItem. #{resp.code}: #{resp.message}"
         end
       end
+      
+      # Format attendees (usually called from #add_attendees!
+      # @param [Array,String,Hash,MailboxUser] attendees
+      # @param [Symbol] type the type of the attendees :required_attendees/:optional_attendees/:resources
+      def self.format_attendees(attendees, type=:required_attendees)
+        case attendees.class.to_s
+        when 'String'
+          return {type => [{:attendee => {:mailbox => {:email_address => {:text => attendees}}}}]}
+        when /Attendee|MailboxUser/
+          return {type => [{:attendee => {:mailbox => [{:name => {:text => attendees.name}}, {:email_address => {:text => attendees.email_address}}]}}]}
+        when 'Hash'
+          return {type => [{:attendee => {:mailbox => [{:name => {:text => attendees[:name]}}, {:email_address => {:text => attendees[:email_address]}}]}}]}
+        when 'Array'
+          as = {type => []}
+          attendees.each do |a|
+            as.merge!(format_attendees(a, type)) {|k,v1,v2| v1 + v2}
+          end
+          return as
+        end
+      end
 
       # Create a new CalendarItem.
       # @param [DateTime] v_start The date and time when the CalendarItem begins
@@ -60,9 +80,9 @@ module Viewpoint
       # @param [String] subject The subject of this Item
       # @param [String,optional] body The body of this object
       # @param [String,optional] location The location where this calendar item will ocurr
-      # @param [Array<String>,optional] required_attendees An Array of e-mail addresses of required attendees
-      # @param [Array<String>,optional] optional_attendees An Array of e-mail addresses of optional attendees
-      # @param [Array<String>,optional] resources An Array of e-mail addresses of resources
+      # @param [Array<String,MailboxUser,Attendee>,optional] required_attendees An Array of e-mail addresses of required attendees
+      # @param [Array<String,MailboxUser,Attendee>,optional] optional_attendees An Array of e-mail addresses of optional attendees
+      # @param [Array<String,MailboxUser,Attendee>,optional] resources An Array of e-mail addresses of resources
       def self.create_item(v_start, v_end, subject, body = nil, location = nil, required_attendees=[], optional_attendees=[], resources=[])
         item = {}
         item[:start] = {:text => v_start.to_s}
@@ -70,14 +90,8 @@ module Viewpoint
         item[:subject] = {:text => subject}
         item[:body] = {:text => body, :body_type => 'Text'} unless body.nil?
         item[:location] = {:text => location} unless location.nil?
-        required_attendees.each do |a|
-          item[:required_attendees] = [] unless item[:required_attendees].is_a?(Array)
-          item[:required_attendees] << {:attendee => {:mailbox => {:email_address => {:text => a}}}}
-        end
-        optional_attendees.each do |a|
-          item[:optional_attendees] = [] unless item[:optional_attendees].is_a?(Array)
-          item[:optional_attendees] << {:attendee => {:mailbox => {:email_address => {:text => a}}}}
-        end
+        item.merge!(self.format_attendees(required_attendees)) unless required_attendees.empty?
+        item.merge!(self.format_attendees(optional_attendees, :optional_attendees)) unless optional_attendees.empty?
         resources.each do |a|
           item[:resources] = [] unless item[:resources].is_a?(Array)
           item[:resources] << {:attendee => {:mailbox => {:email_address => {:text => a}}}}
@@ -90,6 +104,78 @@ module Viewpoint
         super(ews_item)
       end
       
+      # Add attendees to this CalendarItem.
+      # @param [Array] required Required attendees to add to this object
+      #   Array values of attendees may be simple email strings, MailboxUser items or Hashes in the form
+      #   {:email_address => 'email@test', :name => 'My Name'}.
+      # @param [Array] optional Optional attendees to add to this object
+      #   see the notes for the 'required' parameter.
+      # @example
+      #   ['user1@example.org', 'user2@example.org']
+      #   or
+      #   [{:name => 'User1', :email_address => 'user1@example.org'}, {:name => 'User2', :email_address => 'user2@example.org'}]
+      #   or
+      #   ['user1@example.org', 'user2@example.org'], ['user3@example.org', 'user4@example.org']
+      #   or
+      #   [{:name => 'User1', :email_address => 'user1@example.org'}, {:name => 'User2', :email_address => 'user2@example.org'}],
+      #     [{:name => 'User3', :email_address => 'user3@example.org'}, {:name => 'User4', :email_address => 'user4@example.org'}]
+      # @return [Boolean] true on success, false otherwise
+      # @todo add ability to add resources
+      def add_attendees!(required, optional = [], resources = [])
+        update = {}
+        update.merge!(self.class.format_attendees(required)) unless required.empty? || required.nil?
+        update.merge!(self.class.format_attendees(optional, :optional_attendees)) unless optional.empty? || optional.nil?
+
+        return false if update.empty?
+
+        @required_attendees, @optional_attendees = nil, nil
+        update_attribs!(update, :append)
+      end
+
+      # Remove the attendees from the attendee list
+      # @param [Array] attendees the attendees to remove from this CalendarItem
+      #   [Viewpoint::EWS::Attendee<user1>, Viewpoint::EWS::Attendee<user2>] or
+      #   ['user1@example.org', 'user2@example.org']
+      # @return [Boolean] false if the object is not updated, true otherwise
+      def remove_attendees!(attendees)
+        return false if attendees.empty?
+
+        emails = attendees.is_a?(Array) ? attendees : attendees.values
+        emails = emails.collect do |v|
+          case v.class.to_s
+          when 'String'
+            v
+          when /MailboxUser|Attendee/
+            v.email_address
+          when 'Hash'
+            v[:email_address]
+          end
+        end
+
+        update = {}
+        [:required_attendees, :optional_attendees].each do |type|
+          ivar = self.send(type.to_s)
+          next if ivar.nil?
+
+          required_a = ivar.select {|v| !emails.include?(v.email_address) }
+          formatted_a = self.class.format_attendees(required_a, type)
+          if formatted_a[type].empty?
+            update[:preformatted] ||= []
+            update[:preformatted] << {:delete_item_field => [{:field_uRI => {:field_uRI=>FIELD_URIS[type][:text]}}]}
+            self.instance_eval "undef #{type}"
+          else
+            update.merge!(formatted_a)
+          end
+        end
+
+        if(update.empty?)
+          return false
+        else
+          @required_attendees, @optional_attendees = nil, nil
+          update_attribs!(update)
+        end
+      end
+
       # Call UpdateItem for this item with the passed updates
       # @param [Hash] updates a well-formed update hash
       # @example {:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>"message:IsRead"}, :message=>{:is_read=>{:text=>"true"}}}}
