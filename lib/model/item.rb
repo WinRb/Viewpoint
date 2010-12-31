@@ -118,7 +118,9 @@ module Viewpoint
       end
 
       # This takes a hash of attributes with new values and builds the appropriate udpate hash.
-      # It will replace any values that are currently set for those fields.
+      #   It does not commit the changes to Exchange, call #update! with the returned values from
+      #   this method or look at #update_attribs! for a version of this method that autocommits the
+      #   changes back.
       #
       # You can also specify a preformatted Array of data like so:
       #   {:preformatted => [misc data]}
@@ -126,7 +128,7 @@ module Viewpoint
       # @param [Hash] updates a hash that is formed like so :item_attr => newvalue
       # @param [Symbol] update_type :append, :replace, :delete
       # @example  {:sensitivity => {:text => 'Normal'}, :display_name => {:text => 'Test User'}}
-      def update_attribs!(updates, update_type = :replace)
+      def update_attribs(updates, update_type = :replace)
         utype_map = {:append => :append_to_item_field, :replace => :set_item_field, :delete => :delete_item_field}
         changes = []
         type = self.class.name.split(/::/).last.ruby_case.to_sym
@@ -140,6 +142,13 @@ module Viewpoint
           changes << {utype_map[update_type]=>[{:field_uRI => {:field_uRI=>FIELD_URIS[k][:text]}}, {type=>{k => v}}]}
         end
 
+        changes
+      end
+
+      # This is the same as #update_attribs, but it will commit the changes back to Exchange.
+      # @see #update_attribs
+      def update_attribs!(updates, update_type = :replace)
+        changes = update_attribs(updates, update_type)
         update!(changes)
       end
 

@@ -104,7 +104,8 @@ module Viewpoint
         super(ews_item)
       end
       
-      # Add attendees to this CalendarItem.
+      # Add attendees to this CalendarItem. This does not commit the changes so you will have to use #save! to
+      #   commit them back. If you want to commit them at once look at the #add_attendees! method.
       # @param [Array] required Required attendees to add to this object
       #   Array values of attendees may be simple email strings, MailboxUser items or Hashes in the form
       #   {:email_address => 'email@test', :name => 'My Name'}.
@@ -121,7 +122,7 @@ module Viewpoint
       #     [{:name => 'User3', :email_address => 'user3@example.org'}, {:name => 'User4', :email_address => 'user4@example.org'}]
       # @return [Boolean] true on success, false otherwise
       # @todo add ability to add resources
-      def add_attendees!(required, optional = [], resources = [])
+      def add_attendees(required, optional = [], resources = [])
         update = {}
         update.merge!(self.class.format_attendees(required)) unless required.empty? || required.nil?
         update.merge!(self.class.format_attendees(optional, :optional_attendees)) unless optional.empty? || optional.nil?
@@ -129,15 +130,25 @@ module Viewpoint
         return false if update.empty?
 
         @required_attendees, @optional_attendees = nil, nil
-        update_attribs!(update, :append)
+        changes = update_attribs(update, :append)
+        @updates.merge!({:preformatted => changes}) {|k,v1,v2| v1 + v2}
+        true
       end
 
-      # Remove the attendees from the attendee list
+      # This is the same as the #add_attendees method, but it actually commits the change back to Exchange
+      # @see #add_attendees
+      def add_attendees!(required, optional = [], resources = [])
+        add_attendees(required, optional, resources)
+        save!
+      end
+
+      # Remove the attendees from the attendee list. This does not commit the changes so you will have to use
+      #   #save! to commit them back. If you want to commit them at once look at the #remove_attendees! method.
       # @param [Array] attendees the attendees to remove from this CalendarItem
       #   [Viewpoint::EWS::Attendee<user1>, Viewpoint::EWS::Attendee<user2>] or
       #   ['user1@example.org', 'user2@example.org']
       # @return [Boolean] false if the object is not updated, true otherwise
-      def remove_attendees!(attendees)
+      def remove_attendees(attendees)
         return false if attendees.empty?
 
         emails = attendees.is_a?(Array) ? attendees : attendees.values
@@ -168,12 +179,18 @@ module Viewpoint
           end
         end
 
-        if(update.empty?)
-          return false
-        else
-          @required_attendees, @optional_attendees = nil, nil
-          update_attribs!(update)
-        end
+        return false if update.empty?
+
+        @required_attendees, @optional_attendees = nil, nil
+        @updates.merge!(update) {|k,v1,v2| v1 + v2}
+        true
+      end
+
+      # This is the same as the #remove_attendees method, but it actually commits the change back to Exchange
+      # @see #remove_attendees
+      def remove_attendees!(attendees)
+        remove_attendees(attendees)
+        save!
       end
 
       # Call UpdateItem for this item with the passed updates
