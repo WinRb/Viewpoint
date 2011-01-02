@@ -100,6 +100,13 @@ module Viewpoint
         end
       end
 
+      # Clear out any pending updates
+      # @return [TrueClass]
+      def clear_updates!
+        @updates = {}
+        true
+      end
+
       # Call UpdateItem for this item with the passed updates
       # @param [Hash] updates a well-formed update hash
       # @example {:set_item_field=>{:field_uRI=>{:field_uRI=>"message:IsRead"}, :message=>{:is_read=>{:text=>"true"}}}}

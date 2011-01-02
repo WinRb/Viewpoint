@@ -59,8 +59,6 @@ module Viewpoint
         end
       end
 
-
-
       # Create a Contact in the Exchange Data Store
       def self.add_contact()
         item = {}
@@ -76,25 +74,41 @@ module Viewpoint
         end
       end
 
-
-
       # Initialize an Exchange Web Services item of type Contact
       def initialize(ews_item)
         super(ews_item)
       end
+      
+      def set_email_addresses(email1, email2=nil, email3=nil)
+        changes = []
+        type = self.class.name.split(/::/).last.ruby_case.to_sym
+        k = :email_addresses
+        v = 'EmailAddress1'
+        changes << {:set_item_field => 
+          [{:indexed_field_uRI => {:field_uRI => FIELD_URIS[k][:text], :field_index => v}}, {type=>{k => {:entry => {:key => v, :text => email1}}}}]} unless email1.nil?
+        v = 'EmailAddress2'
+        changes << {:set_item_field => 
+          [{:indexed_field_uRI => {:field_uRI => FIELD_URIS[k][:text], :field_index => v}}, {type=>{k => {:entry => {:key => v, :text => email2}}}}]} unless email2.nil?
+        v = 'EmailAddress3'
+        changes << {:set_item_field => 
+          [{:indexed_field_uRI => {:field_uRI => FIELD_URIS[k][:text], :field_index => v}}, {type=>{k => {:entry => {:key => v, :text => email3}}}}]} unless email3.nil?
+        @updates.merge!({:preformatted => changes}) {|k,v1,v2| v1 + v2}
+      end
+
 
       private
 
       def init_methods
         super()
 
-        define_str_var :file_as, :file_as_mapping, :display_name, :job_title, :given_name, :surname
+        define_str_var :file_as, :file_as_mapping, :display_name, :job_title, :given_name, :surname, :company_name
         define_attr_str_var :complete_name, :first_name, :middle_name, :last_name, :initials, :full_name
         define_inet_addresses :email_addresses, :im_addresses
         define_phone_numbers :phone_numbers
         define_physical_addresses :physical_addresses
       end
-      
+
+            
       # Define email_addresses or im_addresses for a Contact
       def define_inet_addresses(*inet_addresses)
         inet_addresses.each do |itype|

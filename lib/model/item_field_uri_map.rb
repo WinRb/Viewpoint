@@ -148,7 +148,7 @@ module Viewpoint
         :culture  => {:text => 'contacts:Culture', :writable => true},
         :department  => {:text => 'contacts:Department', :writable => true},
         :display_name  => {:text => 'contacts:DisplayName', :writable => true},
-        :email_addresses  => {:text => 'contacts:EmailAddresses', :writable => true},
+        :email_addresses  => {:ftype => :indexed_field_uRI, :text => 'contacts:EmailAddress', :writable => true},
         :file_as  => {:text => 'contacts:FileAs', :writable => true},
         :file_as_mapping  => {:text => 'contacts:FileAsMapping', :writable => true},
         :generation  => {:text => 'contacts:Generation', :writable => true},
