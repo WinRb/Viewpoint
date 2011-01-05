@@ -200,7 +200,7 @@ module Viewpoint
       def update!(updates)
         conn = Viewpoint::EWS::EWS.instance
         resp = conn.ews.update_item([{:id => @item_id, :change_key => @change_key}], {:updates => updates},
-                                    {:message_disposition => 'SaveOnly', :conflict_resolution => 'AutoResolve', :send_meeting_invitations_or_cancellations => 'SendToNone'})
+                                    {:message_disposition => 'SaveOnly', :conflict_resolution => 'AutoResolve', :send_meeting_invitations_or_cancellations => 'SendOnlyToChanged'})
         if resp.status == 'Success'
           @item_id = resp.items.first[resp.items.first.keys.first][:item_id][:id]
           @change_key = resp.items.first[resp.items.first.keys.first][:item_id][:change_key]

@@ -55,26 +55,27 @@ module Viewpoint
       #      This is the text
       #   </method_name>
       def define_str_var(*vars)
-        map = ( vars.last.is_a?(Hash) ? vars.pop : {}) 
+        map = ( vars.last.is_a?(Hash) ? vars.pop : {})
         vars.each do |var|
+          mname = ( map.has_key?(var) ? map[var] : var )
           if(@ews_item[var])
-            mname = ( map.has_key?(var) ? map[var] : var )
             @ews_methods << mname
             self.instance_eval <<-EOF
             def #{mname}
               @ews_item[:#{var}][:text]
             end
             EOF
-            if(Item::FIELD_URIS.has_key?(var.to_sym) && Item::FIELD_URIS[var.to_sym][:writable])
-              self.instance_eval <<-EOF
-              def #{mname}=(newtext)
-                @ews_item[:#{var}][:text] = newtext
-                @updates[:#{var}] = @ews_item[:#{var}]
-              end
-              EOF
-            end
           else
             @ews_methods_undef << var
+          end
+          if(Item::FIELD_URIS.has_key?(var.to_sym) && Item::FIELD_URIS[var.to_sym][:writable])
+            self.instance_eval <<-EOF
+            def #{mname}=(newtext)
+              @ews_item[:#{var}] = {} unless @ews_item[:#{var}]
+              @ews_item[:#{var}][:text] = newtext
+              @updates[:#{var}] = @ews_item[:#{var}]
+            end
+            EOF
           end
         end
       end
@@ -107,7 +108,7 @@ module Viewpoint
           end
         end
       end
-      
+
 
       def define_int_var(*vars)
         vars.each do |var|
@@ -115,19 +116,20 @@ module Viewpoint
             @ews_methods << var
             self.instance_eval <<-EOF
             def #{var}
-              @#{var} ||= @ews_item[:#{var}][:text].to_i
+              @ews_item[:#{var}][:text].to_i
             end
             EOF
-            if(Item::FIELD_URIS.has_key?(var.to_sym) && Item::FIELD_URIS[var.to_sym][:writable])
-              self.instance_eval <<-EOF
-              def #{var}=(newint)
-                @ews_item[:#{var}][:text] = newint.to_s
-                @updates[:#{var}] = @ews_item[:#{var}]
-              end
-              EOF
-            end
           else
             @ews_methods_undef << var
+          end
+          if(Item::FIELD_URIS.has_key?(var.to_sym) && Item::FIELD_URIS[var.to_sym][:writable])
+            self.instance_eval <<-EOF
+            def #{var}=(newint)
+              @ews_item[:#{var}] = {} unless @ews_item[:#{var}]
+              @ews_item[:#{var}][:text] = newint.to_s
+              @updates[:#{var}] = @ews_item[:#{var}]
+            end
+            EOF
           end
         end
       end
@@ -138,20 +140,21 @@ module Viewpoint
             @ews_methods << "#{var}?".to_sym
             self.instance_eval <<-EOF
             def #{var}?
-              @#{var} ||= (@ews_item[:#{var}][:text] == 'true') ? true : false
+              (@ews_item[:#{var}][:text] == 'true') ? true : false
             end
             EOF
-            if(Item::FIELD_URIS.has_key?(var.to_sym) && Item::FIELD_URIS[var.to_sym][:writable])
-              self.instance_eval <<-EOF
-              def #{var}=(newbool)
-                raise EwsError, "Value not boolean for method #{var}=" unless(newbool.is_a?(TrueClass) || newbool.is_a?(FalseClass))
-                @ews_item[:#{var}][:text] = newbool.to_s
-                @updates[:#{var}] = @ews_item[:#{var}]
-              end
-              EOF
-            end
           else
             @ews_methods_undef << "#{var}?".to_sym
+          end
+          if(Item::FIELD_URIS.has_key?(var.to_sym) && Item::FIELD_URIS[var.to_sym][:writable])
+            self.instance_eval <<-EOF
+            def #{var}=(newbool)
+              raise EwsError, "Value not boolean for method #{var}=" unless(newbool.is_a?(TrueClass) || newbool.is_a?(FalseClass))
+              @ews_item[:#{var}] = {} unless @ews_item[:#{var}]
+              @ews_item[:#{var}][:text] = newbool.to_s
+              @updates[:#{var}] = @ews_item[:#{var}]
+            end
+          EOF
           end
         end
       end
@@ -162,19 +165,20 @@ module Viewpoint
             @ews_methods << var
             self.instance_eval <<-EOF
             def #{var}
-              @#{var} ||= DateTime.parse(@ews_item[:#{var}][:text])
+              DateTime.parse(@ews_item[:#{var}][:text])
             end
             EOF
-            if(Item::FIELD_URIS.has_key?(var.to_sym) && Item::FIELD_URIS[var.to_sym][:writable])
-              self.instance_eval <<-EOF
-              def #{var}=(newdate)
-                @ews_item[:#{var}][:text] = newdate.to_s
-                @updates[:#{var}] = @ews_item[:#{var}]
-              end
-              EOF
-            end
           else
             @ews_methods_undef << var
+          end
+          if(Item::FIELD_URIS.has_key?(var.to_sym) && Item::FIELD_URIS[var.to_sym][:writable])
+            self.instance_eval <<-EOF
+            def #{var}=(newdate)
+              @ews_item[:#{var}] = {} unless @ews_item[:#{var}]
+              @ews_item[:#{var}][:text] = newdate.to_s
+              @updates[:#{var}] = @ews_item[:#{var}]
+            end
+            EOF
           end
         end
       end
