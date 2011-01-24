@@ -168,7 +168,9 @@ module Viewpoint
         return unless @physical_addresses.empty?
         if(@ews_item.has_key?(physical_addresses))
           @ews_methods << physical_addresses
-          @ews_item[physical_addresses][:entry].each do |entry|
+          entries = @ews_item[physical_addresses][:entry]
+          entries = entries.is_a?(Array) ? entries : [entries]
+          entries.each do |entry|
             next if entry.keys.length == 1
             key = entry.delete(:key)
             @physical_addresses[key.ruby_case.to_sym] = {}
