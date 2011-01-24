@@ -75,6 +75,8 @@ module Viewpoint
       end
 
       # Create a new CalendarItem.
+      # If a block is given it is passed an opts hash with the keys :folder_id and :send_invites.
+      #   See ::create_item_from_hash for details
       # @param [DateTime] v_start The date and time when the CalendarItem begins
       # @param [DateTime] v_end The date and time when the CalendarItem ends
       # @param [String] subject The subject of this Item
@@ -85,6 +87,8 @@ module Viewpoint
       # @param [Array<String,MailboxUser,Attendee>,optional] resources An Array of e-mail addresses of resources
       def self.create_item(v_start, v_end, subject, body = nil, location = nil, required_attendees=[], optional_attendees=[], resources=[])
         item = {}
+        opts = {:folder_id => :calendar, :send_invites => 'SendToAllAndSaveCopy'}
+        yield opts if block_given?
         item[:start] = {:text => v_start.to_s}
         item[:end] = {:text => v_end.to_s}
         item[:subject] = {:text => subject}
@@ -96,7 +100,7 @@ module Viewpoint
           item[:resources] = [] unless item[:resources].is_a?(Array)
           item[:resources] << {:attendee => {:mailbox => {:email_address => {:text => a}}}}
         end
-        self.create_item_from_hash(item)
+        self.create_item_from_hash(item, opts[:folder_id], opts[:send_invites])
       end
 
       # Initialize an Exchange Web Services item of type CalendarItem
