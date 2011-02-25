@@ -93,6 +93,7 @@ module Viewpoint
           mail.content_type headers['Content-Type']
           mail.content_transfer_encoding headers['Content-Transfer-Encoding']
         end
+        mail.date date_time_sent unless date_time_sent.nil?
         mail.message_id internet_message_id unless internet_message_id.nil?
         mail.in_reply_to in_reply_to unless in_reply_to.nil?
         mail.references references unless references.nil?
