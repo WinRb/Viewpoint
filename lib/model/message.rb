@@ -108,6 +108,9 @@ module Viewpoint
           mail.html_part do
             body msg.body
           end
+          mail.text_part do
+            body Nokogiri::HTML(msg.body).content
+          end
         else
           mail.text_part do
             body msg.body
