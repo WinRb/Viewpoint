@@ -305,7 +305,7 @@ module Viewpoint
         if(resp.status == 'Success')
           item = resp.items.shift
           type = item.keys.first
-          return eval "#{type.to_s.camel_case}.new(item[type])"
+          eval "#{type.to_s.camel_case}.new(item[type])"
         else
           raise EwsError, "Could not retrieve item. #{resp.code}: #{resp.message}"
         end

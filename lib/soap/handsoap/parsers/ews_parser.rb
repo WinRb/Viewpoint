@@ -93,7 +93,9 @@ module Viewpoint
 
         def get_item_response(opts)
           if(@response_message.status == 'Success')
-            @response_message.items << xml_to_hash!((@response/"//#{NS_EWS_MESSAGES}:Items/*").first.native_element)
+            (@response/"//#{NS_EWS_MESSAGES}:Items/*").each do |item|
+              @response_message.items << xml_to_hash!(item.native_element)
+            end
           else
             raise EwsError, "#{@response_message.code}: #{@response_message.message}"
           end

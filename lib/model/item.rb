@@ -37,9 +37,13 @@ module Viewpoint
       def self.get_item(item_id, shape = :default)
         item_shape = {:base_shape => shape.to_s.camelcase}
         resp = (Viewpoint::EWS::EWS.instance).ews.get_item([item_id], item_shape)
-        resp = resp.items.shift
-        resp_type = resp.keys.first
-        eval "#{resp_type.to_s.camel_case}.new(resp[resp_type])"
+        if(resp.status == 'Success')
+          item = resp.items.shift
+          type = item.keys.first
+          eval "#{type.to_s.camel_case}.new(item[type])"
+        else
+          raise EwsError, "Could not retrieve item. #{resp.code}: #{resp.message}"
+        end
       end
 
       # Add attachments to the passed in ParentId
