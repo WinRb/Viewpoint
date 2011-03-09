@@ -127,7 +127,7 @@ module Viewpoint
 
       # The MailboxUser object that represents the user connected to EWS.
       def me
-        @me ||= MailboxUser.find_user((@@user.include?('@') ? @@user : "#{@@user}@"))
+        MailboxUser.find_user((@@user.include?('@') ? @@user : "#{@@user}@"))
       end
 
     end # class EWS
