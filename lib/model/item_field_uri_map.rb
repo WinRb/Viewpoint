@@ -162,7 +162,7 @@ module Viewpoint
         :mileage  => {:text => 'contacts:Mileage', :writable => true},
         :nickname  => {:text => 'contacts:Nickname', :writable => true},
         :office_location  => {:text => 'contacts:OfficeLocation', :writable => true},
-        :phone_numbers  => {:text => 'contacts:PhoneNumbers', :writable => true},
+        :phone_numbers  => {:ftype => :indexed_field_uRI, :text => 'contacts:PhoneNumber', :writable => true},
         :physical_addresses  => {:text => 'contacts:PhysicalAddresses', :writable => true},
         :postal_address_index  => {:text => 'contacts:PostalAddressIndex', :writable => true},
         :profession  => {:text => 'contacts:Profession', :writable => true},

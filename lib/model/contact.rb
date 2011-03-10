@@ -95,6 +95,53 @@ module Viewpoint
         @updates.merge!({:preformatted => changes}) {|k,v1,v2| v1 + v2}
       end
 
+      # Set the phone number. You must give a type based on the available Exchange phone number types
+      # @param [Symbol] type the type of number to set. It must be one of these:
+      #   :assistant_phone, :business_fax, :business_phone, :business_phone2, :callback, :car_phone, :company_main_phone,
+      #   :home_fax, :home_phone, :home_phone2, :isdn, :mobile_phone, :other_fax, :other_telephone, :pager, :primary_phone,
+      #   :radio_phone, :telex, :tty_tdd_phone
+      # @param [String] phone_number The phone number
+      # @TODO: Check to make sure the passed type is valid
+      def set_phone_number(phone_type, phone_number)
+        valid_types = [:assistant_phone, :business_fax, :business_phone, :business_phone2, :callback, :car_phone, :company_main_phone,
+          :home_fax, :home_phone, :home_phone2, :isdn, :mobile_phone, :other_fax, :other_telephone, :pager, :primary_phone,
+          :radio_phone, :telex, :tty_tdd_phone]
+        raise EwsError, "Invalid phone type (#{phone_type}) passed to Contact#set_phone_number." unless valid_types.index phone_type
+        type = self.class.name.split(/::/).last.ruby_case.to_sym
+
+        changes = []
+        k = :phone_numbers
+        v = phone_type.to_s.camel_case
+        changes << {:set_item_field =>
+          [{:indexed_field_uRI => {:field_uRI => FIELD_URIS[k][:text], :field_index => v}}, {type=>{k => {:entry => {:key => v, :text => phone_number}}}}]}
+        @updates.merge!({:preformatted => changes}) {|k,v1,v2| v1 + v2}
+      end
+
+      # Set an address for this contact
+      # @param [Symbol] address_type the type of Exchange address to set. It must be one of the following:
+      #   :business, :home, :other
+      # @param [Hash] address the address elements to set. It may include the following keys
+      #   :street, :city, :state, :country_or_region, :postal_code
+      def set_address(address_type, address)
+        valid_types = [:business, :home, :other]
+        raise EwsError, "Invalid address type (#{address_type}) passed to Contact#set_address." unless valid_types.index address_type
+        valid_field_types = [:street, :city, :state, :country_or_region, :postal_code]
+        type = self.class.name.split(/::/).last.ruby_case.to_sym
+        v = address_type.to_s.camel_case
+
+        changes = []
+        field = 'PhysicalAddresses'
+        address.keys.each do |addr_item|
+          raise EwsError, "Invalid address element (#{addr_item}) passed to Contact#set_address." unless valid_field_types.index addr_item
+          index_field = "contacts:PhysicalAddress:#{addr_item.to_s.camel_case}"
+          changes << {:set_item_field =>
+            [{:indexed_field_uRI => {
+              :field_uRI => index_field, :field_index => v}}, {type => {field => {:entry => {:key => v, addr_item =>{ :text => address[addr_item]}}}}}
+            ]}
+        end
+        @updates.merge!({:preformatted => changes}) {|k,v1,v2| v1 + v2}
+      end
+
 
       private
 
