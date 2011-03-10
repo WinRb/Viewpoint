@@ -101,7 +101,6 @@ module Viewpoint
       #   :home_fax, :home_phone, :home_phone2, :isdn, :mobile_phone, :other_fax, :other_telephone, :pager, :primary_phone,
       #   :radio_phone, :telex, :tty_tdd_phone
       # @param [String] phone_number The phone number
-      # @TODO: Check to make sure the passed type is valid
       def set_phone_number(phone_type, phone_number)
         valid_types = [:assistant_phone, :business_fax, :business_phone, :business_phone2, :callback, :car_phone, :company_main_phone,
           :home_fax, :home_phone, :home_phone2, :isdn, :mobile_phone, :other_fax, :other_telephone, :pager, :primary_phone,
@@ -122,6 +121,7 @@ module Viewpoint
       #   :business, :home, :other
       # @param [Hash] address the address elements to set. It may include the following keys
       #   :street, :city, :state, :country_or_region, :postal_code
+      # @TODO check for empty address hash
       def set_address(address_type, address)
         valid_types = [:business, :home, :other]
         raise EwsError, "Invalid address type (#{address_type}) passed to Contact#set_address." unless valid_types.index address_type
