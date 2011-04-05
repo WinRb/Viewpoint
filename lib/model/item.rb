@@ -278,6 +278,24 @@ module Viewpoint
         GenericFolder.get_folder @parent_folder_id
       end
 
+      # Use ExtendedProperties to create tags
+      # @param [String] tag a tag to add to this item
+      def add_tag!(tag)
+        i_type = self.class.name.split(/::/).last.ruby_case.to_sym
+
+        vtag = {:preformatted => []}
+        vtag[:preformatted] << {:set_item_field => [
+          {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}},
+          {i_type => [
+            {:extended_property => [
+              {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}},
+              {:values => [ {:value => {:text => tag} }]}
+            ]}
+          ]}
+        ]}
+
+        self.update_attribs!(vtag)
+      end
 
 
       private

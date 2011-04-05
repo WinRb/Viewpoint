@@ -242,6 +242,16 @@ module Viewpoint
         end
       end
 
+      # Find Items with a specific tag
+      def find_items_with_tag(tag)
+        restrict = { :restriction => { 
+          :is_equal_to => [ {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}},
+            :field_uRI_or_constant => {:constant => {:value=>tag}} ]
+        } }
+
+        find_items(restrict)
+      end
+
       # Fetch only items from today (since midnight)
       def todays_items(opts = {})
         #opts = {:query_string => ["Received:today"]}
