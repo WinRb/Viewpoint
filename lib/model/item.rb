@@ -62,7 +62,7 @@ module Viewpoint
         {:id => resp.items.first[:attachment_id][:root_item_id], :change_key => resp.items.first[:attachment_id][:root_item_change_key]}
       end
 
-      attr_reader :item_id, :change_key
+      attr_reader :item_id, :change_key, :tags
       alias :id :item_id
 
       # Initialize an Exchange Web Services item
@@ -76,6 +76,7 @@ module Viewpoint
         @change_key = ews_item[:item_id][:change_key]
         @text_only = false
         @updates = {}
+        @tags = parse_tags
 
         init_methods
       end
@@ -283,13 +284,19 @@ module Viewpoint
       def add_tag!(tag)
         i_type = self.class.name.split(/::/).last.ruby_case.to_sym
 
+        @tags |= [tag]
+        tag_vals = []
+        @tags.each do |t|
+          tag_vals << {:value => {:text => t}}
+        end
+
         vtag = {:preformatted => []}
         vtag[:preformatted] << {:set_item_field => [
           {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}},
           {i_type => [
             {:extended_property => [
               {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}},
-              {:values => [ {:value => {:text => tag} }]}
+              {:values => tag_vals}
             ]}
           ]}
         ]}
@@ -326,6 +333,24 @@ module Viewpoint
           warn "!!! No such method: #{m}" if $DEBUG
           nil
         end
+      end
+
+      def parse_tags
+        return [] unless(@ews_item.has_key?(:extended_property) &&
+                         @ews_item[:extended_property].has_key?(:extended_field_u_r_i) &&
+                         @ews_item[:extended_property][:extended_field_u_r_i].has_key?(:property_name) &&
+                         @ews_item[:extended_property][:extended_field_u_r_i][:property_name] == 'viewpoint_tags')
+
+        tags = []
+        vals = @ews_item[:extended_property][:values][:value]
+        if vals.is_a?(Array)
+          vals.each do |v|
+            tags << v[:text]
+          end
+        else
+          tags << vals[:text]
+        end
+        tags
       end
 
     end # Item

@@ -225,8 +225,16 @@ module Viewpoint
           else
             aprops[:field_uRI] = ['item:ParentFolderId']
           end
+          if aprops.has_key?(:extended_field_uRI)
+            raise EwsBadArgumentError, ":extended_field_uRI val should be an Array instead of #{aprops[:extended_field_uRI].class.name}" unless aprops[:extended_field_uRI].is_a?(Array)
+            aprops[:extended_field_uRI] << [{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}]
+          else
+            aprops[:extended_field_uRI] = [{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}]
+          end
         else
-          item_shape[:additional_properties] = {:field_uRI => ['item:ParentFolderId']}
+          item_shape[:additional_properties] = {}
+          item_shape[:additional_properties][:field_uRI] = ['item:ParentFolderId']
+          item_shape[:additional_properties][:extended_field_uRI] = [{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}]
         end
         resp = (Viewpoint::EWS::EWS.instance).ews.find_item([@folder_id], 'Shallow', item_shape, opts)
         if(resp.status == 'Success')
