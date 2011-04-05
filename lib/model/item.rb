@@ -282,13 +282,13 @@ module Viewpoint
       # Use ExtendedProperties to create tags
       # @param [String] tag a tag to add to this item
       def add_tag!(tag)
-        @tags |= [tag]
+        @tags |= [tag.downcase]
         set_tags!(@tags)
       end
 
       # @param [String] tag a tag to delete from this item
       def remove_tag!(tag)
-        @tags -= [tag]
+        @tags -= [tag.downcase]
         if(@tags.blank?)
           clear_all_tags!
         else
@@ -302,7 +302,12 @@ module Viewpoint
           {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}}
         }
 
-        self.update_attribs!(vtag)
+        if(self.update_attribs!(vtag))
+          @tags = []
+          true
+        else
+          false
+        end
       end
 
       # @param [Array<String>] tags viewpoint_tags to set on this item
