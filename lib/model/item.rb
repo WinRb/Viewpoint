@@ -282,11 +282,35 @@ module Viewpoint
       # Use ExtendedProperties to create tags
       # @param [String] tag a tag to add to this item
       def add_tag!(tag)
+        @tags |= [tag]
+        set_tags!(@tags)
+      end
+
+      # @param [String] tag a tag to delete from this item
+      def remove_tag!(tag)
+        @tags -= [tag]
+        if(@tags.blank?)
+          clear_all_tags!
+        else
+          set_tags!(@tags)
+        end
+      end
+
+      def clear_all_tags!
+        vtag = {:preformatted => []}
+        vtag[:preformatted] << {:delete_item_field => 
+          {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}}
+        }
+
+        self.update_attribs!(vtag)
+      end
+
+      # @param [Array<String>] tags viewpoint_tags to set on this item
+      def set_tags!(tags)
         i_type = self.class.name.split(/::/).last.ruby_case.to_sym
 
-        @tags |= [tag]
         tag_vals = []
-        @tags.each do |t|
+        tags.each do |t|
           tag_vals << {:value => {:text => t}}
         end
 
@@ -303,7 +327,6 @@ module Viewpoint
 
         self.update_attribs!(vtag)
       end
-
 
       private
 
