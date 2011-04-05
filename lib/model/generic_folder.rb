@@ -217,7 +217,17 @@ module Viewpoint
       def find_items(opts = {})
         opts = opts.clone # clone the passed in object so we don't modify it in case it's being used in a loop
         item_shape = opts.has_key?(:item_shape) ? opts.delete(:item_shape) : {:base_shape => 'Default'}
-        item_shape[:additional_properties] = {:field_uRI => ['item:ParentFolderId']}
+        if item_shape.has_key?(:additional_properties)
+          aprops = item_shape[:additional_properties]
+          if aprops.has_key?(:field_uRI)
+            raise EwsBadArgumentError, ":field_uRI val should be an Array instead of #{aprops[:field_uRI].class.name}" unless aprops[:field_uRI].is_a?(Array)
+            aprops[:field_uRI] << ['item:ParentFolderId']
+          else
+            aprops[:field_uRI] = ['item:ParentFolderId']
+          end
+        else
+          item_shape[:additional_properties] = {:field_uRI => ['item:ParentFolderId']}
+        end
         resp = (Viewpoint::EWS::EWS.instance).ews.find_item([@folder_id], 'Shallow', item_shape, opts)
         if(resp.status == 'Success')
           parms = resp.items.shift

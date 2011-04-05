@@ -148,6 +148,11 @@ module Viewpoint
           end
         end
 
+        # This isn't exactly pretty for AdditionalProperties, but it works. The incoming Hash should be formulated like so:
+        # @example
+        #     :additional_properties => {
+        #       :extended_field_uRI => [{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}]
+        #     }
         # @todo Finish AdditionalProperties implementation
         def item_shape!(node, item_shape)
           node.add("#{NS_EWS_MESSAGES}:ItemShape") do |is|
@@ -157,11 +162,22 @@ module Viewpoint
             is.add("#{NS_EWS_TYPES}:FilterHtmlContent", item_shape[:filter_html_content]) if item_shape.has_key?(:filter_html_content)
             is.add("#{NS_EWS_TYPES}:ConvertHtmlCodePageToUTF8", item_shape[:convert_html_code_page_to_utf8]) if item_shape.has_key?(:convert_html_code_page_to_utf8)
             unless( item_shape[:additional_properties].nil? )
-              unless( item_shape[:additional_properties][:field_uRI].nil? )
-                is.add("#{NS_EWS_TYPES}:AdditionalProperties") do |addprops|
-                  item_shape[:additional_properties][:field_uRI].each do |uri|
-                    addprops.add("#{NS_EWS_TYPES}:FieldURI") { |furi| furi.set_attr('FieldURI', uri) }
-                  end
+              is.add("#{NS_EWS_TYPES}:AdditionalProperties") do |addprops|
+                item_shape[:additional_properties].each_pair do |prop_t,prop_v|
+                  case prop_t
+                  when :field_uRI
+                    prop_v.each do |uri|
+                      addprops.add("#{NS_EWS_TYPES}:FieldURI") { |furi| furi.set_attr('FieldURI', uri) }
+                    end
+                  when :extended_field_uRI
+                    prop_v.each do |uri|
+                      addprops.add("#{NS_EWS_TYPES}:ExtendedFieldURI") do |furi|
+                        uri.each_pair do |attr,val|
+                          furi.set_attr(attr.to_s.camel_case, val)
+                        end
+                      end
+                    end
+                  end #when
                 end
               end
             end
