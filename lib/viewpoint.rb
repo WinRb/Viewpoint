@@ -83,6 +83,17 @@ module Viewpoint
 
       attr_reader :ews
 
+      # Set the name for the tags stored in extended properties
+      # @param [String] name The name of the extended property to
+      #   store the tags. Defaults to 'viewpoint_tags'
+      def self.tagspace=(name)
+        @@tagspace = name
+      end
+
+      # Fetch the current endpoint
+      def self.tagspace
+        @@tagspace || 'viewpoint_tags'
+      end
       # Set the endpoint for Exchange Web Services.  
       # @param [String] endpoint The URL of the endpoint. This should end in
       #   'exchange.asmx' and is typically something like this:

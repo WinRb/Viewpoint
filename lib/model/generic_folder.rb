@@ -227,14 +227,14 @@ module Viewpoint
           end
           if aprops.has_key?(:extended_field_uRI)
             raise EwsBadArgumentError, ":extended_field_uRI val should be an Array instead of #{aprops[:extended_field_uRI].class.name}" unless aprops[:extended_field_uRI].is_a?(Array)
-            aprops[:extended_field_uRI] << [{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}]
+            aprops[:extended_field_uRI] << [{:distinguished_property_set_id=>"PublicStrings", :property_name=>Viewpoint::EWS::EWS.tagspace, :property_type=>"StringArray"}]
           else
-            aprops[:extended_field_uRI] = [{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}]
+            aprops[:extended_field_uRI] = [{:distinguished_property_set_id=>"PublicStrings", :property_name=>Viewpoint::EWS::EWS.tagspace, :property_type=>"StringArray"}]
           end
         else
           item_shape[:additional_properties] = {}
           item_shape[:additional_properties][:field_uRI] = ['item:ParentFolderId']
-          item_shape[:additional_properties][:extended_field_uRI] = [{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}]
+          item_shape[:additional_properties][:extended_field_uRI] = [{:distinguished_property_set_id=>"PublicStrings", :property_name=>Viewpoint::EWS::EWS.tagspace, :property_type=>"StringArray"}]
         end
         resp = (Viewpoint::EWS::EWS.instance).ews.find_item([@folder_id], 'Shallow', item_shape, opts)
         if(resp.status == 'Success')
@@ -253,7 +253,7 @@ module Viewpoint
       # Find Items with a specific tag
       def find_items_with_tag(tag)
         restrict = { :restriction => { 
-          :is_equal_to => [ {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}},
+          :is_equal_to => [ {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>Viewpoint::EWS::EWS.tagspace, :property_type=>"StringArray"}},
             :field_uRI_or_constant => {:constant => {:value=>tag}} ]
         } }
 

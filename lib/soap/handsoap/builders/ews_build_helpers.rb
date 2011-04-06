@@ -151,7 +151,7 @@ module Viewpoint
         # This isn't exactly pretty for AdditionalProperties, but it works. The incoming Hash should be formulated like so:
         # @example
         #     :additional_properties => {
-        #       :extended_field_uRI => [{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}]
+        #       :extended_field_uRI => [{:distinguished_property_set_id=>"PublicStrings", :property_name=>Viewpoint::EWS::EWS.tagspace, :property_type=>"StringArray"}]
         #     }
         # @todo Finish AdditionalProperties implementation
         def item_shape!(node, item_shape)
