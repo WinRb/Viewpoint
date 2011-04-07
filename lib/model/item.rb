@@ -296,10 +296,11 @@ module Viewpoint
         end
       end
 
-      def clear_all_tags!
+      def clear_all_tags!(options)
+        namespace = options[:namespace] || 'viewpoint_tags'
         vtag = {:preformatted => []}
         vtag[:preformatted] << {:delete_item_field => 
-          {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}}
+          {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>namespace, :property_type=>"StringArray"}}
         }
 
         if(self.update_attribs!(vtag))
@@ -311,7 +312,8 @@ module Viewpoint
       end
 
       # @param [Array<String>] tags viewpoint_tags to set on this item
-      def set_tags!(tags)
+      def set_tags!(tags, options)
+        namespace = options[:namespace] || 'viewpoint_tags'
         i_type = self.class.name.split(/::/).last.ruby_case.to_sym
 
         tag_vals = []
@@ -321,10 +323,10 @@ module Viewpoint
 
         vtag = {:preformatted => []}
         vtag[:preformatted] << {:set_item_field => [
-          {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}},
+          {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>namespace, :property_type=>"StringArray"}},
           {i_type => [
             {:extended_property => [
-              {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>"viewpoint_tags", :property_type=>"StringArray"}},
+              {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>namespace, :property_type=>"StringArray"}},
               {:values => tag_vals}
             ]}
           ]}
@@ -363,11 +365,13 @@ module Viewpoint
         end
       end
 
-      def parse_tags
+      def parse_tags(options)
+        namespace = options[:namespace] || 'viewpoint_tags'
+
         return [] unless(@ews_item.has_key?(:extended_property) &&
                          @ews_item[:extended_property].has_key?(:extended_field_u_r_i) &&
                          @ews_item[:extended_property][:extended_field_u_r_i].has_key?(:property_name) &&
-                         @ews_item[:extended_property][:extended_field_u_r_i][:property_name] == 'viewpoint_tags')
+                         @ews_item[:extended_property][:extended_field_u_r_i][:property_name] == namespace)
 
         tags = []
         vals = @ews_item[:extended_property][:values][:value]
