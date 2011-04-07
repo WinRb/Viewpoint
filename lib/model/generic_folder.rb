@@ -69,7 +69,7 @@ module Viewpoint
         if( folder_type.nil? )
           resp = (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal, {:base_shape => shape} )
         else
-          restr = {:restriction => 
+          restr = {:restriction =>
             {:is_equal_to => [{:field_uRI => {:field_uRI=>'folder:FolderClass'}}, {:field_uRI_or_constant=>{:constant => {:value => folder_type}}}]}
           }
           resp = (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal, {:base_shape => shape}, restr)
@@ -109,7 +109,7 @@ module Viewpoint
         # For now the :field_uRI and :field_uRI_or_constant must be in an Array for Ruby 1.8.7 because Hashes
         # are not positional at insertion until 1.9
         restr = {:restriction =>
-          {:is_equal_to => 
+          {:is_equal_to =>
             [{:field_uRI => {:field_uRI=>'folder:DisplayName'}}, {:field_uRI_or_constant =>{:constant => {:value=>name}}}]}}
         resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([:msgfolderroot], 'Deep', {:base_shape => shape}, restr)
         if(resp.status == 'Success')
@@ -255,7 +255,7 @@ module Viewpoint
       def find_items_with_tag(tag, opts = {})
         tagspace = opts.delete(:tagspace) || 'viewpoint_tags'
 
-        restrict = { :restriction => { 
+        restrict = { :restriction => {
           :is_equal_to => [ {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>tagspace, :property_type=>"StringArray"}},
             :field_uRI_or_constant => {:constant => {:value=>tag}} ]
         } }
@@ -274,7 +274,7 @@ module Viewpoint
       # @param [DateTime] date_time the time to fetch Items since.
       def items_since(date_time, opts = {})
         restr = {:restriction =>
-          {:is_greater_than_or_equal_to => 
+          {:is_greater_than_or_equal_to =>
             [{:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
             {:field_uRI_or_constant =>{:constant => {:value=>date_time}}}]
           }}
@@ -286,7 +286,7 @@ module Viewpoint
       # @param [DateTime] end_date the time to stop fetching Items from
       def items_between(start_date, end_date, opts={})
         restr = {:restriction =>  {:and => [
-          {:is_greater_than_or_equal_to => 
+          {:is_greater_than_or_equal_to =>
             [{:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
             {:field_uRI_or_constant=>{:constant => {:value =>start_date}}}]},
           {:is_less_than_or_equal_to =>
