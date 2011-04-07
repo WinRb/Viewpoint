@@ -57,7 +57,7 @@ module Viewpoint
         attachments.each do |a|
           b64attach << {:name => {:text =>(File.basename a.path)}, :content => {:text => Base64.encode64(a.read)}}
         end
-        resp = conn.ews.create_attachment(parent_id, b64attach) 
+        resp = conn.ews.create_attachment(parent_id, b64attach)
         (resp.status == 'Success') || (raise EwsError, "Could not create attachments. #{resp.code}: #{resp.message}")
         {:id => resp.items.first[:attachment_id][:root_item_id], :change_key => resp.items.first[:attachment_id][:root_item_change_key]}
       end
@@ -183,7 +183,7 @@ module Viewpoint
         return true unless @shallow
         conn = Viewpoint::EWS::EWS.instance
         shape = {:base_shape => 'AllProperties', :body_type => (@text_only ? 'Text' : 'Best')}
-        resp = conn.ews.get_item([@item_id], shape) 
+        resp = conn.ews.get_item([@item_id], shape)
         resp = resp.items.shift
         @ews_item = resp[resp.keys.first]
         @shallow = false
@@ -250,7 +250,7 @@ module Viewpoint
       end
 
       # Delete this item
-      # @param [Boolean] soft Whether or not to do a soft delete.  By default EWS will do a 
+      # @param [Boolean] soft Whether or not to do a soft delete.  By default EWS will do a
       #   hard delete of this item.  See the MSDN docs for more info:
       #   http://msdn.microsoft.com/en-us/library/aa562961.aspx
       # @return [Boolean] Whether or not the item was deleted
@@ -281,26 +281,32 @@ module Viewpoint
 
       # Use ExtendedProperties to create tags
       # @param [String] tag a tag to add to this item
-      def add_tag!(tag)
+      # @param [Hash] opts options to pass to add_tag!
+      # @option opts [String] :tagspace the namespace to add the tag to. (default: 'viewpoint_tags')
+      def add_tag!(tag, opts={})
         @tags |= [tag.downcase]
-        set_tags!(@tags)
+        set_tags!(@tags, opts)
       end
 
       # @param [String] tag a tag to delete from this item
-      def remove_tag!(tag)
+      # @param [Hash] opts options to pass to remove_tag!
+      # @option opts [String] :tagspace the namespace to add the tag to. (default: 'viewpoint_tags')
+      def remove_tag!(tag, opts={})
         @tags -= [tag.downcase]
         if(@tags.blank?)
           clear_all_tags!
         else
-          set_tags!(@tags)
+          set_tags!(@tags, opts)
         end
       end
 
-      def clear_all_tags!(options)
-        namespace = options[:namespace] || 'viewpoint_tags'
+      # @param [Hash] opts options to pass to clear_all_tags!
+      # @option opts [String] :tagspace the namespace to add the tag to. (default: 'viewpoint_tags')
+      def clear_all_tags!(opts={})
+        tagspace = opts[:tagspace] || 'viewpoint_tags'
         vtag = {:preformatted => []}
-        vtag[:preformatted] << {:delete_item_field => 
-          {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>namespace, :property_type=>"StringArray"}}
+        vtag[:preformatted] << {:delete_item_field =>
+          {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>tagspace, :property_type=>"StringArray"}}
         }
 
         if(self.update_attribs!(vtag))
@@ -312,8 +318,10 @@ module Viewpoint
       end
 
       # @param [Array<String>] tags viewpoint_tags to set on this item
-      def set_tags!(tags, options)
-        namespace = options[:namespace] || 'viewpoint_tags'
+      # @param [Hash] opts options to pass to set_tags!
+      # @option opts [String] :tagspace the namespace to add the tag to. (default: 'viewpoint_tags')
+      def set_tags!(tags, opts={})
+        tagspace = opts[:tagspace] || 'viewpoint_tags'
         i_type = self.class.name.split(/::/).last.ruby_case.to_sym
 
         tag_vals = []
@@ -323,10 +331,10 @@ module Viewpoint
 
         vtag = {:preformatted => []}
         vtag[:preformatted] << {:set_item_field => [
-          {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>namespace, :property_type=>"StringArray"}},
+          {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>tagspace, :property_type=>"StringArray"}},
           {i_type => [
             {:extended_property => [
-              {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>namespace, :property_type=>"StringArray"}},
+              {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>tagspace, :property_type=>"StringArray"}},
               {:values => tag_vals}
             ]}
           ]}
@@ -365,13 +373,13 @@ module Viewpoint
         end
       end
 
-      def parse_tags(options)
-        namespace = options[:namespace] || 'viewpoint_tags'
+      def parse_tags(opts={})
+        tagspace = opts[:tagspace] || 'viewpoint_tags'
 
         return [] unless(@ews_item.has_key?(:extended_property) &&
                          @ews_item[:extended_property].has_key?(:extended_field_u_r_i) &&
                          @ews_item[:extended_property][:extended_field_u_r_i].has_key?(:property_name) &&
-                         @ews_item[:extended_property][:extended_field_u_r_i][:property_name] == namespace)
+                         @ews_item[:extended_property][:extended_field_u_r_i][:property_name] == tagspace)
 
         tags = []
         vals = @ews_item[:extended_property][:values][:value]

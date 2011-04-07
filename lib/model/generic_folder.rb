@@ -216,8 +216,8 @@ module Viewpoint
       # Find Items
       def find_items(opts = {})
         opts = opts.clone # clone the passed in object so we don't modify it in case it's being used in a loop
-        namespace = opts.delete(:namespace) || 'viewpoint_tags'
         item_shape = opts.has_key?(:item_shape) ? opts.delete(:item_shape) : {:base_shape => 'Default'}
+        tagspace = opts.delete(:tagspace) || 'viewpoint_tags'
         if item_shape.has_key?(:additional_properties)
           aprops = item_shape[:additional_properties]
           if aprops.has_key?(:field_uRI)
@@ -228,14 +228,14 @@ module Viewpoint
           end
           if aprops.has_key?(:extended_field_uRI)
             raise EwsBadArgumentError, ":extended_field_uRI val should be an Array instead of #{aprops[:extended_field_uRI].class.name}" unless aprops[:extended_field_uRI].is_a?(Array)
-            aprops[:extended_field_uRI] << [{:distinguished_property_set_id=>"PublicStrings", :property_name=>namespace, :property_type=>"StringArray"}]
+            aprops[:extended_field_uRI] << [{:distinguished_property_set_id=>"PublicStrings", :property_name=>tagspace, :property_type=>"StringArray"}]
           else
-            aprops[:extended_field_uRI] = [{:distinguished_property_set_id=>"PublicStrings", :property_name=>namespace, :property_type=>"StringArray"}]
+            aprops[:extended_field_uRI] = [{:distinguished_property_set_id=>"PublicStrings", :property_name=>tagspace, :property_type=>"StringArray"}]
           end
         else
           item_shape[:additional_properties] = {}
           item_shape[:additional_properties][:field_uRI] = ['item:ParentFolderId']
-          item_shape[:additional_properties][:extended_field_uRI] = [{:distinguished_property_set_id=>"PublicStrings", :property_name=>namespace, :property_type=>"StringArray"}]
+          item_shape[:additional_properties][:extended_field_uRI] = [{:distinguished_property_set_id=>"PublicStrings", :property_name=>tagspace, :property_type=>"StringArray"}]
         end
         resp = (Viewpoint::EWS::EWS.instance).ews.find_item([@folder_id], 'Shallow', item_shape, opts)
         if(resp.status == 'Success')
@@ -252,11 +252,11 @@ module Viewpoint
       end
 
       # Find Items with a specific tag
-      def find_items_with_tag(tag, opts)
-        namespace = opts.delete(:namespace) || 'viewpoint_tags'
+      def find_items_with_tag(tag, opts = {})
+        tagspace = opts.delete(:tagspace) || 'viewpoint_tags'
 
         restrict = { :restriction => { 
-          :is_equal_to => [ {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>namespace, :property_type=>"StringArray"}},
+          :is_equal_to => [ {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>tagspace, :property_type=>"StringArray"}},
             :field_uRI_or_constant => {:constant => {:value=>tag}} ]
         } }
 
