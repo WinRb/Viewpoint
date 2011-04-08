@@ -253,14 +253,14 @@ module Viewpoint
 
       # Find Items with a specific tag
       def find_items_with_tag(tag, opts = {})
-        tagspace = opts.delete(:tagspace) || 'viewpoint_tags'
+        tagspace = opts[:tagspace] || 'viewpoint_tags'
 
         restrict = { :restriction => {
           :is_equal_to => [ {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>tagspace, :property_type=>"StringArray"}},
             {:field_uRI_or_constant => {:constant => {:value=>tag}}} ]
         } }
 
-        find_items(restrict)
+        find_items(opts.merge(restrict))
       end
 
       # Fetch only items from today (since midnight)

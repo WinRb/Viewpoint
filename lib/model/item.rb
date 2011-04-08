@@ -294,7 +294,7 @@ module Viewpoint
       def remove_tag!(tag, opts={})
         @tags -= [tag.downcase]
         if(@tags.blank?)
-          clear_all_tags!
+          clear_all_tags!(opts)
         else
           set_tags!(@tags, opts)
         end
