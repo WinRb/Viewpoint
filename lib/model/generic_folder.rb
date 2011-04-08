@@ -257,7 +257,7 @@ module Viewpoint
 
         restrict = { :restriction => {
           :is_equal_to => [ {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>tagspace, :property_type=>"StringArray"}},
-            :field_uRI_or_constant => {:constant => {:value=>tag}} ]
+            {:field_uRI_or_constant => {:constant => {:value=>tag}}} ]
         } }
 
         find_items(restrict)
