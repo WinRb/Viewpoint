@@ -70,13 +70,14 @@ module Viewpoint
       # @param [Boolean] shallow Whether or not we have retrieved all the elements for this object
       def initialize(ews_item, shallow = true)
         super() # Calls initialize in Model (creates @ews_methods Array)
-        @ews_item = ews_item
-        @shallow = shallow
-        @item_id = ews_item[:item_id][:id]
+        @ews_item   = ews_item
+        @shallow    = shallow
+        @item_id    = ews_item[:item_id][:id]
         @change_key = ews_item[:item_id][:change_key]
-        @text_only = false
-        @updates = {}
-        @tags = parse_tags
+        @text_only  = false
+        @updates    = {}
+        @tags       = parse_tags
+        @tagspace   = (Viewpoint::EWS::EWS.instance).tagspace
 
         init_methods
       end
@@ -303,7 +304,7 @@ module Viewpoint
       # @param [Hash] opts options to pass to clear_all_tags!
       # @option opts [String] :tagspace the namespace to add the tag to. (default: 'viewpoint_tags')
       def clear_all_tags!(opts={})
-        tagspace = opts[:tagspace] || 'viewpoint_tags'
+        tagspace = opts[:tagspace] || @tagspace
         vtag = {:preformatted => []}
         vtag[:preformatted] << {:delete_item_field =>
           {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>tagspace, :property_type=>"StringArray"}}
@@ -321,7 +322,7 @@ module Viewpoint
       # @param [Hash] opts options to pass to set_tags!
       # @option opts [String] :tagspace the namespace to add the tag to. (default: 'viewpoint_tags')
       def set_tags!(tags, opts={})
-        tagspace = opts[:tagspace] || 'viewpoint_tags'
+        tagspace = opts[:tagspace] || @tagspace
         i_type = self.class.name.split(/::/).last.ruby_case.to_sym
 
         tag_vals = []
@@ -374,7 +375,7 @@ module Viewpoint
       end
 
       def parse_tags(opts={})
-        tagspace = opts[:tagspace] || 'viewpoint_tags'
+        tagspace = opts[:tagspace] || @tagspace
 
         return [] unless(@ews_item.has_key?(:extended_property) &&
                          @ews_item[:extended_property].has_key?(:extended_field_u_r_i) &&

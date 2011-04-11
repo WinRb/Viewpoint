@@ -127,12 +127,12 @@ module Viewpoint
 
       def initialize(ews_item)
         super() # Calls initialize in Model (creates @ews_methods Array)
-        @ews_item = ews_item
-        @folder_id = ews_item[:folder_id][:id]
-        @ews_methods << :folder_id
-        @ews_methods << :id
-        @change_key = ews_item[:folder_id][:change_key]
-        @ews_methods << :change_key
+        @ews_item     = ews_item
+        @folder_id    = ews_item[:folder_id][:id]
+        @ews_methods  << :folder_id
+        @ews_methods  << :id
+        @change_key   = ews_item[:folder_id][:change_key]
+        @ews_methods  << :change_key
         unless ews_item[:parent_folder_id].nil?
           @parent_id = ews_item[:parent_folder_id]
           @ews_methods << :parent_id
@@ -142,11 +142,12 @@ module Viewpoint
         # @todo Handle:
         #   <EffectiveRights/>, <ExtendedProperty/>, <ManagedFolderInformation/>, <PermissionSet/>
 
-        @sync_state = nil # Base-64 encoded sync data
-        @synced = false   # Whether or not the synchronization process is complete
-        @subscription_id = nil
-        @watermark = nil
-        @shallow = true
+        @tagspace         = (Viewpoint::EWS::EWS.instance).tagspace
+        @sync_state       = nil # Base-64 encoded sync data
+        @synced           = false   # Whether or not the synchronization process is complete
+        @subscription_id  = nil
+        @watermark        = nil
+        @shallow          = true
       end
 
       # Subscribe this folder to events.  This method initiates an Exchange pull
@@ -217,7 +218,7 @@ module Viewpoint
       def find_items(opts = {})
         opts = opts.clone # clone the passed in object so we don't modify it in case it's being used in a loop
         item_shape = opts.has_key?(:item_shape) ? opts.delete(:item_shape) : {:base_shape => 'Default'}
-        tagspace = opts.delete(:tagspace) || 'viewpoint_tags'
+        tagspace = opts.delete(:tagspace) || @tagspace
         if item_shape.has_key?(:additional_properties)
           aprops = item_shape[:additional_properties]
           if aprops.has_key?(:field_uRI)
@@ -253,7 +254,7 @@ module Viewpoint
 
       # Find Items with a specific tag
       def find_items_with_tag(tag, opts = {})
-        tagspace = opts[:tagspace] || 'viewpoint_tags'
+        tagspace = opts[:tagspace] || @tagspace
 
         restrict = { :restriction => {
           :is_equal_to => [ {:extended_field_uRI=>{:distinguished_property_set_id=>"PublicStrings", :property_name=>tagspace, :property_type=>"StringArray"}},

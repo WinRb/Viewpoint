@@ -81,7 +81,7 @@ module Viewpoint
       include Singleton
       include Viewpoint
 
-      attr_reader :ews
+      attr_reader :ews, :tagspace
 
       # Set the endpoint for Exchange Web Services.  
       # @param [String] endpoint The URL of the endpoint. This should end in
@@ -122,12 +122,20 @@ module Viewpoint
       end
 
       def initialize
+        @tagspace ||= 'viewpoint_tags'
         @ews = SOAP::ExchangeWebService.new
       end
 
       # The MailboxUser object that represents the user connected to EWS.
       def me
         MailboxUser.find_user((@@user.include?('@') ? @@user : "#{@@user}@"))
+      end
+
+      # Set the tagspace used for creating tags on the Model objects. Under the covers this uses
+      # a StringArray and Exchange extended properties.
+      # @param [String] tagspace the name of the tagspace to collect tags in (default: viewpoint_tags)
+      def set_tagspace(tagspace)
+        @tagspace = tagspace.to_s
       end
 
     end # class EWS
