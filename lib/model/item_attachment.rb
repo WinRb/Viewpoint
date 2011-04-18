@@ -26,7 +26,8 @@ module Viewpoint
 
       # @param [String] attachment_id The unique ID for the attachment.
       def initialize(attachment_id)
-        raise EwsNotImplemented, "ItemAttachments are not yet implemented in Viewpoint"
+        #raise EwsNotImplemented, "ItemAttachments are not yet implemented in Viewpoint"
+        warn "ItemAttachments are not yet implemented in Viewpoint"
       end
 
     end # ItemAttachment

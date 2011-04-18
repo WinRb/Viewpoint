@@ -26,18 +26,24 @@ module Viewpoint
   module EWS
     class Item
       include Model
+      include ItemFieldUriMap
 
       # This is a class method that fetches an existing Item from the
       #  Exchange Store.
       # @param [String] item_id The id of the item.
+      # @param [Symbol] shape The optional shape of the item :id_only/:default/:all_properties
       # @return [Item] Returns an Item or subclass of Item
       # @todo Add support to fetch an item with a ChangeKey
-      def self.get_item(item_id)
-        conn = Viewpoint::EWS::EWS.instance
-        resp = conn.ews.get_item([item_id])
-        resp = resp.items.shift
-        resp_type = resp.keys.first
-        eval "#{resp_type.to_s.camel_case}.new(resp[resp_type])"
+      def self.get_item(item_id, shape = :default)
+        item_shape = {:base_shape => shape.to_s.camelcase}
+        resp = (Viewpoint::EWS::EWS.instance).ews.get_item([item_id], item_shape)
+        if(resp.status == 'Success')
+          item = resp.items.shift
+          type = item.keys.first
+          eval "#{type.to_s.camel_case}.new(item[type])"
+        else
+          raise EwsError, "Could not retrieve item. #{resp.code}: #{resp.message}"
+        end
       end
 
       # Add attachments to the passed in ParentId
@@ -69,6 +75,7 @@ module Viewpoint
         @item_id = ews_item[:item_id][:id]
         @change_key = ews_item[:item_id][:change_key]
         @text_only = false
+        @updates = {}
 
         init_methods
       end
@@ -86,24 +93,87 @@ module Viewpoint
         @text_only = ( txt == true ? true : false)
       end
 
+      # Save any pending updates that were manipulated via setter methods.
+      def save!
+        return true if @updates.empty?
+        if update_attribs!(@updates)
+          @updates = {}
+          true
+        else
+          false
+        end
+      end
+
+      # Clear out any pending updates
+      # @return [TrueClass]
+      def clear_updates!
+        @updates = {}
+        true
+      end
+
       # Call UpdateItem for this item with the passed updates
       # @param [Hash] updates a well-formed update hash
-      # @example {:updates=>{:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>"message:IsRead"}, :message=>{:is_read=>{:text=>"true"}}}}}
+      # @example {:set_item_field=>{:field_uRI=>{:field_uRI=>"message:IsRead"}, :message=>{:is_read=>{:text=>"true"}}}}
       def update!(updates)
         conn = Viewpoint::EWS::EWS.instance
-        resp = conn.ews.update_item([{:id => @item_id, :change_key => @change_key}], updates)
-        (resp.status == 'Success') || (raise EwsError, "Trouble updating Item. #{resp.code}: #{resp.message}")
+        resp = conn.ews.update_item([{:id => @item_id, :change_key => @change_key}], {:updates => updates})
+        if resp.status == 'Success'
+          @item_id = resp.items.first[resp.items.first.keys.first][:item_id][:id]
+          @change_key = resp.items.first[resp.items.first.keys.first][:item_id][:change_key]
+          @shallow = true
+          deepen!
+        else
+          raise EwsError, "Trouble updating Item. #{resp.code}: #{resp.message}"
+        end
+
+      end
+
+      # This takes a hash of attributes with new values and builds the appropriate udpate hash.
+      #   It does not commit the changes to Exchange, call #update! with the returned values from
+      #   this method or look at #update_attribs! for a version of this method that autocommits the
+      #   changes back.
+      #
+      # You can also specify a preformatted Array of data like so:
+      #   {:preformatted => [misc data]}
+      #   This will simply be passed to the update! method
+      # @param [Hash] updates a hash that is formed like so :item_attr => newvalue
+      # @param [Symbol] update_type :append, :replace, :delete
+      # @example  {:sensitivity => {:text => 'Normal'}, :display_name => {:text => 'Test User'}}
+      def update_attribs(updates, update_type = :replace)
+        utype_map = {:append => :append_to_item_field, :replace => :set_item_field, :delete => :delete_item_field}
+        changes = []
+        type = self.class.name.split(/::/).last.ruby_case.to_sym
+
+        updates.each_pair do |k,v|
+          if(k == :preformatted)
+            changes += v
+            next
+          end
+          raise EwsError, "Field (#{FIELD_URIS[k][:text]}) not writable by update." unless FIELD_URIS[k][:writable]
+          changes << {utype_map[update_type]=>[{:field_uRI => {:field_uRI=>FIELD_URIS[k][:text]}}, {type=>{k => v}}]}
+        end
+
+        changes
+      end
+
+      # This is the same as #update_attribs, but it will commit the changes back to Exchange.
+      # @see #update_attribs
+      def update_attribs!(updates, update_type = :replace)
+        changes = update_attribs(updates, update_type)
+        update!(changes)
       end
 
       # Mark this Item as read
       def mark_read!
-        update!({:updates=>{:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>"message:IsRead"}, :message=>{:is_read=>{:text=>"true"}}}}})
+        field = :is_read
+        update!({:set_item_field=>{:field_uRI=>{:field_uRI=>FIELD_URIS[field][:text]}, :message=>{field=>{:text=>"true"}}}})
         @is_read = true
       end
 
       # Mark this Item as unread
       def mark_unread!
-        update!({:updates=>{:set_item_field=>{:field_u_r_i=>{:field_u_r_i=>"message:IsRead"}, :message=>{:is_read=>{:text=>"false"}}}}})
+        field = :is_read
+        update!({:set_item_field=>{:field_uRI=>{:field_uRI=>FIELD_URIS[field][:text]}, :message=>{field=>{:text=>"false"}}}})
         @is_read = false
         true
       end
@@ -207,6 +277,7 @@ module Viewpoint
         #deepen!
         GenericFolder.get_folder @parent_folder_id
       end
+
 
 
       private

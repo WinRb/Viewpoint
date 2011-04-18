@@ -544,12 +544,15 @@ module Viewpoint
         # Used to modify the properties of an existing item in the Exchange store
         # @see http://msdn.microsoft.com/en-us/library/aa581084.aspx
         # @param [Array] item_ids An Array of item ids
-        def update_item(item_ids, changes)
+        # @param [Hash] changes a Hash of changes to be fed to auto_hierarchy!
+        # @param [Hash] opts various attributes to set for this update. See the Technet docs for more info
+        def update_item(item_ids, changes, opts = {:message_disposition => 'SaveOnly', :conflict_resolution => 'AutoResolve'})
           action = "#{SOAP_ACTION_PREFIX}/UpdateItem"
           resp = invoke("#{NS_EWS_MESSAGES}:UpdateItem", action) do |root|
             build!(root) do
-              root.set_attr('MessageDisposition', 'SaveOnly')
-              root.set_attr('ConflictResolution', 'AutoResolve')
+              root.set_attr('MessageDisposition', opts[:message_disposition]) if opts.has_key?(:message_disposition)
+              root.set_attr('ConflictResolution', opts[:conflict_resolution]) if opts.has_key?(:message_disposition)
+              root.set_attr('SendMeetingInvitationsOrCancellations', opts[:send_meeting_invitations_or_cancellations]) if opts.has_key?(:send_meeting_invitations_or_cancellations)
               item_changes!(root, item_ids, changes)
             end
           end
@@ -771,6 +774,7 @@ module Viewpoint
 
         # Override the superclasses' invoke so we can add http_options to each request
         def invoke(msg, action)
+          raise EwsError, "EWS Endpoint not set." if uri.nil?
           begin
             super(msg, {:soap_action => action, :http_options => @@http_options})
           rescue SocketError

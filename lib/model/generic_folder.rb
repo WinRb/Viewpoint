@@ -70,7 +70,7 @@ module Viewpoint
           resp = (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal, {:base_shape => shape} )
         else
           restr = {:restriction => 
-            {:is_equal_to => {:field_uRI => {:field_uRI=>'folder:FolderClass'},:field_uRI_or_constant=>{:constant => {:value => folder_type}}}}
+            {:is_equal_to => [{:field_uRI => {:field_uRI=>'folder:FolderClass'}}, {:field_uRI_or_constant=>{:constant => {:value => folder_type}}}]}
           }
           resp = (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal, {:base_shape => shape}, restr)
         end
@@ -215,7 +215,8 @@ module Viewpoint
 
       # Find Items
       def find_items(opts = {})
-        item_shape = {:base_shape => 'Default'}
+        opts = opts.clone # clone the passed in object so we don't modify it in case it's being used in a loop
+        item_shape = opts.has_key?(:item_shape) ? opts.delete(:item_shape) : {:base_shape => 'Default'}
         item_shape[:additional_properties] = {:field_uRI => ['item:ParentFolderId']}
         resp = (Viewpoint::EWS::EWS.instance).ews.find_item([@folder_id], 'Shallow', item_shape, opts)
         if(resp.status == 'Success')
@@ -232,27 +233,27 @@ module Viewpoint
       end
 
       # Fetch only items from today (since midnight)
-      def todays_items
+      def todays_items(opts = {})
         #opts = {:query_string => ["Received:today"]}
         #This is a bit convoluted for pre-1.9.x ruby versions that don't support to_datetime
-        items_since(DateTime.parse(Date.today.to_s))
+        items_since(DateTime.parse(Date.today.to_s), opts)
       end
 
       # Fetch items since a give DateTime
       # @param [DateTime] date_time the time to fetch Items since.
-      def items_since(date_time)
+      def items_since(date_time, opts = {})
         restr = {:restriction =>
           {:is_greater_than_or_equal_to => 
             [{:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
             {:field_uRI_or_constant =>{:constant => {:value=>date_time}}}]
           }}
-        find_items(restr)
+        find_items(opts.merge(restr))
       end
 
       # Fetch items between a given time period
       # @param [DateTime] start_date the time to start fetching Items from
       # @param [DateTime] end_date the time to stop fetching Items from
-      def items_between(start_date, end_date)
+      def items_between(start_date, end_date, opts={})
         restr = {:restriction =>  {:and => [
           {:is_greater_than_or_equal_to => 
             [{:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
@@ -261,7 +262,7 @@ module Viewpoint
             [{:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
             {:field_uRI_or_constant=>{:constant => {:value =>end_date}}}]}
         ]}}
-        find_items(restr)
+        find_items(opts.merge(restr))
       end
 
       # Search on the item subject
@@ -305,7 +306,7 @@ module Viewpoint
         if(resp.status == 'Success')
           item = resp.items.shift
           type = item.keys.first
-          return eval "#{type.to_s.camel_case}.new(item[type])"
+          eval "#{type.to_s.camel_case}.new(item[type])"
         else
           raise EwsError, "Could not retrieve item. #{resp.code}: #{resp.message}"
         end
@@ -323,8 +324,9 @@ module Viewpoint
       #   an array of ItemIds are returned wich is a Hash in the form:
       #   {:id=>"item id", :change_key=>"change key"}
       #   See: http://msdn.microsoft.com/en-us/library/aa565609.aspx
-      def sync_items!(sync_amount = 256, sync_all = false)
-        resp = (Viewpoint::EWS::EWS.instance).ews.sync_folder_items(@folder_id, @sync_state, sync_amount)
+      def sync_items!(sync_amount = 256, sync_all = false, opts = {})
+        item_shape = opts.has_key?(:item_shape) ? opts.delete(:item_shape) : {:base_shape => 'Default'}
+        resp = (Viewpoint::EWS::EWS.instance).ews.sync_folder_items(@folder_id, @sync_state, sync_amount, item_shape)
         parms = resp.items.shift
         @sync_state = parms[:sync_state]
         @synced = parms[:includes_last_item_in_range]
@@ -351,14 +353,14 @@ module Viewpoint
       # additional items.  Calling this method again will clear the sync_state and synchronize
       # everything again.
       # @return [Array<Item>] returns an array of Items
-      def sync_items_since!(datetime)
+      def sync_items_since!(datetime, opts={})
         clear_sync_state!
 
         begin
           items = sync_items!
         end until items.empty?
 
-        items_since(datetime)
+        items_since(datetime, opts)
       end
 
       # Clears out the @sync_state so you can freshly synchronize this folder if needed

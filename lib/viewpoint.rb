@@ -22,6 +22,8 @@
 require 'singleton'
 require 'date'
 require 'base64'
+require 'kconv' if(RUBY_VERSION.start_with? '1.9') # bug in rubyntlm with ruby 1.9.x
+
 
 # Class Extensions
 require 'extensions/string'
@@ -35,6 +37,7 @@ require 'model/model'
 require 'model/mailbox_user'
 require 'model/attendee'
 require 'model/generic_folder'
+require 'model/item_field_uri_map' # supports Item
 require 'model/item'
 # Specific Models
 # Folders
@@ -124,7 +127,7 @@ module Viewpoint
 
       # The MailboxUser object that represents the user connected to EWS.
       def me
-        @me ||= MailboxUser.find_user((@@user.include?('@') ? @@user : "#{@@user}@"))
+        MailboxUser.find_user((@@user.include?('@') ? @@user : "#{@@user}@"))
       end
 
     end # class EWS

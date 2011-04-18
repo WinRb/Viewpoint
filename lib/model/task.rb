@@ -58,21 +58,17 @@ module Viewpoint
       # @param [String] body The task body
       # @param [DateTime] v_start The date/time when this task begins
       # @param [DateTime] v_end The date/time when this task is due
-      def self.create_task(folder, subject, body, v_start = nil, v_end = nil)
+      # @param [Symbol] status The current status of this task
+      #   :completed, :in_progress, :waiting_on_others, 
+      def self.create_task(folder, subject, body, v_start = nil, v_end = nil, status = nil)
         item = {}
         item[:subject] = {:text => subject}
         item[:body] = {:text => body, :body_type => 'Text'} unless body.nil?
         item[:start_date] = {:text => v_start.to_s} unless v_start.nil?
         item[:due_date] = {:text => v_end.to_s} unless v_end.nil?
+        item[:status] = {:text => status} unless status.nil?
         
-        conn = Viewpoint::EWS::EWS.instance
-        resp = conn.ews.create_task_item(folder, item, 'SaveOnly')
-        if(resp.status == 'Success')
-          resp = resp.items.shift
-          self.new(resp[resp.keys.first])
-        else
-          raise EwsError, "Could not create task. #{resp.code}: #{resp.message}"
-        end
+        self.create_item_from_hash(item, folder)
       end
 
 
@@ -115,7 +111,11 @@ module Viewpoint
       private
 
       def init_methods
-        super()
+        super
+        define_str_var :status, :owner
+        define_bool_var :is_complete, :is_recurring, :is_team_task
+        define_int_var :percent_complete, :actual_work, :change_count
+        define_datetime_var :start_date, :due_date, :complete_date
       end
 
     end # Task

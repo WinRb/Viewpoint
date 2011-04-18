@@ -79,12 +79,15 @@ module Viewpoint
       # @return [true] This method either returns true or raises an error with the message
       #   as to why this operation did not succeed.
       def add_delegate!(delegate_email, permissions)
+        # Use a new hash so the passed hash is not modified in case we are in a loop.
+        # Thanks to Markus Roberts for pointing this out.
+        formatted_perms = {}
         # Modify permissions so we can pass it to the builders
         permissions.each_pair do |k,v|
-          permissions[k] = {:text => v}
+          formatted_perms[k] = {:text => v}
         end
 
-        resp = (Viewpoint::EWS::EWS.instance).ews.add_delegate(self.email_address, delegate_email, permissions)
+        resp = (Viewpoint::EWS::EWS.instance).ews.add_delegate(self.email_address, delegate_email, formatted_perms)
         if(resp.status == 'Success')
           return true
         else
@@ -94,11 +97,12 @@ module Viewpoint
 
       def update_delegate!(delegate_email, permissions)
         # Modify permissions so we can pass it to the builders
+        formatted_perms = {}
         permissions.each_pair do |k,v|
-          permissions[k] = {:text => v}
+          formatted_perms[k] = {:text => v}
         end
 
-        resp = (Viewpoint::EWS::EWS.instance).ews.update_delegate(self.email_address, delegate_email, permissions)
+        resp = (Viewpoint::EWS::EWS.instance).ews.update_delegate(self.email_address, delegate_email, formatted_perms)
         if(resp.status == 'Success')
           return true
         else

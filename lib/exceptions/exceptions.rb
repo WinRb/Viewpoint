@@ -37,6 +37,9 @@ module Viewpoint
     class EwsNotImplemented < StandardError
     end
 
+    # Raised when an method is called in the wrong way
+    class EwsBadArgumentError < StandardError; end
+
   end # EWS
 end # Viewpoint
  
