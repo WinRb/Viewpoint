@@ -65,8 +65,8 @@ module Viewpoint
       end
 
       # Initialize an Exchange Web Services item of type Message
-      def initialize(ews_item)
-        super(ews_item)
+      def initialize(ews_item, shallow = true)
+        super(ews_item, shallow)
       end
 
       def headers

@@ -62,7 +62,7 @@ module Viewpoint
         {:id => resp.items.first[:attachment_id][:root_item_id], :change_key => resp.items.first[:attachment_id][:root_item_change_key]}
       end
 
-      attr_reader :item_id, :change_key
+      attr_reader :item_id, :change_key, :parent_folder_id
       alias :id :item_id
 
       # Initialize an Exchange Web Services item

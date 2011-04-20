@@ -104,8 +104,8 @@ module Viewpoint
       end
 
       # Initialize an Exchange Web Services item of type CalendarItem
-      def initialize(ews_item)
-        super(ews_item)
+      def initialize(ews_item, shallow = true)
+        super(ews_item, shallow)
       end
       
       # Add attendees to this CalendarItem. This does not commit the changes so you will have to use #save! to
