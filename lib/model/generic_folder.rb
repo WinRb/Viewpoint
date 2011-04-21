@@ -217,7 +217,9 @@ module Viewpoint
       def find_items(opts = {})
         opts = opts.clone # clone the passed in object so we don't modify it in case it's being used in a loop
         item_shape = opts.has_key?(:item_shape) ? opts.delete(:item_shape) : {:base_shape => 'Default'}
-        item_shape[:additional_properties] = {:field_uRI => ['item:ParentFolderId', 'item:LastModifiedTime']}
+        unless item_shape.has_key?(:additional_properties) # Don't overwrite if specified by caller
+          item_shape[:additional_properties] = {:field_uRI => ['item:ParentFolderId']}
+        end
         resp = (Viewpoint::EWS::EWS.instance).ews.find_item([@folder_id], 'Shallow', item_shape, opts)
         if(resp.status == 'Success')
           parms = resp.items.shift
