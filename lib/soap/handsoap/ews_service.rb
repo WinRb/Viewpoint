@@ -769,6 +769,7 @@ module Viewpoint
 
         def parse!(response, opts = {})
           return response if @@raw_soap
+          raise EwsError, "Can't parse an empty response. Please check your endpoint." if(response.nil?)
           EwsParser.new(response).parse(opts)
         end
 
