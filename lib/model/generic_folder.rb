@@ -217,7 +217,9 @@ module Viewpoint
       def find_items(opts = {})
         opts = opts.clone # clone the passed in object so we don't modify it in case it's being used in a loop
         item_shape = opts.has_key?(:item_shape) ? opts.delete(:item_shape) : {:base_shape => 'Default'}
-        item_shape[:additional_properties] = {:field_uRI => ['item:ParentFolderId']}
+        unless item_shape.has_key?(:additional_properties) # Don't overwrite if specified by caller
+          item_shape[:additional_properties] = {:field_uRI => ['item:ParentFolderId']}
+        end
         resp = (Viewpoint::EWS::EWS.instance).ews.find_item([@folder_id], 'Shallow', item_shape, opts)
         if(resp.status == 'Success')
           parms = resp.items.shift
@@ -311,6 +313,29 @@ module Viewpoint
           raise EwsError, "Could not retrieve item. #{resp.code}: #{resp.message}"
         end
       end
+
+      # Get Items
+      # @param [String] item_ids is an array of Item IDs to fetch
+      # @param [String] change_key specify an optional change_key if you want to
+      #   make sure you are fetching a specific version of the object.
+      # @param [String] options specify an optional options hash. Supports the
+      #   key :item_shape that expects a hash value with :base_shape and other
+      #   optional parameters that specify the desired fields to return.
+      def get_items(item_ids, change_key = nil, options={})
+        item_shape = options[:item_shape] ||
+          {:base_shape => 'Default', :additional_properties => {:field_uRI => ['item:ParentFolderId']}}
+        shallow = item_shape[:base_shape] != 'AllProperties'
+        resp = (Viewpoint::EWS::EWS.instance).ews.get_item(item_ids, item_shape)
+        if(resp.status == 'Success')
+          resp.items.map do |item|
+            type = item.keys.first
+            eval "#{type.to_s.camel_case}.new(item[type], :shallow => #{shallow})"
+          end
+        else
+          raise EwsError, "Could not retrieve items. #{resp.code}: #{resp.message}"
+        end
+      end
+
 
       # Syncronize Items in this folder. If this method is issued multiple
       # times it will continue where the last sync completed.

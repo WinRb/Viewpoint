@@ -73,8 +73,8 @@ module Viewpoint
 
 
       # Initialize an Exchange Web Services item of type Task
-      def initialize(ews_item)
-        super(ews_item)
+      def initialize(ews_item, opts={})
+        super(ews_item, opts)
       end
 
       # Delete this item
