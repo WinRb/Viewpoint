@@ -25,7 +25,7 @@ module Viewpoint
       attr_reader :subject, :organizer, :location, :start, :end, :cal_item_type
 
       # Initialize an Exchange Web Services item
-      def initialize(ews_item, parent_folder)
+      def initialize(ews_item, parent_folder, opts={})
         raise InvalidEWSItemError if ews_item.nil?
 
         @subject = ews_item.subject # String
@@ -42,7 +42,7 @@ module Viewpoint
         # body when the message is viewed.
         @message = nil
 
-        super(ews_item, :shallow => parent_folder)
+        super(ews_item, opts)
       end
 
 
