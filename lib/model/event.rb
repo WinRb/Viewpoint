@@ -42,7 +42,7 @@ module Viewpoint
         # body when the message is viewed.
         @message = nil
 
-        super(ews_item, parent_folder)
+        super(ews_item, :shallow => parent_folder)
       end
 
 

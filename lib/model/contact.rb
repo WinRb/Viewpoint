@@ -75,8 +75,8 @@ module Viewpoint
       end
 
       # Initialize an Exchange Web Services item of type Contact
-      def initialize(ews_item, shallow = true)
-        super(ews_item, shallow)
+      def initialize(ews_item, opts={})
+        super(ews_item, opts)
       end
       
       def set_email_addresses(email1, email2=nil, email3=nil)

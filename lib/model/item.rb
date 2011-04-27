@@ -68,10 +68,10 @@ module Viewpoint
       # Initialize an Exchange Web Services item
       # @param [Hash] ews_item A hash representing this item
       # @param [Boolean] shallow Whether or not we have retrieved all the elements for this object
-      def initialize(ews_item, shallow = true)
+      def initialize(ews_item, opts={})
         super() # Calls initialize in Model (creates @ews_methods Array)
         @ews_item = ews_item
-        @shallow = shallow
+        @shallow = opts.has_key?(:shallow) ? opts[:shallow] : true
         @item_id = ews_item[:item_id][:id]
         @change_key = ews_item[:item_id][:change_key]
         @text_only = false

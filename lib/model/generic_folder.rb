@@ -329,7 +329,7 @@ module Viewpoint
         if(resp.status == 'Success')
           resp.items.map do |item|
             type = item.keys.first
-            eval "#{type.to_s.camel_case}.new(item[type], #{shallow})"
+            eval "#{type.to_s.camel_case}.new(item[type], :shallow => #{shallow})"
           end
         else
           raise EwsError, "Could not retrieve items. #{resp.code}: #{resp.message}"

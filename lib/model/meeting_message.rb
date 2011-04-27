@@ -22,8 +22,8 @@ module Viewpoint
   module EWS
     class MeetingMessage < Item
 
-      def initialize(ews_item, shallow = true)
-        super(ews_item, shallow)
+      def initialize(ews_item, opts={})
+        super(ews_item, opts)
       end
     end # MeetingMessage
   end # EWS
