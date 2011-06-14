@@ -105,14 +105,16 @@ module Viewpoint
       # Gets a folder by name.  This name must match the folder name exactly.
       # @param [String] name The name of the folder to fetch.
       # @param [String] shape the shape of the object to return IdOnly/Default/AllProperties
+      # @return [GenericFolder,nil] will return the folder by the given name of nil if not found.
       def self.get_folder_by_name(name, shape = 'Default')
         # For now the :field_uRI and :field_uRI_or_constant must be in an Array for Ruby 1.8.7 because Hashes
         # are not positional at insertion until 1.9
         restr = {:restriction =>
           {:is_equal_to => 
             [{:field_uRI => {:field_uRI=>'folder:DisplayName'}}, {:field_uRI_or_constant =>{:constant => {:value=>name}}}]}}
-        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([:msgfolderroot], 'Deep', {:base_shape => shape}, restr)
+        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([:root], 'Deep', {:base_shape => shape}, restr)
         if(resp.status == 'Success')
+          return nil if resp.items.empty?
           f = resp.items.first
           f_type = f.keys.first.to_s.camel_case
           eval "#{f_type}.new(f[f.keys.first])"
@@ -398,12 +400,19 @@ module Viewpoint
       # @param [String] name The name of the new folder
       def add_subfolder(name)
         resp = (Viewpoint::EWS::EWS.instance).ews.create_folder(@folder_id, name)
+        folder = resp.items.first
+        ftype = folder.keys.first
+        GenericFolder.get_folder(folder[ftype][:folder_id][:id])
       end
 
-
       # Deletes this folder from the Exchange Data Store
-      def delete!
-        resp = (Viewpoint::EWS::EWS.instance).ews.delete_folder(@folder_id)
+      # @param [Boolean] recycle_bin Send to the recycle bin instead of deleting (default: false)
+      # @return [TrueClass] This will return true because if an issue occurs it
+      #   will be thrown in the SOAP Parser
+      def delete!(recycle_bin = false)
+        deltype = recycle_bin ? 'MoveToDeletedItems' : 'HardDelete'
+        resp = (Viewpoint::EWS::EWS.instance).ews.delete_folder(@folder_id, deltype)
+        true
       end
 
       private

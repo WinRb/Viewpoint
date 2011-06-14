@@ -43,6 +43,22 @@ module Viewpoint
           @response_message.items = folders
         end
 
+        def create_folder_response(opts)
+          if(@response_message.status == 'Success')
+            folders = []
+            (@response/"//#{NS_EWS_MESSAGES}:Folders/*").each do |f|
+              folders << xml_to_hash!(f.native_element)
+            end
+            @response_message.items = folders
+          else
+            raise EwsError, "#{@response_message.code}: #{@response_message.message}"
+          end
+        end
+
+        def delete_folder_response(opts)
+          raise EwsError, "#{@response_message.code}: #{@response_message.message}" unless @response_message.status == 'Success'
+        end
+
         def get_events_response(opts)
           if @response_message.status == 'Success'
             events = []
