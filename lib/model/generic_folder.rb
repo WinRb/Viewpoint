@@ -34,7 +34,7 @@ module Viewpoint
       recoverableitemsroot recoverableitemsdeletions recoverableitemsversions
       recoverableitemspurges archiveroot archivemsgfolderroot archivedeleteditems
       archiverecoverableitemsroot archiverecoverableitemsdeletions
-      archiverecoverableitemsversions archiverecoverableitemspurges}
+      archiverecoverableitemsversions archiverecoverableitemspurges publicfoldersroot}
 
       @@event_types = %w{CopiedEvent CreatedEvent DeletedEvent ModifiedEvent MovedEvent NewMailEvent}
 
@@ -58,7 +58,7 @@ module Viewpoint
       # Find subfolders of the passed root folder.  If no parameters are passed
       # this method will search from the Root folder.
       # @param [String,Symbol] root An folder id, either a DistinguishedFolderId (must me a Symbol)
-      #   or a FolderId (String)
+      #   or a FolderId (String). This is where to start the search from. Usually :root,:msgfolderroot,:publicfoldersroot
       # @param [String] traversal Shallow/Deep/SoftDeleted
       # @param [String] shape the shape to return IdOnly/Default/AllProperties
       # @param [optional, String] folder_type an optional folder type to limit the search to like 'IPF.Task'
@@ -86,8 +86,10 @@ module Viewpoint
       end
 
       # Return a list of folder names
+      # @param [String,Symbol] root An folder id, either a DistinguishedFolderId (must me a Symbol)
+      #   or a FolderId (String). This is where to start the search from. Usually :root,:msgfolderroot,:publicfoldersroot
       # @return [Array<String>] Return an Array of folder names.
-      def self.folder_names
+      def self.folder_names(root = :msgfolderroot)
         resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([:msgfolderroot], 'Shallow')
         if(resp.status == 'Success')
           flds = []
@@ -102,15 +104,18 @@ module Viewpoint
 
       # Gets a folder by name.  This name must match the folder name exactly.
       # @param [String] name The name of the folder to fetch.
+      # @param [String,Symbol] root An folder id, either a DistinguishedFolderId (must me a Symbol)
+      #   or a FolderId (String). This is where to start the search from. Usually :root,:msgfolderroot,:publicfoldersroot
       # @param [String] shape the shape of the object to return IdOnly/Default/AllProperties
       # @return [GenericFolder,nil] will return the folder by the given name of nil if not found.
-      def self.get_folder_by_name(name, shape = 'Default')
+      def self.get_folder_by_name(name, root = :msgfolderroot, shape = 'Default', opts = {})
+        opts[:traversal] = 'Deep' unless opts.has_key?(:traversal)
         # For now the :field_uRI and :field_uRI_or_constant must be in an Array for Ruby 1.8.7 because Hashes
         # are not positional at insertion until 1.9
         restr = {:restriction =>
           {:is_equal_to => 
             [{:field_uRI => {:field_uRI=>'folder:DisplayName'}}, {:field_uRI_or_constant =>{:constant => {:value=>name}}}]}}
-        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([:root], 'Deep', {:base_shape => shape}, restr)
+        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([root], opts[:traversal], {:base_shape => shape}, restr)
         if(resp.status == 'Success')
           return nil if resp.items.empty?
           f = resp.items.first
@@ -119,6 +124,26 @@ module Viewpoint
         else
           raise EwsError, "Could not retrieve folder. #{resp.code}: #{resp.message}"
         end
+      end
+
+      # Gets a folder by the given path. The default search path is :msgfolderroot so if you want to
+      # specify a path at a different root change that parameter.
+      # @param [String] path the fully qualified path to a folder at the given root
+      #   @example "/myfolders/folder a/personal calendar"
+      # @param [String,Symbol] root An folder id, either a DistinguishedFolderId (must me a Symbol)
+      #   or a FolderId (String). This is where to start the search from. Usually :root,:msgfolderroot,:publicfoldersroot
+      # @param [String] shape the shape of the object to return IdOnly/Default/AllProperties
+      # @return [GenericFolder,nil] will return the folder by the given name of nil if not found.
+      def self.get_folder_by_path(path, root = :msgfolderroot, shape = 'Default')
+        parts = path.split(/\//)
+        parts = parts.slice(1..(parts.length)) if parts.first.empty?
+        retfld = nil
+        parts.each do |p|
+          fld = self.get_folder_by_name(p, root, shape, {:traversal => 'Shallow'})
+          root = fld.id
+          retfld = fld if(fld.display_name.downcase == p.downcase)
+        end
+        retfld
       end
 
       attr_accessor :folder_id, :change_key, :parent_id, :sync_state
