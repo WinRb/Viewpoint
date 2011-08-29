@@ -38,6 +38,9 @@ module Viewpoint
     # Raised when an method is called in the wrong way
     class EwsBadArgumentError < StandardError; end
 
+    # Raised when a folder that is asked for is not found
+    class EwsFolderNotFound < StandardError; end
+
   end # EWS
 end # Viewpoint
  

@@ -44,6 +44,7 @@ module Viewpoint
       #   delegate access to this folder or else this operation will fail.
       # @param [Hash] folder_shape
       # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
+      # @raise [EwsError] raised when the backend SOAP method returns an error.
       def self.get_folder(folder_id, act_as = nil, folder_shape = {:base_shape => 'Default'})
         resp = (Viewpoint::EWS::EWS.instance).ews.get_folder( [normalize_id(folder_id)], folder_shape, act_as )
         if(resp.status == 'Success')
@@ -63,6 +64,7 @@ module Viewpoint
       # @param [String] shape the shape to return IdOnly/Default/AllProperties
       # @param [optional, String] folder_type an optional folder type to limit the search to like 'IPF.Task'
       # @return [Array] Returns an Array of Folder or subclasses of Folder
+      # @raise [EwsError] raised when the backend SOAP method returns an error.
       def self.find_folders(root = :msgfolderroot, traversal = 'Shallow', shape = 'Default', folder_type = nil)
         if( folder_type.nil? )
           resp = (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal, {:base_shape => shape} )
@@ -89,6 +91,7 @@ module Viewpoint
       # @param [String,Symbol] root An folder id, either a DistinguishedFolderId (must me a Symbol)
       #   or a FolderId (String). This is where to start the search from. Usually :root,:msgfolderroot,:publicfoldersroot
       # @return [Array<String>] Return an Array of folder names.
+      # @raise [EwsError] raised when the backend SOAP method returns an error.
       def self.folder_names(root = :msgfolderroot)
         resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([:msgfolderroot], 'Shallow')
         if(resp.status == 'Success')
@@ -107,7 +110,9 @@ module Viewpoint
       # @param [String,Symbol] root An folder id, either a DistinguishedFolderId (must me a Symbol)
       #   or a FolderId (String). This is where to start the search from. Usually :root,:msgfolderroot,:publicfoldersroot
       # @param [String] shape the shape of the object to return IdOnly/Default/AllProperties
-      # @return [GenericFolder,nil] will return the folder by the given name of nil if not found.
+      # @return [GenericFolder] will return the folder by the given name.
+      # @raise [EwsFolderNotFound] raised when a folder requested is not found
+      # @raise [EwsError] raised when the backend SOAP method returns an error.
       def self.get_folder_by_name(name, root = :msgfolderroot, shape = 'Default', opts = {})
         opts[:traversal] = 'Deep' unless opts.has_key?(:traversal)
         # For now the :field_uRI and :field_uRI_or_constant must be in an Array for Ruby 1.8.7 because Hashes
@@ -117,6 +122,7 @@ module Viewpoint
             [{:field_uRI => {:field_uRI=>'folder:DisplayName'}}, {:field_uRI_or_constant =>{:constant => {:value=>name}}}]}}
         resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([root], opts[:traversal], {:base_shape => shape}, restr)
         if(resp.status == 'Success')
+          raise EwsFolderNotFound, "The folder requested is invalid or unavailable"
           return nil if resp.items.empty?
           f = resp.items.first
           f_type = f.keys.first.to_s.camel_case
@@ -133,7 +139,9 @@ module Viewpoint
       # @param [String,Symbol] root An folder id, either a DistinguishedFolderId (must me a Symbol)
       #   or a FolderId (String). This is where to start the search from. Usually :root,:msgfolderroot,:publicfoldersroot
       # @param [String] shape the shape of the object to return IdOnly/Default/AllProperties
-      # @return [GenericFolder,nil] will return the folder by the given name of nil if not found.
+      # @return [GenericFolder] will return the folder by the given path
+      # @raise [EwsFolderNotFound] raised when a folder requested is not found
+      # @raise [EwsError] raised when the backend SOAP method returns an error.
       def self.get_folder_by_path(path, root = :msgfolderroot, shape = 'Default')
         parts = path.split(/\//)
         parts = parts.slice(1..(parts.length)) if parts.first.empty?
