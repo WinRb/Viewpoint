@@ -10,7 +10,7 @@ require 'date'
 
 describe Viewpoint::EWS::CalendarItem, "functionality testing" do
   before(:all) do
-    creds = JSON.load(File.open('spec/creds.json','r'))
+    creds = JSON.load(File.open("#{File.dirname(__FILE__)}/creds.json",'r'))
     Viewpoint::EWS::EWS.endpoint = creds['endpoint']
     Viewpoint::EWS::EWS.set_auth(creds['user'],creds['pass'])
     @v_start = DateTime.parse("#{Date.today}T14:00:00-06:00")
@@ -51,7 +51,7 @@ describe Viewpoint::EWS::CalendarItem, "functionality testing" do
     end
 
     it 'should add attendees to the Meeting' do
-      attendees = JSON.load(File.open('spec/attendees.json','r'))
+      attendees = JSON.load(File.open("#{File.dirname(__FILE__)}/attendees.json",'r'))
       @citem.add_attendees!((attendees.has_key?('required_attendees') ? attendees['required_attendees'] : []),
                             (attendees.has_key?('optional_attendees') ? attendees['optional_attendees'] : [])).should be_true
 

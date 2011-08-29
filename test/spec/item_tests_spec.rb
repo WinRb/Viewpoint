@@ -9,7 +9,7 @@ require 'json'
 
 describe "Test the basic functionality of Items" do
   before(:all) do
-    creds = JSON.load(File.open('spec/creds.json','r'))
+    creds = JSON.load(File.open("#{File.dirname(__FILE__)}/creds.json",'r'))
     Viewpoint::EWS::EWS.endpoint = creds['endpoint']
     Viewpoint::EWS::EWS.set_auth(creds['user'],creds['pass'])
     @ews = Viewpoint::EWS::EWS.instance
