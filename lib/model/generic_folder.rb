@@ -122,8 +122,7 @@ module Viewpoint
             [{:field_uRI => {:field_uRI=>'folder:DisplayName'}}, {:field_uRI_or_constant =>{:constant => {:value=>name}}}]}}
         resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([root], opts[:traversal], {:base_shape => shape}, restr)
         if(resp.status == 'Success')
-          raise EwsFolderNotFound, "The folder requested is invalid or unavailable"
-          return nil if resp.items.empty?
+          raise EwsFolderNotFound, "The folder requested is invalid or unavailable" if resp.items.empty?
           f = resp.items.first
           f_type = f.keys.first.to_s.camel_case
           eval "#{f_type}.new(f[f.keys.first])"
