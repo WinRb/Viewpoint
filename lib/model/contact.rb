@@ -119,7 +119,7 @@ module Viewpoint
       #   :business, :home, :other
       # @param [Hash] address the address elements to set. It may include the following keys
       #   :street, :city, :state, :country_or_region, :postal_code
-      # @TODO check for empty address hash
+      # @todo check for empty address hash
       def set_address(address_type, address)
         valid_types = [:business, :home, :other]
         raise EwsError, "Invalid address type (#{address_type}) passed to Contact#set_address." unless valid_types.index address_type

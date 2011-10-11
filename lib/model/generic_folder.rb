@@ -226,7 +226,7 @@ module Viewpoint
       end
 
       # Checks a subscribed folder for events
-      # @returns [Array] An array of Event items
+      # @return [Array] An array of Event items
       # @todo check for subscription expiry
       def get_events
         begin

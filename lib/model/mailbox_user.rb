@@ -26,10 +26,12 @@ module Viewpoint
       include Model
 
       # Resolve a user in the Exchange Data Store
-      # @param [String] A user to resolve to.
+      # @param [String] resolve A user to resolve to.
       # @return [MailboxUser,Array] If it resolves to one user then it returns a MailboxUser.
       #   If it resolves to more than one user an Array of MailboxUsers are returned.  If an
       #   error ocurrs an exception is raised.
+      # @todo - rename "resolve" to something more descriptive
+      #   - standardize on a common return type???
       def self.find_user(resolve)
         resp = (Viewpoint::EWS::EWS.instance).ews.resolve_names(resolve)
         if(resp.status == 'Success')
