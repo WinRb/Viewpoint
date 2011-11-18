@@ -305,22 +305,22 @@ module Viewpoint
       # @param [String,nil] exclude_str A string to exclude from matches against the subject.  This is optional.
       def search_by_subject(match_str, exclude_str = nil)
         match = {:contains =>
-          {
-            :containment_mode => 'Substring',
-            :containment_comparison => 'IgnoreCase',
-            :field_uRI => {:field_uRI=>'item:Subject'},
-            :constant => {:value =>match_str}
-          }
+          [
+            {:containment_mode => 'Substring'},
+            {:containment_comparison => 'IgnoreCase'},
+            {:field_uRI => {:field_uRI=>'item:Subject'}},
+            {:constant => {:value =>match_str}}
+          ]
         }
         unless exclude_str.nil?
           excl = {:not =>
             {:contains =>
-              {
-                :containment_mode => 'Substring',
-                :containment_comparison => 'IgnoreCase',
-                :field_uRI => {:field_uRI=>'item:Subject'},
-                :constant => {:value =>exclude_str}
-              }
+              [
+                {:containment_mode => 'Substring'},
+                {:containment_comparison => 'IgnoreCase'},
+                {:field_uRI => {:field_uRI=>'item:Subject'}},
+                {:constant => {:value =>exclude_str}}
+              ]
             }
           }
 
