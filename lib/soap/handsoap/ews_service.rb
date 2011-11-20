@@ -728,12 +728,14 @@ module Viewpoint
         # Provides detailed information about the availability of a set of users, rooms, and resources
         # within a specified time window.
         # @see http://msdn.microsoft.com/en-us/library/aa564001.aspx
-        def get_user_availability
+        def get_user_availability(email_address, start_time, end_time)
           action = "#{SOAP_ACTION_PREFIX}/GetUserAvailability"
-          resp = invoke("#{NS_EWS_MESSAGES}:GetUserAvailability", action) do |get_user_availability|
-            build_get_user_availability!(get_user_availability)
+          resp = invoke("#{NS_EWS_MESSAGES}:GetUserAvailabilityRequest", action) do |root|
+            build!(root) do
+              get_user_availability!(email_address, start_time, end_time)
+            end
           end
-          parse_get_user_availability(resp)
+          parse!(resp)
         end
 
         # Gets a mailbox user's Out of Office (OOF) settings and messages.

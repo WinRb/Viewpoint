@@ -80,6 +80,29 @@ module Viewpoint
           end
         end
 
+        # Build the request XML for GetUserAvailability.
+        # @see http://msdn.microsoft.com/en-us/library/aa494212.aspx
+        def get_user_availability!(email_address, start_time, end_time)
+          add_time_zone_info
+          @node.add("#{NS_EWS_MESSAGES}:MailboxDataArray") do |mda|
+            mda.add("#{NS_EWS_TYPES}:MailboxData") do |mbdata|
+              mbdata.add("#{NS_EWS_TYPES}:Email") do |email|
+                email.add("#{NS_EWS_TYPES}:Name")
+                email.add("#{NS_EWS_TYPES}:Address", email_address)
+              end
+              mbdata.add("#{NS_EWS_TYPES}:AttendeeType", 'Required')
+            end
+          end
+          @node.add("#{NS_EWS_TYPES}:FreeBusyViewOptions") do |fbvo|
+            fbvo.add("#{NS_EWS_TYPES}:TimeWindow") do |tw|
+              tw.add("#{NS_EWS_TYPES}:StartTime", start_time)
+              tw.add("#{NS_EWS_TYPES}:EndTime", end_time)
+            end
+            fbvo.add("#{NS_EWS_TYPES}:MergedFreeBusyIntervalInMinutes", 10)
+            fbvo.add("#{NS_EWS_TYPES}:RequestedView", 'MergedOnly')
+          end
+        end
+
         # This is forthcoming in Exchange 2010.  It will replace much of the Restriction
         # based code.
         # @param [Array] An array of query strings
@@ -87,6 +110,33 @@ module Viewpoint
         def query_strings!(query_strings)
           query_strings.each do |qs|
             @node.add("#{NS_EWS_MESSAGES}:QueryString", qs)
+          end
+        end
+
+        private
+
+        # Add a description of the time zone to the request XML.
+        # The timezone information defaults to US/Pacific time.
+        def add_time_zone_info(offset_hours_std = -8, offset_hours_dst = -7)
+          base_bias = (-1 * offset_hours_std * 60).to_s
+          standard_bias = '0'
+          savings_bias = (offset_hours_std - offset_hours_dst).to_s
+          @node.add("#{NS_EWS_TYPES}:TimeZone") do |tz|
+            tz.add("#{NS_EWS_TYPES}:Bias", base_bias) # e.g. '480'
+            tz.add("#{NS_EWS_TYPES}:StandardTime") do |stime|
+              stime.add("#{NS_EWS_TYPES}:Bias", standard_bias) # e.g. '0'
+              stime.add("#{NS_EWS_TYPES}:Time", '02:00:00')
+              stime.add("#{NS_EWS_TYPES}:DayOrder", '1')
+              stime.add("#{NS_EWS_TYPES}:Month", '11')
+              stime.add("#{NS_EWS_TYPES}:DayOfWeek", 'Sunday')
+            end
+            tz.add("#{NS_EWS_TYPES}:DaylightTime") do |dtime|
+              dtime.add("#{NS_EWS_TYPES}:Bias", savings_bias) # e.g. '-60'
+              dtime.add("#{NS_EWS_TYPES}:Time", '02:00:00')
+              dtime.add("#{NS_EWS_TYPES}:DayOrder", '2')
+              dtime.add("#{NS_EWS_TYPES}:Month", '3')
+              dtime.add("#{NS_EWS_TYPES}:DayOfWeek", 'Sunday')
+            end
           end
         end
 
