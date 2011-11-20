@@ -202,6 +202,12 @@ module Viewpoint
           @response_message.items = xml_to_hash!((@response/"//#{NS_EWS_TYPES}:OofSettings").first.native_element)
         end
 
+        # Parse out the free/busy time.
+        # @see http://msdn.microsoft.com/en-us/library/aa494212.aspx
+        def get_user_availability_response(opts)
+          @response_message.items = xml_to_hash!((@response/"//#{NS_EWS_MESSAGES}:FreeBusyView").first.native_element)
+        end
+
         # Parse out a Mailbox element
         # @param [XML] mbox The <t:Mailbox> element
         # @return [Hash] Values of EWS Mailbox type :name, :email_address, :routing_type, :mailbox_type, :item_id
