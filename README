@@ -97,7 +97,11 @@ DESIGN GOALS/GUIDELINES:
     where they do not and I have deviated somewhat.  For example,
     an instance method named delete_folder doesn't make much sense, but
     an instance method named delete! is pretty clear what it deletes.
-
+--------------------------------------------------------------------------
+!!!SHOUTS OUT!!!
+--------------------------------------------------------------------------
+* Thanks to Harold Lee (https://github.com/haroldl) for working on the
+  get_user_availability code.
 --------------------------------------------------------------------------
 DISCLAIMER:  If you see something that could be done better or would like
 to help out in the development of this code please feel free to clone the
