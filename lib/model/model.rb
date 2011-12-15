@@ -187,7 +187,7 @@ module Viewpoint
             self.instance_eval <<-EOF
             def #{var}
               return @#{var} if defined?(@#{var})
-              deepen!
+              deepen! if !@ews_item[:#{var}]
               if( (@ews_item[:#{var}][:mailbox]).is_a?(Hash) )
                 @#{var} = [MailboxUser.new(@ews_item[:#{var}][:mailbox])]
               elsif( (@ews_item[:#{var}][:mailbox]).is_a?(Array) )
@@ -214,7 +214,7 @@ module Viewpoint
             @ews_methods << var
             self.instance_eval <<-EOF
             def #{var}
-              deepen!
+              deepen! if !@ews_item[:#{var}]
               @#{var} ||= MailboxUser.new(@ews_item[:#{var}][:mailbox])
             end
             EOF
