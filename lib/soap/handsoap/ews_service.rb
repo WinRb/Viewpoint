@@ -90,7 +90,14 @@ module Viewpoint
         end
 
         def on_http_error(response)
-          raise EwsLoginError, "Failed to login to EWS at #{uri}. Please check your credentials." if(response.status == 401)
+          case response.status
+          when 401
+            raise EwsLoginError, "Failed to login to EWS at #{uri}. Please check your credentials."
+          when 404
+            raise EwsError, "File not found (404): #{uri} Please check the endpoint URL. Body: #{response.body}"
+          else
+            raise EwsError, "Unknown error (#{response.status}): #{uri} : Body: #{response.body}"
+          end
         end
 
         # ********** End Hooks **********
