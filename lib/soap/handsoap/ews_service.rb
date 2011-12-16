@@ -90,7 +90,7 @@ module Viewpoint
         end
 
         def on_http_error(response)
-          return case response.status
+          case response.status
           when 401
             raise EwsLoginError, "Failed to login to EWS at #{uri}. Please check your credentials."
           when 404
