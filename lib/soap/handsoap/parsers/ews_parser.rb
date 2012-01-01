@@ -225,8 +225,9 @@ module Viewpoint
           resolution_set = []
           (@response/"//#{NS_EWS_MESSAGES}:ResolutionSet/*").each do |r|
             mbox_hash    = mailbox((r/"#{NS_EWS_TYPES}:Mailbox").first)
-            contact_hash = contact((r/"#{NS_EWS_TYPES}:Contact").first)
-            resolution_set << mbox_hash.merge(contact_hash)
+            contact_xml  = (r/"#{NS_EWS_TYPES}:Contact").first
+            next if !contact_xml
+            resolution_set << mbox_hash.merge(contact(contact_xml))
           end
           resolution_set
         end
