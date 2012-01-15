@@ -28,9 +28,9 @@ module Viewpoint
       NS_EWS_TYPES    = 'types'.freeze # http://schemas.microsoft.com/exchange/services/2006/types
       NS_EWS_MESSAGES = 'messages'.freeze # http://schemas.microsoft.com/exchange/services/2006/messages
       NAMESPACES = {
-        NS_SOAP         => 'http://schemas.xmlsoap.org/soap/envelope/',
-        NS_EWS_TYPES    => 'http://schemas.microsoft.com/exchange/services/2006/types',
-        NS_EWS_MESSAGES => 'http://schemas.microsoft.com/exchange/services/2006/messages',
+        "xmlns:#{NS_SOAP}"         => 'http://schemas.xmlsoap.org/soap/envelope/',
+        "xmlns:#{NS_EWS_TYPES}"    => 'http://schemas.microsoft.com/exchange/services/2006/types',
+        "xmlns:#{NS_EWS_MESSAGES}" => 'http://schemas.microsoft.com/exchange/services/2006/messages',
       }.freeze
 
       # used in ResolveNames to determine where names are resolved
@@ -41,7 +41,7 @@ module Viewpoint
 
       def initialize
         @log = Logging.logger[self.class.name.to_s.to_sym]
-        @default_ns = NAMESPACES['messages']
+        @default_ns = NAMESPACES["xmlns:#{NS_EWS_MESSAGES}"]
       end
 
       # A Generic Class for SOAP returns.
