@@ -16,25 +16,33 @@
   limitations under the License.
 =end
 
-# This file requires the appropriate SOAP Library (Handsoap today) and also
-# defines certain contants that SOAP methods may use.
+# This module defines some constants and other niceties to make available to
+# the underlying SOAP classes and modules that do the actual work.
 module Viewpoint
   module EWS
     module SOAP
 
       # CONSTANTS
 
-      NS_SOAP         = 'soap' # http://schemas.xmlsoap.org/soap/envelope/
-      NS_EWS_TYPES    = 't'    # http://schemas.microsoft.com/exchange/services/2006/types
-      NS_EWS_MESSAGES = 'm'    # http://schemas.microsoft.com/exchange/services/2006/messages
+      NS_SOAP         = 'soap'.freeze # http://schemas.xmlsoap.org/soap/envelope/
+      NS_EWS_TYPES    = 'types'.freeze # http://schemas.microsoft.com/exchange/services/2006/types
+      NS_EWS_MESSAGES = 'messages'.freeze # http://schemas.microsoft.com/exchange/services/2006/messages
+      NAMESPACES = {
+        NS_SOAP         => 'http://schemas.xmlsoap.org/soap/envelope/',
+        NS_EWS_TYPES    => 'http://schemas.microsoft.com/exchange/services/2006/types',
+        NS_EWS_MESSAGES => 'http://schemas.microsoft.com/exchange/services/2006/messages',
+      }.freeze
 
       # used in ResolveNames to determine where names are resolved
-      ActiveDirectory = 'ActiveDirectory'
+      ActiveDirectory         = 'ActiveDirectory'
       ActiveDirectoryContacts = 'ActiveDirectoryContacts'
-      Contacts = 'Contacts'
+      Contacts                = 'Contacts'
       ContactsActiveDirectory = 'ContactsActiveDirectory'
 
-
+      def initialize
+        @log = Logging.logger[self.class.name.to_s.to_sym]
+        @default_ns = NAMESPACES['messages']
+      end
 
       # A Generic Class for SOAP returns.
       # @attr_reader [String] :message The text from the EWS element <m:ResponseCode>
@@ -53,12 +61,8 @@ module Viewpoint
         def set_soap_resp(response)
           @soap_response = response
         end
-
       end # EwsSoapResponse
-
 
     end # SOAP
   end # EWS
 end # Viewpoint
-
-require 'soap/handsoap/ews_service'
