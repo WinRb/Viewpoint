@@ -46,6 +46,7 @@ require 'exceptions/exceptions'
 
 # Load the backend SOAP / EWS infrastructure.
 require 'ews/soap'
+require 'ews/builders/ews_builder'
 require 'ews/exchange_web_service'
 
 # Load the model classes
