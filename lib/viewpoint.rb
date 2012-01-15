@@ -27,8 +27,8 @@ require 'kconv' if(RUBY_VERSION.start_with? '1.9') # bug in rubyntlm with ruby 1
 require 'extensions/string'
 
 # Load the backend SOAP / EWS infrastructure.
-require 'soap/soap'
-require 'soap/ews_service'
+require 'ews/soap'
+require 'ews/ews_service'
 
 # Load the model classes
 # Base Models
