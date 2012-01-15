@@ -26,8 +26,9 @@ require 'kconv' if(RUBY_VERSION.start_with? '1.9') # bug in rubyntlm with ruby 1
 # Class Extensions
 require 'extensions/string'
 
-# Load the backend SOAP infrastructure.  Today this is Handsoap.
-require 'soap/soap_provider'
+# Load the backend SOAP / EWS infrastructure.
+require 'soap/soap'
+require 'soap/ews_service'
 
 # Load the model classes
 # Base Models
