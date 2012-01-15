@@ -15,32 +15,29 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 =end
-module Viewpoint
-  module EWS
+module Viewpoint::EWS
 
-    # Generic Ews Error
-    class EwsError < StandardError
-    end
+  # Generic Ews Error
+  class EwsError < StandardError
+  end
 
-    # Raise when authentication/authorization issues occur.
-    class EwsLoginError < StandardError
-    end
+  # Raise when authentication/authorization issues occur.
+  class EwsLoginError < StandardError
+  end
 
-    # Raised when a user tries to query a folder subscription after the
-    # subscription has timed out.
-    class EwsSubscriptionTimeout < StandardError
-    end
+  # Raised when a user tries to query a folder subscription after the
+  # subscription has timed out.
+  class EwsSubscriptionTimeout < StandardError
+  end
 
-    # Represents a function in EWS that is not yet implemented in Viewpoint
-    class EwsNotImplemented < StandardError
-    end
+  # Represents a function in EWS that is not yet implemented in Viewpoint
+  class EwsNotImplemented < StandardError
+  end
 
-    # Raised when an method is called in the wrong way
-    class EwsBadArgumentError < StandardError; end
+  # Raised when an method is called in the wrong way
+  class EwsBadArgumentError < StandardError; end
 
-    # Raised when a folder that is asked for is not found
-    class EwsFolderNotFound < StandardError; end
+  # Raised when a folder that is asked for is not found
+  class EwsFolderNotFound < StandardError; end
 
-  end # EWS
-end # Viewpoint
- 
+end # Viewpoint::EWS
