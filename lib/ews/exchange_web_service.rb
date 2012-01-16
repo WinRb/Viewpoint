@@ -98,6 +98,7 @@ module Viewpoint::EWS::SOAP
         if(type == :header)
         else
           builder.FindFolder(:Traversal => traversal) {
+            builder.parent.default_namespace = NAMESPACES["xmlns:#{NS_EWS_MESSAGES}"]
             folder_shape!(builder, folder_shape)
             # @TODO add FractionalPageFolderView
             restriction!(builder, opts[:restriction]) if opts[:restriction]
@@ -130,6 +131,7 @@ module Viewpoint::EWS::SOAP
         if(type == :header)
         else
           builder.FindItem(:Traversal => traversal) {
+            builder.parent.default_namespace = NAMESPACES["xmlns:#{NS_EWS_MESSAGES}"]
             item_shape!(builder, item_shape)
             # @TODO add FractionalPageFolderView
             calendar_view!(builder, opts[:calendar_view]) if opts[:calendar_view]
@@ -147,8 +149,9 @@ module Viewpoint::EWS::SOAP
     # Gets folders from the Exchange store
     # @see http://msdn.microsoft.com/en-us/library/aa580274.aspx
     #
-    # @param [Array] folder_ids An Array of folder ids, either a
-    #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+    # @param [Array<Hash>] folder_ids An array of folder_ids in the form:
+    #   [ {:id => 'myfolderID##asdfs', :change_key => 'asdfasdf'},
+    #     {:id => :msgfolderroot} ]  # Don't do this for real
     # @param [Hash] folder_shape defines the FolderShape node
     #   See: http://msdn.microsoft.com/en-us/library/aa494311.aspx
     # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
@@ -162,6 +165,7 @@ module Viewpoint::EWS::SOAP
         if(type == :header)
         else
           builder.GetFolder {
+            builder.parent.default_namespace = NAMESPACES["xmlns:#{NS_EWS_MESSAGES}"]
             folder_shape!(builder, folder_shape)
             folder_ids!(builder, folder_ids, act_as)
           }
@@ -172,12 +176,8 @@ module Viewpoint::EWS::SOAP
       #parse!(resp)
     end
 
+    # @TODO
     def convert_id
-      action = "#{SOAP_ACTION_PREFIX}/ConvertId"
-      resp = invoke("#{NS_EWS_MESSAGES}:ConvertId", action) do |convert_id|
-        build_convert_id!(convert_id)
-      end
-      parse_convert_id(resp)
     end
 
     # Creates folders, calendar folders, contacts folders, tasks folders, and search folders.
@@ -185,41 +185,46 @@ module Viewpoint::EWS::SOAP
     #
     # @param [String,Symbol] parent_folder_id either the name of a folder or it's
     #   numerical ID.  See: http://msdn.microsoft.com/en-us/library/aa565998.aspx
-    # @param [Array,String] folder_name The display name for the new folder or folders
-    def create_folder(parent_folder_id, folder_name)
-      action = "#{SOAP_ACTION_PREFIX}/CreateFolder"
-      resp = invoke("#{NS_EWS_MESSAGES}:CreateFolder", action) do |root|
-        build!(root) do
-          root.add("#{NS_EWS_MESSAGES}:ParentFolderId") do |pfid|
-            folder_id!(pfid, parent_folder_id)
-          end
-          folder_name = (folder_name.is_a?(Array)) ? folder_name : [folder_name]
-          root.add("#{NS_EWS_MESSAGES}:Folders") do |fids|
-            folder_name.each do |f|
-              add_hierarchy!(fids, {:folder => {:display_name => {:text => f}}})
-            end
-          end
+    # @param [Array<Hash>] folders An array of hashes of folder types that conform to
+    #   input for build_xml!
+    #   @example [ {:folder =>
+    #               {:sub_elements => [{:display_name => {:text => 'New Folder'}}]}},
+    #              {:calendar_folder =>
+    #               {:sub_elements => [{:display_name => {:text => 'Agenda'}}]}} ]
+    def create_folder(parent_folder_id, folders)
+      req = build_soap_envelope do |type, builder|
+        if(type == :header)
+        else
+          builder[NS_EWS_MESSAGES].CreateFolder {
+            parent_folder_id!(builder, parent_folder_id)
+            folders!(builder, folders)
+          }
         end
       end
-      parse!(resp)
+      puts "DOC:\n#{req.to_xml}"
+
+      #parse!(resp)
     end
 
     # Deletes folders from a mailbox.
     # @see http://msdn.microsoft.com/en-us/library/aa564767.aspx DeleteFolder
     #
-    # @param [Array,String,Symbol] folder_id either the name of a folder or it's
-    #   numerical ID.  See: http://msdn.microsoft.com/en-us/library/aa565998.aspx
+    # @param [Array<Hash>] folder_ids An array of folder_ids in the form:
+    #   [ {:id => 'myfolderID##asdfs', :change_key => 'asdfasdf'},
+    #     {:id => :msgfolderroot} ]  # Don't do this for real
     # @param [String,nil] delete_type Type of delete to do: HardDelete/SoftDelete/MoveToDeletedItems
-    def delete_folder(folder_id, delete_type = 'MoveToDeletedItems')
-      action = "#{SOAP_ACTION_PREFIX}/DeleteFolder"
-      resp = invoke("#{NS_EWS_MESSAGES}:DeleteFolder", action) do |root|
-        build!(root) do
-          root.set_attr('DeleteType', delete_type)
-          folder_id = (folder_id.is_a?(Array)) ? folder_id : [folder_id]
-          folder_ids!(root, folder_id)
+    def delete_folder(folder_ids, delete_type = 'MoveToDeletedItems', act_as = nil)
+      req = build_soap_envelope do |type, builder|
+        if(type == :header)
+        else
+          builder[NS_EWS_MESSAGES].DeleteFolder('DeleteType' => delete_type) {
+            folder_ids!(builder, folder_ids, act_as)
+          }
         end
       end
-      parse!(resp)
+      puts "DOC:\n#{req.to_xml}"
+
+      #parse!(resp)
     end
 
     def update_folder

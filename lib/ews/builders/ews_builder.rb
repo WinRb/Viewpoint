@@ -55,7 +55,7 @@ module Viewpoint::EWS::SOAP
         txt = vals.delete(:text)
         ns = vals.delete(:xmlns)
 
-        builder.send(keys.first.to_s, txt, vals) {
+        builder.send(keys.first.to_s.camel_case, txt, vals) {
           builder.parent.default_namespace = ns if ns
           build_xml!(builder, se) if se
         }
@@ -113,12 +113,32 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    # Build the ParentFolderId element
+    # @see http://msdn.microsoft.com/en-us/library/aa563268.aspx
+    def parent_folder_id!(node, pfid)
+      node[NS_EWS_MESSAGES].ParentFolderId {
+        if(pfid.is_a?(String))
+          folder_id!(node, pfid)
+        elsif(pfid.is_a?(Symbol))
+          distinguished_folder_id!(node, pfid)
+        else
+          raise EwsBadArgumentError, "Bad argument given for a ParentFolderId. #{pfid.class}"
+        end
+      }
+    end
+
     # Build the FolderIds element
     # @see http://msdn.microsoft.com/en-us/library/aa580509.aspx
     def folder_ids!(node, fids, act_as=nil)
       node.FolderIds {
         fids.each do |fid|
-          folder_id!(node,fid,act_as)
+          if(fid[:id].is_a?(String))
+            folder_id!(node, fid[:id], fid[:change_key])
+          elsif(fid[:id].is_a?(Symbol))
+            distinguished_folder_id!(node, fid[:id], fid[:change_key], fid[:act_as])
+          else
+            raise EwsBadArgumentError, "Bad argument given for a FolderId. #{fid[:id].class}"
+          end
         end
       }
     end
@@ -136,10 +156,18 @@ module Viewpoint::EWS::SOAP
 
     # Build the FolderId element
     # @see http://msdn.microsoft.com/en-us/library/aa579461.aspx
-    def folder_id!(node, fid, change_key = nil, act_as = nil)
+    def folder_id!(node, fid, change_key = nil)
       attribs = {'Id' => fid}
       attribs['ChangeKey'] = change_key if change_key
       node[NS_EWS_TYPES].FolderId(attribs)
+    end
+
+    # Build the Folders element
+    # @see http://msdn.microsoft.com/en-us/library/aa564009.aspx
+    def folders!(node, folders)
+      node[NS_EWS_TYPES].Folders {
+        build_xml!(node, folders)
+      }
     end
 
     # Build the AdditionalProperties element
