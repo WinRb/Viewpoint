@@ -385,20 +385,27 @@ module Viewpoint::EWS::SOAP
 
     # Defines a request to synchronize a folder hierarchy on a client
     # @see http://msdn.microsoft.com/en-us/library/aa580990.aspx
-    def sync_folder_hierarchy
-      sync_state = nil
-      folder_id = :publicfoldersroot
-      action = "#{SOAP_ACTION_PREFIX}/SyncFolderHierarchy"
-      resp = invoke("#{NS_EWS_MESSAGES}:SyncFolderHierarchy", action) do |root|
-        build!(root) do
-          folder_shape!(root, {:base_shape => 'Default'})
-          root.add("#{NS_EWS_MESSAGES}:SyncFolderId") do |sfid|
-            folder_id!(sfid, folder_id)
-          end
-          sync_state!(root, sync_state) unless sync_state.nil?
+    # @param [Hash] opts
+    # @option opts [Hash] :folder_shape The folder shape properties
+    #   Ex: {:base_shape => 'Default', :additional_properties => 'bla bla bla'}
+    # @option opts [Hash] :sync_folder_id An optional Hash that represents a FolderId or
+    #   DistinguishedFolderId.
+    #   Ex: {:id => :inbox}
+    # @option opts [Hash] :sync_state The Base64 sync state id. If this is the
+    #   first time syncing this does not need to be passed.
+    def sync_folder_hierarchy(opts = {})
+      req = build_soap_envelope do |type, builder|
+        if(type == :header)
+        else
+          builder.SyncFolderHierarchy {
+            builder.parent.default_namespace = @default_ns
+            folder_shape!(builder, opts[:folder_shape])
+            sync_folder_id!(builder, opts[:sync_folder_id]) if opts[:sync_folder_id]
+            sync_state!(builder, opts[:sync_state]) if opts[:sync_state]
+          }
         end
       end
-      parse!(resp)
+      puts "DOC:\n#{req.to_xml}"
     end
 
     # Synchronizes items between the Exchange server and the client

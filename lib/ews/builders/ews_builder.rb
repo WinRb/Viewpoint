@@ -127,6 +127,14 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    # Build the SyncFolderId element
+    # @see http://msdn.microsoft.com/en-us/library/aa580296.aspx
+    def sync_folder_id!(node, fid)
+      node.SyncFolderId {
+        dispatch_folder_id!(node, fid)
+      }
+    end
+
     # Build the DistinguishedFolderId element
     # @see http://msdn.microsoft.com/en-us/library/aa580808.aspx
     # @TODO add support for the Mailbox child object
@@ -210,6 +218,7 @@ module Viewpoint::EWS::SOAP
       node[NS_EWS_MESSAGES].ContactsView(attribs)
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa579678(v=EXCHG.140).aspx
     def event_types!(node, evtypes)
       node[NS_EWS_TYPES].EventTypes {
         evtypes.each do |et|
@@ -218,26 +227,32 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa565886(v=EXCHG.140).aspx
     def watermark!(node, wmark)
       node[NS_EWS_TYPES].Watermark(wmark)
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa565201(v=EXCHG.140).aspx
     def timeout!(node, tout)
       node[NS_EWS_TYPES].Timeout(tout)
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa564048(v=EXCHG.140).aspx
     def status_frequency!(node, freq)
       node[NS_EWS_TYPES].StatusFrequency(freq)
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa566309(v=EXCHG.140).aspx
     def uRL!(node, url)
       node[NS_EWS_TYPES].URL(url)
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa563790(v=EXCHG.140).aspx
     def subscription_id!(node, subid)
       node.SubscriptionId(subid)
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa563455(v=EXCHG.140).aspx
     def pull_subscription_request(node, subopts)
       subscribe_all = subopts[:subscribe_to_all_folders] ? 'True' : 'False'
       node.PullSubscriptionRequest('SubscribeToAllFolders' => subscribe_all) {
@@ -248,6 +263,7 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa563599(v=EXCHG.140).aspx
     def push_subscription_request(node, subopts)
       subscribe_all = subopts[:subscribe_to_all_folders] ? 'True' : 'False'
       node.PushSubscriptionRequest('SubscribeToAllFolders' => subscribe_all) {
@@ -259,6 +275,7 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/ff406182(v=EXCHG.140).aspx
     def streaming_subscription_request(node, subopts)
       subscribe_all = subopts[:subscribe_to_all_folders] ? 'True' : 'False'
       node.StreamingSubscriptionRequest('SubscribeToAllFolders' => subscribe_all) {
@@ -267,6 +284,10 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa565970(v=EXCHG.140).aspx
+    def sync_state!(node, syncstate)
+      node.SyncState(syncstate)
+    end
 
     # ---------------------- Helpers -------------------- #
 
