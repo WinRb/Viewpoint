@@ -210,6 +210,62 @@ module Viewpoint::EWS::SOAP
       node[NS_EWS_MESSAGES].ContactsView(attribs)
     end
 
+    def event_types!(node, evtypes)
+      node[NS_EWS_TYPES].EventTypes {
+        evtypes.each do |et|
+          node[NS_EWS_TYPES].EventType(et)
+        end
+      }
+    end
+
+    def watermark!(node, wmark)
+      node[NS_EWS_TYPES].Watermark(wmark)
+    end
+
+    def timeout!(node, tout)
+      node[NS_EWS_TYPES].Timeout(tout)
+    end
+
+    def status_frequency!(node, freq)
+      node[NS_EWS_TYPES].StatusFrequency(freq)
+    end
+
+    def uRL!(node, url)
+      node[NS_EWS_TYPES].URL(url)
+    end
+
+    def subscription_id!(node, subid)
+      node.SubscriptionId(subid)
+    end
+
+    def pull_subscription_request(node, subopts)
+      subscribe_all = subopts[:subscribe_to_all_folders] ? 'True' : 'False'
+      node.PullSubscriptionRequest('SubscribeToAllFolders' => subscribe_all) {
+        folder_ids!(node, subopts[:folder_ids]) if subopts[:folder_ids]
+        event_types!(node, subopts[:event_types]) if subopts[:event_types]
+        watermark!(node, subopts[:watermark]) if subopts[:watermark]
+        timeout!(node, subopts[:timeout]) if subopts[:timeout]
+      }
+    end
+
+    def push_subscription_request(node, subopts)
+      subscribe_all = subopts[:subscribe_to_all_folders] ? 'True' : 'False'
+      node.PushSubscriptionRequest('SubscribeToAllFolders' => subscribe_all) {
+        folder_ids!(node, subopts[:folder_ids]) if subopts[:folder_ids]
+        event_types!(node, subopts[:event_types]) if subopts[:event_types]
+        watermark!(node, subopts[:watermark]) if subopts[:watermark]
+        status_frequency!(node, subopts[:status_frequency]) if subopts[:status_frequency]
+        uRL!(node, subopts[:uRL]) if subopts[:uRL]
+      }
+    end
+
+    def streaming_subscription_request(node, subopts)
+      subscribe_all = subopts[:subscribe_to_all_folders] ? 'True' : 'False'
+      node.StreamingSubscriptionRequest('SubscribeToAllFolders' => subscribe_all) {
+        folder_ids!(node, subopts[:folder_ids]) if subopts[:folder_ids]
+        event_types!(node, subopts[:event_types]) if subopts[:event_types]
+      }
+    end
 
 
     # ---------------------- Helpers -------------------- #

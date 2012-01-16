@@ -99,7 +99,7 @@ module Viewpoint::EWS::SOAP
         if(type == :header)
         else
           builder.FindFolder(:Traversal => traversal) {
-            builder.parent.default_namespace = NAMESPACES["xmlns:#{NS_EWS_MESSAGES}"]
+            builder.parent.default_namespace = @default_ns
             folder_shape!(builder, folder_shape)
             # @TODO add FractionalPageFolderView
             restriction!(builder, opts[:restriction]) if opts[:restriction]
@@ -133,7 +133,7 @@ module Viewpoint::EWS::SOAP
         if(type == :header)
         else
           builder.FindItem(:Traversal => traversal) {
-            builder.parent.default_namespace = NAMESPACES["xmlns:#{NS_EWS_MESSAGES}"]
+            builder.parent.default_namespace = @default_ns
             item_shape!(builder, item_shape)
             # @TODO add FractionalPageFolderView
             calendar_view!(builder, opts[:calendar_view]) if opts[:calendar_view]
@@ -167,7 +167,7 @@ module Viewpoint::EWS::SOAP
         if(type == :header)
         else
           builder.GetFolder {
-            builder.parent.default_namespace = NAMESPACES["xmlns:#{NS_EWS_MESSAGES}"]
+            builder.parent.default_namespace = @default_ns
             folder_shape!(builder, folder_shape)
             folder_ids!(builder, folder_ids, act_as)
           }
@@ -241,8 +241,9 @@ module Viewpoint::EWS::SOAP
       req = build_soap_envelope do |type, builder|
         if(type == :header)
         else
-          builder[NS_EWS_MESSAGES].UpdateFolder {
-            builder[NS_EWS_MESSAGES].FolderChanges {
+          builder.UpdateFolder {
+            builder.parent.default_namespace = @default_ns
+            builder.FolderChanges {
               folder_changes.each do |fc|
                 builder[NS_EWS_TYPES].FolderChange {
                   if(fc[:id].is_a?(String))
@@ -273,7 +274,8 @@ module Viewpoint::EWS::SOAP
       req = build_soap_envelope do |type, builder|
         if(type == :header)
         else
-          builder[NS_EWS_MESSAGES].MoveFolder {
+          builder.MoveFolder {
+            builder.parent.default_namespace = @default_ns
             to_folder_id!(to_fid)
             folder_ids!(sources)
           }
@@ -291,7 +293,8 @@ module Viewpoint::EWS::SOAP
       req = build_soap_envelope do |type, builder|
         if(type == :header)
         else
-          builder[NS_EWS_MESSAGES].CopyFolder {
+          builder.CopyFolder {
+            builder.parent.default_namespace = @default_ns
             to_folder_id!(to_fid)
             folder_ids!(sources)
           }
@@ -302,51 +305,45 @@ module Viewpoint::EWS::SOAP
 
     # Used to subscribe client applications to either push, pull or stream notifications.
     # @see http://msdn.microsoft.com/en-us/library/aa566188(v=EXCHG.140).aspx
-    def subscribe()
+    # @param [Array<Hash>] subscriptions An array of Hash objects that describe each
+    #   subscription.
+    #   Ex: [ {:pull_subscription_request => {
+    #         :subscribe_to_all_folders => false,
+    #         :folder_ids => [ {:id => 'id', :change_key => 'ck'} ],
+    #         :event_types=> %w{CopiedEvent CreatedEvent},
+    #         :watermark  => 'watermark id',
+    #         :timeout    => intval
+    #       }},
+    #       {:push_subscription_request => {
+    #         :subscribe_to_all_folders => true,
+    #         :event_types=> %w{CopiedEvent CreatedEvent},
+    #         :status_frequency => 15,
+    #         :uRL => 'http://my.endpoint.for.updates/',
+    #       }},
+    #       {:streaming_subscription_request => {
+    #         :subscribe_to_all_folders => false,
+    #         :folder_ids => [ {:id => 'id', :change_key => 'ck'} ],
+    #         :event_types=> %w{NewMailEvent DeletedEvent},
+    #       }},
+    #       ]
+    def subscribe(subscriptions)
       req = build_soap_envelope do |type, builder|
         if(type == :header)
         else
-          builder[NS_EWS_MESSAGES].Subscribe {
-            #@TODO finish implementation
+          builder.Subscribe {
+            builder.parent.default_namespace = @default_ns
+            subscriptions.each do |sub|
+              subtype = sub.keys.first
+              if(respond_to?(subtype))
+                method(subtype).call(builder, sub[subtype])
+              else
+                raise EwsBadArgumentError, "Bad subscription type. #{subtype}"
+              end
+            end
           }
         end
       end
       puts "DOC:\n#{req.to_xml}"
-    end
-
-    # Used to subscribe client applications to either push or pull notifications.
-    # @see http://msdn.microsoft.com/en-us/library/aa566188.aspx Subscribe on MSDN
-    #
-    # @param [Array] folder_ids An Array of folder ids, either a
-    #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
-    # @param [Array] event_types An Array of EventTypes that we should track.
-    #   Available types are, CopiedEvent, CreatedEvent, DeletedEvent, ModifiedEvent,
-    #   MovedEvent, NewMailEvent, FreeBusyChangedEvent
-    # @param [Integer] timeout The number of minutes in which the subscription
-    #   will timeout after not receiving a get_events operation.
-    # @todo Decide how/if to handle the optional SubscribeToAllFolders attribute of
-    #   the PullSubscriptionRequest element.
-    def subscribe(folder_ids, event_types, timeout = 10)
-      action = "#{SOAP_ACTION_PREFIX}/Subscribe"
-      resp = invoke("#{NS_EWS_MESSAGES}:Subscribe", action) do |root|
-        build!(root) do
-          pull_subscription_request!(folder_ids, event_types, timeout)
-        end
-      end
-      parse!(resp)
-    end
-
-    # Used to subscribe client applications to either push or pull notifications.
-    # @see http://msdn.microsoft.com/en-us/library/aa566188.aspx Subscribe on MSDN
-    def push_subscribe(folder_ids, event_types, url, watermark=nil, status_frequency=5)
-      action = "#{SOAP_ACTION_PREFIX}/Subscribe"
-      resp = invoke("#{NS_EWS_MESSAGES}:Subscribe", action) do |root|
-        build!(root) do
-          push_subscription_request!(folder_ids, event_types, url, watermark, status_frequency)
-        end
-      end
-      parse!(resp)
-
     end
 
     # End a pull notification subscription.
@@ -354,13 +351,17 @@ module Viewpoint::EWS::SOAP
     #
     # @param [String] subscription_id The Id of the subscription
     def unsubscribe(subscription_id)
-      action = "#{SOAP_ACTION_PREFIX}/Unsubscribe"
-      resp = invoke("#{NS_EWS_MESSAGES}:Unsubscribe", action) do |root|
-        build!(root) do
-          subscription_id!(root, subscription_id)
+      req = build_soap_envelope do |type, builder|
+        if(type == :header)
+        else
+          builder.Unsubscribe {
+            builder.parent.default_namespace = @default_ns
+            subscription_id!(builder, subscription_id)
+          }
         end
       end
-      parse!(resp)
+      puts "DOC:\n#{req.to_xml}"
+      #parse!(resp)
     end
 
     # Used by pull subscription clients to request notifications from the Client Access server
@@ -369,14 +370,17 @@ module Viewpoint::EWS::SOAP
     # @param [String] subscription_id Subscription identifier
     # @param [String] watermark Event bookmark in the events queue
     def get_events(subscription_id, watermark)
-      action = "#{SOAP_ACTION_PREFIX}/GetEvents"
-      resp = invoke("#{NS_EWS_MESSAGES}:GetEvents", action) do |root|
-        build!(root) do
-          subscription_id!(root, subscription_id)
-          watermark!(root, watermark)
+      req = build_soap_envelope do |type, builder|
+        if(type == :header)
+        else
+          builder.GetEvents {
+            builder.parent.default_namespace = @default_ns
+            subscription_id!(builder, subscription_id)
+            watermark!(builder, watermark)
+          }
         end
       end
-      parse!(resp)
+      puts "DOC:\n#{req.to_xml}"
     end
 
     # Defines a request to synchronize a folder hierarchy on a client
