@@ -409,33 +409,38 @@ module Viewpoint::EWS::SOAP
     end
 
     # Synchronizes items between the Exchange server and the client
-    # @see http://msdn.microsoft.com/en-us/library/aa563967.aspx
-    #
-    # @param [String, Symbol] folder_id either a DistinguishedFolderId
-    #   (must me a Symbol) or a FolderId (String)
-    # @param [String] sync_state Base-64 encoded string used to determine
-    #   where we are in the sync process.
-    # @param [Integer] max_changes The amount of items to sync per call
-    #   to SyncFolderItems
-    # @param [Hash] item_shape defines the ItemShape node
-    #   See: http://msdn.microsoft.com/en-us/library/aa565261.aspx
-    # @option item_shape [String] :base_shape IdOnly/Default/AllProperties
-    # @option item_shape :additional_properties
-    #   See: http://msdn.microsoft.com/en-us/library/aa565261.aspx
-    # @param [Hash] opts optional parameters to this method
-    def sync_folder_items(folder_id, sync_state = nil, max_changes = 256, item_shape = {:base_shape => 'Default'}, opts = {})
-      action = "#{SOAP_ACTION_PREFIX}/SyncFolderItems"
-      resp = invoke("#{NS_EWS_MESSAGES}:SyncFolderItems", action) do |root|
-        build!(root) do
-          item_shape!(root, item_shape)
-          root.add("#{NS_EWS_MESSAGES}:SyncFolderId") do |sfid|
-            folder_id!(sfid, folder_id)
-          end
-          sync_state!(root, sync_state) unless sync_state.nil?
-          root.add("#{NS_EWS_MESSAGES}:MaxChangesReturned", max_changes)
+    # @see http://msdn.microsoft.com/en-us/library/aa563967(v=EXCHG.140).aspx
+    # @param [Hash] opts
+    # @option opts [Hash] :item_shape The item shape properties
+    #   Ex: {:base_shape => 'Default', :additional_properties => 'bla bla bla'}
+    # @option opts [Hash] :sync_folder_id A Hash that represents a FolderId or
+    #   DistinguishedFolderId. [ Ex: {:id => :inbox} ] OPTIONAL
+    # @option opts [Hash] :sync_state The Base64 sync state id. If this is the
+    #   first time syncing this does not need to be passed. OPTIONAL on first call
+    # @option opts [Array <String>] :ignore An Array of ItemIds for items to ignore
+    #   during the sync process. Ex: [{:id => 'id1', :change_key => 'ck'}, {:id => 'id2'}]
+    #   OPTIONAL
+    # @option opts [Integer] :max_changes_returned ('required') The amount of items to sync per call.
+    # @option opts [String] :sync_scope specifies whether just items or items and folder associated
+    #   information are returned. OPTIONAL
+    #   options: 'NormalItems' or 'NormalAndAssociatedItems'
+    def sync_folder_items(opts = {})
+      req = build_soap_envelope do |type, builder|
+        if(type == :header)
+        else
+          builder.SyncFolderItems {
+            builder.parent.default_namespace = @default_ns
+            item_shape!(builder, opts[:item_shape])
+            sync_folder_id!(builder, opts[:sync_folder_id]) if opts[:sync_folder_id]
+            sync_state!(builder, opts[:sync_state]) if opts[:sync_state]
+            ignore!(builder, opts[:ignore]) if opts[:ignore]
+            max_changes_returned!(builder, opts[:max_changes_returned])
+            sync_scope!(builder, opts[:sync_scope]) if opts[:sync_scope]
+          }
         end
       end
-      parse!(resp)
+      puts "DOC:\n#{req.to_xml}"
+      #parse!(resp)
     end
 
     # Gets items from the Exchange store

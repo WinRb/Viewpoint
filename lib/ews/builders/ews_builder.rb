@@ -72,7 +72,7 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa494311.aspx
     # @param [Nokogiri::XML::Builder] node The XML builder object
     # @param [Hash] folder_shape The folder shape structure to build from
-    # @TODO This only supports the FieldURI extended property right now
+    # @TODO need fully support all options
     def folder_shape!(node, folder_shape)
       node.FolderShape {
         node.parent.default_namespace = @default_ns
@@ -85,8 +85,10 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa565261.aspx
     # @param [Nokogiri::XML::Builder] node The XML builder object
     # @param [Hash] item_shape The item shape structure to build from
+    # @TODO need fully support all options
     def item_shape!(node, item_shape)
       node[NS_EWS_MESSAGES].ItemShape {
+        node.parent.default_namespace = @default_ns
         base_shape!(node, item_shape[:base_shape])
         additional_properties!(node,item_shape[:additional_properties]) if(item_shape[:additional_properties])
       }
@@ -152,6 +154,13 @@ module Viewpoint::EWS::SOAP
       attribs = {'Id' => fid}
       attribs['ChangeKey'] = change_key if change_key
       node[NS_EWS_TYPES].FolderId(attribs)
+    end
+
+    # @see http://msdn.microsoft.com/en-us/library/aa580234(v=EXCHG.140).aspx
+    def item_id!(node, iid, change_key = nil)
+      attribs = {'Id' => iid}
+      attribs['ChangeKey'] = change_key if change_key
+      node[NS_EWS_TYPES].ItemId(attribs)
     end
 
     def to_folder_id!(node, to_fid)
@@ -289,11 +298,31 @@ module Viewpoint::EWS::SOAP
       node.SyncState(syncstate)
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa563785(v=EXCHG.140).aspx
+    def ignore!(node, item_ids)
+      node.Ignore {
+        item_ids.each do |iid|
+          item_id!(node, iid)
+        end
+      }
+    end
+
+    # @see http://msdn.microsoft.com/en-us/library/aa566325(v=EXCHG.140).aspx
+    def max_changes_returned!(node, cnum)
+      node[NS_EWS_TYPES].MaxChangesReturned(cnum)
+    end
+
+    # @see http://msdn.microsoft.com/en-us/library/dd899531(v=EXCHG.140).aspx
+    def sync_scope!(node, scope)
+      node.SyncScope(scope)
+    end
+
     # ---------------------- Helpers -------------------- #
 
 
     # A helper method to dispatch to a FolderId or DistinguishedFolderId correctly
-    # @param [Hash] fid {:id => myid, :change_key => ck}
+    # @param [Hash] fid A folder_id
+    #   Ex: {:id => myid, :change_key => ck}
     def dispatch_folder_id!(node, fid)
       if(fid[:id].is_a?(String))
         folder_id!(node, fid[:id], fid[:change_key])
