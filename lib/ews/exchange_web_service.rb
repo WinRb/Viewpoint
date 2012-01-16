@@ -424,7 +424,7 @@ module Viewpoint::EWS::SOAP
     # @option opts [String] :sync_scope specifies whether just items or items and folder associated
     #   information are returned. OPTIONAL
     #   options: 'NormalItems' or 'NormalAndAssociatedItems'
-    def sync_folder_items(opts = {})
+    def sync_folder_items(opts)
       req = build_soap_envelope do |type, builder|
         if(type == :header)
         else
@@ -444,25 +444,36 @@ module Viewpoint::EWS::SOAP
     end
 
     # Gets items from the Exchange store
-    # @see http://msdn.microsoft.com/en-us/library/aa565934.aspx
+    # @see http://msdn.microsoft.com/en-us/library/aa565934(v=EXCHG.140).aspx
     #
-    # @param [Array] item_ids An Array of item ids
-    # @param [Hash] item_shape defines the ItemShape node
-    #   See: http://msdn.microsoft.com/en-us/library/aa565261.aspx
-    # @option item_shape [String] :base_shape ('Default') IdOnly/Default/AllProperties
-    # @option item_shape :additional_properties
-    #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
-    # @param [Hash] opts optional parameters to this method
-    def get_item(item_ids, item_shape = {})
-      action = "#{SOAP_ACTION_PREFIX}/GetItem"
-      item_shape[:base_shape] = 'Default' unless item_shape.has_key?(:base_shape)
-      resp = invoke("#{NS_EWS_MESSAGES}:GetItem", action) do |root|
-        build!(root) do
-          item_shape!(root, item_shape)
-          item_ids!(root, item_ids)
+    # @param [Hash] opts
+    # @option opts [Hash] :item_shape The item shape properties
+    #   Ex: {:base_shape => 'Default'}
+    # @option opts [Array<Hash>] :item_ids ItemIds Hash. The keys in these Hashes can be
+    #   :item_id, :occurrence_item_id, or :recurring_master_item_id. Please see the
+    #   Microsoft docs for more information.
+    # @example
+    #   opts = {
+    #     :item_shape => {:base_shape => 'Default'},
+    #     :item_ids   => [
+    #       {:item_id => {:id => 'id1'}},
+    #       {:occurrence_item_id => {:recurring_master_id => 'rid1', :change_key => 'ck', :instance_index => 1}},
+    #       {:recurring_master_item_id => {:occurrence_id => 'oid1', :change_key => 'ck'}}
+    #       ]}
+    #   get_item(opts)
+    def get_item(opts)
+      req = build_soap_envelope do |type, builder|
+        if(type == :header)
+        else
+          builder.GetItem {
+            builder.parent.default_namespace = @default_ns
+            item_shape!(builder, opts[:item_shape])
+            item_ids!(builder, opts[:item_ids])
+          }
         end
       end
-      parse!(resp)
+      puts "DOC:\n#{req.to_xml}"
+      #parse!(resp)
     end
 
     # Operation is used to create e-mail messages

@@ -156,6 +156,26 @@ module Viewpoint::EWS::SOAP
       node[NS_EWS_TYPES].FolderId(attribs)
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa563525(v=EXCHG.140).aspx
+    def item_ids!(node, item_ids)
+      node.ItemIds {
+        item_ids.each do |iid|
+        type = iid.keys.first
+        item = iid[type]
+        case type
+        when :item_id
+          item_id!(node, item[:id], item[:change_key])
+        when :occurrence_item_id
+          occurrence_item_id!(node, item[:recurring_master_id], item[:change_key], item[:instance_index])
+        when :recurring_master_item_id
+          recurring_master_item_id!(node, item[:occurrence_id], item[:change_key])
+        else
+          raise EwsBadArgumentError, "Bad ItemId type. #{type}"
+        end
+        end
+      }
+    end
+
     # @see http://msdn.microsoft.com/en-us/library/aa580234(v=EXCHG.140).aspx
     def item_id!(node, iid, change_key = nil)
       attribs = {'Id' => iid}
@@ -163,13 +183,28 @@ module Viewpoint::EWS::SOAP
       node[NS_EWS_TYPES].ItemId(attribs)
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa580744(v=EXCHG.140).aspx
+    def occurrence_item_id!(node, rmid, change_key, instance_index)
+      attribs = {'RecurringMasterId' => rmid}
+      attribs['ChangeKey'] = change_key if change_key
+      attribs['InstanceIndex'] = instance_index
+      node[NS_EWS_TYPES].OccurrenceItemId(attribs)
+    end
+
+    # @see http://msdn.microsoft.com/en-us/library/aa581019(v=EXCHG.140).aspx
+    def recurring_master_item_id!(node, oid, change_key = nil)
+      attribs = {'OccurrenceId' => oid}
+      attribs['ChangeKey'] = change_key if change_key
+      node[NS_EWS_TYPES].RecurringMasterItemId(attribs)
+    end
+
+    # @see http://msdn.microsoft.com/en-us/library/aa565020(v=EXCHG.140).aspx
     def to_folder_id!(node, to_fid)
       node[NS_EWS_MESSAGES].ToFolderId {
         dispatch_folder_id!(node, to_fid)
       }
     end
 
-        # Build the Folders element
     # @see http://msdn.microsoft.com/en-us/library/aa564009.aspx
     def folders!(node, folders)
       node[NS_EWS_TYPES].Folders {
