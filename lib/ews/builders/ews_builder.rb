@@ -102,13 +102,7 @@ module Viewpoint::EWS::SOAP
     def parent_folder_ids!(node, pfids)
       node[NS_EWS_MESSAGES].ParentFolderIds {
         pfids.each do |pfid|
-          if(pfid.is_a?(String))
-            folder_id!(node, pfid)
-          elsif(pfid.is_a?(Symbol))
-            distinguished_folder_id!(node, pfid)
-          else
-            raise EwsBadArgumentError, "Bad argument given for a ParentFolderId. #{pfid.class}"
-          end
+          dispatch_folder_id!(node, pfid)
         end
       }
     end
@@ -117,13 +111,7 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa563268.aspx
     def parent_folder_id!(node, pfid)
       node[NS_EWS_MESSAGES].ParentFolderId {
-        if(pfid.is_a?(String))
-          folder_id!(node, pfid)
-        elsif(pfid.is_a?(Symbol))
-          distinguished_folder_id!(node, pfid)
-        else
-          raise EwsBadArgumentError, "Bad argument given for a ParentFolderId. #{pfid.class}"
-        end
+        dispatch_folder_id!(node, pfid)
       }
     end
 
@@ -132,13 +120,7 @@ module Viewpoint::EWS::SOAP
     def folder_ids!(node, fids, act_as=nil)
       node.FolderIds {
         fids.each do |fid|
-          if(fid[:id].is_a?(String))
-            folder_id!(node, fid[:id], fid[:change_key])
-          elsif(fid[:id].is_a?(Symbol))
-            distinguished_folder_id!(node, fid[:id], fid[:change_key], fid[:act_as])
-          else
-            raise EwsBadArgumentError, "Bad argument given for a FolderId. #{fid[:id].class}"
-          end
+          dispatch_folder_id!(fid)
         end
       }
     end
@@ -162,7 +144,13 @@ module Viewpoint::EWS::SOAP
       node[NS_EWS_TYPES].FolderId(attribs)
     end
 
-    # Build the Folders element
+    def to_folder_id!(node, to_fid)
+      node[NS_EWS_MESSAGES].ToFolderId {
+        dispatch_folder_id!(node, to_fid)
+      }
+    end
+
+        # Build the Folders element
     # @see http://msdn.microsoft.com/en-us/library/aa564009.aspx
     def folders!(node, folders)
       node[NS_EWS_TYPES].Folders {
@@ -218,6 +206,23 @@ module Viewpoint::EWS::SOAP
       attribs = {}
       con_view.each_pair {|k,v| attribs[k.to_s.camel_case] = v.to_s}
       node[NS_EWS_MESSAGES].ContactsView(attribs)
+    end
+
+
+
+    # ---------------------- Helpers -------------------- #
+
+
+    # A helper method to dispatch to a FolderId or DistinguishedFolderId correctly
+    # @param [Hash] fid {:id => myid, :change_key => ck}
+    def dispatch_folder_id!(node, fid)
+      if(fid[:id].is_a?(String))
+        folder_id!(node, fid[:id], fid[:change_key])
+      elsif(fid[:id].is_a?(Symbol))
+        distinguished_folder_id!(node, fid[:id], fid[:change_key], fid[:act_as])
+      else
+        raise EwsBadArgumentError, "Bad argument given for a FolderId. #{fid[:id].class}"
+      end
     end
 
   end # XmlBuilder

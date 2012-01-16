@@ -84,8 +84,9 @@ module Viewpoint::EWS::SOAP
     # Find subfolders of an identified folder
     # @see http://msdn.microsoft.com/en-us/library/aa563918.aspx
     #
-    # @param [Array] parent_folder_ids An Array of folder ids, either a
+    # @param [Array<Hash>] parent_folder_ids An Array of folder id Hashes, either a
     #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+    #   [{:id => <myid>, :change_key => <ck>}, {:id => :root}]
     # @param [String] traversal Shallow/Deep/SoftDeleted
     # @param [Hash] folder_shape defines the FolderShape node
     #   See: http://msdn.microsoft.com/en-us/library/aa494311.aspx
@@ -93,7 +94,7 @@ module Viewpoint::EWS::SOAP
     # @option folder_shape :additional_properties
     #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
     # @param [Hash] opts optional parameters to this method
-    def find_folder(parent_folder_ids = [:root], traversal = 'Shallow', folder_shape = {:base_shape => 'Default'}, opts = {})
+    def find_folder(parent_folder_ids = [{:id => :root}], traversal = 'Shallow', folder_shape = {:base_shape => 'Default'}, opts = {})
       req = build_soap_envelope do |type, builder|
         if(type == :header)
         else
@@ -113,8 +114,9 @@ module Viewpoint::EWS::SOAP
     # Identifies items that are located in a specified folder
     # @see http://msdn.microsoft.com/en-us/library/aa566107.aspx
     #
-    # @param [Array] parent_folder_ids An Array of folder ids, either a
+    # @param [Array<Hash>] parent_folder_ids An Array of folder id Hashes, either a
     #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+    #   [{:id => <myid>, :change_key => <ck>}, {:id => :root}]
     # @param [String] traversal Shallow/Deep/SoftDeleted
     # @param [Hash] item_shape defines the FolderShape node
     #   See: http://msdn.microsoft.com/en-us/library/aa494311.aspx
@@ -183,8 +185,9 @@ module Viewpoint::EWS::SOAP
     # Creates folders, calendar folders, contacts folders, tasks folders, and search folders.
     # @see http://msdn.microsoft.com/en-us/library/aa563574.aspx CreateFolder
     #
-    # @param [String,Symbol] parent_folder_id either the name of a folder or it's
+    # @param [Hash] parent_folder_id A hash with either the name of a folder or it's
     #   numerical ID.  See: http://msdn.microsoft.com/en-us/library/aa565998.aspx
+    #   {:id => :root}  or {:id => 'myfolderid#'}
     # @param [Array<Hash>] folders An array of hashes of folder types that conform to
     #   input for build_xml!
     #   @example [ {:folder =>
@@ -227,28 +230,86 @@ module Viewpoint::EWS::SOAP
       #parse!(resp)
     end
 
-    def update_folder
-      action = "#{SOAP_ACTION_PREFIX}/UpdateFolder"
-      resp = invoke("#{NS_EWS_MESSAGES}:UpdateFolder", action) do |update_folder|
-        build_update_folder!(update_folder)
+    # Update properties for a specified folder
+    # There is a lot more building in this method because most of the builders are only used
+    # for this operation so there was no need to externalize them for re-use.
+    # @see http://msdn.microsoft.com/en-us/library/aa580519(v=EXCHG.140).aspx
+    # @param [Array<Hash>] folder_changes an Array of well-formatted Hashes
+    def update_folder(folder_changes)
+      req = build_soap_envelope do |type, builder|
+        if(type == :header)
+        else
+          builder[NS_EWS_MESSAGES].UpdateFolder {
+            builder[NS_EWS_MESSAGES].FolderChanges {
+              folder_changes.each do |fc|
+                builder[NS_EWS_TYPES].FolderChange {
+                  if(fc[:id].is_a?(String))
+                    folder_id!(builder, fc[:id], fc[:change_key])
+                  elsif(fc[:id].is_a?(Symbol))
+                    distinguished_folder_id!(builder, fc[:id], fc[:change_key])
+                  else
+                    raise EwsBadArgumentError, "Bad argument given for a FolderId. #{fc[:id].class}"
+                  end
+                  builder[NS_EWS_TYPES].Updates {
+                    # @TODO finish implementation
+                  }
+                }
+              end
+            }
+          }
+        end
       end
-      parse_update_folder(resp)
+      puts "DOC:\n#{req.to_xml}"
+    end
+    
+    # Defines a request to move folders in the Exchange store
+    # @see http://msdn.microsoft.com/en-us/library/aa566202(v=EXCHG.140).aspx
+    # @param [Hash] to_fid The target FolderId {:id => <myid>, :change_key => <optional ck>}
+    # @param [Array<Hash>] sources The source Folders
+    #   [ {:id => <myid>, :change_key => <optional_ck>} ]
+    def move_folder(to_fid, sources)
+      req = build_soap_envelope do |type, builder|
+        if(type == :header)
+        else
+          builder[NS_EWS_MESSAGES].MoveFolder {
+            to_folder_id!(to_fid)
+            folder_ids!(sources)
+          }
+        end
+      end
+      puts "DOC:\n#{req.to_xml}"
     end
 
-    def move_folder
-      action = "#{SOAP_ACTION_PREFIX}/MoveFolder"
-      resp = invoke("#{NS_EWS_MESSAGES}:MoveFolder", action) do |move_folder|
-        build_move_folder!(move_folder)
+    # Defines a request to copy folders in the Exchange store
+    # @see http://msdn.microsoft.com/en-us/library/aa563949(v=EXCHG.140).aspx
+    # @param [Hash] to_fid The target FolderId {:id => <myid>, :change_key => <optional ck>}
+    # @param [Array<Hash>] sources The source Folders
+    #   [ {:id => <myid>, :change_key => <optional_ck>} ]
+    def copy_folder(to_fid, sources)
+      req = build_soap_envelope do |type, builder|
+        if(type == :header)
+        else
+          builder[NS_EWS_MESSAGES].CopyFolder {
+            to_folder_id!(to_fid)
+            folder_ids!(sources)
+          }
+        end
       end
-      parse_move_folder(resp)
+      puts "DOC:\n#{req.to_xml}"
     end
 
-    def copy_folder
-      action = "#{SOAP_ACTION_PREFIX}/CopyFolder"
-      resp = invoke("#{NS_EWS_MESSAGES}:CopyFolder", action) do |copy_folder|
-        build_copy_folder!(copy_folder)
+    # Used to subscribe client applications to either push, pull or stream notifications.
+    # @see http://msdn.microsoft.com/en-us/library/aa566188(v=EXCHG.140).aspx
+    def subscribe()
+      req = build_soap_envelope do |type, builder|
+        if(type == :header)
+        else
+          builder[NS_EWS_MESSAGES].Subscribe {
+            #@TODO finish implementation
+          }
+        end
       end
-      parse_copy_folder(resp)
+      puts "DOC:\n#{req.to_xml}"
     end
 
     # Used to subscribe client applications to either push or pull notifications.
