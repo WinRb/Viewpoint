@@ -74,7 +74,8 @@ module Viewpoint::EWS::SOAP
     # @param [Hash] folder_shape The folder shape structure to build from
     # @TODO This only supports the FieldURI extended property right now
     def folder_shape!(node, folder_shape)
-      node[NS_EWS_MESSAGES].FolderShape {
+      node.FolderShape {
+        node.parent.default_namespace = @default_ns
         base_shape!(node, folder_shape[:base_shape])
         additional_properties!(node,folder_shape[:additional_properties]) if(folder_shape[:additional_properties])
       }
@@ -110,7 +111,7 @@ module Viewpoint::EWS::SOAP
     # Build the ParentFolderId element
     # @see http://msdn.microsoft.com/en-us/library/aa563268.aspx
     def parent_folder_id!(node, pfid)
-      node[NS_EWS_MESSAGES].ParentFolderId {
+      node.ParentFolderId {
         dispatch_folder_id!(node, pfid)
       }
     end
@@ -119,8 +120,9 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa580509.aspx
     def folder_ids!(node, fids, act_as=nil)
       node.FolderIds {
+        node.parent.default_namespace = @default_ns
         fids.each do |fid|
-          dispatch_folder_id!(fid)
+          dispatch_folder_id!(node, fid)
         end
       }
     end

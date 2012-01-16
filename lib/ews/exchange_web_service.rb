@@ -198,7 +198,8 @@ module Viewpoint::EWS::SOAP
       req = build_soap_envelope do |type, builder|
         if(type == :header)
         else
-          builder[NS_EWS_MESSAGES].CreateFolder {
+          builder.CreateFolder {
+            builder.parent.default_namespace = @default_ns
             parent_folder_id!(builder, parent_folder_id)
             folders!(builder, folders)
           }
@@ -220,7 +221,8 @@ module Viewpoint::EWS::SOAP
       req = build_soap_envelope do |type, builder|
         if(type == :header)
         else
-          builder[NS_EWS_MESSAGES].DeleteFolder('DeleteType' => delete_type) {
+          builder.DeleteFolder('DeleteType' => delete_type) {
+            builder.parent.default_namespace = @default_ns
             folder_ids!(builder, folder_ids, act_as)
           }
         end
