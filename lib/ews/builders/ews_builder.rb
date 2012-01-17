@@ -406,7 +406,11 @@ module Viewpoint::EWS::SOAP
         dispatch_field_uri!(node, uri)
       }
     end
-
+    
+    # @see http://msdn.microsoft.com/en-us/library/ff709497(v=exchg.140).aspx
+    def return_new_item_ids!(node, retval)
+      node.ReturnNewItemIds(retval)
+    end
 
     # ---------------------- Helpers -------------------- #
 

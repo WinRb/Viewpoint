@@ -246,13 +246,7 @@ module Viewpoint::EWS::SOAP
             builder.FolderChanges {
               folder_changes.each do |fc|
                 builder[NS_EWS_TYPES].FolderChange {
-                  if(fc[:id].is_a?(String))
-                    folder_id!(builder, fc[:id], fc[:change_key])
-                  elsif(fc[:id].is_a?(Symbol))
-                    distinguished_folder_id!(builder, fc[:id], fc[:change_key])
-                  else
-                    raise EwsBadArgumentError, "Bad argument given for a FolderId. #{fc[:id].class}"
-                  end
+                  dispatch_folder_id!(builder, fc)
                   builder[NS_EWS_TYPES].Updates {
                     # @todo finish implementation
                   }
@@ -276,8 +270,8 @@ module Viewpoint::EWS::SOAP
         else
           builder.MoveFolder {
             builder.parent.default_namespace = @default_ns
-            to_folder_id!(to_fid)
-            folder_ids!(sources)
+            to_folder_id!(builder, to_fid)
+            folder_ids!(builder, sources)
           }
         end
       end
@@ -295,8 +289,8 @@ module Viewpoint::EWS::SOAP
         else
           builder.CopyFolder {
             builder.parent.default_namespace = @default_ns
-            to_folder_id!(to_fid)
-            folder_ids!(sources)
+            to_folder_id!(builder, to_fid)
+            folder_ids!(builder, sources)
           }
         end
       end
@@ -574,7 +568,7 @@ module Viewpoint::EWS::SOAP
     # @option opts [String] :send_meeting_invitations_or_cancellations How meeting requests are
     #   handled after they are updated. Required for calendar items. Must be one of 'SendToNone',
     #   'SendOnlyToAll', 'SendOnlyToChanged', 'SendToAllAndSaveCopy', 'SendToChangedAndSaveCopy'
-    # @option opts [Hash] :saved_item_folder_id A well-formatted folder_id Hash. Ex: {:id => :inbox}
+    # @option opts [Hash] :saved_item_folder_id A well-formatted folder_id Hash. Ex: {:id => :sentitems}
     #   Will on work if 'SendOnly' is specified for :message_disposition
     # @option opts [Array<Hash>] :item_changes an array of ItemChange elements that identify items
     #   and the updates to apply to the items. See the Microsoft docs for more information.
@@ -612,55 +606,107 @@ module Viewpoint::EWS::SOAP
     end
 
     # Used to send e-mail messages that are located in the Exchange store.
-    # @see http://msdn.microsoft.com/en-us/library/aa580238.aspx
-    # @param [Array<Hash>] item_ids An Array of item ids.  These item_ids should be a Hash of
-    #   :id and :change_key.
-    # @param [Boolean] save_item Save item after sending (Think sent-items)
-    # @param [String, Symbol,nil] saved_item_folder The folder to save this item in. Either a
-    #   DistinguishedFolderId (must me a Symbol) or a FolderId (String).  Just leave
-    #   it blank for the default :sentitems
-    def send_item(item_ids, save_item=true, saved_item_folder=nil)
-      action = "#{SOAP_ACTION_PREFIX}/SendItem"
-      resp = invoke("#{NS_EWS_MESSAGES}:SendItem", action) do |root|
-        build!(root) do
-          root.set_attr('SaveItemToFolder', save_item)
-          item_ids!(root,item_ids)
-          saved_item_folder_id!(root,saved_item_folder) unless saved_item_folder.nil?
+    # @see http://msdn.microsoft.com/en-us/library/aa580238(v=exchg.140).aspx
+    #
+    # @param [Hash] opts
+    # @option opts [Boolean] :save_item_to_folder To save or not to save... save! :-)
+    # @option opts [Hash] :saved_item_folder_id A well-formatted folder_id Hash. Ex: {:id => :sentitems}
+    # @option opts [Array<Hash>] :item_ids ItemIds Hash. The keys in these Hashes can be
+    #   :item_id, :occurrence_item_id, or :recurring_master_item_id. Please see the
+    #   Microsoft docs for more information.
+    # @example
+    #   opts = {
+    #     :save_item_to_folder => true,
+    #     :saved_item_folder_id => {:id => :sentitems},
+    #     :item_ids => [
+    #       {:item_id => {:id => 'id1'}},
+    #       {:item_id => {:id => 'id2'}},
+    #     ]}
+    #   obj.send_item(opts)
+    def send_item(opts)
+      req = build_soap_envelope do |type, builder|
+        attribs = {}
+        attribs['SaveItemToFolder'] = opts[:save_item_to_folder]
+        if(type == :header)
+        else
+          builder.SendItem(attribs) {
+            builder.parent.default_namespace = @default_ns
+            saved_item_folder_id!(builder, opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
+            item_ids!(builder, opts[:item_ids])
+          }
         end
       end
-      parse!(resp)
+      puts "DOC:\n#{req.to_xml}"
     end
 
     # Used to move one or more items to a single destination folder.
-    # @see http://msdn.microsoft.com/en-us/library/aa565781.aspx
-    # @param [Array] item_ids An Array of item ids
-    # @param [String, Symbol] folder_id either a DistinguishedFolderId
-    #   (must me a Symbol) or a FolderId (String)
-    def move_item(item_ids, folder_id)
-      action = "#{SOAP_ACTION_PREFIX}/MoveItem"
-      resp = invoke("#{NS_EWS_MESSAGES}:MoveItem", action) do |root|
-        build!(root) do
-          to_folder_id!(root, folder_id)
-          item_ids!(root, item_ids)
+    # @see http://msdn.microsoft.com/en-us/library/aa565781(v=exchg.140).aspx
+    #
+    # @param [Hash] opts
+    # @option opts [Hash] :to_folder_id A well-formatted folder_id Hash. Ex: {:id => :inbox}
+    # @option opts [Array<Hash>] :item_ids ItemIds Hash. The keys in these Hashes can be
+    #   :item_id, :occurrence_item_id, or :recurring_master_item_id. Please see the
+    #   Microsoft docs for more information.
+    # @option opts [Boolean] :return_new_item_ids Indicates whether the item identifiers of
+    #   new items are returned in the response
+    # @example
+    #   opts = {
+    #     :to_folder_id => {:id => :inbox},
+    #     :item_ids => [
+    #       {:item_id => {:id => 'id1'}},
+    #       {:item_id => {:id => 'id2'}},
+    #     ],
+    #     :return_new_item_ids => true
+    #     }
+    #   obj.move_item(opts)
+    def move_item(opts)
+     req = build_soap_envelope do |type, builder|
+        if(type == :header)
+        else
+          builder.MoveItem {
+            builder.parent.default_namespace = @default_ns
+            to_folder_id!(builder, opts[:to_folder_id])
+            item_ids!(builder, opts[:item_ids])
+            return_new_item_ids!(builder, opts[:return_new_item_ids]) if opts[:return_new_item_ids]
+          }
         end
       end
-      parse!(resp)
+      puts "DOC:\n#{req.to_xml}"
     end
 
     # Copies items and puts the items in a different folder
-    # @see http://msdn.microsoft.com/en-us/library/aa565012.aspx
-    # @param [Array] item_ids An Array of item ids
-    # @param [String, Symbol] folder_id either a DistinguishedFolderId
-    #   (must me a Symbol) or a FolderId (String)
-    def copy_item(item_ids, folder_id)
-      action = "#{SOAP_ACTION_PREFIX}/CopyItem"
-      resp = invoke("#{NS_EWS_MESSAGES}:CopyItem", action) do |root|
-        build!(root) do
-          to_folder_id!(root, folder_id)
-          item_ids!(root, item_ids)
+    # @see http://msdn.microsoft.com/en-us/library/aa565012(v=exchg.140).aspx
+    #
+    # @param [Hash] opts
+    # @option opts [Hash] :to_folder_id A well-formatted folder_id Hash. Ex: {:id => :inbox}
+    # @option opts [Array<Hash>] :item_ids ItemIds Hash. The keys in these Hashes can be
+    #   :item_id, :occurrence_item_id, or :recurring_master_item_id. Please see the
+    #   Microsoft docs for more information.
+    # @option opts [Boolean] :return_new_item_ids Indicates whether the item identifiers of
+    #   new items are returned in the response
+    # @example
+    #   opts = {
+    #     :to_folder_id => {:id => :inbox},
+    #     :item_ids => [
+    #       {:item_id => {:id => 'id1'}},
+    #       {:item_id => {:id => 'id2'}},
+    #     ],
+    #     :return_new_item_ids => true
+    #     }
+    #   obj.copy_item(opts)
+    def copy_item(opts)
+      req = build_soap_envelope do |type, builder|
+        if(type == :header)
+        else
+          builder.CopyItem {
+            builder.parent.default_namespace = @default_ns
+            to_folder_id!(builder, opts[:to_folder_id])
+            item_ids!(builder, opts[:item_ids])
+            return_new_item_ids!(builder, opts[:return_new_item_ids]) if opts[:return_new_item_ids]
+          }
         end
       end
-      parse!(resp)
+      puts "DOC:\n#{req.to_xml}"
     end
 
     # Creates either an item or file attachment and attaches it to the specified item.
