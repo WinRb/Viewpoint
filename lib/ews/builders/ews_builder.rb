@@ -53,10 +53,8 @@ module Viewpoint::EWS::SOAP
         vals = vals.first.clone
         se = vals.delete(:sub_elements)
         txt = vals.delete(:text)
-        ns = vals.delete(:xmlns)
 
         builder.send(keys.first.to_s.camel_case, txt, vals) {
-          builder.parent.default_namespace = ns if ns
           build_xml!(builder, se) if se
         }
       when 'Array'
@@ -72,7 +70,7 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa494311.aspx
     # @param [Nokogiri::XML::Builder] node The XML builder object
     # @param [Hash] folder_shape The folder shape structure to build from
-    # @TODO need fully support all options
+    # @todo need fully support all options
     def folder_shape!(node, folder_shape)
       node.FolderShape {
         node.parent.default_namespace = @default_ns
@@ -85,7 +83,7 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa565261.aspx
     # @param [Nokogiri::XML::Builder] node The XML builder object
     # @param [Hash] item_shape The item shape structure to build from
-    # @TODO need fully support all options
+    # @todo need fully support all options
     def item_shape!(node, item_shape)
       node[NS_EWS_MESSAGES].ItemShape {
         node.parent.default_namespace = @default_ns
@@ -139,7 +137,7 @@ module Viewpoint::EWS::SOAP
 
     # Build the DistinguishedFolderId element
     # @see http://msdn.microsoft.com/en-us/library/aa580808.aspx
-    # @TODO add support for the Mailbox child object
+    # @todo add support for the Mailbox child object
     def distinguished_folder_id!(node, dfid, change_key = nil, act_as = nil)
       attribs = {'Id' => dfid.to_s}
       attribs['ChangeKey'] = change_key if change_key
@@ -160,18 +158,7 @@ module Viewpoint::EWS::SOAP
     def item_ids!(node, item_ids)
       node.ItemIds {
         item_ids.each do |iid|
-        type = iid.keys.first
-        item = iid[type]
-        case type
-        when :item_id
-          item_id!(node, item[:id], item[:change_key])
-        when :occurrence_item_id
-          occurrence_item_id!(node, item[:recurring_master_id], item[:change_key], item[:instance_index])
-        when :recurring_master_item_id
-          recurring_master_item_id!(node, item[:occurrence_id], item[:change_key])
-        else
-          raise EwsBadArgumentError, "Bad ItemId type. #{type}"
-        end
+          dispatch_item_id!(node, iid)
         end
       }
     end
@@ -229,7 +216,7 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa565036.aspx
     # @param [Hash] mailbox A well-formated hash that can be passed to build_xml!
     #   For example: {:email_address => {:text => 'test@test.com'}, :name => {:text => 'Test User'}}
-    # @TODO support the rest of the child elements
+    # @todo support the rest of the child elements
     def mailbox!(node, mbox)
       node[NS_EWS_MESSAGES].Mailbox {
         build_xml!(node, mbox)
@@ -352,10 +339,79 @@ module Viewpoint::EWS::SOAP
       node.SyncScope(scope)
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa580758(v=EXCHG.140).aspx
+    def saved_item_folder_id!(node, fid)
+      node.SavedItemFolderId {
+        dispatch_folder_id!(node, fid)
+      }
+    end
+
+    # @see http://msdn.microsoft.com/en-us/library/aa565428(v=exchg.140).aspx
+    def item_changes!(node, changes)
+      node.ItemChanges {
+        changes.each do |chg|
+          item_change!(node,chg)
+        end
+      }
+    end
+
+    # @see http://msdn.microsoft.com/en-us/library/aa581081(v=exchg.140).aspx
+    def item_change!(node, change)
+      node[NS_EWS_TYPES].ItemChange {
+        chg = change.clone
+        updates = chg.delete(:updates) # Remove updates so dispatch_item_id works correctly
+        dispatch_item_id!(node, chg)
+        updates!(node, updates)
+      }
+    end
+
+    # @see http://msdn.microsoft.com/en-us/library/aa581074(v=exchg.140).aspx
+    def updates!(node, updates)
+      node[NS_EWS_TYPES].Updates {
+        updates.each do |update|
+          dispatch_update_type!(node, update)
+        end
+      }
+    end
+
+    # @see http://msdn.microsoft.com/en-us/library/aa581317(v=exchg.140).aspx
+    def append_to_item_field!(node, upd)
+      upd = upd.clone
+      uri = upd.select {|k,v| k =~ /_uri/i}
+      raise EwsBadArgumentError, "Bad argument given for AppendToItemField." if uri.keys.length != 1
+      upd.delete(uri.keys.first)
+      node.AppendToItemField {
+        dispatch_field_uri!(node, uri)
+        dispatch_field_item!(node, upd)
+      }
+    end
+
+    # @see http://msdn.microsoft.com/en-us/library/aa581487(v=exchg.140).aspx
+    def set_item_field!(node, upd)
+      upd = upd.clone
+      uri = upd.select {|k,v| k =~ /_uri/i}
+      raise EwsBadArgumentError, "Bad argument given for SetItemField." if uri.keys.length != 1
+      upd.delete(uri.keys.first)
+      node.SetItemField {
+        dispatch_field_uri!(node, uri)
+        dispatch_field_item!(node, upd)
+      }
+    end
+
+    # @see http://msdn.microsoft.com/en-us/library/aa580330(v=exchg.140).aspx
+    def delete_item_field!(node, upd)
+      uri = upd.select {|k,v| k =~ /_uri/i}
+      raise EwsBadArgumentError, "Bad argument given for SetItemField." if uri.keys.length != 1
+      node.DeleteItemField {
+        dispatch_field_uri!(node, uri)
+      }
+    end
+
+
     # ---------------------- Helpers -------------------- #
 
-
     # A helper method to dispatch to a FolderId or DistinguishedFolderId correctly
+    # @param [Nokogiri::XML::Builder] node
     # @param [Hash] fid A folder_id
     #   Ex: {:id => myid, :change_key => ck}
     def dispatch_folder_id!(node, fid)
@@ -366,6 +422,64 @@ module Viewpoint::EWS::SOAP
       else
         raise EwsBadArgumentError, "Bad argument given for a FolderId. #{fid[:id].class}"
       end
+    end
+
+    # A helper method to dispatch to an ItemId, OccurrenceItemId, or a RecurringMasterItemId
+    # @param [Nokogiri::XML::Builder] node
+    # @param [Hash] iid The item id of some type
+    def dispatch_item_id!(node, iid)
+      type = iid.keys.first
+      item = iid[type]
+      case type
+      when :item_id
+        item_id!(node, item[:id], item[:change_key])
+      when :occurrence_item_id
+        occurrence_item_id!(node, item[:recurring_master_id], item[:change_key], item[:instance_index])
+      when :recurring_master_item_id
+        recurring_master_item_id!(node, item[:occurrence_id], item[:change_key])
+      else
+        raise EwsBadArgumentError, "Bad ItemId type. #{type}"
+      end
+    end
+          
+    # A helper method to dispatch to a AppendToItemField, SetItemField, or DeleteItemField
+    # @param [Nokogiri::XML::Builder] node
+    # @param [Hash] update An update of some type
+    def dispatch_update_type!(node, update)
+      type = update.keys.first
+      upd  = update[type]
+      case type
+      when :append_to_item_field
+        append_to_item_field!(node, upd)
+      when :set_item_field
+        set_item_field!(node, upd)
+      when :delete_item_field
+        delete_item_field!(node, upd)
+      else
+        raise EwsBadArgumentError, "Bad Update type. #{type}"
+      end
+    end
+
+    # A helper to dispatch to a FieldURI, IndexedFieldURI, or an ExtendedFieldURI
+    # @todo Implement ExtendedFieldURI
+    def dispatch_field_uri!(node, uri)
+      type = uri.keys.first
+      val  = uri[type]
+      case type
+      when :field_uRI
+        node.FieldURI('FieldURI' => val[:field_uRI])
+      when :indexed_field_uRI
+        node.IndexedFieldURI('FieldURI' => val[:field_uRI], 'FieldIndex' => val[:field_index])
+      when :extended_field_uRI
+        raise EwsNotImplemented, 'This functionality has not yet been implemented.'
+      else
+        raise EwsBadArgumentError, "Bad URI type. #{type}"
+      end
+
+    end
+        
+    def dispatch_field_item!(node, item)
+      build_xml!(node, item)
     end
 
   end # XmlBuilder

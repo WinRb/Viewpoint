@@ -47,13 +47,13 @@ module Viewpoint::EWS::SOAP
         else
         builder.ResolveNames(attribs) {
           builder.parent.default_namespace = @default_ns
-          # @TODO builder.ParentFolderIds
+          # @todo builder.ParentFolderIds
           builder.UnresolvedEntry(name)
         }
         end
       end
       puts "DOC:\n#{req.to_xml}"
-      # @TODO rsp = Nokogiri::XML(send_soap_request(soapmsg.doc.to_xml))
+      # @todo rsp = Nokogiri::XML(send_soap_request(soapmsg.doc.to_xml))
       #parse!(resp)
     end
 
@@ -61,7 +61,7 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa494152.aspx ExpandDL
     #
     # @param [String] dist_email The e-mail address associated with the Distribution List
-    # @TODO Fully support all of the ExpandDL operations. Today it just supports
+    # @todo Fully support all of the ExpandDL operations. Today it just supports
     #   taking an e-mail address as an argument
     def expand_dl(dist_email)
       req = build_soap_envelope do |type, builder|
@@ -101,7 +101,7 @@ module Viewpoint::EWS::SOAP
           builder.FindFolder(:Traversal => traversal) {
             builder.parent.default_namespace = @default_ns
             folder_shape!(builder, folder_shape)
-            # @TODO add FractionalPageFolderView
+            # @todo add FractionalPageFolderView
             restriction!(builder, opts[:restriction]) if opts[:restriction]
             parent_folder_ids!(builder, parent_folder_ids)
           }
@@ -135,7 +135,7 @@ module Viewpoint::EWS::SOAP
           builder.FindItem(:Traversal => traversal) {
             builder.parent.default_namespace = @default_ns
             item_shape!(builder, item_shape)
-            # @TODO add FractionalPageFolderView
+            # @todo add FractionalPageFolderView
             calendar_view!(builder, opts[:calendar_view]) if opts[:calendar_view]
             contacts_view!(builder, opts[:contacts_view]) if opts[:contacts_view]
             restriction!(builder, opts[:restriction]) if opts[:restriction]
@@ -178,7 +178,7 @@ module Viewpoint::EWS::SOAP
       #parse!(resp)
     end
 
-    # @TODO
+    # @todo
     def convert_id
     end
 
@@ -254,7 +254,7 @@ module Viewpoint::EWS::SOAP
                     raise EwsBadArgumentError, "Bad argument given for a FolderId. #{fc[:id].class}"
                   end
                   builder[NS_EWS_TYPES].Updates {
-                    # @TODO finish implementation
+                    # @todo finish implementation
                   }
                 }
               end
@@ -476,126 +476,139 @@ module Viewpoint::EWS::SOAP
       #parse!(resp)
     end
 
-    # Operation is used to create e-mail messages
-    # This is actually a CreateItem operation but they differ for different types
-    # of Exchange objects so it is named appropriately here.
-    # @see http://msdn.microsoft.com/en-us/library/aa566468.aspx
+    # Defines a request to create an item in the Exchange store.
+    # @see http://msdn.microsoft.com/en-us/library/aa565209(v=EXCHG.140).aspx
     #
-    # @param [String, Symbol] folder_id The folder to save this message in. Either a
-    #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
-    # @param [Hash, Array] items An array of item Hashes or a single item Hash. Hash
-    #   This Hash will eventually be passed to add_hierarchy! in the builder so it is in that format.
-    #   Values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa494306.aspx
-    # @param [String] message_disposition "SaveOnly/SendOnly/SendAndSaveCopy"
-    #   See: http://msdn.microsoft.com/en-us/library/aa565209.aspx
-    def create_message_item(folder_id, items, message_disposition = 'SaveOnly')
-      action = "#{SOAP_ACTION_PREFIX}/CreateItem"
-      resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", action) do |node|
-        build!(node) do
-          create_item!(folder_id, items, message_disposition, send_invites=false, 'message')
+    # @param [Hash] opts
+    # @option opts [String] :message_disposition How the item will be handled after it is created.
+    #   Only applicable for to e-mail. Must be one of 'SaveOnly', 'SendOnly', or 'SendAndSaveCopy'
+    # @option opts [String] :send_meeting_invitations How meeting requests are handled after they
+    #   are created. Required for calendar items. Must be one of 'SendToNone', 'SendOnlyToAll',
+    #   'SendToAllAndSaveCopy'
+    # @option opts [Hash] :saved_item_folder_id A well-formatted folder_id Hash. Ex: {:id => :inbox}
+    #   Will on work if 'SendOnly' is specified for :message_disposition
+    # @option opts [Array<Hash>] :items This is a complex Hash that conforms to various Item types.
+    #   Please see the Microsoft documentation for this element.
+    # @example
+    #   email_item = {:message => {
+    #   :xmlns => 'http://schemas.microsoft.com/exchange/services/2006/types',
+    #   :sub_elements => [
+    #     {:subject => {:text => 'Test Subject'}},
+    #     {:sensitivity => {:text => 'Private'}},
+    #     {:body => {:body_type => 'Text', :text => 'This is the body'}},
+    #     {:to_recipients => {:sub_elements => [
+    #       {:mailbox => {:sub_elements => [
+    #         {:name => {:text => 'Test User'}},
+    #         {:email_address => {:text => 'test@example.org'}}
+    #       ]}}
+    #     ]}}
+    #   ]}}
+    #   create_item(:message_disposition => 'SendAndSaveCopy', :items => [email_item])
+    def create_item(opts)
+      req = build_soap_envelope do |type, builder|
+        attribs = {}
+        attribs['MessageDisposition'] = opts[:message_disposition] if opts[:message_disposition]
+        attribs['SendMeetingInvitations'] = opts[:send_meeting_invitations] if opts[:send_meeting_invitations]
+        if(type == :header)
+        else
+          builder.CreateItem(attribs) {
+            builder.parent.default_namespace = @default_ns
+            saved_item_folder_id!(builder, opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
+            builder.Items {
+              build_xml!(builder, opts[:items])
+            }
+          }
         end
       end
-      parse!(resp)
-    end
-
-    # Operation is used to create calendar items
-    # @see http://msdn.microsoft.com/en-us/library/aa564690.aspx
-    #
-    # @param [String, Symbol] folder_id The folder to create this item in. Either a
-    #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
-    # @param [Hash, Array] items An array of item Hashes or a single item Hash. Hash
-    #   This Hash will eventually be passed to add_hierarchy! in the builder so it is in that format.
-    #   Values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa564765.aspx
-    # @param [String] send_invites "SendToNone/SendOnlyToAll/SendToAllAndSaveCopy"
-    def create_calendar_item(folder_id, items, send_invites = 'SendToAllAndSaveCopy')
-      action = "#{SOAP_ACTION_PREFIX}/CreateItem"
-      resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", action) do |node|
-        build!(node) do
-          create_item!(folder_id, items, message_disposition=false, send_invites, 'calendar')
-        end
-      end
-      parse!(resp)
-    end
-
-    # Operation is used to create task items
-    # This is actually a CreateItem operation but they differ for different types
-    # of Exchange objects so it is named appropriately here.
-    # @see http://msdn.microsoft.com/en-us/library/aa563439.aspx
-    #
-    # @param [String, Symbol] folder_id The folder to save this task in. Either a
-    #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
-    # @param [Hash, Array] items An array of item Hashes or a single item Hash. Hash
-    #   values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa494306.aspx
-    #   This Hash will eventually be passed to add_hierarchy! in the builder so it is in that format.
-    # @param [String] message_disposition "SaveOnly/SendOnly/SendAndSaveCopy"
-    #   See: http://msdn.microsoft.com/en-us/library/aa565209.aspx
-    def create_task_item(folder_id, items, message_disposition = 'SaveOnly')
-      action = "#{SOAP_ACTION_PREFIX}/CreateItem"
-      resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", action) do |node|
-        build!(node) do
-          create_item!(folder_id, items, message_disposition, false, 'task')
-        end
-      end
-      parse!(resp)
-    end
-
-    # Operation is used to create contact items
-    # This is actually a CreateItem operation but they differ for different types
-    # of Exchange objects so it is named appropriately here.
-    # @see # http://msdn.microsoft.com/en-us/library/aa580529.aspx
-    #
-    # @param [String, Symbol] folder_id The folder to save this task in. Either a
-    #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
-    # @param [Hash, Array] items An array of item Hashes or a single item Hash. Hash
-    #   values should be based on values found here: http://msdn.microsoft.com/en-us/library/aa581315.aspx
-    #   This Hash will eventually be passed to add_hierarchy! in the builder so it is in that format.
-    def create_contact_item(folder_id, items)
-      action = "#{SOAP_ACTION_PREFIX}/CreateItem"
-      resp = invoke("#{NS_EWS_MESSAGES}:CreateItem", action) do |node|
-        build!(node) do
-          create_item!(folder_id, items, nil, false, 'contact')
-        end
-      end
-      parse!(resp)
+      puts "DOC:\n#{req.to_xml}"
+      #parse!(resp)
     end
 
     # Delete an item from a mailbox in the Exchange store
-    # @see http://msdn.microsoft.com/en-us/library/aa562961.aspx
-    # @param [Array] item_ids An Array of item ids
-    # @param [String] delete_type Type of deletion: "HardDelete/SoftDelete/MoveToDeletedItems"
-    # @param [String, nil] send_meeting_cancellations "SendToNone/SendOnlyToAll/SendToAllAndSaveCopy"
-    #   This is only applicable to CalendarItems and should be nil otherwise, which is the default
-    # @param [String, nil] affected_task_occurrences "AllOccurrences/SpecifiedOccurrenceOnly"
-    #   This is really only related to tasks and can be nil otherwise, which is the default.
-    def delete_item(item_ids, delete_type, send_meeting_cancellations = nil, affected_task_occurrences = nil)
-      action = "#{SOAP_ACTION_PREFIX}/DeleteItem"
-      resp = invoke("#{NS_EWS_MESSAGES}:DeleteItem", action) do |root|
-        build!(root) do
-          root.set_attr('DeleteType', delete_type)
-          root.set_attr('SendMeetingCancellations', send_meeting_cancellations) unless send_meeting_cancellations.nil?
-          root.set_attr('AffectedTaskOccurrences', affected_task_occurrences) unless affected_task_occurrences.nil?
-          item_ids!(root, item_ids)
+    # @see http://msdn.microsoft.com/en-us/library/aa580484(v=exchg.140).aspx
+    #
+    # @param [Hash] opts
+    # @option opts [String] :delete_type Describes how an item is deleted. Must be one of
+    #   'HardDelete', 'SoftDelete', or 'MoveToDeletedItems'
+    # @option opts [String] :send_meeting_cancellations How meetings are handled after they
+    #   are deleted. Required for calendar items. Must be one of 'SendToNone', 'SendOnlyToAll',
+    #   'SendToAllAndSaveCopy'
+    # @option opts [String] :affected_task_occurrences Describes whether a task instance or a
+    #   task master is deleted by a DeleteItem Operation. This attribute is required when
+    #   tasks are deleted. Must be one of 'AllOccurrences' or 'SpecifiedOccurrenceOnly'
+    # @option opts [Array<Hash>] :item_ids ItemIds Hash. The keys in these Hashes can be
+    #   :item_id, :occurrence_item_id, or :recurring_master_item_id. Please see the
+    #   Microsoft docs for more information.
+    # @example
+    #   opts = {
+    #     :delete_type => 'MoveToDeletedItems',
+    #     :item_ids => [{:item_id => {:id => 'id1'}}]
+    #     }
+    #   inst.delete_item(opts)
+    def delete_item(opts)
+      req = build_soap_envelope do |type, builder|
+        attribs = {}
+        attribs['DeleteType'] = opts[:delete_type] if opts[:delete_type]
+        attribs['SendMeetingCancellations'] = opts[:send_meeting_cancellations] if opts[:send_meeting_cancellations]
+        attribs['AffectedTaskOccurrences'] = opts[:affected_task_occurrences] if opts[:affected_task_occurrences]
+        if(type == :header)
+        else
+          builder.DeleteItem(attribs) {
+            builder.parent.default_namespace = @default_ns
+            item_ids!(builder, opts[:item_ids])
+          }
         end
       end
-      parse!(resp)
+      puts "DOC:\n#{req.to_xml}"
     end
 
     # Used to modify the properties of an existing item in the Exchange store
-    # @see http://msdn.microsoft.com/en-us/library/aa581084.aspx
-    # @param [Array] item_ids An Array of item ids
-    # @param [Hash] changes a Hash of changes to be fed to auto_hierarchy!
-    # @param [Hash] opts various attributes to set for this update. See the Technet docs for more info
-    def update_item(item_ids, changes, opts = {:message_disposition => 'SaveOnly', :conflict_resolution => 'AutoResolve'})
-      action = "#{SOAP_ACTION_PREFIX}/UpdateItem"
-      resp = invoke("#{NS_EWS_MESSAGES}:UpdateItem", action) do |root|
-        build!(root) do
-          root.set_attr('MessageDisposition', opts[:message_disposition]) if opts.has_key?(:message_disposition)
-          root.set_attr('ConflictResolution', opts[:conflict_resolution]) if opts.has_key?(:message_disposition)
-          root.set_attr('SendMeetingInvitationsOrCancellations', opts[:send_meeting_invitations_or_cancellations]) if opts.has_key?(:send_meeting_invitations_or_cancellations)
-          item_changes!(root, item_ids, changes)
+    # @see http://msdn.microsoft.com/en-us/library/aa581084(v=exchg.140).aspx
+    #
+    # @param [Hash] opts
+    # @option opts [String] :conflict_resolution Identifies the type of conflict resolution to
+    #   try during an update. The default value is AutoResolve. Available options are
+    #   'NeverOverwrite', 'AutoResolve', 'AlwaysOverwrite'
+    # @option opts [String] :message_disposition How the item will be handled after it is updated.
+    #   Only applicable for to e-mail. Must be one of 'SaveOnly', 'SendOnly', or 'SendAndSaveCopy'
+    # @option opts [String] :send_meeting_invitations_or_cancellations How meeting requests are
+    #   handled after they are updated. Required for calendar items. Must be one of 'SendToNone',
+    #   'SendOnlyToAll', 'SendOnlyToChanged', 'SendToAllAndSaveCopy', 'SendToChangedAndSaveCopy'
+    # @option opts [Hash] :saved_item_folder_id A well-formatted folder_id Hash. Ex: {:id => :inbox}
+    #   Will on work if 'SendOnly' is specified for :message_disposition
+    # @option opts [Array<Hash>] :item_changes an array of ItemChange elements that identify items
+    #   and the updates to apply to the items. See the Microsoft docs for more information.
+    # @example
+    #   opts = {
+    #     :send_meeting_invitations_or_cancellations => 'SendOnlyToChangedAndSaveCopy',
+    #     :item_changes => [
+    #       { :item_id => {:id => 'id1'},
+    #         :updates => [
+    #           {:set_item_field => {
+    #             :field_uRI => {:field_uRI => 'item:Subject'},
+    #             # The following needs to conform to #build_xml! format for now
+    #             :calendar_item => { :sub_elements => [{:subject => {:text => 'Test Subject'}}]}
+    #           }}
+    #         ]
+    #       }
+    #     ]
+    #   }
+    def update_item(opts)
+      req = build_soap_envelope do |type, builder|
+        attribs = {}
+        attribs['MessageDisposition'] = opts[:message_disposition] if opts[:message_disposition]
+        attribs['ConflictResolution'] = opts[:conflict_resolution] if opts[:conflict_resolution]
+        attribs['SendMeetingInvitationsOrCancellations'] = opts[:send_meeting_invitations_or_cancellations] if opts[:send_meeting_invitations_or_cancellations]
+        if(type == :header)
+        else
+          builder.UpdateItem(attribs) {
+            builder.parent.default_namespace = @default_ns
+            saved_item_folder_id!(builder, opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
+            item_changes!(builder, opts[:item_changes])
+          }
         end
       end
-      parse!(resp)
+      puts "DOC:\n#{req.to_xml}"
     end
 
     # Used to send e-mail messages that are located in the Exchange store.
@@ -813,7 +826,6 @@ module Viewpoint::EWS::SOAP
     # Build the common elements in the SOAP message and yield to any custom elements.
     def build_soap_envelope
       new_ent = Nokogiri::XML::Builder.new do |xml|
-        puts "Adding namespaces #{NAMESPACES}..."
         xml.Envelope(NAMESPACES) do |ent|
           xml.parent.namespace = xml.parent.namespace_definitions.find{|ns|ns.prefix==NS_SOAP}
           ent[NS_SOAP].Header {
@@ -828,7 +840,7 @@ module Viewpoint::EWS::SOAP
 
     # Send the SOAP request to the endpoint
     # @param [String] soapmsg an XML formatted string
-    # @TODO make this work for Viewpoint (imported from SPWS)
+    # @todo make this work for Viewpoint (imported from SPWS)
     def send_soap_request(soapmsg)
       @log.debug "Sending SOAP Request:\n----------------\n#{soapmsg}\n----------------"
       respmsg = @con.post(soapmsg)
