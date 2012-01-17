@@ -122,7 +122,7 @@ module Viewpoint
             raise EwsError, "#{@response_message.code}: #{@response_message.message}"
           end
         end
-        
+
         def move_item_response(opts)
           if(@response_message.status == 'Success')
             @response_message.items << xml_to_hash!((@response/"//#{NS_EWS_MESSAGES}:Items/*").first.native_element)
@@ -147,7 +147,7 @@ module Viewpoint
         def update_item_response(opts)
           create_item_response(opts)
         end
-        
+
         def send_item_response(opts)
           if(@response_message.status == 'Success')
             items = []
@@ -159,7 +159,7 @@ module Viewpoint
             raise EwsError, "#{@response_message.code}: #{@response_message.message}"
           end
         end
-        
+
         def get_attachment_response(opts)
           atts = []
           if(@response_message.status == 'Success')

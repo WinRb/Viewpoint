@@ -387,7 +387,7 @@ module Viewpoint::EWS::SOAP
     #   Ex: {:id => :inbox}
     # @option opts [Hash] :sync_state The Base64 sync state id. If this is the
     #   first time syncing this does not need to be passed.
-    def sync_folder_hierarchy(opts = {})
+    def sync_folder_hierarchy(opts)
       req = build_soap_envelope do |type, builder|
         if(type == :header)
         else
