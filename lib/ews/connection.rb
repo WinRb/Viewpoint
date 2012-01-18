@@ -1,7 +1,8 @@
+require 'httpclient'
 class Viewpoint::EWS::Connection
   include Viewpoint::EWS
 
-  attr_reader :endpoint
+  attr_reader :endpoint, :ews
   # @param [String] endpoint the URL of the web service.
   #   @example https://<site>/ews/Exchange.asmx
   def initialize(endpoint)
@@ -10,6 +11,7 @@ class Viewpoint::EWS::Connection
     # Up the keep-alive so we don't have to do the NTLM dance as often.
     @httpcli.keep_alive_timeout = 60
     @endpoint = endpoint
+    @ews = SOAP::ExchangeWebService.new(self)
   end
 
   def set_auth(user,pass)
@@ -33,7 +35,7 @@ class Viewpoint::EWS::Connection
   # @return [String] If the request is successful (200) it returns the body of
   #   the response.
   def post(xmldoc)
-    headers = {'Content-Type' => 'application/soap+xml; charset=utf-8'}
+    headers = {'Content-Type' => 'text/xml'}
     check_response( @httpcli.post(@endpoint, xmldoc, headers) )
   end
 

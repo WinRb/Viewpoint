@@ -52,8 +52,7 @@ module Viewpoint::EWS::SOAP
         }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
-      # @todo rsp = Nokogiri::XML(send_soap_request(soapmsg.doc.to_xml))
+      resp = Nokogiri::XML(send_soap_request(req.doc.to_xml))
       #parse!(resp)
     end
 
@@ -861,7 +860,6 @@ module Viewpoint::EWS::SOAP
 
 
     # Private Methods (Builders and Parsers)
-    private
 
     def parse!(response, opts = {})
       #return response if @@raw_soap
