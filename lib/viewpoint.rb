@@ -42,7 +42,7 @@ module Viewpoint
 end
 
 # Load the Exception classes
-require 'exceptions/exceptions'
+require 'ews/exceptions/exceptions'
 
 # Load the backend SOAP / EWS infrastructure.
 require 'ews/soap'
@@ -54,29 +54,29 @@ require 'ews/connection'
 
 # Load the model classes
 # Base Models
-require 'model/model'
-require 'model/mailbox_user'
-require 'model/attendee'
-require 'model/generic_folder'
-require 'model/item_field_uri_map' # supports Item
-require 'model/item'
+require 'ews/model/model'
+require 'ews/model/mailbox_user'
+require 'ews/model/attendee'
+require 'ews/model/generic_folder'
+require 'ews/model/item_field_uri_map' # supports Item
+require 'ews/model/item'
 # Specific Models
 # Folders
-require 'model/folder'
-require 'model/calendar_folder'
-require 'model/contacts_folder'
-require 'model/search_folder'
-require 'model/tasks_folder'
+require 'ews/model/folder'
+require 'ews/model/calendar_folder'
+require 'ews/model/contacts_folder'
+require 'ews/model/search_folder'
+require 'ews/model/tasks_folder'
 # Items
-require 'model/message'
-require 'model/calendar_item'
-require 'model/contact'
-require 'model/distribution_list'
-require 'model/meeting_message'
-require 'model/meeting_request'
-require 'model/meeting_response'
-require 'model/meeting_cancellation'
-require 'model/task'
-require 'model/attachment'
-require 'model/file_attachment'
-require 'model/item_attachment'
+require 'ews/model/message'
+require 'ews/model/calendar_item'
+require 'ews/model/contact'
+require 'ews/model/distribution_list'
+require 'ews/model/meeting_message'
+require 'ews/model/meeting_request'
+require 'ews/model/meeting_response'
+require 'ews/model/meeting_cancellation'
+require 'ews/model/task'
+require 'ews/model/attachment'
+require 'ews/model/file_attachment'
+require 'ews/model/item_attachment'
