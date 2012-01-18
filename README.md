@@ -1,4 +1,4 @@
-h1. Viewpoint for Exchange Web Services 1.0
+# Viewpoint for Exchange Web Services 1.0
 http://github.com/zenchild/Viewpoint/wiki
 
 Viewpoint for EWS provides a thin Ruby layer on top of Microsoft Exchange
@@ -12,9 +12,9 @@ Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
 
 Find me on irc.freenode.net in #ruby-lang (zenChild)
 
-h2. Features
+## Features
 
-h3. New in 1.0
+### New in 1.0
 
 * SOAP backend is now only dependant on Nokogiri. Before version 1.0 Viewpoint
 went through a number of iterations in backends including SOAP4r and Handsoap.
@@ -28,9 +28,9 @@ Singleton pattern for connection to the SOAP endpoint so with authentication
 I was forced to implement Viewpoint as a Singleton as well. Now with Handsoap
 out of the picture this is no longer required. Go crazy ;)
 
-h3. Enhanced in 1.0
+### Enhanced in 1.0
 
-* Delegate access is supported
+* *Delegate access is supported*
   One thing that was often asked for, but missing from the previous version
   was delegate access to mailboxes and calendars.  This is now supported via
   the 'act_as' parameter to the GenericFolder::get_folder method. For example:
@@ -45,10 +45,12 @@ h3. Enhanced in 1.0
 
 --------------------------------------------------------------------------
 TO USE:
+
 ```ruby
 require 'rubygems'
 require 'viewpoint'
 ```
+
 # See REQUIRED GEMS below
 
 REQUIRED GEMS:
