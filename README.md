@@ -1,41 +1,32 @@
---------------------------------------------------------------------------
-                   Viewpoint for Exchange Web Services
+                 Viewpoint for Exchange Web Services 1.0
                 http://github.com/zenchild/Viewpoint/wiki
---------------------------------------------------------------------------
-This program attempts to create a client access library for Exchange Web
-Services (EWS) in Ruby.
 
-!!!CAUTION!!!  This is currently BETA code and has changed dramatically from
-the original version of Viewpoint which was based on Soap4r.  This version
-has essentially been gutted and written on top of Handsoap.  Development
-has been much more flexible, but the interface to Viewpoint has changed
-quite a bit.  I have tried to write good code comments and I will keep
-enhancing this.  I will also try and post examples on my blog as I write
-them or they are asked for.
+Viewpoint for EWS provides a thin Ruby layer on top of Microsoft Exchange
+Web Services(EWS). It also includes a bunch of model classes that add an
+additional layer of abstraction on top of EWS for use in implementing
+programs with Viewpoint.
 
 BLOG:  http://distributed-frostbite.blogspot.com/
 Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
 Find me on irc.freenode.net in #ruby-lang (zenChild)
 
---------------------------------------------------------------------------
-MAJOR CHANGES TO THE FIRST VERSION:
+h2. Features
 
-New SOAP backend
-  Viewpoint now uses Handsoap as its back-end instead of soap4r.  While
-  soap4r does some very nice things for you automatically, it ends up
-  making your code base fairly large and it complicates any customizations
-  that you might want to make.  One example is adding custom headers. Soap4r
-  required you to create a subclass to use as a sort of hook. I can do the
-  same thing in Handsoap with a one-liner in the services #on_create_document
-  method.
+h3. New in 1.0
+* SOAP backend is now only dependant on Nokogiri. Before version 1.0 Viewpoint
+went through a number of iterations in backends including SOAP4r and Handsoap.
+Each of these approaches had major issues so in the end I decided it was
+easiest to just build the SOAP messages with Nokogiri since I was using it as
+the parser for response messages already.
 
-Models are completely rewritten
-  The models are completely new and not backward compatible with the old
-  version of Viewpoint.  Some of the methods still exist, but don't count
-  on them.  I've tried to make this version much more extensible than the
-  last.
+* Viewpoint is no longer built on a Singleton pattern. The reason it was
+previously is because of the Handsoap backend. Handsoap itself uses a
+Singleton pattern for connection to the SOAP endpoint so with authentication
+I was forced to implement Viewpoint as a Singleton as well. Now with Handsoap
+out of the picture this is no longer required. Go crazy ;)
 
-Delegate access is supported
+h3. Enhanced in 1.0
+* Delegate access is supported
   One thing that was often asked for, but missing from the previous version
   was delegate access to mailboxes and calendars.  This is now supported via
   the 'act_as' parameter to the GenericFolder::get_folder method. For example:
@@ -48,12 +39,6 @@ Delegate access is supported
   the methods MailboxUser#add_delegate!, MailboxUser#update_delegate!, and 
   MailboxUser#get_delegate_info.
 
-Misc other changes
-  Since it's a complete rewrite there are tons of other changes that you'll
-  notice.  I've tried to keep the code comments coming so stay tuned to the
-  API docs for library information.  I'll also be posting more examples to
-  my blog.
-
 --------------------------------------------------------------------------
 TO USE:
 require 'rubygems'
@@ -62,17 +47,8 @@ require 'viewpoint'
 
 REQUIRED GEMS:
 
-# Handsoap (Thanks jrun for pointing me this way!)
-gem install -r handsoap
-# Nokogiri XML Parser
-gem install -r nokogiri
-# HttpClient
-gem install -r httpclient
 # NTLM Library
 gem install -r rubyntlm
-
-# iCalendar (still forthcoming in this release)
-gem install -r icalendar
 
 --------------------------------------------------------------------------
 DESIGN GOALS/GUIDELINES:
