@@ -1,5 +1,5 @@
-                 Viewpoint for Exchange Web Services 1.0
-                http://github.com/zenchild/Viewpoint/wiki
+h1. Viewpoint for Exchange Web Services 1.0
+http://github.com/zenchild/Viewpoint/wiki
 
 Viewpoint for EWS provides a thin Ruby layer on top of Microsoft Exchange
 Web Services(EWS). It also includes a bunch of model classes that add an
@@ -7,12 +7,15 @@ additional layer of abstraction on top of EWS for use in implementing
 programs with Viewpoint.
 
 BLOG:  http://distributed-frostbite.blogspot.com/
+
 Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
+
 Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 h2. Features
 
 h3. New in 1.0
+
 * SOAP backend is now only dependant on Nokogiri. Before version 1.0 Viewpoint
 went through a number of iterations in backends including SOAP4r and Handsoap.
 Each of these approaches had major issues so in the end I decided it was
@@ -26,6 +29,7 @@ I was forced to implement Viewpoint as a Singleton as well. Now with Handsoap
 out of the picture this is no longer required. Go crazy ;)
 
 h3. Enhanced in 1.0
+
 * Delegate access is supported
   One thing that was often asked for, but missing from the previous version
   was delegate access to mailboxes and calendars.  This is now supported via
@@ -35,20 +39,22 @@ h3. Enhanced in 1.0
   operation will retrieve their inbox and allow you to manipulate it as you
   would with your own Inbox.
 
-  There is also some support for manipulation of delegate access itself via
+* There is also some support for manipulation of delegate access itself via
   the methods MailboxUser#add_delegate!, MailboxUser#update_delegate!, and 
   MailboxUser#get_delegate_info.
 
 --------------------------------------------------------------------------
 TO USE:
+```ruby
 require 'rubygems'
 require 'viewpoint'
+```
 # See REQUIRED GEMS below
 
 REQUIRED GEMS:
 
 # NTLM Library
-gem install -r rubyntlm
+`gem install -r rubyntlm`
 
 --------------------------------------------------------------------------
 DESIGN GOALS/GUIDELINES:
