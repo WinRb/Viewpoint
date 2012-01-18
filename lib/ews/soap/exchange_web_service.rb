@@ -19,7 +19,7 @@
 module Viewpoint::EWS::SOAP
   class ExchangeWebService
     include Viewpoint::EWS::SOAP
-    include Viewpoint::EWS::SOAP::XmlBuilder
+#    include Viewpoint::EWS::SOAP::XmlBuilder
 
     def initialize(connection)
       super()
@@ -42,13 +42,13 @@ module Viewpoint::EWS::SOAP
       attribs = {:ReturnFullContactData => full_contact_data.to_s}
       attribs[:SearchScope] = opts[:search_scope] if opts[:search_scope]
 
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-        builder.ResolveNames(attribs) {
-          builder.parent.default_namespace = @default_ns
-          # @todo builder.ParentFolderIds
-          builder.UnresolvedEntry(name)
+        builder.nbuild.ResolveNames(attribs) {
+          builder.nbuild.parent.default_namespace = @default_ns
+          # @todo builder.nbuild.ParentFolderIds
+          builder.nbuild.UnresolvedEntry(name)
         }
         end
       end
@@ -63,14 +63,14 @@ module Viewpoint::EWS::SOAP
     # @todo Fully support all of the ExpandDL operations. Today it just supports
     #   taking an e-mail address as an argument
     def expand_dl(dist_email)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-        builder.ExpandDL {
-          builder.parent.default_namespace = @default_ns
-          builder.Mailbox {
-            builder.parent.default_namespace = NAMESPACES["xmlns:#{NS_EWS_TYPES}"]
-            builder.EmailAddress(dist_email)
+        builder.nbuild.ExpandDL {
+          builder.nbuild.parent.default_namespace = @default_ns
+          builder.nbuild.Mailbox {
+            builder.nbuild.parent.default_namespace = NAMESPACES["xmlns:#{NS_EWS_TYPES}"]
+            builder.nbuild.EmailAddress(dist_email)
           }
         }
         end
@@ -94,15 +94,15 @@ module Viewpoint::EWS::SOAP
     #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
     # @param [Hash] opts optional parameters to this method
     def find_folder(parent_folder_ids = [{:id => :root}], traversal = 'Shallow', folder_shape = {:base_shape => 'Default'}, opts = {})
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.FindFolder(:Traversal => traversal) {
-            builder.parent.default_namespace = @default_ns
-            folder_shape!(builder, folder_shape)
+          builder.nbuild.FindFolder(:Traversal => traversal) {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.folder_shape!(folder_shape)
             # @todo add FractionalPageFolderView
-            restriction!(builder, opts[:restriction]) if opts[:restriction]
-            parent_folder_ids!(builder, parent_folder_ids)
+            builder.restriction!(opts[:restriction]) if opts[:restriction]
+            builder.nbuild.parent_folder_ids!(parent_folder_ids)
           }
         end
       end
@@ -128,17 +128,17 @@ module Viewpoint::EWS::SOAP
     # @option opts [Hash] :contacts_view Limit FindItem between contact names
     #   {:contacts_view => {:max_entries_returned => 2, :initial_name => 'Dan', :final_name => 'Wally'}}
     def find_item(parent_folder_ids, traversal = 'Shallow', item_shape = {:base_shape => 'Default'}, opts = {})
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.FindItem(:Traversal => traversal) {
-            builder.parent.default_namespace = @default_ns
-            item_shape!(builder, item_shape)
+          builder.nbuild.FindItem(:Traversal => traversal) {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.item_shape!(item_shape)
             # @todo add FractionalPageFolderView
-            calendar_view!(builder, opts[:calendar_view]) if opts[:calendar_view]
-            contacts_view!(builder, opts[:contacts_view]) if opts[:contacts_view]
-            restriction!(builder, opts[:restriction]) if opts[:restriction]
-            parent_folder_ids!(builder, parent_folder_ids)
+            builder.calendar_view!(opts[:calendar_view]) if opts[:calendar_view]
+            builder.contacts_view!(opts[:contacts_view]) if opts[:contacts_view]
+            builder.restriction!(opts[:restriction]) if opts[:restriction]
+            builder.nbuild.parent_folder_ids!(parent_folder_ids)
           }
         end
       end
@@ -162,13 +162,13 @@ module Viewpoint::EWS::SOAP
     #   given delegate access to this folder or else this operation will fail.
     # @param [Hash] opts optional parameters to this method
     def get_folder(folder_ids, folder_shape = {:base_shape => 'Default'}, act_as = nil)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.GetFolder {
-            builder.parent.default_namespace = @default_ns
-            folder_shape!(builder, folder_shape)
-            folder_ids!(builder, folder_ids, act_as)
+          builder.nbuild.GetFolder {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.folder_shape!(folder_shape)
+            builder.folder_ids!(folder_ids, act_as)
           }
         end
       end
@@ -194,13 +194,13 @@ module Viewpoint::EWS::SOAP
     #              {:calendar_folder =>
     #               {:sub_elements => [{:display_name => {:text => 'Agenda'}}]}} ]
     def create_folder(parent_folder_id, folders)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.CreateFolder {
-            builder.parent.default_namespace = @default_ns
-            parent_folder_id!(builder, parent_folder_id)
-            folders!(builder, folders)
+          builder.nbuild.CreateFolder {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.nbuild.parent_folder_id!(parent_folder_id)
+            builder.folders!(folders)
           }
         end
       end
@@ -217,12 +217,12 @@ module Viewpoint::EWS::SOAP
     #     {:id => :msgfolderroot} ]  # Don't do this for real
     # @param [String,nil] delete_type Type of delete to do: HardDelete/SoftDelete/MoveToDeletedItems
     def delete_folder(folder_ids, delete_type = 'MoveToDeletedItems', act_as = nil)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.DeleteFolder('DeleteType' => delete_type) {
-            builder.parent.default_namespace = @default_ns
-            folder_ids!(builder, folder_ids, act_as)
+          builder.nbuild.DeleteFolder('DeleteType' => delete_type) {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.folder_ids!(folder_ids, act_as)
           }
         end
       end
@@ -237,15 +237,15 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa580519(v=EXCHG.140).aspx
     # @param [Array<Hash>] folder_changes an Array of well-formatted Hashes
     def update_folder(folder_changes)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.UpdateFolder {
-            builder.parent.default_namespace = @default_ns
-            builder.FolderChanges {
+          builder.nbuild.UpdateFolder {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.nbuild.FolderChanges {
               folder_changes.each do |fc|
                 builder[NS_EWS_TYPES].FolderChange {
-                  dispatch_folder_id!(builder, fc)
+                  builder.dispatch_folder_id!(fc)
                   builder[NS_EWS_TYPES].Updates {
                     # @todo finish implementation
                   }
@@ -264,13 +264,13 @@ module Viewpoint::EWS::SOAP
     # @param [Array<Hash>] sources The source Folders
     #   [ {:id => <myid>, :change_key => <optional_ck>} ]
     def move_folder(to_fid, sources)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.MoveFolder {
-            builder.parent.default_namespace = @default_ns
-            to_folder_id!(builder, to_fid)
-            folder_ids!(builder, sources)
+          builder.nbuild.MoveFolder {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.to_folder_id!(to_fid)
+            builder.folder_ids!(sources)
           }
         end
       end
@@ -283,13 +283,13 @@ module Viewpoint::EWS::SOAP
     # @param [Array<Hash>] sources The source Folders
     #   [ {:id => <myid>, :change_key => <optional_ck>} ]
     def copy_folder(to_fid, sources)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.CopyFolder {
-            builder.parent.default_namespace = @default_ns
-            to_folder_id!(builder, to_fid)
-            folder_ids!(builder, sources)
+          builder.nbuild.CopyFolder {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.to_folder_id!(to_fid)
+            builder.folder_ids!(sources)
           }
         end
       end
@@ -320,11 +320,11 @@ module Viewpoint::EWS::SOAP
     #       }},
     #       ]
     def subscribe(subscriptions)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.Subscribe {
-            builder.parent.default_namespace = @default_ns
+          builder.nbuild.Subscribe {
+            builder.nbuild.parent.default_namespace = @default_ns
             subscriptions.each do |sub|
               subtype = sub.keys.first
               if(respond_to?(subtype))
@@ -344,12 +344,12 @@ module Viewpoint::EWS::SOAP
     #
     # @param [String] subscription_id The Id of the subscription
     def unsubscribe(subscription_id)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.Unsubscribe {
-            builder.parent.default_namespace = @default_ns
-            subscription_id!(builder, subscription_id)
+          builder.nbuild.Unsubscribe {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.subscription_id!(subscription_id)
           }
         end
       end
@@ -363,13 +363,13 @@ module Viewpoint::EWS::SOAP
     # @param [String] subscription_id Subscription identifier
     # @param [String] watermark Event bookmark in the events queue
     def get_events(subscription_id, watermark)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.GetEvents {
-            builder.parent.default_namespace = @default_ns
-            subscription_id!(builder, subscription_id)
-            watermark!(builder, watermark)
+          builder.nbuild.GetEvents {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.subscription_id!(subscription_id)
+            builder.watermark!(watermark)
           }
         end
       end
@@ -387,14 +387,14 @@ module Viewpoint::EWS::SOAP
     # @option opts [Hash] :sync_state The Base64 sync state id. If this is the
     #   first time syncing this does not need to be passed.
     def sync_folder_hierarchy(opts)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.SyncFolderHierarchy {
-            builder.parent.default_namespace = @default_ns
-            folder_shape!(builder, opts[:folder_shape])
-            sync_folder_id!(builder, opts[:sync_folder_id]) if opts[:sync_folder_id]
-            sync_state!(builder, opts[:sync_state]) if opts[:sync_state]
+          builder.nbuild.SyncFolderHierarchy {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.folder_shape!(opts[:folder_shape])
+            builder.sync_folder_id!(opts[:sync_folder_id]) if opts[:sync_folder_id]
+            builder.sync_state!(opts[:sync_state]) if opts[:sync_state]
           }
         end
       end
@@ -418,17 +418,17 @@ module Viewpoint::EWS::SOAP
     #   information are returned. OPTIONAL
     #   options: 'NormalItems' or 'NormalAndAssociatedItems'
     def sync_folder_items(opts)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.SyncFolderItems {
-            builder.parent.default_namespace = @default_ns
-            item_shape!(builder, opts[:item_shape])
-            sync_folder_id!(builder, opts[:sync_folder_id]) if opts[:sync_folder_id]
-            sync_state!(builder, opts[:sync_state]) if opts[:sync_state]
-            ignore!(builder, opts[:ignore]) if opts[:ignore]
-            max_changes_returned!(builder, opts[:max_changes_returned])
-            sync_scope!(builder, opts[:sync_scope]) if opts[:sync_scope]
+          builder.nbuild.SyncFolderItems {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.item_shape!(opts[:item_shape])
+            builder.sync_folder_id!(opts[:sync_folder_id]) if opts[:sync_folder_id]
+            builder.sync_state!(opts[:sync_state]) if opts[:sync_state]
+            builder.ignore!(opts[:ignore]) if opts[:ignore]
+            builder.max_changes_returned!(opts[:max_changes_returned])
+            builder.sync_scope!(opts[:sync_scope]) if opts[:sync_scope]
           }
         end
       end
@@ -455,13 +455,13 @@ module Viewpoint::EWS::SOAP
     #       ]}
     #   get_item(opts)
     def get_item(opts)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.GetItem {
-            builder.parent.default_namespace = @default_ns
-            item_shape!(builder, opts[:item_shape])
-            item_ids!(builder, opts[:item_ids])
+          builder.nbuild.GetItem {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.item_shape!(opts[:item_shape])
+            builder.item_ids!(opts[:item_ids])
           }
         end
       end
@@ -498,17 +498,17 @@ module Viewpoint::EWS::SOAP
     #   ]}}
     #   create_item(:message_disposition => 'SendAndSaveCopy', :items => [email_item])
     def create_item(opts)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         attribs = {}
         attribs['MessageDisposition'] = opts[:message_disposition] if opts[:message_disposition]
         attribs['SendMeetingInvitations'] = opts[:send_meeting_invitations] if opts[:send_meeting_invitations]
         if(type == :header)
         else
-          builder.CreateItem(attribs) {
-            builder.parent.default_namespace = @default_ns
-            saved_item_folder_id!(builder, opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
-            builder.Items {
-              build_xml!(builder, opts[:items])
+          builder.nbuild.CreateItem(attribs) {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.saved_item_folder_id!(opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
+            builder.nbuild.Items {
+              builder.build_xml!(opts[:items])
             }
           }
         end
@@ -539,16 +539,16 @@ module Viewpoint::EWS::SOAP
     #     }
     #   inst.delete_item(opts)
     def delete_item(opts)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         attribs = {}
         attribs['DeleteType'] = opts[:delete_type] if opts[:delete_type]
         attribs['SendMeetingCancellations'] = opts[:send_meeting_cancellations] if opts[:send_meeting_cancellations]
         attribs['AffectedTaskOccurrences'] = opts[:affected_task_occurrences] if opts[:affected_task_occurrences]
         if(type == :header)
         else
-          builder.DeleteItem(attribs) {
-            builder.parent.default_namespace = @default_ns
-            item_ids!(builder, opts[:item_ids])
+          builder.nbuild.DeleteItem(attribs) {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.item_ids!(opts[:item_ids])
           }
         end
       end
@@ -587,17 +587,17 @@ module Viewpoint::EWS::SOAP
     #     ]
     #   }
     def update_item(opts)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         attribs = {}
         attribs['MessageDisposition'] = opts[:message_disposition] if opts[:message_disposition]
         attribs['ConflictResolution'] = opts[:conflict_resolution] if opts[:conflict_resolution]
         attribs['SendMeetingInvitationsOrCancellations'] = opts[:send_meeting_invitations_or_cancellations] if opts[:send_meeting_invitations_or_cancellations]
         if(type == :header)
         else
-          builder.UpdateItem(attribs) {
-            builder.parent.default_namespace = @default_ns
-            saved_item_folder_id!(builder, opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
-            item_changes!(builder, opts[:item_changes])
+          builder.nbuild.UpdateItem(attribs) {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.saved_item_folder_id!(opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
+            builder.item_changes!(opts[:item_changes])
           }
         end
       end
@@ -623,15 +623,15 @@ module Viewpoint::EWS::SOAP
     #     ]}
     #   obj.send_item(opts)
     def send_item(opts)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         attribs = {}
         attribs['SaveItemToFolder'] = opts[:save_item_to_folder]
         if(type == :header)
         else
-          builder.SendItem(attribs) {
-            builder.parent.default_namespace = @default_ns
-            saved_item_folder_id!(builder, opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
-            item_ids!(builder, opts[:item_ids])
+          builder.nbuild.SendItem(attribs) {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.saved_item_folder_id!(opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
+            builder.item_ids!(opts[:item_ids])
           }
         end
       end
@@ -659,14 +659,14 @@ module Viewpoint::EWS::SOAP
     #     }
     #   obj.move_item(opts)
     def move_item(opts)
-     req = build_soap_envelope do |type, builder|
+     req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.MoveItem {
-            builder.parent.default_namespace = @default_ns
-            to_folder_id!(builder, opts[:to_folder_id])
-            item_ids!(builder, opts[:item_ids])
-            return_new_item_ids!(builder, opts[:return_new_item_ids]) if opts[:return_new_item_ids]
+          builder.nbuild.MoveItem {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.to_folder_id!(opts[:to_folder_id])
+            builder.item_ids!(opts[:item_ids])
+            builder.return_new_item_ids!(opts[:return_new_item_ids]) if opts[:return_new_item_ids]
           }
         end
       end
@@ -694,14 +694,14 @@ module Viewpoint::EWS::SOAP
     #     }
     #   obj.copy_item(opts)
     def copy_item(opts)
-      req = build_soap_envelope do |type, builder|
+      req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.CopyItem {
-            builder.parent.default_namespace = @default_ns
-            to_folder_id!(builder, opts[:to_folder_id])
-            item_ids!(builder, opts[:item_ids])
-            return_new_item_ids!(builder, opts[:return_new_item_ids]) if opts[:return_new_item_ids]
+          builder.nbuild.CopyItem {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.to_folder_id!(opts[:to_folder_id])
+            builder.item_ids!(opts[:item_ids])
+            builder.return_new_item_ids!(opts[:return_new_item_ids]) if opts[:return_new_item_ids]
           }
         end
       end
@@ -868,18 +868,8 @@ module Viewpoint::EWS::SOAP
     end
 
     # Build the common elements in the SOAP message and yield to any custom elements.
-    def build_soap_envelope
-      new_ent = Nokogiri::XML::Builder.new do |xml|
-        xml.Envelope(NAMESPACES) do |ent|
-          xml.parent.namespace = xml.parent.namespace_definitions.find{|ns|ns.prefix==NS_SOAP}
-          ent[NS_SOAP].Header {
-            yield(:header, ent) if block_given?
-          }
-          ent[NS_SOAP].Body {
-            yield(:body, ent) if block_given?
-          }
-        end
-      end
+    def build_soap!(&block)
+      XmlBuilder.new.build!(&block)
     end
 
     # Send the SOAP request to the endpoint

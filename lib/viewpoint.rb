@@ -46,10 +46,11 @@ require 'ews/exceptions/exceptions'
 
 # Load the backend SOAP / EWS infrastructure.
 require 'ews/soap'
-require 'ews/builders/ews_builder'
-require 'ews/parsers/parser'
-require 'ews/parsers/ews_parser'
-require 'ews/exchange_web_service'
+require 'ews/soap/builders/ews_builder'
+require 'ews/soap/parsers/parser'
+require 'ews/soap/parsers/ews_parser'
+require 'ews/soap/exchange_web_service'
+
 require 'ews/connection'
 
 # Load the model classes
