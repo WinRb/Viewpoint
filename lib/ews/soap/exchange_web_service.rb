@@ -30,16 +30,18 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa565329.aspx ResolveNames
     # @see http://msdn.microsoft.com/en-us/library/aa581054.aspx UnresolvedEntry
     #
-    # @param [String] name an unresolved entry
-    # @param [Boolean] full_contact_data whether or not to return full contact info
-    # @param [Hash] opts optional parameters to this method
+    # @param [Hash] opts
+    # @option opts [String] :name the unresolved entry
+    # @option opts [Boolean] :full_contact_data (true) Whether or not to return the
+    #   full contact details.
     # @option opts [String] :search_scope where to seach for this entry, one of
     #   SOAP::Contacts, SOAP::ActiveDirectory, SOAP::ActiveDirectoryContacts (default),
     #   SOAP::ContactsActiveDirectory
     # @option opts [String, FolderId] :parent_folder_id either the name of a folder or
     #   it's numerical ID.  @see http://msdn.microsoft.com/en-us/library/aa565998.aspx
-    def resolve_names(name, full_contact_data = true, opts = {})
-      attribs = {:ReturnFullContactData => full_contact_data.to_s}
+    def resolve_names(opts)
+      fcd = opts.has_key?(:full_contact_data) ? opts[:full_contact_data] : true
+      attribs = {:ReturnFullContactData => fcd.to_s}
       attribs[:SearchScope] = opts[:search_scope] if opts[:search_scope]
 
       req = build_soap! do |type, builder|
@@ -48,61 +50,63 @@ module Viewpoint::EWS::SOAP
         builder.nbuild.ResolveNames(attribs) {
           builder.nbuild.parent.default_namespace = @default_ns
           # @todo builder.nbuild.ParentFolderIds
-          builder.nbuild.UnresolvedEntry(name)
+          builder.nbuild.UnresolvedEntry(opts[:name])
         }
         end
       end
-      resp = Nokogiri::XML(send_soap_request(req.doc.to_xml))
-      #parse!(resp)
+      resp = Nokogiri::XML(send_soap_request(req))
+      parse!(resp)
     end
 
     # Exposes the full membership of distribution lists.
     # @see http://msdn.microsoft.com/en-us/library/aa494152.aspx ExpandDL
     #
-    # @param [String] dist_email The e-mail address associated with the Distribution List
     # @todo Fully support all of the ExpandDL operations. Today it just supports
     #   taking an e-mail address as an argument
-    def expand_dl(dist_email)
+    # @param [Hash] opts
+    # @option opts [String] :email_address The e-mail address of the distribution to resolve
+    # @option opts [Hash] :item_id The ItemId of the private distribution to resolve.
+    #   {:id => 'my id'}
+    def expand_dl(opts)
       req = build_soap! do |type, builder|
         if(type == :header)
         else
         builder.nbuild.ExpandDL {
           builder.nbuild.parent.default_namespace = @default_ns
           builder.nbuild.Mailbox {
-            builder.nbuild.parent.default_namespace = NAMESPACES["xmlns:#{NS_EWS_TYPES}"]
-            builder.nbuild.EmailAddress(dist_email)
+            builder.nbuild[NS_EWS_TYPES].EmailAddress(opts[:email_address]) if opts[:email_address]
+            builder.item_id! if opts[:item_id]
           }
         }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
-
-      #parse!(resp)
+      resp = Nokogiri::XML(send_soap_request(req))
+      parse!(resp)
     end
 
     # Find subfolders of an identified folder
     # @see http://msdn.microsoft.com/en-us/library/aa563918.aspx
     #
-    # @param [Array<Hash>] parent_folder_ids An Array of folder id Hashes, either a
+    # @param [Hash] opts
+    # @option opts [Array<Hash>] :parent_folder_ids An Array of folder id Hashes, either a
     #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
     #   [{:id => <myid>, :change_key => <ck>}, {:id => :root}]
-    # @param [String] traversal Shallow/Deep/SoftDeleted
-    # @param [Hash] folder_shape defines the FolderShape node
+    # @option opts [String] :traversal Shallow/Deep/SoftDeleted
+    # @option opts [Hash] :folder_shape defines the FolderShape node
     #   See: http://msdn.microsoft.com/en-us/library/aa494311.aspx
     # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
     # @option folder_shape :additional_properties
     #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
-    # @param [Hash] opts optional parameters to this method
-    def find_folder(parent_folder_ids = [{:id => :root}], traversal = 'Shallow', folder_shape = {:base_shape => 'Default'}, opts = {})
+    def find_folder(opts)
       req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.nbuild.FindFolder(:Traversal => traversal) {
+          builder.nbuild.FindFolder(:Traversal => opts[:traversal]) {
             builder.nbuild.parent.default_namespace = @default_ns
-            builder.folder_shape!(folder_shape)
+            builder.folder_shape!(opts[:folder_shape])
             # @todo add FractionalPageFolderView
             builder.restriction!(opts[:restriction]) if opts[:restriction]
-            builder.nbuild.parent_folder_ids!(parent_folder_ids)
+            builder.nbuild.parent_folder_ids!(opts[:parent_folder_ids])
           }
         end
       end
@@ -113,32 +117,31 @@ module Viewpoint::EWS::SOAP
     # Identifies items that are located in a specified folder
     # @see http://msdn.microsoft.com/en-us/library/aa566107.aspx
     #
-    # @param [Array<Hash>] parent_folder_ids An Array of folder id Hashes, either a
+    # @param [Hash] opts
+    # @option opts [Array<Hash>] :parent_folder_ids An Array of folder id Hashes, either a
     #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
     #   [{:id => <myid>, :change_key => <ck>}, {:id => :root}]
-    # @param [String] traversal Shallow/Deep/SoftDeleted
-    # @param [Hash] item_shape defines the FolderShape node
-    #   See: http://msdn.microsoft.com/en-us/library/aa494311.aspx
+    # @option opts [String] :traversal Shallow/Deep/SoftDeleted
+    # @option opts [Hash] :item_shape defines the ItemShape node
     # @option item_shape [String] :base_shape IdOnly/Default/AllProperties
     # @option item_shape :additional_properties
     #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
-    # @param [Hash] opts optional parameters to this method
     # @option opts [Hash] :calendar_view Limit FindItem by a start and end date
     #   {:calendar_view => {:max_entries_returned => 2, :start_date => <DateTime Obj>, :end_date => <DateTime Obj>}}
     # @option opts [Hash] :contacts_view Limit FindItem between contact names
     #   {:contacts_view => {:max_entries_returned => 2, :initial_name => 'Dan', :final_name => 'Wally'}}
-    def find_item(parent_folder_ids, traversal = 'Shallow', item_shape = {:base_shape => 'Default'}, opts = {})
+    def find_item(opts)
       req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.nbuild.FindItem(:Traversal => traversal) {
+          builder.nbuild.FindItem(:Traversal => opts[:traversal]) {
             builder.nbuild.parent.default_namespace = @default_ns
-            builder.item_shape!(item_shape)
+            builder.item_shape!(opts[:item_shape])
             # @todo add FractionalPageFolderView
             builder.calendar_view!(opts[:calendar_view]) if opts[:calendar_view]
             builder.contacts_view!(opts[:contacts_view]) if opts[:contacts_view]
             builder.restriction!(opts[:restriction]) if opts[:restriction]
-            builder.nbuild.parent_folder_ids!(parent_folder_ids)
+            builder.nbuild.parent_folder_ids!(opts[:parent_folder_ids])
           }
         end
       end
@@ -150,25 +153,23 @@ module Viewpoint::EWS::SOAP
     # Gets folders from the Exchange store
     # @see http://msdn.microsoft.com/en-us/library/aa580274.aspx
     #
-    # @param [Array<Hash>] folder_ids An array of folder_ids in the form:
+    # @param [Hash] opts
+    # @option opts [Array<Hash>] :folder_ids An array of folder_ids in the form:
     #   [ {:id => 'myfolderID##asdfs', :change_key => 'asdfasdf'},
     #     {:id => :msgfolderroot} ]  # Don't do this for real
-    # @param [Hash] folder_shape defines the FolderShape node
-    #   See: http://msdn.microsoft.com/en-us/library/aa494311.aspx
+    # @option opts [Hash] :folder_shape defines the FolderShape node
     # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
     # @option folder_shape :additional_properties
-    #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
-    # @param [String,nil] act_as User to act on behalf as.  This user must have been
+    # @option opts [String,nil] :act_as User to act on behalf as.  This user must have been
     #   given delegate access to this folder or else this operation will fail.
-    # @param [Hash] opts optional parameters to this method
-    def get_folder(folder_ids, folder_shape = {:base_shape => 'Default'}, act_as = nil)
+    def get_folder(opts)
       req = build_soap! do |type, builder|
         if(type == :header)
         else
           builder.nbuild.GetFolder {
             builder.nbuild.parent.default_namespace = @default_ns
-            builder.folder_shape!(folder_shape)
-            builder.folder_ids!(folder_ids, act_as)
+            builder.folder_shape!(opts[:folder_shape])
+            builder.folder_ids!(opts[:folder_ids], opts[:act_as])
           }
         end
       end
@@ -184,23 +185,24 @@ module Viewpoint::EWS::SOAP
     # Creates folders, calendar folders, contacts folders, tasks folders, and search folders.
     # @see http://msdn.microsoft.com/en-us/library/aa563574.aspx CreateFolder
     #
-    # @param [Hash] parent_folder_id A hash with either the name of a folder or it's
+    # @param [Hash] opts
+    # @option opts [Hash] :parent_folder_id A hash with either the name of a folder or it's
     #   numerical ID.  See: http://msdn.microsoft.com/en-us/library/aa565998.aspx
     #   {:id => :root}  or {:id => 'myfolderid#'}
-    # @param [Array<Hash>] folders An array of hashes of folder types that conform to
+    # @option opts [Array<Hash>] :folders An array of hashes of folder types that conform to
     #   input for build_xml!
     #   @example [ {:folder =>
     #               {:sub_elements => [{:display_name => {:text => 'New Folder'}}]}},
     #              {:calendar_folder =>
     #               {:sub_elements => [{:display_name => {:text => 'Agenda'}}]}} ]
-    def create_folder(parent_folder_id, folders)
+    def create_folder(opts)
       req = build_soap! do |type, builder|
         if(type == :header)
         else
           builder.nbuild.CreateFolder {
             builder.nbuild.parent.default_namespace = @default_ns
-            builder.nbuild.parent_folder_id!(parent_folder_id)
-            builder.folders!(folders)
+            builder.nbuild.parent_folder_id!(opts[:parent_folder_id])
+            builder.folders!(opts[:folders])
           }
         end
       end
@@ -212,17 +214,21 @@ module Viewpoint::EWS::SOAP
     # Deletes folders from a mailbox.
     # @see http://msdn.microsoft.com/en-us/library/aa564767.aspx DeleteFolder
     #
-    # @param [Array<Hash>] folder_ids An array of folder_ids in the form:
+    # @param [Hash] opts
+    # @option opts [Array<Hash>] :folder_ids An array of folder_ids in the form:
     #   [ {:id => 'myfolderID##asdfs', :change_key => 'asdfasdf'},
     #     {:id => :msgfolderroot} ]  # Don't do this for real
-    # @param [String,nil] delete_type Type of delete to do: HardDelete/SoftDelete/MoveToDeletedItems
-    def delete_folder(folder_ids, delete_type = 'MoveToDeletedItems', act_as = nil)
+    # @option opts [String,nil] :delete_type Type of delete to do:
+    #   HardDelete/SoftDelete/MoveToDeletedItems
+    # @option opts [String,nil] :act_as User to act on behalf as.  This user must have been
+    #   given delegate access to this folder or else this operation will fail.
+    def delete_folder(opts)
       req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.nbuild.DeleteFolder('DeleteType' => delete_type) {
+          builder.nbuild.DeleteFolder('DeleteType' => opts[:delete_type]) {
             builder.nbuild.parent.default_namespace = @default_ns
-            builder.folder_ids!(folder_ids, act_as)
+            builder.folder_ids!(opts[:folder_ids], opts[:act_as])
           }
         end
       end
@@ -260,10 +266,10 @@ module Viewpoint::EWS::SOAP
     
     # Defines a request to move folders in the Exchange store
     # @see http://msdn.microsoft.com/en-us/library/aa566202(v=EXCHG.140).aspx
-    # @param [Hash] to_fid The target FolderId {:id => <myid>, :change_key => <optional ck>}
     # @param [Array<Hash>] sources The source Folders
     #   [ {:id => <myid>, :change_key => <optional_ck>} ]
-    def move_folder(to_fid, sources)
+    # @param [Hash] to_fid The target FolderId {:id => <myid>, :change_key => <optional ck>}
+    def move_folder(sources, to_fid)
       req = build_soap! do |type, builder|
         if(type == :header)
         else
@@ -279,10 +285,10 @@ module Viewpoint::EWS::SOAP
 
     # Defines a request to copy folders in the Exchange store
     # @see http://msdn.microsoft.com/en-us/library/aa563949(v=EXCHG.140).aspx
-    # @param [Hash] to_fid The target FolderId {:id => <myid>, :change_key => <optional ck>}
     # @param [Array<Hash>] sources The source Folders
     #   [ {:id => <myid>, :change_key => <optional_ck>} ]
-    def copy_folder(to_fid, sources)
+    # @param [Hash] to_fid The target FolderId {:id => <myid>, :change_key => <optional ck>}
+    def copy_folder(sources, to_fid)
       req = build_soap! do |type, builder|
         if(type == :header)
         else
