@@ -249,6 +249,7 @@ module Viewpoint
       def find_items(opts = {})
         opts = opts.clone # clone the passed in object so we don't modify it in case it's being used in a loop
         item_shape = opts.has_key?(:item_shape) ? opts.delete(:item_shape) : {:base_shape => 'Default'}
+        shallow = item_shape[:base_shape] != 'AllProperties'
         unless item_shape.has_key?(:additional_properties) # Don't overwrite if specified by caller
           item_shape[:additional_properties] = {:field_uRI => ['item:ParentFolderId']}
         end
@@ -258,7 +259,7 @@ module Viewpoint
           items = []
           resp.items.each do |i|
             i_type = i.keys.first
-            items << (eval "#{i_type.to_s.camel_case}.new(i[i_type])")
+            items << (eval "#{i_type.to_s.camel_case}.new(i[i_type], :shallow => #{shallow})")
           end
           return items
         else
@@ -383,6 +384,7 @@ module Viewpoint
       #   See: http://msdn.microsoft.com/en-us/library/aa565609.aspx
       def sync_items!(sync_amount = 256, sync_all = false, opts = {})
         item_shape = opts.has_key?(:item_shape) ? opts.delete(:item_shape) : {:base_shape => 'Default'}
+        shallow = item_shape[:base_shape] != 'AllProperties'
         resp = (Viewpoint::EWS::EWS.instance).ews.sync_folder_items(@folder_id, @sync_state, sync_amount, item_shape)
         parms = resp.items.shift
         @sync_state = parms[:sync_state]
@@ -395,10 +397,18 @@ module Viewpoint
             items[key] << i[key][:item_id]
           else
             i_type = i[key].keys.first
-            items[key] << (eval "#{i_type.to_s.camel_case}.new(i[key][i_type])")
+            next if !i_type
+            items[key] << (eval "#{i_type.to_s.camel_case}.new(i[key][i_type], :shallow => #{shallow})")
           end
         end
         items
+      end
+
+      # Fetch current synced state (comes from synchronizing elements).
+      # @return [Boolean] Current synchronization state, i.e. whether sync_items! needs to be called
+      #         again to finish the pending rounds of synchronization requests.
+      def synced
+        @synced
       end
 
       # This is basically a work-around for Microsoft's BPOS hosted Exchange, which does not support
