@@ -33,11 +33,12 @@ module Viewpoint
       # @todo Add support to fetch an item with a ChangeKey
       def self.get_item(item_id, shape = :default)
         item_shape = {:base_shape => shape.to_s.camelcase}
+        shallow = item_shape[:base_shape] != 'AllProperties'
         resp = (Viewpoint::EWS::EWS.instance).ews.get_item([item_id], item_shape)
         if(resp.status == 'Success')
           item = resp.items.shift
           type = item.keys.first
-          eval "#{type.to_s.camel_case}.new(item[type])"
+          eval "#{type.to_s.camel_case}.new(item[type], :shallow => #{shallow})"
         else
           raise EwsError, "Could not retrieve item. #{resp.code}: #{resp.message}"
         end
