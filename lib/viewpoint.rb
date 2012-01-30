@@ -81,3 +81,6 @@ require 'ews/model/task'
 require 'ews/model/attachment'
 require 'ews/model/file_attachment'
 require 'ews/model/item_attachment'
+
+# The proxy between the models and the web service
+require 'ews/ews_client'
