@@ -54,8 +54,7 @@ module Viewpoint::EWS::SOAP
         }
         end
       end
-      resp = Nokogiri::XML(send_soap_request(req))
-      parse!(resp)
+      do_soap_request(req)
     end
 
     # Exposes the full membership of distribution lists.
@@ -80,8 +79,7 @@ module Viewpoint::EWS::SOAP
         }
         end
       end
-      resp = Nokogiri::XML(send_soap_request(req))
-      parse!(resp)
+      do_soap_request(req)
     end
 
     # Find subfolders of an identified folder
@@ -110,8 +108,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
-      #parse!(resp)
+      do_soap_request(req)
     end
 
     # Identifies items that are located in a specified folder
@@ -145,9 +142,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
-
-      #parse!(resp)
+      do_soap_request(req)
     end
 
     # Gets folders from the Exchange store
@@ -173,9 +168,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
-
-      #parse!(resp)
+      do_soap_request(req)
     end
 
     # @todo
@@ -206,9 +199,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
-
-      #parse!(resp)
+      do_soap_request(req)
     end
 
     # Deletes folders from a mailbox.
@@ -232,9 +223,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
-
-      #parse!(resp)
+      do_soap_request(req)
     end
 
     # Update properties for a specified folder
@@ -261,7 +250,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
+      do_soap_request(req)
     end
     
     # Defines a request to move folders in the Exchange store
@@ -280,7 +269,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
+      do_soap_request(req)
     end
 
     # Defines a request to copy folders in the Exchange store
@@ -299,7 +288,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
+      do_soap_request(req)
     end
 
     # Used to subscribe client applications to either push, pull or stream notifications.
@@ -342,7 +331,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
+      do_soap_request(req)
     end
 
     # End a pull notification subscription.
@@ -359,8 +348,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
-      #parse!(resp)
+      do_soap_request(req)
     end
 
     # Used by pull subscription clients to request notifications from the Client Access server
@@ -379,7 +367,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
+      do_soap_request(req)
     end
 
     # Defines a request to synchronize a folder hierarchy on a client
@@ -404,7 +392,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
+      do_soap_request(req)
     end
 
     # Synchronizes items between the Exchange server and the client
@@ -438,8 +426,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
-      #parse!(resp)
+      do_soap_request(req)
     end
 
     # Gets items from the Exchange store
@@ -471,8 +458,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
-      #parse!(resp)
+      do_soap_request(req)
     end
 
     # Defines a request to create an item in the Exchange store.
@@ -519,8 +505,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
-      #parse!(resp)
+      do_soap_request(req)
     end
 
     # Delete an item from a mailbox in the Exchange store
@@ -558,7 +543,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
+      do_soap_request(req)
     end
 
     # Used to modify the properties of an existing item in the Exchange store
@@ -607,7 +592,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
+      do_soap_request(req)
     end
 
     # Used to send e-mail messages that are located in the Exchange store.
@@ -641,7 +626,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
+      do_soap_request(req)
     end
 
     # Used to move one or more items to a single destination folder.
@@ -676,7 +661,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
+      do_soap_request(req)
     end
 
     # Copies items and puts the items in a different folder
@@ -711,7 +696,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      puts "DOC:\n#{req.to_xml}"
+      do_soap_request(req)
     end
 
     # Creates either an item or file attachment and attaches it to the specified item.
@@ -878,14 +863,15 @@ module Viewpoint::EWS::SOAP
       XmlBuilder.new.build!(&block)
     end
 
-    # Send the SOAP request to the endpoint
+    # Send the SOAP request to the endpoint and parse it.
     # @param [String] soapmsg an XML formatted string
     # @todo make this work for Viewpoint (imported from SPWS)
-    def send_soap_request(soapmsg)
+    def do_soap_request(soapmsg)
       @log.debug "Sending SOAP Request:\n----------------\n#{soapmsg}\n----------------"
       respmsg = @con.post(soapmsg)
       @log.debug "Received SOAP Response:\n----------------\n#{Nokogiri::XML(respmsg).to_xml}\n----------------"
-      respmsg
+      ndoc = Nokogiri::XML(respmsg)
+      parse!(ndoc)
     end
 
   end # class ExchangeWebService
