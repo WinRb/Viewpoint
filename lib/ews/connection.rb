@@ -65,8 +65,8 @@ class Viewpoint::EWS::Connection
   def parse_soap_error(xml)
     ndoc = Nokogiri::XML(xml)
     ns = ndoc.collect_namespaces
-    err_string  = ndoc.xpath("//xmlns:errorstring",ns).text
-    err_code    = ndoc.xpath("//xmlns:errorcode",ns).text
+    err_string  = ndoc.xpath("//faultstring",ns).text
+    err_code    = ndoc.xpath("//faultcode",ns).text
     @log.debug "Internal SOAP error. Message: #{err_string}, Code: #{err_code}"
     [err_string, err_code]
   end
