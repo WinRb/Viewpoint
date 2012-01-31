@@ -33,8 +33,9 @@ module Viewpoint::EWS::SOAP
 
     def find_folder_response(opts)
       folders = []
-      (@response/"//#{NS_EWS_MESSAGES}:FindFolderResponseMessage//#{NS_EWS_TYPES}:Folders/*").each do |f|
-        folders << xml_to_hash!(f.native_element)
+      query = "//#{NS_EWS_MESSAGES}:FindFolderResponseMessage//#{NS_EWS_TYPES}:Folders/*"
+      @response.xpath(query, NAMESPACES).each do |f|
+        folders << xml_to_hash!(f)
       end
       @response_message.items = folders
     end
@@ -42,8 +43,9 @@ module Viewpoint::EWS::SOAP
     def create_folder_response(opts)
       if(@response_message.status == 'Success')
         folders = []
-        (@response/"//#{NS_EWS_MESSAGES}:Folders/*").each do |f|
-          folders << xml_to_hash!(f.native_element)
+        query = "//#{NS_EWS_MESSAGES}:Folders/*"
+        @response.xpath(query, NAMESPACES).each do |f|
+          folders << xml_to_hash!(f)
         end
         @response_message.items = folders
       else
@@ -52,7 +54,9 @@ module Viewpoint::EWS::SOAP
     end
 
     def delete_folder_response(opts)
-      raise EwsError, "#{@response_message.code}: #{@response_message.message}" unless @response_message.status == 'Success'
+      if @response_message.status != 'Success'
+        raise EwsError, "#{@response_message.code}: #{@response_message.message}"
+      end
     end
 
     def get_events_response(opts)

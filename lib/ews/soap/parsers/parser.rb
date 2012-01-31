@@ -22,12 +22,13 @@ module Viewpoint::EWS::SOAP
     def initialize(response)
       # Unwrap SOAP Envelope
       @response = response
+      @namespaces = response.collect_namespaces
       @response_type = (response/"//#{NS_SOAP}:Body/*").first.node_name
 
       rmsg = (response/'//*[@ResponseClass]').first
       @response_message = EwsSoapResponse.new(rmsg['ResponseClass'],
-                                              (rmsg/'m:ResponseCode/text()').first.to_s,
-                                              (rmsg/'m:MessageText/text()').first.to_s)
+                                              (rmsg/"#{NS_EWS_MESSAGES}:ResponseCode/text()").first.to_s,
+                                              (rmsg/"#{NS_EWS_MESSAGES}:MessageText/text()").first.to_s)
       @response_message.set_soap_resp(response)
     end
 

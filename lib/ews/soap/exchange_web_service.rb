@@ -110,7 +110,7 @@ module Viewpoint::EWS::SOAP
             builder.folder_shape!(opts[:folder_shape])
             # @todo add FractionalPageFolderView
             builder.restriction!(opts[:restriction]) if opts[:restriction]
-            builder.nbuild.parent_folder_ids!(opts[:parent_folder_ids])
+            builder.parent_folder_ids!(opts[:parent_folder_ids])
           }
         end
       end
