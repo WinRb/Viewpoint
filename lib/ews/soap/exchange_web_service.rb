@@ -95,6 +95,12 @@ module Viewpoint::EWS::SOAP
     # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
     # @option folder_shape :additional_properties
     #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
+    # @option opts [Hash] :restriction A well formatted restriction Hash.
+    # @example
+    #   { :parent_folder_ids => [{:id => root}],
+    #     :traversal => 'Deep',
+    #     :folder_shape  => {:base_shape => 'Default'},
+    #   }
     def find_folder(opts)
       req = build_soap! do |type, builder|
         if(type == :header)
@@ -230,7 +236,7 @@ module Viewpoint::EWS::SOAP
     # There is a lot more building in this method because most of the builders are only used
     # for this operation so there was no need to externalize them for re-use.
     # @see http://msdn.microsoft.com/en-us/library/aa580519(v=EXCHG.140).aspx
-    # @param [Array<Hash>] folder_changes an Array of well-formatted Hashes
+    # @param [Array<Hash>] folder_changes an Array of well formatted Hashes
     def update_folder(folder_changes)
       req = build_soap! do |type, builder|
         if(type == :header)
@@ -470,7 +476,7 @@ module Viewpoint::EWS::SOAP
     # @option opts [String] :send_meeting_invitations How meeting requests are handled after they
     #   are created. Required for calendar items. Must be one of 'SendToNone', 'SendOnlyToAll',
     #   'SendToAllAndSaveCopy'
-    # @option opts [Hash] :saved_item_folder_id A well-formatted folder_id Hash. Ex: {:id => :inbox}
+    # @option opts [Hash] :saved_item_folder_id A well formatted folder_id Hash. Ex: {:id => :inbox}
     #   Will on work if 'SendOnly' is specified for :message_disposition
     # @option opts [Array<Hash>] :items This is a complex Hash that conforms to various Item types.
     #   Please see the Microsoft documentation for this element.
@@ -558,7 +564,7 @@ module Viewpoint::EWS::SOAP
     # @option opts [String] :send_meeting_invitations_or_cancellations How meeting requests are
     #   handled after they are updated. Required for calendar items. Must be one of 'SendToNone',
     #   'SendOnlyToAll', 'SendOnlyToChanged', 'SendToAllAndSaveCopy', 'SendToChangedAndSaveCopy'
-    # @option opts [Hash] :saved_item_folder_id A well-formatted folder_id Hash. Ex: {:id => :sentitems}
+    # @option opts [Hash] :saved_item_folder_id A well formatted folder_id Hash. Ex: {:id => :sentitems}
     #   Will on work if 'SendOnly' is specified for :message_disposition
     # @option opts [Array<Hash>] :item_changes an array of ItemChange elements that identify items
     #   and the updates to apply to the items. See the Microsoft docs for more information.
@@ -600,7 +606,7 @@ module Viewpoint::EWS::SOAP
     #
     # @param [Hash] opts
     # @option opts [Boolean] :save_item_to_folder To save or not to save... save! :-)
-    # @option opts [Hash] :saved_item_folder_id A well-formatted folder_id Hash. Ex: {:id => :sentitems}
+    # @option opts [Hash] :saved_item_folder_id A well formatted folder_id Hash. Ex: {:id => :sentitems}
     # @option opts [Array<Hash>] :item_ids ItemIds Hash. The keys in these Hashes can be
     #   :item_id, :occurrence_item_id, or :recurring_master_item_id. Please see the
     #   Microsoft docs for more information.
@@ -633,7 +639,7 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa565781(v=exchg.140).aspx
     #
     # @param [Hash] opts
-    # @option opts [Hash] :to_folder_id A well-formatted folder_id Hash. Ex: {:id => :inbox}
+    # @option opts [Hash] :to_folder_id A well formatted folder_id Hash. Ex: {:id => :inbox}
     # @option opts [Array<Hash>] :item_ids ItemIds Hash. The keys in these Hashes can be
     #   :item_id, :occurrence_item_id, or :recurring_master_item_id. Please see the
     #   Microsoft docs for more information.
@@ -668,7 +674,7 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa565012(v=exchg.140).aspx
     #
     # @param [Hash] opts
-    # @option opts [Hash] :to_folder_id A well-formatted folder_id Hash. Ex: {:id => :inbox}
+    # @option opts [Hash] :to_folder_id A well formatted folder_id Hash. Ex: {:id => :inbox}
     # @option opts [Array<Hash>] :item_ids ItemIds Hash. The keys in these Hashes can be
     #   :item_id, :occurrence_item_id, or :recurring_master_item_id. Please see the
     #   Microsoft docs for more information.
