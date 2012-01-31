@@ -34,8 +34,8 @@ module Viewpoint
 
 
       # initialize with an item of CalendarFolderType
-      def initialize(folder)
-        super(folder)
+      def initialize(ews, folder)
+        super(ews, folder)
 
         # @todo Handle:
         #   <SharingEffectiveRights/>

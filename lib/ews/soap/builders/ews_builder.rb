@@ -360,7 +360,7 @@ module Viewpoint::EWS::SOAP
 
     # @see http://msdn.microsoft.com/en-us/library/aa566325(v=EXCHG.140).aspx
     def max_changes_returned!(cnum)
-      @nbuild[NS_EWS_TYPES].MaxChangesReturned(cnum)
+      @nbuild[NS_EWS_MESSAGES].MaxChangesReturned(cnum)
     end
 
     # @see http://msdn.microsoft.com/en-us/library/dd899531(v=EXCHG.140).aspx

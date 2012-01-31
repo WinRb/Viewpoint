@@ -99,8 +99,7 @@ module Viewpoint::EWS::SOAP
     # @example
     #   { :parent_folder_ids => [{:id => root}],
     #     :traversal => 'Deep',
-    #     :folder_shape  => {:base_shape => 'Default'},
-    #   }
+    #     :folder_shape  => {:base_shape => 'Default'} }
     def find_folder(opts)
       req = build_soap! do |type, builder|
         if(type == :header)
@@ -163,6 +162,9 @@ module Viewpoint::EWS::SOAP
     # @option folder_shape :additional_properties
     # @option opts [String,nil] :act_as User to act on behalf as.  This user must have been
     #   given delegate access to this folder or else this operation will fail.
+    # @example
+    #   { :folder_ids   => [{:id => :msgfolderroot}],
+    #     :folder_shape => {:base_shape => 'Default'} }
     def get_folder(opts)
       req = build_soap! do |type, builder|
         if(type == :header)
@@ -408,7 +410,7 @@ module Viewpoint::EWS::SOAP
     #   Ex: {:base_shape => 'Default', :additional_properties => 'bla bla bla'}
     # @option opts [Hash] :sync_folder_id A Hash that represents a FolderId or
     #   DistinguishedFolderId. [ Ex: {:id => :inbox} ] OPTIONAL
-    # @option opts [Hash] :sync_state The Base64 sync state id. If this is the
+    # @option opts [String] :sync_state The Base64 sync state id. If this is the
     #   first time syncing this does not need to be passed. OPTIONAL on first call
     # @option opts [Array <String>] :ignore An Array of ItemIds for items to ignore
     #   during the sync process. Ex: [{:id => 'id1', :change_key => 'ck'}, {:id => 'id2'}]
@@ -417,6 +419,11 @@ module Viewpoint::EWS::SOAP
     # @option opts [String] :sync_scope specifies whether just items or items and folder associated
     #   information are returned. OPTIONAL
     #   options: 'NormalItems' or 'NormalAndAssociatedItems'
+    # @example
+    #   { :item_shape => {:base_shape => 'Default'},
+    #     :sync_folder_id => {:id => :inbox},
+    #     :sync_state => myBase64id,
+    #     :max_changes_returned => 256 }
     def sync_folder_items(opts)
       req = build_soap! do |type, builder|
         if(type == :header)

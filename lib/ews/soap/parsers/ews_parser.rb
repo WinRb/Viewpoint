@@ -189,10 +189,13 @@ module Viewpoint::EWS::SOAP
       if(@response_message.status == 'Success')
         sync = []
         sync << {}
-        sync.first[:sync_state] = (@response/"//#{NS_EWS_MESSAGES}:SyncState").first.to_s
-        sync.first[:includes_last_item_in_range] = (@response/"//#{NS_EWS_MESSAGES}:IncludesLastItemInRange").first.to_boolean
-        (@response/"//m:Changes/*").each do |c|
-          sync << xml_to_hash!(c.native_element)
+        q = "//#{NS_EWS_MESSAGES}:SyncState"
+        sync.first[:sync_state] = @response.xpath(q,NAMESPACES).first.text
+        q = "//#{NS_EWS_MESSAGES}:IncludesLastItemInRange"
+        li = @response.xpath(q, NAMESPACES).first.text
+        sync.first[:includes_last_item_in_range] = (li =~ /true/i ? true : false)
+        @response.xpath("//m:Changes/*",NAMESPACES).each do |c|
+          sync << xml_to_hash!(c)
         end
         @response_message.items = sync
       else
@@ -236,8 +239,9 @@ module Viewpoint::EWS::SOAP
 
     def folders
       folders = []
-      (@response/"//#{NS_EWS_MESSAGES}:Folders/*").each do |f|
-        folders << xml_to_hash!(f.native_element)
+      query = "//#{NS_EWS_MESSAGES}:Folders/*"
+      @response.xpath(query, NAMESPACES).each do |f|
+        folders << xml_to_hash!(f)
       end
       folders
     end

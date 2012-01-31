@@ -37,8 +37,8 @@ module Viewpoint
 
       # Initialize with an item of FolderType.  This is typically the folder
       # used to house mail messages.
-      def initialize(folder)
-        super(folder)
+      def initialize(ews, folder)
+        super(ews, folder)
         define_int_var :unread_count
       end
 

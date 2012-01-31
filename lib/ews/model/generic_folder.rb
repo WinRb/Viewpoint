@@ -38,54 +38,6 @@ module Viewpoint
 
       @@event_types = %w{CopiedEvent CreatedEvent DeletedEvent ModifiedEvent MovedEvent NewMailEvent}
 
-      # Get a specific folder by its ID.
-      # @param [String,Symbol] folder_id either a DistinguishedFolderID or simply a FolderID
-      # @param [String,nil] act_as User to act on behalf as.  This user must have been given
-      #   delegate access to this folder or else this operation will fail.
-      # @param [Hash] folder_shape
-      # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
-      # @raise [EwsError] raised when the backend SOAP method returns an error.
-      def self.get_folder(folder_id, act_as = nil, folder_shape = {:base_shape => 'Default'})
-        resp = (Viewpoint::EWS::EWS.instance).ews.get_folder( [normalize_id(folder_id)], folder_shape, act_as )
-        if(resp.status == 'Success')
-          folder = resp.items.first
-          f_type = folder.keys.first.to_s.camel_case
-          return(eval "#{f_type}.new(folder[folder.keys.first])")
-        else
-          raise EwsError, "Could not retrieve folder. #{resp.code}: #{resp.message}"
-        end
-      end
-
-      # Find subfolders of the passed root folder.  If no parameters are passed
-      # this method will search from the Root folder.
-      # @param [String,Symbol] root An folder id, either a DistinguishedFolderId (must me a Symbol)
-      #   or a FolderId (String). This is where to start the search from. Usually :root,:msgfolderroot,:publicfoldersroot
-      # @param [String] traversal Shallow/Deep/SoftDeleted
-      # @param [String] shape the shape to return IdOnly/Default/AllProperties
-      # @param [optional, String] folder_type an optional folder type to limit the search to like 'IPF.Task'
-      # @return [Array] Returns an Array of Folder or subclasses of Folder
-      # @raise [EwsError] raised when the backend SOAP method returns an error.
-      def self.find_folders(root = :msgfolderroot, traversal = 'Shallow', shape = 'Default', folder_type = nil)
-        if( folder_type.nil? )
-          resp = (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal, {:base_shape => shape} )
-        else
-          restr = {:restriction => 
-            {:is_equal_to => [{:field_uRI => {:field_uRI=>'folder:FolderClass'}}, {:field_uRI_or_constant=>{:constant => {:value => folder_type}}}]}
-          }
-          resp = (Viewpoint::EWS::EWS.instance).ews.find_folder( [normalize_id(root)], traversal, {:base_shape => shape}, restr)
-        end
-
-        if(resp.status == 'Success')
-          folders = []
-          resp.items.each do |f|
-            f_type = f.keys.first.to_s.camel_case
-            folders << (eval "#{f_type}.new(f[f.keys.first])")
-          end
-          return folders
-        else
-          raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
-        end
-      end
 
       # Return a list of folder names
       # @param [String,Symbol] root An folder id, either a DistinguishedFolderId (must me a Symbol)
@@ -157,8 +109,9 @@ module Viewpoint
       attr_reader :subscription_id, :watermark
       alias :id :folder_id
 
-      def initialize(ews_item)
+      def initialize(ews, ews_item)
         super() # Calls initialize in Model (creates @ews_methods Array)
+        @ews = ews
         @ews_item = ews_item
         @folder_id = ews_item[:folder_id][:id]
         @ews_methods << :folder_id
@@ -383,9 +336,12 @@ module Viewpoint
       #   {:id=>"item id", :change_key=>"change key"}
       #   See: http://msdn.microsoft.com/en-us/library/aa565609.aspx
       def sync_items!(sync_amount = 256, sync_all = false, opts = {})
-        item_shape = opts.has_key?(:item_shape) ? opts.delete(:item_shape) : {:base_shape => 'Default'}
-        shallow = item_shape[:base_shape] != 'AllProperties'
-        resp = (Viewpoint::EWS::EWS.instance).ews.sync_folder_items(@folder_id, @sync_state, sync_amount, item_shape)
+        item_shape = opts.has_key?(:item_shape) ? opts[:item_shape] : {:base_shape => 'Default'}
+        args = { :sync_folder_id => {:id => @folder_id},
+            :sync_state => @sync_state,
+            :item_shape => item_shape,
+            :max_changes_returned => sync_amount }
+        resp = @ews.sync_folder_items(args)
         parms = resp.items.shift
         @sync_state = parms[:sync_state]
         @synced = parms[:includes_last_item_in_range]

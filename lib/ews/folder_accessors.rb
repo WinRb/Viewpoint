@@ -33,11 +33,33 @@ module Viewpoint::EWS::FolderAccessors
       folders = []
       resp.items.each do |f|
         f_type = f.keys.first.to_s.camel_case
-        folders << (eval "#{f_type}.new(f[f.keys.first])")
+        folders << (eval "#{f_type}.new(@ews, f[f.keys.first])")
       end
       return folders
     else
       raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
+    end
+  end
+
+  # Get a specific folder by its ID.
+  # @param [String,Symbol] folder_id either a DistinguishedFolderID or simply a FolderID
+  # @param [String,nil] act_as User to act on behalf as.  This user must have been given
+  #   delegate access to this folder or else this operation will fail.
+  # @param [Hash] folder_shape
+  # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
+  # @raise [EwsError] raised when the backend SOAP method returns an error.
+  def get_folder(folder_id, act_as = nil, folder_shape = {:base_shape => 'Default'})
+    args =  {
+      :folder_ids   => [{:id => folder_id}],
+      :folder_shape => folder_shape }
+    args[:act_as] = act_as if act_as
+    resp = @ews.get_folder(args)
+    if(resp.status == 'Success')
+      folder = resp.items.first
+      f_type = folder.keys.first.to_s.camel_case
+      return(eval "#{f_type}.new(@ews, folder[folder.keys.first])")
+    else
+      raise EwsError, "Could not retrieve folder. #{resp.code}: #{resp.message}"
     end
   end
 

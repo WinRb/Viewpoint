@@ -34,8 +34,8 @@ module Viewpoint
       end
 
 
-      def initialize(folder)
-        super(folder)
+      def initialize(ews, folder)
+        super(ews, folder)
         define_int_var :unread_count
       end
 
