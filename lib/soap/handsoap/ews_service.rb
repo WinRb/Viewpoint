@@ -234,12 +234,28 @@ module Viewpoint
           parse!(resp)
         end
 
-        def convert_id
+        # Converts item and folder identifiers between formats that are accepted by Microsoft Exchange
+        # @see http://msdn.microsoft.com/en-us/library/bb799665.aspx
+        #
+        # @param [String] id identifier to convert
+        # @param [String] mailbox mailbox where is located the item
+        # @param [String] alternate_id_format Format of the identifier to be converted, by default Exchange Web Services identifier
+        # @param [String] destination_format Destination format, by default Outlook identifier
+        def convert_id(id, mailbox, alternate_id_format = 'EwsId', destination_format = 'HexEntryId')
           action = "#{SOAP_ACTION_PREFIX}/ConvertId"
-          resp = invoke("#{NS_EWS_MESSAGES}:ConvertId", action) do |convert_id|
-            build_convert_id!(convert_id)
+          resp = invoke("#{NS_EWS_MESSAGES}:ConvertId", action) do |root|
+            build!(root) do
+              root.set_attr('DestinationFormat', destination_format)
+              root.add("#{NS_EWS_MESSAGES}:SourceIds") do |source_ids|
+                source_ids.add("#{NS_EWS_TYPES}:AlternateId") do |alternate_id|
+                  alternate_id.set_attr('Format', alternate_id_format)
+                  alternate_id.set_attr('Id', id)
+                  alternate_id.set_attr('Mailbox', mailbox)
+                end
+              end
+            end
           end
-          parse_convert_id(resp)
+          parse!(resp)
         end
 
         # Creates folders, calendar folders, contacts folders, tasks folders, and search folders.
