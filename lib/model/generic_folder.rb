@@ -93,7 +93,7 @@ module Viewpoint
       # @return [Array<String>] Return an Array of folder names.
       # @raise [EwsError] raised when the backend SOAP method returns an error.
       def self.folder_names(root = :msgfolderroot)
-        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([:msgfolderroot], 'Shallow')
+        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([root], 'Shallow')
         if(resp.status == 'Success')
           flds = []
           resp.items.each do |f|
