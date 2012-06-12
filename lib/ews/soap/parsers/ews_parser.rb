@@ -80,10 +80,10 @@ module Viewpoint::EWS::SOAP
     def find_item_response(opts)
       items = []
       items << {}
-      items.first[:total_items_in_view] = (@response/"//#{NS_EWS_MESSAGES}:FindItemResponseMessage/#{NS_EWS_MESSAGES}:RootFolder/@TotalItemsInView").first.to_i
+      items.first[:total_items_in_view] = @response.xpath("//#{NS_EWS_MESSAGES}:FindItemResponseMessage/#{NS_EWS_MESSAGES}:RootFolder/@TotalItemsInView", NAMESPACES).first.content.to_i
 
-      (@response/"//#{NS_EWS_MESSAGES}:FindItemResponseMessage//#{NS_EWS_TYPES}:Items/*").each do |i|
-        items << xml_to_hash!(i.native_element)
+      @response.xpath("//#{NS_EWS_MESSAGES}:FindItemResponseMessage//#{NS_EWS_TYPES}:Items/*", NAMESPACES).each do |i|
+        items << xml_to_hash!(i)
       end
 
       @response_message.items = items

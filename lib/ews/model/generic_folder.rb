@@ -19,13 +19,13 @@
 # This class is inherited by all folder subtypes such as Mail, Calendar,
 # Tasks and Search.  It will serve as the brain for all of the methods that
 # each of these folder types have in common.
-module Viewpoint
-  module EWS
+module Viewpoint::EWS
     # This class is a generic folder that should typically not be instantiated
     # on it's own.  It represents all the commonalities among folders found
     # in the Exchange Data Store of which there are many.
     # @see http://msdn.microsoft.com/en-us/library/aa564009.aspx
     class GenericFolder
+      include EWS
       include Viewpoint
       include Model
 
@@ -197,7 +197,8 @@ module Viewpoint
           parms = resp.items.shift
           items = []
           resp.items.each do |i|
-            items << class_by_name(i.keys.first).new(i[i_type], :shallow => shallow)
+            i_type = i.keys.first
+            items << class_by_name(i_type).new(i[i_type], :shallow => shallow)
           end
           return items
         else
@@ -408,5 +409,4 @@ module Viewpoint
       end
 
     end # GenericFolder
-  end # EWS
-end # Viewpoint
+end # Viewpoint::EWS
