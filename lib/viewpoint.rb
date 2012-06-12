@@ -38,6 +38,15 @@ module Viewpoint
     def self.root_logger
       Logging.logger.root
     end
+
+private
+
+    def class_by_name(cname)
+      if(cname.instance_of? Symbol)
+        cname = cname.to_s.camel_case
+      end
+      Viewpoint::EWS.const_get(cname)
+    end
   end # EWS
 end
 
