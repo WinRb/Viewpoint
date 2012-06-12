@@ -39,24 +39,6 @@ module Viewpoint
       @@event_types = %w{CopiedEvent CreatedEvent DeletedEvent ModifiedEvent MovedEvent NewMailEvent}
 
 
-      # Return a list of folder names
-      # @param [String,Symbol] root An folder id, either a DistinguishedFolderId (must me a Symbol)
-      #   or a FolderId (String). This is where to start the search from. Usually :root,:msgfolderroot,:publicfoldersroot
-      # @return [Array<String>] Return an Array of folder names.
-      # @raise [EwsError] raised when the backend SOAP method returns an error.
-      def self.folder_names(root = :msgfolderroot)
-        resp = (Viewpoint::EWS::EWS.instance).ews.find_folder([root], 'Shallow')
-        if(resp.status == 'Success')
-          flds = []
-          resp.items.each do |f|
-            flds << f[f.keys.first][:display_name][:text]
-          end
-          flds
-        else
-          raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
-        end
-      end
-
       # Gets a folder by name.  This name must match the folder name exactly.
       # @param [String] name The name of the folder to fetch.
       # @param [String,Symbol] root An folder id, either a DistinguishedFolderId (must me a Symbol)
@@ -206,13 +188,16 @@ module Viewpoint
         unless item_shape.has_key?(:additional_properties) # Don't overwrite if specified by caller
           item_shape[:additional_properties] = {:field_uRI => ['item:ParentFolderId']}
         end
-        resp = (Viewpoint::EWS::EWS.instance).ews.find_item([@folder_id], 'Shallow', item_shape, opts)
+        args = {
+          :parent_folder_ids  => [{:id => @folder_id}],
+          :traversal          => 'Shallow',
+          :item_shape         => item_shape }
+        resp = @ews.find_item(args)
         if(resp.status == 'Success')
           parms = resp.items.shift
           items = []
           resp.items.each do |i|
-            i_type = i.keys.first
-            items << (eval "#{i_type.to_s.camel_case}.new(i[i_type], :shallow => #{shallow})")
+            items << class_by_name(i.keys.first).new(i[i_type], :shallow => shallow)
           end
           return items
         else

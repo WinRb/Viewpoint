@@ -1,13 +1,41 @@
 module Viewpoint::EWS::FolderAccessors
   include Viewpoint::EWS
 
-  # Find subfolders of the passed root folder.  If no parameters are passed
-  # this method will search from the Root folder.
-  # @param [String,Symbol] root An folder id, either a DistinguishedFolderId (must me a Symbol)
-  #   or a FolderId (String). This is where to start the search from. Usually :root,:msgfolderroot,:publicfoldersroot
+  # Return a list of folder names
+  # @param [String,Symbol] root A DistinguishedFolderId(symbol) or
+  # FolderId(string). This is where we'll start the search from. Usually :root,
+  # :msgfolderroot, or :publicfoldersroot
+  # @return [Array<String>] Return an Array of folder names.
+  # @raise [EwsError] raised when the backend SOAP method returns an error.
+  def folder_names(root = :msgfolderroot)
+    resp = @ews.find_folder( {
+      :parent_folder_ids  => [{:id => root}],
+      :traversal          => 'Deep',
+      :folder_shape       => {
+        :base_shape => 'IdOnly',
+        :additional_properties => {:FieldURI => ['folder:DisplayName']}
+      }
+    })
+    if(resp.status == 'Success')
+      flds = []
+      resp.items.each do |f|
+        flds << f[f.keys.first][:display_name][:text]
+      end
+      flds
+    else
+      raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
+    end
+  end
+
+  # Find subfolders of the passed root folder.  If no parameters are passed this
+  # method will search from the Root folder.
+  # @param [String,Symbol] root Either a FolderId(String) or a
+  #   DistinguishedFolderId(Symbol) . This is where to start the search from.
+  #   Usually :root,:msgfolderroot, or :publicfoldersroot
   # @param [String] traversal Shallow/Deep/SoftDeleted
   # @param [String] shape the shape to return IdOnly/Default/AllProperties
-  # @param [optional, String] folder_type an optional folder type to limit the search to like 'IPF.Task'
+  # @param [optional, String] folder_type an optional folder type to limit the
+  #   search to like 'IPF.Task'
   # @return [Array] Returns an Array of Folder or subclasses of Folder
   # @raise [EwsError] raised when the backend SOAP method returns an error.
   def find_folders(root = :msgfolderroot, traversal = 'Shallow', shape = 'Default', folder_type = nil)
@@ -26,41 +54,38 @@ module Viewpoint::EWS::FolderAccessors
       :folder_shape => {:base_shape => shape}
     }
     args[:restriction] = restr if restr
-
     resp = @ews.find_folder( args )
-
     if(resp.status == 'Success')
       folders = []
       resp.items.each do |f|
-        f_type = f.keys.first.to_s.camel_case
-        folders << (eval "#{f_type}.new(@ews, f[f.keys.first])")
+        folders << class_by_name(f.keys.first).new(@ews, f[f.keys.first])
       end
-      return folders
+      folders
     else
       raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
     end
   end
 
   # Get a specific folder by its ID.
-  # @param [String,Symbol] folder_id either a DistinguishedFolderID or simply a FolderID
-  # @param [String,nil] act_as User to act on behalf as.  This user must have been given
-  #   delegate access to this folder or else this operation will fail.
-  # @param [Hash] folder_shape
-  # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
+  # @param [String,Symbol] folder_id Either a FolderId(String) or a
+  #   DistinguishedFolderId(Symbol).
+  # @param [String,nil] act_as User to act on behalf as. This user must have
+  #   been given delegate access to the folder or this operation will fail.
+  # @param [Hash] opts Misc options to control request
+  # @option base_shape [String] IdOnly/Default/AllProperties
   # @raise [EwsError] raised when the backend SOAP method returns an error.
-  def get_folder(folder_id, act_as = nil, folder_shape = {:base_shape => 'Default'})
+  def get_folder(folder_id, act_as = nil, opts = {})
+    opts[:base_shape] = 'Default' unless opts[:base_shape]
     args =  {
       :folder_ids   => [{:id => folder_id}],
-      :folder_shape => folder_shape }
+      :folder_shape => {:base_shape => opts[:base_shape]} }
     args[:act_as] = act_as if act_as
     resp = @ews.get_folder(args)
     if(resp.status == 'Success')
       folder = resp.items.first
-      f_type = folder.keys.first.to_s.camel_case
-      return(eval "#{f_type}.new(@ews, folder[folder.keys.first])")
+      class_by_name(folder.keys.first).new(@ews, folder[folder.keys.first])
     else
       raise EwsError, "Could not retrieve folder. #{resp.code}: #{resp.message}"
     end
   end
-
 end
