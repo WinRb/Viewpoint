@@ -44,25 +44,6 @@ module Viewpoint
         @default_ns = NAMESPACES["xmlns:#{NS_EWS_MESSAGES}"]
       end
 
-      # A Generic Class for SOAP returns.
-      # @attr_reader [String] :message The text from the EWS element <m:ResponseCode>
-      class EwsSoapResponse
-
-        attr_reader :status, :code, :message, :soap_response
-        attr_accessor :items
-
-        def initialize(status, code, message)
-          @status, @code, @message = status, code, message
-
-          # Items is an array where hash types get stored for return
-          @items = []
-        end
-
-        def set_soap_resp(response)
-          @soap_response = response
-        end
-      end # EwsSoapResponse
-
     end # SOAP
   end # EWS
 end # Viewpoint
