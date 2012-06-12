@@ -232,13 +232,13 @@ module Viewpoint::EWS::SOAP
     # Build the AdditionalProperties element
     # @see http://msdn.microsoft.com/en-us/library/aa563810.aspx
     def additional_properties!(addprops)
-      @nbuild[NS_EWS_TYPES].AdditionalProperties {
-        if(folder_shape[:additional_properties][:FieldURI])
-          folder_shape[:additional_properties][:FieldURI].each do |uri|
+      if(addprops[:FieldURI] && !addprops[:FieldURI].empty?)
+        @nbuild[NS_EWS_TYPES].AdditionalProperties {
+          addprops[:FieldURI].each do |uri|
             @nbuild[NS_EWS_TYPES].FieldURI('FieldURI' => uri)
           end
-        end
-      }
+        }
+      end
     end
 
     # Build the Mailbox element.
