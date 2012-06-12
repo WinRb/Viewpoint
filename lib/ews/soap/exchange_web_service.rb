@@ -132,6 +132,10 @@ module Viewpoint::EWS::SOAP
     #   {:calendar_view => {:max_entries_returned => 2, :start_date => <DateTime Obj>, :end_date => <DateTime Obj>}}
     # @option opts [Hash] :contacts_view Limit FindItem between contact names
     #   {:contacts_view => {:max_entries_returned => 2, :initial_name => 'Dan', :final_name => 'Wally'}}
+    # @example
+    #   { :parent_folder_ids => [{:id => root}],
+    #     :traversal => 'Shallow',
+    #     :item_shape  => {:base_shape => 'Default'} }
     def find_item(opts)
       req = build_soap! do |type, builder|
         if(type == :header)
@@ -143,7 +147,7 @@ module Viewpoint::EWS::SOAP
             builder.calendar_view!(opts[:calendar_view]) if opts[:calendar_view]
             builder.contacts_view!(opts[:contacts_view]) if opts[:contacts_view]
             builder.restriction!(opts[:restriction]) if opts[:restriction]
-            builder.nbuild.parent_folder_ids!(opts[:parent_folder_ids])
+            builder.parent_folder_ids!(opts[:parent_folder_ids])
           }
         end
       end
