@@ -3,8 +3,8 @@ module Viewpoint::EWS::FolderAccessors
 
   # Return a list of folder names
   # @param [String,Symbol] root A DistinguishedFolderId(symbol) or
-  # FolderId(string). This is where we'll start the search from. Usually :root,
-  # :msgfolderroot, or :publicfoldersroot
+  #   FolderId(string). This is where we'll start the search from. Usually
+  #   :root, :msgfolderroot, or :publicfoldersroot
   # @return [Array<String>] Return an Array of folder names.
   # @raise [EwsError] raised when the backend SOAP method returns an error.
   def folder_names(root = :msgfolderroot)
