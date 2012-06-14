@@ -4,6 +4,7 @@ require 'ews/folder_accessors'
 class Viewpoint::EWSClient
   include Viewpoint::EWS
   include Viewpoint::EWS::FolderAccessors
+  include Viewpoint::EWS::ItemAccessors
 
   # The instance of Viewpoint::EWS::SOAP::ExchangeWebService 
   attr_reader :ews
