@@ -1,4 +1,5 @@
 require 'ews/folder_accessors'
+require 'ews/item_accessors'
 
 # This class is the glue between the Models and the Web Service.
 class Viewpoint::EWSClient
