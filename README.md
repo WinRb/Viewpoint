@@ -1,3 +1,5 @@
+**ATTENTION:** If you want to fix a bug in the currently released gem please use the 0.1.x-support branch. The master is the current development branch and is not ready for prime-time just yet.
+
 # Viewpoint for Exchange Web Services 1.0
 http://github.com/zenchild/Viewpoint/wiki
 
