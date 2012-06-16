@@ -33,8 +33,8 @@ module Viewpoint::EWS::SOAP
 
     def find_folder_response(opts)
       folders = []
-      query = "//#{NS_EWS_MESSAGES}:FindFolderResponseMessage//#{NS_EWS_TYPES}:Folders/*"
-      @response.xpath(query, NAMESPACES).each do |f|
+      q = "//#{NS_EWS_MESSAGES}:FindFolderResponseMessage//#{NS_EWS_TYPES}:Folders/*"
+      @response.xpath(q, NAMESPACES).each do |f|
         folders << xml_to_hash!(f)
       end
       @response_message.items = folders
@@ -43,8 +43,8 @@ module Viewpoint::EWS::SOAP
     def create_folder_response(opts)
       if(@response_message.status == 'Success')
         folders = []
-        query = "//#{NS_EWS_MESSAGES}:Folders/*"
-        @response.xpath(query, NAMESPACES).each do |f|
+        q = "//#{NS_EWS_MESSAGES}:Folders/*"
+        @response.xpath(q, NAMESPACES).each do |f|
           folders << xml_to_hash!(f)
         end
         @response_message.items = folders
@@ -63,14 +63,15 @@ module Viewpoint::EWS::SOAP
       if @response_message.status == 'Success'
         events = []
         events << {}
-        events.first[:subscription_id] = (@response/"//#{NS_EWS_MESSAGES}:Notification/#{NS_EWS_TYPES}:SubscriptionId").first.to_s
-        events.first[:more_events] = (@response/"//#{NS_EWS_MESSAGES}:Notification/#{NS_EWS_TYPES}:SubscriptionId").first.to_boolean
-
-        (@response/"//#{NS_EWS_MESSAGES}:Notification/*[position()>3]").each do |e|
-          events << xml_to_hash!(e.native_element)
+        q = "//#{NS_EWS_MESSAGES}:Notification/#{NS_EWS_TYPES}:SubscriptionId"
+        events.first[:subscription_id] = @response.xpath(q, NAMESPACES).first.content
+        q = "//#{NS_EWS_MESSAGES}:Notification/#{NS_EWS_TYPES}:SubscriptionId")
+        events.first[:more_events] = @response.xpath(q, NAMESPACES).first.content.to_boolean
+        q = "//#{NS_EWS_MESSAGES}:Notification/*[position()>3]"
+        @response.xpath(q, NAMESPACES).each do |e|
+          events << xml_to_hash!(e)
           events.first[:watermark] = events.last[events.last.keys.first][:watermark][:text]
         end
-
         @response_message.items = events
       else
         raise EwsSubscriptionTimeout.new("#{@response_message.code}: #{@response_message.message}")
@@ -80,9 +81,11 @@ module Viewpoint::EWS::SOAP
     def find_item_response(opts)
       items = []
       items << {}
-      items.first[:total_items_in_view] = @response.xpath("//#{NS_EWS_MESSAGES}:FindItemResponseMessage/#{NS_EWS_MESSAGES}:RootFolder/@TotalItemsInView", NAMESPACES).first.content.to_i
+      q = "//#{NS_EWS_MESSAGES}:FindItemResponseMessage/#{NS_EWS_MESSAGES}:RootFolder/@TotalItemsInView")
+      items.first[:total_items_in_view] = @response.xpath(q,NAMESPACES).first.content.to_i
 
-      @response.xpath("//#{NS_EWS_MESSAGES}:FindItemResponseMessage//#{NS_EWS_TYPES}:Items/*", NAMESPACES).each do |i|
+      q = "//#{NS_EWS_MESSAGES}:FindItemResponseMessage//#{NS_EWS_TYPES}:Items/*"
+      @response.xpath(q, NAMESPACES).each do |i|
         items << xml_to_hash!(i)
       end
 
@@ -96,8 +99,12 @@ module Viewpoint::EWS::SOAP
     # @raise [EwsError] Raise an error if the ResponseClass is not Success
     def subscribe_response(opts)
       subscription = []
-      sid = xml_to_hash!((@response/"//#{NS_EWS_MESSAGES}:SubscriptionId").first.native_element)
-      wmk = xml_to_hash!((@response/"//#{NS_EWS_MESSAGES}:Watermark").first.native_element)
+      sid = xml_to_hash!(
+        @response.xpath("//#{NS_EWS_MESSAGES}:SubscriptionId", NAMESPACES).first
+      )
+      wmk = xml_to_hash!(
+        @response.xpath("//#{NS_EWS_MESSAGES}:Watermark", NAMESPACES).first
+      )
       subscription << sid.merge(wmk)
       @response_message.items = subscription
     end
@@ -109,8 +116,8 @@ module Viewpoint::EWS::SOAP
 
     def get_item_response(opts)
       if(@response_message.status == 'Success')
-        (@response/"//#{NS_EWS_MESSAGES}:Items/*").each do |item|
-          @response_message.items << xml_to_hash!(item.native_element)
+        @response.xpath("//#{NS_EWS_MESSAGES}:Items/*", NAMESPACES).each do |item|
+          @response_message.items << xml_to_hash!(item)
         end
       else
         raise EwsError, "#{@response_message.code}: #{@response_message.message}"
@@ -119,7 +126,9 @@ module Viewpoint::EWS::SOAP
 
     def copy_item_response(opts)
       if(@response_message.status == 'Success')
-        @response_message.items << xml_to_hash!((@response/"//#{NS_EWS_MESSAGES}:Items/*").first.native_element)
+        @response_message.items << xml_to_hash!(
+          @response.xpath("//#{NS_EWS_MESSAGES}:Items/*", NAMESPACES).first
+        )
       else
         raise EwsError, "#{@response_message.code}: #{@response_message.message}"
       end
@@ -127,7 +136,9 @@ module Viewpoint::EWS::SOAP
 
     def move_item_response(opts)
       if(@response_message.status == 'Success')
-        @response_message.items << xml_to_hash!((@response/"//#{NS_EWS_MESSAGES}:Items/*").first.native_element)
+        @response_message.items << xml_to_hash!(
+          @response.xpath("//#{NS_EWS_MESSAGES}:Items/*", NAMESPACES).first
+        )
       else
         raise EwsError, "#{@response_message.code}: #{@response_message.message}"
       end
@@ -137,8 +148,8 @@ module Viewpoint::EWS::SOAP
     def create_item_response(opts)
       if(@response_message.status == 'Success')
         items = []
-        (@response/"//#{NS_EWS_MESSAGES}:Items/*").each do |i|
-          items << xml_to_hash!(i.native_element)
+        @response.xpath("//#{NS_EWS_MESSAGES}:Items/*", NAMESPACES).each do |i|
+          items << xml_to_hash!(i)
         end
         @response_message.items = items
       else
@@ -153,8 +164,8 @@ module Viewpoint::EWS::SOAP
     def send_item_response(opts)
       if(@response_message.status == 'Success')
         items = []
-        (@response/"//#{NS_EWS_MESSAGES}:Items/*").each do |i|
-          items << xml_to_hash!(i.native_element)
+        @response.xpath("//#{NS_EWS_MESSAGES}:Items/*", NAMESPACES).each do |i|
+          items << xml_to_hash!(i)
         end
         @response_message.items = items
       else
@@ -165,11 +176,11 @@ module Viewpoint::EWS::SOAP
     def get_attachment_response(opts)
       atts = []
       if(@response_message.status == 'Success')
-        att_id = (@response/"//#{NS_EWS_MESSAGES}:Attachments/*").each do |a|
-          atts << xml_to_hash!(a.native_element)
+        q = "//#{NS_EWS_MESSAGES}:Attachments/*"
+        att_id = @response.xpath(q, NAMESPACES).each do |a|
+          atts << xml_to_hash!(a)
         end
         @response_message.items = atts
-        #@response_message.items = @response
       else
         raise EwsError, "#{@response_message.code}: #{@response_message.message}"
       end
@@ -177,8 +188,9 @@ module Viewpoint::EWS::SOAP
 
     def create_attachment_response(opts)
       if(@response_message.status == 'Success')
-        att_id = (@response/"//#{NS_EWS_TYPES}:FileAttachment/*").last
-        att_id = xml_to_hash!(att_id.native_element)
+        q = "//#{NS_EWS_TYPES}:FileAttachment/*"
+        att_id = @response.xpath(q, NAMESPACES).last
+        att_id = xml_to_hash!(att_id)
         @response_message.items = [att_id]
       else
         raise EwsError, "#{@response_message.code}: #{@response_message.message}"
@@ -204,31 +216,37 @@ module Viewpoint::EWS::SOAP
     end
 
     def get_user_oof_settings_response(opts)
-      @response_message.items = xml_to_hash!((@response/"//#{NS_EWS_TYPES}:OofSettings").first.native_element)
+      @response_message.items = xml_to_hash!(
+        @response.xpath("//#{NS_EWS_TYPES}:OofSettings", NAMESPACES).first
+      )
     end
 
     # Parse out the free/busy time.
     # @see http://msdn.microsoft.com/en-us/library/aa494212.aspx
     def get_user_availability_response(opts)
-      @response_message.items = xml_to_hash!((@response/"//#{NS_EWS_MESSAGES}:FreeBusyView").first.native_element)
+      @response_message.items = xml_to_hash!(
+        @response.xpath("//#{NS_EWS_MESSAGES}:FreeBusyView", NAMESPACES).first
+      )
     end
 
     # Parse out a Mailbox element
     # @param [XML] mbox The <t:Mailbox> element
-    # @return [Hash] Values of EWS Mailbox type :name, :email_address, :routing_type, :mailbox_type, :item_id
+    # @return [Hash] Values of EWS Mailbox type :name, :email_address,
+    #   :routing_type, :mailbox_type, :item_id
     def mailbox(mbox_xml)
-      xml_to_hash!(mbox_xml.native_element)
+      xml_to_hash!(mbox_xml)
     end
 
     def contact(contact_xml)
-      xml_to_hash!(contact_xml.native_element)
+      xml_to_hash!(contact_xml)
     end
 
     # Parse out Resolutions from a ResolutionSet from the ResolveNames operation
     # @return [Array] An array of :mailbox,:contact Hashes that resolved.
     def resolution_set
       resolution_set = []
-      (@response/"//#{NS_EWS_MESSAGES}:ResolutionSet/*").each do |r|
+      q = "//#{NS_EWS_MESSAGES}:ResolutionSet/*"
+      @response.xpath(q, NAMESPACES).each do |r|
         mbox_hash    = mailbox((r/"#{NS_EWS_TYPES}:Mailbox").first)
         contact_xml  = (r/"#{NS_EWS_TYPES}:Contact").first
         next if !contact_xml
@@ -239,8 +257,8 @@ module Viewpoint::EWS::SOAP
 
     def folders
       folders = []
-      query = "//#{NS_EWS_MESSAGES}:Folders/*"
-      @response.xpath(query, NAMESPACES).each do |f|
+      q = "//#{NS_EWS_MESSAGES}:Folders/*"
+      @response.xpath(q, NAMESPACES).each do |f|
         folders << xml_to_hash!(f)
       end
       folders
