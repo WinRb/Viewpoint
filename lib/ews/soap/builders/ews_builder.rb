@@ -22,7 +22,6 @@ module Viewpoint::EWS::SOAP
   # subelements to a method of the same name with a '!' after it.
   class XmlBuilder
 
-
     attr_reader :nbuild
     def initialize
       @nbuild = Nokogiri::XML::Builder.new
@@ -43,7 +42,7 @@ module Viewpoint::EWS::SOAP
     #   end
     def build!(&block)
       @nbuild.Envelope(NAMESPACES) do |node|
-        node.parent.namespace = node.parent.namespace_definitions.find{|ns|ns.prefix==NS_SOAP}
+        node.parent.namespace = parent_namespace(node)
         node.Header {
           yield(:header, self) if block_given?
         }
@@ -55,9 +54,10 @@ module Viewpoint::EWS::SOAP
     end
 
     # Build XML from a passed in Hash or Array in a specified format.
-    # @param [Nokogiri::XML::Builder] nbuild The builder we are using to construct the XML
-    # @param [Array,Hash] elems The elements to add to the Builder. They must be specified
-    #   like so:
+    # @param [Nokogiri::XML::Builder] nbuild The builder we are using to
+    #   construct the XML
+    # @param [Array,Hash] elems The elements to add to the Builder. They must
+    #   be specified like so:
     #   {:top =>
     #     { :xmlns => 'http://stonesthrow/soap',
     #       :sub_elements => [
@@ -72,8 +72,8 @@ module Viewpoint::EWS::SOAP
     #     {:second => {:text => 'world'}}
     #   ]
     #
-    #   NOTE: there are specialized keys for text (:text), child elements (:sub_elements) and
-    #   namespaces (:xmlns).
+    #   NOTE: there are specialized keys for text (:text), child elements
+    #   (:sub_elements) and namespaces (:xmlns).
     def build_xml!(elems)
       case elems.class.name
       when 'Hash'
@@ -106,7 +106,9 @@ module Viewpoint::EWS::SOAP
       @nbuild.FolderShape {
         @nbuild.parent.default_namespace = @default_ns
         base_shape!(folder_shape[:base_shape])
-        additional_properties!(folder_shape[:additional_properties]) if(folder_shape[:additional_properties])
+        if(folder_shape[:additional_properties]) do
+          additional_properties!(folder_shape[:additional_properties])
+        end
       }
     end
 
@@ -118,7 +120,9 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_MESSAGES].ItemShape {
         @nbuild.parent.default_namespace = @default_ns
         base_shape!(item_shape[:base_shape])
-        additional_properties!(item_shape[:additional_properties]) if(item_shape[:additional_properties])
+        if(item_shape[:additional_properties]) do
+          additional_properties!(item_shape[:additional_properties])
+        end
       }
     end
 
@@ -172,7 +176,9 @@ module Viewpoint::EWS::SOAP
       attribs = {'Id' => dfid.to_s}
       attribs['ChangeKey'] = change_key if change_key
       @nbuild[NS_EWS_TYPES].DistinguishedFolderId(attribs) {
-        mailbox!({:email_address => {:text => act_as}}, NS_EWS_TYPES) unless act_as.nil?
+        if ! act_as.nil?
+          mailbox!({:email_address => {:text => act_as}}, NS_EWS_TYPES)
+        end
       }
     end
 
@@ -242,10 +248,12 @@ module Viewpoint::EWS::SOAP
     end
 
     # Build the Mailbox element.
-    # This element is commonly used for delegation. Typically passing an email_address is sufficient
+    # This element is commonly used for delegation. Typically passing an
+    #   email_address is sufficient
     # @see http://msdn.microsoft.com/en-us/library/aa565036.aspx
     # @param [Hash] mailbox A well-formated hash that can be passed to build_xml!
-    #   For example: {:email_address => {:text => 'test@test.com'}, :name => {:text => 'Test User'}}
+    #   For example: {:email_address => {:text => 'test@test.com'},
+    #   :name => {:text => 'Test User'}}
     # @todo support the rest of the child elements
     def mailbox!(mbox)
       @nbuild[NS_EWS_MESSAGES].Mailbox {
@@ -465,7 +473,8 @@ module Viewpoint::EWS::SOAP
       when :item_id
         item_id!(item[:id], item[:change_key])
       when :occurrence_item_id
-        occurrence_item_id!(item[:recurring_master_id], item[:change_key], item[:instance_index])
+        occurrence_item_id!(
+          item[:recurring_master_id], item[:change_key], item[:instance_index])
       when :recurring_master_item_id
         recurring_master_item_id!(item[:occurrence_id], item[:change_key])
       else
@@ -473,7 +482,8 @@ module Viewpoint::EWS::SOAP
       end
     end
           
-    # A helper method to dispatch to a AppendToItemField, SetItemField, or DeleteItemField
+    # A helper method to dispatch to a AppendToItemField, SetItemField, or
+    #   DeleteItemField
     # @param [Hash] update An update of some type
     def dispatch_update_type!(update)
       type = update.keys.first
@@ -499,7 +509,8 @@ module Viewpoint::EWS::SOAP
       when :field_uRI
         @nbuild.FieldURI('FieldURI' => val[:field_uRI])
       when :indexed_field_uRI
-        @nbuild.IndexedFieldURI('FieldURI' => val[:field_uRI], 'FieldIndex' => val[:field_index])
+        @nbuild.IndexedFieldURI(
+          'FieldURI' => val[:field_uRI], 'FieldIndex' => val[:field_index])
       when :extended_field_uRI
         raise EwsNotImplemented, 'This functionality has not yet been implemented.'
       else
@@ -510,6 +521,13 @@ module Viewpoint::EWS::SOAP
         
     def dispatch_field_item!(item)
       build_xml!(item)
+    end
+
+
+private
+
+    def parent_namespace(node)
+      node.parent.namespace_definitions.find {|ns| ns.prefix == NS_SOAP}
     end
 
   end # XmlBuilder
