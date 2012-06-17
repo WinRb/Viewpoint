@@ -133,9 +133,11 @@ module Viewpoint::EWS::SOAP
     # @option item_shape :additional_properties
     #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
     # @option opts [Hash] :calendar_view Limit FindItem by a start and end date
-    #   {:calendar_view => {:max_entries_returned => 2, :start_date => <DateTime Obj>, :end_date => <DateTime Obj>}}
+    #   {:calendar_view => {:max_entries_returned => 2, :start_date =>
+    #   <DateTime Obj>, :end_date => <DateTime Obj>}}
     # @option opts [Hash] :contacts_view Limit FindItem between contact names
-    #   {:contacts_view => {:max_entries_returned => 2, :initial_name => 'Dan', :final_name => 'Wally'}}
+    #   {:contacts_view => {:max_entries_returned => 2, :initial_name => 'Dan',
+    #   :final_name => 'Wally'}}
     # @example
     #   { :parent_folder_ids => [{:id => root}],
     #     :traversal => 'Shallow',
@@ -169,8 +171,9 @@ module Viewpoint::EWS::SOAP
     # @option opts [Hash] :folder_shape defines the FolderShape node
     # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
     # @option folder_shape :additional_properties
-    # @option opts [String,nil] :act_as User to act on behalf as.  This user must have been
-    #   given delegate access to this folder or else this operation will fail.
+    # @option opts [String,nil] :act_as User to act on behalf as. This user must
+    #   have been given delegate access to this folder or else this operation
+    #   will fail.
     # @example
     #   { :folder_ids   => [{:id => :msgfolderroot}],
     #     :folder_shape => {:base_shape => 'Default'} }
