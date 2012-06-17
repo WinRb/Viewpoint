@@ -870,7 +870,6 @@ module Viewpoint::EWS::SOAP
     # Private Methods (Builders and Parsers)
 
     def parse!(response, opts = {})
-      #return response if @@raw_soap
       raise EwsError, "Can't parse an empty response. Please check your endpoint." if(response.nil?)
       EwsParser.new(response).parse(opts)
     end
@@ -884,9 +883,19 @@ module Viewpoint::EWS::SOAP
     # @param [String] soapmsg an XML formatted string
     # @todo make this work for Viewpoint (imported from SPWS)
     def do_soap_request(soapmsg)
-      @log.debug "Sending SOAP Request:\n----------------\n#{soapmsg}\n----------------"
+      @log.debug <<-EOF
+        Sending SOAP Request:
+        ----------------
+        #{soapmsg}
+        ----------------
+      EOF
       respmsg = @con.post(soapmsg)
-      @log.debug "Received SOAP Response:\n----------------\n#{Nokogiri::XML(respmsg).to_xml}\n----------------"
+      @log.debug <<-EOF
+        Received SOAP Response:
+        ----------------
+        #{Nokogiri::XML(respmsg).to_xml}
+        ----------------
+      EOF
       ndoc = Nokogiri::XML(respmsg)
       parse!(ndoc)
     end
