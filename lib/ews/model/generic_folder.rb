@@ -195,19 +195,21 @@ module Viewpoint::EWS
       args = {
         :parent_folder_ids  => [{:id => @folder_id}],
         :traversal          => 'Shallow',
-        :item_shape         => item_shape }
-        resp = @ews.find_item(args)
-        if(resp.status == 'Success')
-          parms = resp.items.shift
-          items = []
-          resp.items.each do |i|
-            i_type = i.keys.first
-            items << class_by_name(i_type).new(i[i_type], :shallow => shallow)
-          end
-          return items
-        else
-          raise EwsError, "Could not find items. #{resp.code}: #{resp.message}"
+        :item_shape         => item_shape
+      }
+      args[:restriction] = opts[:restriction] if opts[:restriction]
+      resp = @ews.find_item(args)
+      if(resp.status == 'Success')
+        parms = resp.items.shift
+        items = []
+        resp.items.each do |i|
+          i_type = i.keys.first
+          items << class_by_name(i_type).new(i[i_type], :shallow => shallow)
         end
+        return items
+      else
+        raise EwsError, "Could not find items. #{resp.code}: #{resp.message}"
+      end
     end
 
     # Fetch only items from today (since midnight)
