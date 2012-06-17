@@ -20,7 +20,8 @@ module Viewpoint
   module EWS
     module ItemFieldUriMap
 
-      FIELD_URIS= {:folder_id  => {:text => 'older:FolderId', :writable => true},
+      FIELD_URIS= {
+        :folder_id  => {:text => 'older:FolderId', :writable => true},
         :parent_folder_id  => {:text => 'folder:ParentFolderId', :writable => true},
         :display_name  => {:text => 'folder:DisplayName', :writable => true},
         :unread_count  => {:text => 'folder:UnreadCount', :writable => true},
@@ -218,7 +219,6 @@ module Viewpoint
         :item_ids  => {:text => 'conversation:ItemIds', :writable => true},
         :global_item_ids  => {:text => 'conversation:GlobalItemIds', :writable => true}
       }
-
     end
   end
 end
