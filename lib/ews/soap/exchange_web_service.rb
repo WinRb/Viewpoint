@@ -19,7 +19,6 @@
 module Viewpoint::EWS::SOAP
   class ExchangeWebService
     include Viewpoint::EWS::SOAP
-#    include Viewpoint::EWS::SOAP::XmlBuilder
 
     def initialize(connection)
       super()
@@ -32,13 +31,14 @@ module Viewpoint::EWS::SOAP
     #
     # @param [Hash] opts
     # @option opts [String] :name the unresolved entry
-    # @option opts [Boolean] :full_contact_data (true) Whether or not to return the
-    #   full contact details.
+    # @option opts [Boolean] :full_contact_data (true) Whether or not to return
+    #   the full contact details.
     # @option opts [String] :search_scope where to seach for this entry, one of
-    #   SOAP::Contacts, SOAP::ActiveDirectory, SOAP::ActiveDirectoryContacts (default),
-    #   SOAP::ContactsActiveDirectory
-    # @option opts [String, FolderId] :parent_folder_id either the name of a folder or
-    #   it's numerical ID.  @see http://msdn.microsoft.com/en-us/library/aa565998.aspx
+    #   SOAP::Contacts, SOAP::ActiveDirectory, SOAP::ActiveDirectoryContacts
+    #   (default), SOAP::ContactsActiveDirectory
+    # @option opts [String, FolderId] :parent_folder_id either the name of a
+    #   folder or it's numerical ID.
+    #   @see http://msdn.microsoft.com/en-us/library/aa565998.aspx
     def resolve_names(opts)
       fcd = opts.has_key?(:full_contact_data) ? opts[:full_contact_data] : true
       attribs = {:ReturnFullContactData => fcd.to_s}
@@ -63,7 +63,8 @@ module Viewpoint::EWS::SOAP
     # @todo Fully support all of the ExpandDL operations. Today it just supports
     #   taking an e-mail address as an argument
     # @param [Hash] opts
-    # @option opts [String] :email_address The e-mail address of the distribution to resolve
+    # @option opts [String] :email_address The e-mail address of the
+    #   distribution to resolve
     # @option opts [Hash] :item_id The ItemId of the private distribution to resolve.
     #   {:id => 'my id'}
     def expand_dl(opts)
