@@ -26,9 +26,10 @@ module Viewpoint::EWS::SOAP
       @response_type = (response/"//#{NS_SOAP}:Body/*").first.node_name
 
       rmsg = (response/'//*[@ResponseClass]').first
-      @response_message = EwsSoapResponse.new(rmsg['ResponseClass'],
-                                              (rmsg/"#{NS_EWS_MESSAGES}:ResponseCode/text()").first.to_s,
-                                              (rmsg/"#{NS_EWS_MESSAGES}:MessageText/text()").first.to_s)
+      @response_message = EwsSoapResponse.new(
+        rmsg['ResponseClass'],
+        (rmsg/"#{NS_EWS_MESSAGES}:ResponseCode/text()").first.to_s,
+        (rmsg/"#{NS_EWS_MESSAGES}:MessageText/text()").first.to_s )
       @response_message.set_soap_resp(response)
     end
 
@@ -53,7 +54,8 @@ module Viewpoint::EWS::SOAP
     end
 
     # Create a Hash from a Nokogiri element tree
-    # @param [Nokogiri::XML::Element, Nokogiri::XML::Text] nokoelem The Nokogiri element passed to this method
+    # @param [Nokogiri::XML::Element, Nokogiri::XML::Text] nokoelem The
+    #   Nokogiri element passed to this method
     # @example XML
     #   <tiptop>
     #     <top Id="32fss">TestText</top>
@@ -61,7 +63,8 @@ module Viewpoint::EWS::SOAP
     #     <bottom />
     #   </tiptop>
     #   becomes...
-    #   {:tiptop=>{:top=>{:id=>"32fss", :text=>"TestText"}, :middle=>{:id=>"TestTestMiddle"}}} 
+    #   {:tiptop=>{:top=>{:id=>"32fss", :text=>"TestText"},
+    #     :middle=>{:id=>"TestTestMiddle"}}}
     def xml_to_hash!(nokoelem)
       e_hash = {}
       node_name = nokoelem.name.ruby_case.to_sym
@@ -88,11 +91,10 @@ module Viewpoint::EWS::SOAP
         return {node_name => nokoelem.text} if nokoelem.text != "\n"
         nil
       else
+        # @todo Do something smarter here?
         # If something strange gets passed just return nil
         return nil
       end
     end
-
-
   end # Parser
 end # Viewpoint
