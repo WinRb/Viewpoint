@@ -54,8 +54,6 @@ module Viewpoint::EWS::SOAP
     end
 
     # Build XML from a passed in Hash or Array in a specified format.
-    # @param [Nokogiri::XML::Builder] nbuild The builder we are using to
-    #   construct the XML
     # @param [Array,Hash] elems The elements to add to the Builder. They must
     #   be specified like so:
     #   {:top =>
@@ -265,11 +263,139 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa563791.aspx
     # @param [Hash] restriction a well-formatted Hash that can be fed to #build_xml!
     def restriction!(restriction)
-      bhash = {:Restriction =>
-        { :xmlns => NAMESPACES[NS_EWS_TYPES],
-          :sub_elements => [restriction]}
+      @nbuild[NS_EWS_MESSAGES].Restriction {
+        restriction.each_pair do |k,v|
+          case k
+          when :and, :or, :not
+            self.send("#{k}_r", v)
+          else
+            self.send(k, v)
+          end
+        end
       }
-      build_xml!(restriction)
+    end
+
+    def and_r(expr)
+      and_or('And', expr)
+    end
+
+    def or_r(expr)
+      and_or('Or', expr)
+    end
+
+    def and_or(type, expr)
+      @nbuild[NS_EWS_TYPES].send(type) {
+        expr.each do |e|
+          type = e.keys.first
+          self.send(type, e[type])
+        end
+      }
+    end
+
+    def not_r(expr)
+      @nbuild[NS_EWS_TYPES].Not {
+        type = expr.keys.first
+        self.send(type, expr[type])
+      }
+    end
+
+    def contains(expr)
+      @nbuild[NS_EWS_TYPES].Contains(
+        'ContainmentMode' => expr[:containment_mode],
+        'ContainmentComparison' => expr[:containment_comparison]) {
+        c = expr.delete(:constant) # remove constant 1st for ordering
+        type = expr.keys.first
+        self.send(type, expr[type])
+        constant(c)
+      }
+    end
+
+    def excludes(expr)
+      @nbuild[NS_EWS_TYPES].Excludes {
+        b = expr.delete(:bitmask) # remove bitmask 1st for ordering
+        type = expr.keys.first
+        self.send(type, expr[type])
+        bitmask(b)
+      }
+    end
+
+    def exists(expr)
+      @nbuild[NS_EWS_TYPES].Exists {
+        type = expr.keys.first
+        self.send(type, expr[type])
+      }
+    end
+
+    def bitmask(expr)
+      @nbuild[NS_EWS_TYPES].Bitmask('Value' => expr[:value])
+    end
+
+    def is_equal_to(expr)
+      restriction_compare('IsEqualTo',expr)
+    end
+
+    def is_greater_than(expr)
+      restriction_compare('IsGreaterThan',expr)
+    end
+
+    def is_greater_than_or_equal_to(expr)
+      restriction_compare('IsGreaterThanOrEqualTo',expr)
+    end
+
+    def is_less_than(expr)
+      restriction_compare('IsLessThan',expr)
+    end
+
+    def is_less_than_or_equal_to(expr)
+      restriction_compare('IsLessThanOrEqualTo',expr)
+    end
+
+    def is_not_equal_to(expr)
+      restriction_compare('IsNotEqualTo',expr)
+    end
+
+    def restriction_compare(type,expr)
+      nbuild[NS_EWS_TYPES].send(type) {
+        expr.each do |e|
+          e.each_pair do |k,v|
+            self.send(k, v)
+          end
+        end
+      }
+    end
+
+    def field_uRI(expr)
+      nbuild[NS_EWS_TYPES].FieldURI('FieldURI' => expr[:field_uRI])
+    end
+
+    def indexed_field_uRI(expr)
+      nbuild[NS_EWS_TYPES].IndexedFieldURI(
+        'FieldURI'    => expr[:field_uRI],
+        'FieldIndex'  => expr[:field_index]
+      )
+    end
+
+    def extended_field_uRI(expr)
+      nbuild[NS_EWS_TYPES].ExtendedFieldURI(
+        'PropertyType' => expr[:property_type]) {|x|
+        x.parent['ProperyId'] = expr[:property_id] if expr[:property_id]
+        x.parent['ProperyName'] = expr[:property_name] if expr[:property_name]
+        x.parent['ProperyTag'] = expr[:property_tag] if expr[:property_tag]
+        x.parent['ProperySetId'] = expr[:property_set_id] if expr[:property_set_id]
+        v = :distinguished_property_set_id
+        x.parent['DistinguishedPropertySetId'] = expr[v] if expr[v]
+      }
+    end
+      
+    def field_uRI_or_constant(expr)
+      nbuild[NS_EWS_TYPES].FieldURIOrConstant {
+        type = expr.keys.first
+        self.send(type, expr[type])
+      }
+    end
+
+    def constant(expr)
+      nbuild[NS_EWS_TYPES].Constant('Value' => expr[:value])
     end
 
     # Build the CalendarView element
@@ -395,9 +521,8 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa581081(v=exchg.140).aspx
     def item_change!(change)
       @nbuild[NS_EWS_TYPES].ItemChange {
-        chg = change.clone
-        updates = chg.delete(:updates) # Remove updates so dispatch_item_id works correctly
-        dispatch_item_id!(chg)
+        updates = change.delete(:updates) # Remove updates so dispatch_item_id works correctly
+        dispatch_item_id!(change)
         updates!(updates)
       }
     end
@@ -413,7 +538,6 @@ module Viewpoint::EWS::SOAP
 
     # @see http://msdn.microsoft.com/en-us/library/aa581317(v=exchg.140).aspx
     def append_to_item_field!(upd)
-      upd = upd.clone
       uri = upd.select {|k,v| k =~ /_uri/i}
       raise EwsBadArgumentError, "Bad argument given for AppendToItemField." if uri.keys.length != 1
       upd.delete(uri.keys.first)
@@ -425,7 +549,6 @@ module Viewpoint::EWS::SOAP
 
     # @see http://msdn.microsoft.com/en-us/library/aa581487(v=exchg.140).aspx
     def set_item_field!(upd)
-      upd = upd.clone
       uri = upd.select {|k,v| k =~ /_uri/i}
       raise EwsBadArgumentError, "Bad argument given for SetItemField." if uri.keys.length != 1
       upd.delete(uri.keys.first)
