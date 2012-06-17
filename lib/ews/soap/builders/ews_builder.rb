@@ -106,7 +106,7 @@ module Viewpoint::EWS::SOAP
       @nbuild.FolderShape {
         @nbuild.parent.default_namespace = @default_ns
         base_shape!(folder_shape[:base_shape])
-        if(folder_shape[:additional_properties]) do
+        if(folder_shape[:additional_properties])
           additional_properties!(folder_shape[:additional_properties])
         end
       }
@@ -120,7 +120,7 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_MESSAGES].ItemShape {
         @nbuild.parent.default_namespace = @default_ns
         base_shape!(item_shape[:base_shape])
-        if(item_shape[:additional_properties]) do
+        if(item_shape[:additional_properties])
           additional_properties!(item_shape[:additional_properties])
         end
       }

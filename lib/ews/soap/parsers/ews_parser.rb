@@ -65,7 +65,7 @@ module Viewpoint::EWS::SOAP
         events << {}
         q = "//#{NS_EWS_MESSAGES}:Notification/#{NS_EWS_TYPES}:SubscriptionId"
         events.first[:subscription_id] = @response.xpath(q, NAMESPACES).first.content
-        q = "//#{NS_EWS_MESSAGES}:Notification/#{NS_EWS_TYPES}:SubscriptionId")
+        q = "//#{NS_EWS_MESSAGES}:Notification/#{NS_EWS_TYPES}:SubscriptionId"
         events.first[:more_events] = @response.xpath(q, NAMESPACES).first.content.to_boolean
         q = "//#{NS_EWS_MESSAGES}:Notification/*[position()>3]"
         @response.xpath(q, NAMESPACES).each do |e|
@@ -81,7 +81,7 @@ module Viewpoint::EWS::SOAP
     def find_item_response(opts)
       items = []
       items << {}
-      q = "//#{NS_EWS_MESSAGES}:FindItemResponseMessage/#{NS_EWS_MESSAGES}:RootFolder/@TotalItemsInView")
+      q = "//#{NS_EWS_MESSAGES}:FindItemResponseMessage/#{NS_EWS_MESSAGES}:RootFolder/@TotalItemsInView"
       items.first[:total_items_in_view] = @response.xpath(q,NAMESPACES).first.content.to_i
 
       q = "//#{NS_EWS_MESSAGES}:FindItemResponseMessage//#{NS_EWS_TYPES}:Items/*"
