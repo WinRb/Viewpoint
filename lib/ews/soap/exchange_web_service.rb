@@ -42,16 +42,15 @@ module Viewpoint::EWS::SOAP
     def resolve_names(opts)
       opts = opts.clone
       fcd = opts.has_key?(:full_contact_data) ? opts[:full_contact_data] : true
-      attribs = {:ReturnFullContactData => fcd.to_s}
-      attribs[:SearchScope] = opts[:search_scope] if opts[:search_scope]
-
       req = build_soap! do |type, builder|
         if(type == :header)
         else
-        builder.nbuild.ResolveNames(attribs) {
-          builder.nbuild.parent.default_namespace = @default_ns
+        builder.nbuild.ResolveNames {|x|
+          x.parent['ReturnFullContactData'] = fcd.to_s
+          x.parent['SearchScope'] = opts[:search_scope] if opts[:search_scope]
+          x.parent.default_namespace = @default_ns
           # @todo builder.nbuild.ParentFolderIds
-          builder.nbuild.UnresolvedEntry(opts[:name])
+          x.UnresolvedEntry(opts[:name])
         }
         end
       end
@@ -76,7 +75,8 @@ module Viewpoint::EWS::SOAP
         builder.nbuild.ExpandDL {
           builder.nbuild.parent.default_namespace = @default_ns
           builder.nbuild.Mailbox {
-            builder.nbuild[NS_EWS_TYPES].EmailAddress(opts[:email_address]) if opts[:email_address]
+            key = :email_address
+            builder.nbuild[NS_EWS_TYPES].EmailAddress(opts[key]) if opts[key]
             builder.item_id! if opts[:item_id]
           }
         }
@@ -89,8 +89,8 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa563918.aspx
     #
     # @param [Hash] opts
-    # @option opts [Array<Hash>] :parent_folder_ids An Array of folder id Hashes, either a
-    #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+    # @option opts [Array<Hash>] :parent_folder_ids An Array of folder id Hashes,
+    #   either a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
     #   [{:id => <myid>, :change_key => <ck>}, {:id => :root}]
     # @option opts [String] :traversal Shallow/Deep/SoftDeleted
     # @option opts [Hash] :folder_shape defines the FolderShape node
@@ -197,11 +197,12 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa563574.aspx CreateFolder
     #
     # @param [Hash] opts
-    # @option opts [Hash] :parent_folder_id A hash with either the name of a folder or it's
-    #   numerical ID.  See: http://msdn.microsoft.com/en-us/library/aa565998.aspx
+    # @option opts [Hash] :parent_folder_id A hash with either the name of a
+    #   folder or it's numerical ID.
+    #   See: http://msdn.microsoft.com/en-us/library/aa565998.aspx 
     #   {:id => :root}  or {:id => 'myfolderid#'}
-    # @option opts [Array<Hash>] :folders An array of hashes of folder types that conform to
-    #   input for build_xml!
+    # @option opts [Array<Hash>] :folders An array of hashes of folder types
+    #   that conform to input for build_xml!
     #   @example [ {:folder =>
     #               {:sub_elements => [{:display_name => {:text => 'New Folder'}}]}},
     #              {:calendar_folder =>
@@ -213,7 +214,7 @@ module Viewpoint::EWS::SOAP
         else
           builder.nbuild.CreateFolder {
             builder.nbuild.parent.default_namespace = @default_ns
-            builder.nbuild.parent_folder_id!(opts[:parent_folder_id])
+            builder.parent_folder_id!(opts[:parent_folder_id])
             builder.folders!(opts[:folders])
           }
         end
@@ -230,8 +231,9 @@ module Viewpoint::EWS::SOAP
     #     {:id => :msgfolderroot} ]  # Don't do this for real
     # @option opts [String,nil] :delete_type Type of delete to do:
     #   HardDelete/SoftDelete/MoveToDeletedItems
-    # @option opts [String,nil] :act_as User to act on behalf as.  This user must have been
-    #   given delegate access to this folder or else this operation will fail.
+    # @option opts [String,nil] :act_as User to act on behalf as. This user
+    #   must have been given delegate access to this folder or else this
+    #   operation will fail.
     def delete_folder(opts)
       req = build_soap! do |type, builder|
         if(type == :header)
