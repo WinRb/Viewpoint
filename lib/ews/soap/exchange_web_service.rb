@@ -40,6 +40,7 @@ module Viewpoint::EWS::SOAP
     #   folder or it's numerical ID.
     #   @see http://msdn.microsoft.com/en-us/library/aa565998.aspx
     def resolve_names(opts)
+      opts = opts.clone
       fcd = opts.has_key?(:full_contact_data) ? opts[:full_contact_data] : true
       attribs = {:ReturnFullContactData => fcd.to_s}
       attribs[:SearchScope] = opts[:search_scope] if opts[:search_scope]
@@ -68,6 +69,7 @@ module Viewpoint::EWS::SOAP
     # @option opts [Hash] :item_id The ItemId of the private distribution to resolve.
     #   {:id => 'my id'}
     def expand_dl(opts)
+      opts = opts.clone
       req = build_soap! do |type, builder|
         if(type == :header)
         else
@@ -102,6 +104,7 @@ module Viewpoint::EWS::SOAP
     #     :traversal => 'Deep',
     #     :folder_shape  => {:base_shape => 'Default'} }
     def find_folder(opts)
+      opts = opts.clone
       req = build_soap! do |type, builder|
         if(type == :header)
         else
@@ -138,6 +141,7 @@ module Viewpoint::EWS::SOAP
     #     :traversal => 'Shallow',
     #     :item_shape  => {:base_shape => 'Default'} }
     def find_item(opts)
+      opts = opts.clone
       req = build_soap! do |type, builder|
         if(type == :header)
         else
@@ -171,6 +175,7 @@ module Viewpoint::EWS::SOAP
     #   { :folder_ids   => [{:id => :msgfolderroot}],
     #     :folder_shape => {:base_shape => 'Default'} }
     def get_folder(opts)
+      opts = opts.clone
       req = build_soap! do |type, builder|
         if(type == :header)
         else
@@ -202,6 +207,7 @@ module Viewpoint::EWS::SOAP
     #              {:calendar_folder =>
     #               {:sub_elements => [{:display_name => {:text => 'Agenda'}}]}} ]
     def create_folder(opts)
+      opts = opts.clone
       req = build_soap! do |type, builder|
         if(type == :header)
         else
@@ -891,12 +897,14 @@ module Viewpoint::EWS::SOAP
         ----------------
       EOF
       respmsg = @con.post(soapmsg)
+=begin
       @log.debug <<-EOF
         Received SOAP Response:
         ----------------
         #{Nokogiri::XML(respmsg).to_xml}
         ----------------
       EOF
+=end
       ndoc = Nokogiri::XML(respmsg)
       parse!(ndoc)
     end
