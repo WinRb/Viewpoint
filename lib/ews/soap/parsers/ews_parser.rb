@@ -248,8 +248,8 @@ module Viewpoint::EWS::SOAP
       resolution_set = []
       q = "//#{NS_EWS_MESSAGES}:ResolutionSet/*"
       @response.xpath(q, NAMESPACES).each do |r|
-        mbox_hash    = mailbox((r/"#{NS_EWS_TYPES}:Mailbox").first)
-        contact_xml  = (r/"#{NS_EWS_TYPES}:Contact").first
+        mbox_hash    = mailbox(r.xpath("#{NS_EWS_TYPES}:Mailbox",@namespaces).first)
+        contact_xml  = r.xpath("#{NS_EWS_TYPES}:Contact",@namespaces).first
         next if !contact_xml
         resolution_set << mbox_hash.merge(contact(contact_xml))
       end
