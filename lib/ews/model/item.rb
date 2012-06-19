@@ -47,8 +47,9 @@ module Viewpoint
       # Initialize an Exchange Web Services item
       # @param [Hash] ews_item A hash representing this item
       # @param [Boolean] shallow Whether or not we have retrieved all the elements for this object
-      def initialize(ews_item, opts={})
+      def initialize(ews, ews_item, opts={})
         super() # Calls initialize in Model (creates @ews_methods Array)
+        @ews = ews
         @ews_item = ews_item
         @shallow = opts.has_key?(:shallow) ? opts[:shallow] : true
         @item_id = ews_item[:item_id][:id]
@@ -159,9 +160,10 @@ module Viewpoint
 
       def deepen!
         return true unless @shallow
-        conn = Viewpoint::EWS::EWS.instance
-        shape = {:base_shape => 'AllProperties', :body_type => (@text_only ? 'Text' : 'Best')}
-        resp = conn.ews.get_item([@item_id], shape) 
+        shape = {:base_shape => 'AllProperties',
+          :body_type => (@text_only ? 'Text' : 'Best')}
+        item_id = {:item_id => {:id => @item_id}}
+        resp = @ews.get_item( :item_shape => shape, :item_ids => [item_id])
         resp = resp.items.shift
         @ews_item = resp[resp.keys.first]
         @shallow = false

@@ -503,21 +503,6 @@ module Viewpoint::EWS::SOAP
     #   Will on work if 'SendOnly' is specified for :message_disposition
     # @option opts [Array<Hash>] :items This is a complex Hash that conforms to various Item types.
     #   Please see the Microsoft documentation for this element.
-    # @example
-    #   email_item = {:message => {
-    #   :xmlns => 'http://schemas.microsoft.com/exchange/services/2006/types',
-    #   :sub_elements => [
-    #     {:subject => {:text => 'Test Subject'}},
-    #     {:sensitivity => {:text => 'Private'}},
-    #     {:body => {:body_type => 'Text', :text => 'This is the body'}},
-    #     {:to_recipients => {:sub_elements => [
-    #       {:mailbox => {:sub_elements => [
-    #         {:name => {:text => 'Test User'}},
-    #         {:email_address => {:text => 'test@example.org'}}
-    #       ]}}
-    #     ]}}
-    #   ]}}
-    #   create_item(:message_disposition => 'SendAndSaveCopy', :items => [email_item])
     def create_item(opts)
       req = build_soap! do |type, builder|
         attribs = {}
@@ -529,7 +514,12 @@ module Viewpoint::EWS::SOAP
             builder.nbuild.parent.default_namespace = @default_ns
             builder.saved_item_folder_id!(opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
             builder.nbuild.Items {
-              builder.build_xml!(opts[:items])
+              opts[:items].each {|i|
+                # The key can be any number of item types like :message,
+                #   :calendar, etc
+                ikey = i.keys.first
+                builder.send("#{ikey}!",i[ikey])
+              }
             }
           }
         end
@@ -902,14 +892,12 @@ module Viewpoint::EWS::SOAP
         ----------------
       EOF
       respmsg = @con.post(soapmsg)
-=begin
       @log.debug <<-EOF
         Received SOAP Response:
         ----------------
         #{Nokogiri::XML(respmsg).to_xml}
         ----------------
       EOF
-=end
       ndoc = Nokogiri::XML(respmsg)
       parse!(ndoc)
     end
