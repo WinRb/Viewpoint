@@ -1,11 +1,13 @@
 require 'ews/folder_accessors'
 require 'ews/item_accessors'
+require 'ews/message_accessors'
 
 # This class is the glue between the Models and the Web Service.
 class Viewpoint::EWSClient
   include Viewpoint::EWS
   include Viewpoint::EWS::FolderAccessors
   include Viewpoint::EWS::ItemAccessors
+  include Viewpoint::EWS::MessageAccessors
 
   # The instance of Viewpoint::EWS::SOAP::ExchangeWebService 
   attr_reader :ews
