@@ -198,25 +198,28 @@ module Viewpoint::EWS::SOAP
     end
 
     # @see http://msdn.microsoft.com/en-us/library/aa580234(v=EXCHG.140).aspx
-    def item_id!(iid, change_key = nil)
-      attribs = {'Id' => iid}
-      attribs['ChangeKey'] = change_key if change_key
-      @nbuild[NS_EWS_TYPES].ItemId(attribs)
+    def item_id!(id)
+      nbuild[NS_EWS_TYPES].ItemId {|x|
+        x.parent['Id'] = id[:id]
+        x.parent['ChangeKey'] = id[:change_key] if id[:change_key]
+      }
     end
 
     # @see http://msdn.microsoft.com/en-us/library/aa580744(v=EXCHG.140).aspx
-    def occurrence_item_id!(rmid, change_key, instance_index)
-      attribs = {'RecurringMasterId' => rmid}
-      attribs['ChangeKey'] = change_key if change_key
-      attribs['InstanceIndex'] = instance_index
-      @nbuild[NS_EWS_TYPES].OccurrenceItemId(attribs)
+    def occurrence_item_id!(id)
+      @nbuild[NS_EWS_TYPES].OccurrenceItemId {|x|
+        x.parent['RecurringMasterId'] = id[:recurring_master_id]
+        x.parent['ChangeKey'] = id[:change_key] if id[:change_key]
+        x.parent['InstanceIndex'] = id[:instance_index]
+      }
     end
 
     # @see http://msdn.microsoft.com/en-us/library/aa581019(v=EXCHG.140).aspx
-    def recurring_master_item_id!(oid, change_key = nil)
-      attribs = {'OccurrenceId' => oid}
-      attribs['ChangeKey'] = change_key if change_key
-      @nbuild[NS_EWS_TYPES].RecurringMasterItemId(attribs)
+    def recurring_master_item_id!(id)
+      @nbuild[NS_EWS_TYPES].RecurringMasterItemId {|x|
+        x.parent['OccurrenceId'] = id[:occurrence_id]
+        x.parent['ChangeKey'] = id[:change_key] if id[:change_key]
+      }
     end
 
     # @see http://msdn.microsoft.com/en-us/library/aa565020(v=EXCHG.140).aspx
@@ -249,14 +252,32 @@ module Viewpoint::EWS::SOAP
     # This element is commonly used for delegation. Typically passing an
     #   email_address is sufficient
     # @see http://msdn.microsoft.com/en-us/library/aa565036.aspx
-    # @param [Hash] mailbox A well-formated hash that can be passed to build_xml!
-    #   For example: {:email_address => {:text => 'test@test.com'},
-    #   :name => {:text => 'Test User'}}
-    # @todo support the rest of the child elements
+    # @param [Hash] mailbox A well-formated hash
     def mailbox!(mbox)
-      @nbuild[NS_EWS_MESSAGES].Mailbox {
-        build_xml!(mbox)
+      nbuild[NS_EWS_TYPES].Mailbox {
+        name!(mbox[:name]) if mbox[:name]
+        email_address!(mbox[:email_address]) if mbox[:email_address]
+        routing_type!(mbox[:routing_type]) if mbox[:routing_type]
+        mailbox_type!(mbox[:mailbox_type]) if mbox[:mailbox_type]
+        item_id!(mbox[:item_id]) if mbox[:item_id]
       }
+    end
+
+    def name!(name)
+      nbuild[NS_EWS_TYPES].Name(name)
+    end
+
+    def email_address!(email)
+      nbuild[NS_EWS_TYPES].EmailAddress(email)
+    end
+
+    # This is stupid. The only valid value is "SMTP"
+    def routing_type!(type)
+      nbuild[NS_EWS_TYPES].RoutingType(type)
+    end
+
+    def mailbox_type!(type)
+      nbuild[NS_EWS_TYPES].MailboxType(type)
     end
 
     # Build the Restriction element
@@ -509,9 +530,56 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa565652(v=exchg.140).aspx
+    def item!(item)
+      nbuild.Item {
+        item.each_pair {|k,v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
+    def message!(item)
+      nbuild[NS_EWS_TYPES].Message {
+        item.each_pair {|k,v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
+    def subject!(sub)
+      nbuild[NS_EWS_TYPES].Subject(sub)
+    end
+
+    def body!(b)
+      nbuild[NS_EWS_TYPES].Body(b[:text]) {|x|
+        x.parent['BodyType'] = b[:body_type] if b[:body_type]
+      }
+    end
+
+    # @see http://msdn.microsoft.com/en-us/library/aa563719(v=exchg.140).aspx
+    # @param [Array] r An array of Mailbox type hashes to send to #mailbox!
+    def to_recipients!(r)
+      nbuild[NS_EWS_TYPES].ToRecipients {
+        r.each {|mbox| mailbox!(mbox[:mailbox]) }
+      }
+    end
+
+    def cc_recipients!(r)
+      nbuild[NS_EWS_TYPES].CcRecipients {
+        r.each {|mbox| mailbox!(mbox[:mailbox]) }
+      }
+    end
+
+    def bcc_recipients!(r)
+      nbuild[NS_EWS_TYPES].BccRecipients {
+        r.each {|mbox| mailbox!(mbox[:mailbox]) }
+      }
+    end
+
     # @see http://msdn.microsoft.com/en-us/library/aa565428(v=exchg.140).aspx
     def item_changes!(changes)
-      @nbuild.ItemChanges {
+      nbuild.ItemChanges {
         changes.each do |chg|
           item_change!(chg)
         end
@@ -590,11 +658,12 @@ module Viewpoint::EWS::SOAP
     # A helper method to dispatch to an ItemId, OccurrenceItemId, or a RecurringMasterItemId
     # @param [Hash] iid The item id of some type
     def dispatch_item_id!(iid)
+      puts "DISPATCH: #{iid}"
       type = iid.keys.first
       item = iid[type]
       case type
       when :item_id
-        item_id!(item[:id], item[:change_key])
+        item_id!(item)
       when :occurrence_item_id
         occurrence_item_id!(
           item[:recurring_master_id], item[:change_key], item[:instance_index])
