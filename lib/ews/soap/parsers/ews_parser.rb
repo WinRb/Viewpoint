@@ -18,6 +18,7 @@
 
 module Viewpoint::EWS::SOAP
   class EwsParser
+    include Viewpoint::EWS
     include Parser
 
     # Parsing Methods
