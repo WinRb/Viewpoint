@@ -25,28 +25,6 @@ module Viewpoint
     class MailboxUser
       include Model
 
-      # Resolve a user in the Exchange Data Store
-      # @param [String] resolve A user to resolve to.
-      # @return [MailboxUser,Array] If it resolves to one user then it returns a MailboxUser.
-      #   If it resolves to more than one user an Array of MailboxUsers are returned.  If an
-      #   error ocurrs an exception is raised.
-      # @todo - rename "resolve" to something more descriptive
-      #   - standardize on a common return type???
-      def self.find_user(resolve)
-        resp = (Viewpoint::EWS::EWS.instance).ews.resolve_names(resolve)
-        if(resp.status == 'Success')
-          return self.new(resp.items.first[:mailbox])
-        elsif(resp.code == 'ErrorNameResolutionMultipleResults')
-          users = []
-          resp.items.each do |u|
-            users << self.new(u[:mailbox])
-          end
-          return users
-        else
-          raise EwsError, "Find User produced an error: #{resp.code}: #{resp.message}"
-        end
-      end
-
       # Get information about when the user with the given email address is available.
       # @param [String] email_address The email address of the person to find availability for.
       # @param [String] start_time The start of the time range to check as an xs:dateTime.
@@ -61,8 +39,9 @@ module Viewpoint
         end
       end
 
-      def initialize(mbox_user)
+      def initialize(ews, mbox_user)
         super() # Calls initialize in Model (creates @ews_methods Array)
+        @ews = ews
         @ews_item = mbox_user
         define_str_var :name, :email_address, :routing_type, :mailbox_type, :item_id
       end
