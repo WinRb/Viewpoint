@@ -23,13 +23,13 @@ module Viewpoint::EWS::SOAP
       # Unwrap SOAP Envelope
       @response = response
       @namespaces = response.collect_namespaces
-      @response_type = response.xpath("//#{NS_SOAP}:Body/*",@namespaces).first.node_name
+      @response_type = response.xpath("//#{NS_SOAP}:Body/*",NAMESPACES).first.node_name
 
-      rmsg = response.xpath('//*[@ResponseClass]',@namespaces).first
+      rmsg = response.xpath('//*[@ResponseClass]',NAMESPACES).first
       @response_message = EwsSoapResponse.new(
         rmsg['ResponseClass'],
-        rmsg.xpath("#{NS_EWS_MESSAGES}:ResponseCode/text()",@namespaces).first.to_s,
-        rmsg.xpath("#{NS_EWS_MESSAGES}:MessageText/text()",@namespaces).first.to_s)
+        rmsg.xpath("#{NS_EWS_MESSAGES}:ResponseCode/text()",NAMESPACES).first.to_s,
+        rmsg.xpath("#{NS_EWS_MESSAGES}:MessageText/text()",NAMESPACES).first.to_s)
       @response_message.set_soap_resp(response)
     end
 

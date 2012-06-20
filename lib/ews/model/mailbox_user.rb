@@ -46,9 +46,10 @@ module Viewpoint
         define_str_var :name, :email_address, :routing_type, :mailbox_type, :item_id
       end
 
-      def get_oof
-        mailbox = {:mailbox => {:address => {:text => email_address}}}
-        resp = (Viewpoint::EWS::EWS.instance).ews.get_user_oof_settings(mailbox)
+      def out_of_office_settings
+        mailbox = {:address => email_address}
+        resp = @ews.get_user_oof_settings(mailbox)
+        return resp
         s = resp[:oof_settings]
         @oof_state = s[:oof_state][:text]
         @oof_ext_audience = s[:external_audience][:text]

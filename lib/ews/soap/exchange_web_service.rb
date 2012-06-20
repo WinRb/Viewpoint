@@ -848,14 +848,22 @@ module Viewpoint::EWS::SOAP
 
     # Gets a mailbox user's Out of Office (OOF) settings and messages.
     # @see http://msdn.microsoft.com/en-us/library/aa563465.aspx
-    def get_user_oof_settings(mailbox)
-      action = "#{SOAP_ACTION_PREFIX}/GetUserOofSettings"
-      resp = invoke("#{NS_EWS_MESSAGES}:GetUserOofSettingsRequest", action) do |root|
-        build!(root) do
-          mailbox!(root,mailbox[:mailbox],NS_EWS_TYPES)
+    # @param [Hash] opts
+    # @option opts [String] :address the email address of the user
+    # @option opts [String] :name the user display name (optional)
+    # @option opts [String] :routing_type the routing protocol (optional and stupid)
+    def get_user_oof_settings(opts)
+      opts = opts.clone
+      req = build_soap! do |type, builder|
+        if(type == :header)
+        else
+        builder.nbuild.GetUserOofSettingsRequest {|x|
+          x.parent.default_namespace = @default_ns
+          builder.mailbox!(opts)
+        }
         end
       end
-      parse!(resp)
+      do_soap_request(req)
     end
 
     # Sets a mailbox user's Out of Office (OOF) settings and message.

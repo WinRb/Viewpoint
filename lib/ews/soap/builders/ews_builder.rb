@@ -257,6 +257,7 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].Mailbox {
         name!(mbox[:name]) if mbox[:name]
         email_address!(mbox[:email_address]) if mbox[:email_address]
+        address!(mbox[:address]) if mbox[:address] # for Availability query
         routing_type!(mbox[:routing_type]) if mbox[:routing_type]
         mailbox_type!(mbox[:mailbox_type]) if mbox[:mailbox_type]
         item_id!(mbox[:item_id]) if mbox[:item_id]
@@ -269,6 +270,10 @@ module Viewpoint::EWS::SOAP
 
     def email_address!(email)
       nbuild[NS_EWS_TYPES].EmailAddress(email)
+    end
+
+    def address!(email)
+      nbuild[NS_EWS_TYPES].Address(email)
     end
 
     # This is stupid. The only valid value is "SMTP"
