@@ -836,14 +836,40 @@ module Viewpoint::EWS::SOAP
     # Provides detailed information about the availability of a set of users, rooms, and resources
     # within a specified time window.
     # @see http://msdn.microsoft.com/en-us/library/aa564001.aspx
-    def get_user_availability(email_address, start_time, end_time)
-      action = "#{SOAP_ACTION_PREFIX}/GetUserAvailability"
-      resp = invoke("#{NS_EWS_MESSAGES}:GetUserAvailabilityRequest", action) do |root|
-        build!(root) do
-          get_user_availability!(email_address, start_time, end_time)
+    # @param [Hash] opts
+    # @option opts [Hash] :time_zone The TimeZone data
+    #   Example: {:bias => 'UTC offset in minutes',
+    #   :standard_time => {:bias => 480, :time => '02:00:00',
+    #     :day_order => 5, :month => 10, :day_of_week => 'Sunday'},
+    #   :daylight_time => {same options as :standard_time}}
+    # @option opts [Array<Hash>] :mailbox_data Data for the mailbox to query
+    #   Example: [{:attendee_type => 'Organizer|Required|Optional|Room|Resource',
+    #   :email =>{:name => 'name', :address => 'email', :routing_type => 'SMTP'},
+    #   :exclude_conflicts => true|false }]
+    # @option opts [Hash] :free_busy_view_options
+    #   Example: {:time_window => {:start_time => DateTime,:end_time => DateTime},
+    #   :merged_free_busy_interval_in_minutes => minute_int,
+    #   :requested_view => None|MergedOnly|FreeBusy|FreeBusyMerged|Detailed
+    #     |DetailedMerged} (optional)
+    # @option opts [Hash] :suggestions_view_options (optional)
+    # @todo Finish out :suggestions_view_options
+    def get_user_availability(opts)
+      opts = opts.clone
+      req = build_soap! do |type, builder|
+        if(type == :header)
+        else
+        builder.nbuild.GetUserAvailabilityRequestType {|x|
+          x.parent.default_namespace = @default_ns
+          builder.time_zone!(opts[:time_zone])
+          opts[:mailbox_data].each do |mbd|
+            builder.mailbox_data!(mbd)
+          end
+          builder.free_busy_view_options!(opts[:free_busy_view_options])
+          builder.suggestions_view_options!(opts[:suggestions_view_options])
+        }
         end
       end
-      parse!(resp)
+      do_soap_request(req)
     end
 
     # Gets a mailbox user's Out of Office (OOF) settings and messages.

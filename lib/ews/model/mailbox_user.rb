@@ -25,20 +25,6 @@ module Viewpoint
     class MailboxUser
       include Model
 
-      # Get information about when the user with the given email address is available.
-      # @param [String] email_address The email address of the person to find availability for.
-      # @param [String] start_time The start of the time range to check as an xs:dateTime.
-      # @param [String] end_time The end of the time range to check as an xs:dateTime.
-      # @see http://msdn.microsoft.com/en-us/library/aa494212.aspx
-      def self.get_user_availability(email_address, start_time, end_time)
-        resp = (Viewpoint::EWS::EWS.instance).ews.get_user_availability(email_address, start_time, end_time)
-        if(resp.status == 'Success')
-          return resp.items
-        else
-          raise EwsError, "GetUserAvailability produced an error: #{resp.code}: #{resp.message}"
-        end
-      end
-
       def initialize(ews, mbox_user)
         super() # Calls initialize in Model (creates @ews_methods Array)
         @ews = ews
