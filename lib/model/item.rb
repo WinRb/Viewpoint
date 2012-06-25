@@ -32,7 +32,7 @@ module Viewpoint
       # @return [Item] Returns an Item or subclass of Item
       # @todo Add support to fetch an item with a ChangeKey
       def self.get_item(item_id, shape = :default)
-        item_shape = {:base_shape => shape.to_s.camelcase}
+        item_shape = {:base_shape => shape.to_s.camel_case}
         shallow = item_shape[:base_shape] != 'AllProperties'
         resp = (Viewpoint::EWS::EWS.instance).ews.get_item([item_id], item_shape)
         if(resp.status == 'Success')
