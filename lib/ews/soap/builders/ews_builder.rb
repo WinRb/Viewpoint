@@ -20,7 +20,7 @@ module Viewpoint::EWS::SOAP
   # This class includes the element builders. The idea is that each element should
   # know how to build themselves so each parent element can delegate creation of
   # subelements to a method of the same name with a '!' after it.
-  class XmlBuilder
+  class EwsBuilder
 
     attr_reader :nbuild
     def initialize
@@ -28,11 +28,14 @@ module Viewpoint::EWS::SOAP
     end
 
     # Build the SOAP envelope and yield this object so subelements can be built. Once
-    # you have the XmlBuilder object you can use the nbuild object like shown in the
+    # you have the EwsBuilder object you can use the nbuild object like shown in the
     # example for the Header section. The nbuild object is the underlying
     # Nokogiri::XML::Builder object.
+    # @param [Hash] opts
+    # @option opts [String] :server_version The version string that should get
+    #   set in the Header. See ExchangeWebService#initialize
     # @example
-    #   xb = XmlBuilder.new
+    #   xb = EwsBuilder.new
     #   xb.build! do |part, b|
     #     if(part == :header)
     #       b.nbuild.MyVar('blablabla')
@@ -40,10 +43,11 @@ module Viewpoint::EWS::SOAP
     #       b.folder_shape!({:base_shape => 'Default'})
     #     end
     #   end
-    def build!(&block)
+    def build!(opts = {}, &block)
       @nbuild.Envelope(NAMESPACES) do |node|
         node.parent.namespace = parent_namespace(node)
         node.Header {
+          set_version_header! opts[:server_version]
           yield(:header, self) if block_given?
         }
         node.Body {
@@ -84,7 +88,7 @@ module Viewpoint::EWS::SOAP
         se = vals.delete(:sub_elements)
         txt = vals.delete(:text)
 
-        @nbuild.send(keys.first.to_s.camel_case, txt, vals) {
+        @nbuild.send(keys.first.to_s.camel_case, txt, vals) {|x|
           build_xml!(se) if se
         }
       when 'Array'
@@ -231,9 +235,20 @@ module Viewpoint::EWS::SOAP
 
     # @see http://msdn.microsoft.com/en-us/library/aa564009.aspx
     def folders!(folders)
-      @nbuild[NS_EWS_TYPES].Folders {
-        build_xml!(folders)
+      @nbuild.Folders {|x|
+        x.parent.namespace = x.parent.namespace_definitions.find {|ns| ns.prefix == NS_EWS_TYPES}
+        folders.each do |fold|
+          key = fold.keys.first
+          fold[key][:xmlns] = NAMESPACES["xmlns:#{NS_EWS_TYPES}"]
+          build_xml!(fold)
+        end
       }
+    end
+
+    def folder!(folder)
+      type = folder.keys.first.to_s_camel_case
+      data = folder.values.first
+      @nbuild[NS_EWS_TYPES].send(type)
     end
 
     # Build the AdditionalProperties element
@@ -727,5 +742,13 @@ private
       node.parent.namespace_definitions.find {|ns| ns.prefix == NS_SOAP}
     end
 
-  end # XmlBuilder
+    def set_version_header!(version)
+      if version && !(version == 'none')
+        nbuild[NS_EWS_TYPES].RequestServerVersion {|x|
+          x.parent['Version'] = version
+        }
+      end
+    end
+
+  end # EwsBuilder
 end # Viewpoint::EWS::SOAP

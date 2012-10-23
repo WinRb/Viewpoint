@@ -24,9 +24,9 @@ module Viewpoint
 
       # CONSTANTS
 
-      NS_SOAP         = 'soap'.freeze # http://schemas.xmlsoap.org/soap/envelope/
-      NS_EWS_TYPES    = 't'.freeze # http://schemas.microsoft.com/exchange/services/2006/types
-      NS_EWS_MESSAGES = 'm'.freeze # http://schemas.microsoft.com/exchange/services/2006/messages
+      NS_SOAP         = 'soap'.freeze
+      NS_EWS_TYPES    = 't'.freeze
+      NS_EWS_MESSAGES = 'm'.freeze
       NAMESPACES = {
         "xmlns:#{NS_SOAP}"         => 'http://schemas.xmlsoap.org/soap/envelope/',
         "xmlns:#{NS_EWS_TYPES}"    => 'http://schemas.microsoft.com/exchange/services/2006/types',

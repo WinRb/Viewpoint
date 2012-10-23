@@ -20,9 +20,13 @@ class Viewpoint::EWSClient
   #   NTLM or Negotiate authentication you do not need to pass this parameter.
   # @param [String] pass The user password. If you are using NTLM or
   #   Negotiate authentication you do not need to pass this parameter.
-  def initialize(endpoint, user = nil, pass = nil)
+  # @param [Hash] opts Various options to pass to the backends
+  # @option opts [String] :server_version The Exchange server version to
+  #   target. See the VERSION_* constants in
+  #   Viewpoint::EWS::SOAP::ExchangeWebService.
+  def initialize(endpoint, user = nil, pass = nil, opts = {})
     con = Connection.new(endpoint)
     con.set_auth(user,pass) if(user && pass)
-    @ews = SOAP::ExchangeWebService.new(con)
+    @ews = SOAP::ExchangeWebService.new(con, opts)
   end
 end

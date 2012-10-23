@@ -59,6 +59,8 @@ require 'ews/soap/ews_soap_response'
 require 'ews/soap/builders/ews_builder'
 require 'ews/soap/parsers/parser'
 require 'ews/soap/parsers/ews_parser'
+# Mix-ins for the ExchangeWebService
+require 'ews/soap/exchange_data_services'
 require 'ews/soap/exchange_web_service'
 
 require 'ews/connection'
