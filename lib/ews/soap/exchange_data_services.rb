@@ -18,17 +18,18 @@ module Viewpoint::EWS::SOAP
     #   {:id => :root}  or {:id => 'myfolderid#'}
     # @option opts [Array<Hash>] :folders An array of hashes of folder types
     #   that conform to input for build_xml!
-    #   @example [ {:folder =>
-    #               {:sub_elements => [{:display_name => {:text => 'New Folder'}}]}},
-    #              {:calendar_folder =>
-    #               {:sub_elements => [{:display_name => {:text => 'Agenda'}}]}} ]
+    #   @example [ 
+    #     {:folder =>
+    #       {:display_name => "New Folder"}},
+    #     {:calendar_folder =>
+    #       {:folder_id => {:id => 'blah', :change_key => 'blah'}}}
     def create_folder(opts)
       opts = opts.clone
       req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.nbuild.CreateFolder {
-            builder.nbuild.parent.default_namespace = @default_ns
+          builder.nbuild.CreateFolder {|x|
+            x.parent.default_namespace = @default_ns
             builder.parent_folder_id!(opts[:parent_folder_id])
             builder.folders!(opts[:folders])
           }
@@ -38,18 +39,20 @@ module Viewpoint::EWS::SOAP
     end
 
     # Defines a request to copy folders in the Exchange store
-    # @see http://msdn.microsoft.com/en-us/library/aa563949(v=EXCHG.140).aspx
-    # @param [Array<Hash>] sources The source Folders
-    #   [ {:id => <myid>, :change_key => <optional_ck>} ]
-    # @param [Hash] to_fid The target FolderId {:id => <myid>, :change_key => <optional ck>}
-    def copy_folder(sources, to_fid)
+    # @see http://msdn.microsoft.com/en-us/library/aa563949.aspx
+    # @param [Hash] to_fid The target FolderId
+    #   {:id => <myid>, :change_key => <optional ck>}
+    # @param [Array<Hash>] *sources The source Folders
+    #   {:id => <myid>, :change_key => <optional_ck>},
+    #   {:id => <myid2>, :change_key => <optional_ck>}
+    def copy_folder(to_fid, *sources)
       req = build_soap! do |type, builder|
         if(type == :header)
         else
           builder.nbuild.CopyFolder {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.to_folder_id!(to_fid)
-            builder.folder_ids!(sources)
+            builder.folder_ids!(sources.flatten)
           }
         end
       end
@@ -99,6 +102,8 @@ module Viewpoint::EWS::SOAP
     #   { :parent_folder_ids => [{:id => root}],
     #     :traversal => 'Deep',
     #     :folder_shape  => {:base_shape => 'Default'} }
+    # @todo Better error checking for opts parameters
+    # @todo add FractionalPageFolderView
     def find_folder(opts)
       opts = opts.clone
       req = build_soap! do |type, builder|
@@ -107,7 +112,6 @@ module Viewpoint::EWS::SOAP
           builder.nbuild.FindFolder(:Traversal => opts[:traversal]) {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.folder_shape!(opts[:folder_shape])
-            # @todo add FractionalPageFolderView
             builder.restriction!(opts[:restriction]) if opts[:restriction]
             builder.parent_folder_ids!(opts[:parent_folder_ids])
           }

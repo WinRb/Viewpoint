@@ -236,19 +236,38 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa564009.aspx
     def folders!(folders)
       @nbuild.Folders {|x|
-        x.parent.namespace = x.parent.namespace_definitions.find {|ns| ns.prefix == NS_EWS_TYPES}
         folders.each do |fold|
-          key = fold.keys.first
-          fold[key][:xmlns] = NAMESPACES["xmlns:#{NS_EWS_TYPES}"]
-          build_xml!(fold)
+          fold.each_pair do |ftype, vars| # convenience, should only be one pair
+            ftype = "#{ftype}!".to_sym
+            if self.respond_to? ftype
+              self.send ftype, vars
+            else
+              raise Viewpoint::EWS::EwsNotImplemented,
+                "#{ftype} not implemented as a builder."
+            end
+          end
         end
       }
     end
 
     def folder!(folder)
-      type = folder.keys.first.to_s_camel_case
-      data = folder.values.first
-      @nbuild[NS_EWS_TYPES].send(type)
+      nbuild[NS_EWS_TYPES].Folder {|x|
+        folder.each_pair do |e,v|
+          ftype = "#{e}!".to_sym
+          if e == :folder_id
+            dispatch_folder_id!(v)
+          elsif self.respond_to?(ftype)
+            self.send ftype, v
+          else
+            raise Viewpoint::EWS::EwsNotImplemented,
+              "#{ftype} not implemented as a builder."
+          end
+        end
+      }
+    end
+
+    def display_name!(name)
+      nbuild[NS_EWS_TYPES].DisplayName(name)
     end
 
     # Build the AdditionalProperties element
