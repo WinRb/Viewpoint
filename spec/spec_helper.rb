@@ -1,6 +1,8 @@
 $: << File.dirname(__FILE__) + '/../lib/'
 require 'viewpoint'
 require 'ostruct'
+require_relative 'request_xml'
+require_relative 'xml_matcher'
 
 module SpecHelper
   def self.specdir
