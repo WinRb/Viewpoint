@@ -3,6 +3,7 @@ module Viewpoint::EWS::SOAP
   # Exchange Data Service operations as listed in the EWS Documentation.
   # @see http://msdn.microsoft.com/en-us/library/bb409286.aspx
   module ExchangeDataServices
+    include Viewpoint::EWS::SOAP
 
     # -------------- Item Operations -------------
 
@@ -199,12 +200,28 @@ module Viewpoint::EWS::SOAP
 
     # Empties folders in a mailbox.
     # @see http://msdn.microsoft.com/en-us/library/ff709484.aspx
+    # @param [Hash] opts
+    # @option opts [String] :delete_type Must be one of
+    #   ExchangeDataServices::HARD_DELETE, SOFT_DELETE, or MOVE_TO_DELETED_ITEMS
+    # @option opts [Boolean] :delete_sub_folders
+    # @option opts [Array<Hash>] :folder_ids An array of folder_ids in the form:
+    #   [ {:id => 'myfolderID##asdfs', :change_key => 'asdfasdf'},
+    #     {:id => 'blah'} ]
     # @todo Finish
     def empty_folder(opts)
+      validate_version(VERSION_2010_SP1)
+      ef_opts = {}
+      [:delete_type, :delete_sub_folders].each do |k|
+        ef_opts[k.to_s.camel_case] = validate_param(opts, k, true)
+      end
+      fids = validate_param opts, :folder_ids, true
+
       req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.nbuild.EmptyFolder {|x|
+          builder.nbuild.EmptyFolder(ef_opts) {|x|
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.folder_ids!(fids)
           }
         end
       end

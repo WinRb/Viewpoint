@@ -18,17 +18,11 @@
 
 module Viewpoint::EWS::SOAP
   class ExchangeWebService
+    include Viewpoint::EWS
     include Viewpoint::EWS::SOAP
     include ExchangeDataServices
 
-    # Target specific Exchange Server versions
-    # @see http://msdn.microsoft.com/en-us/library/bb891876(v=exchg.140).aspx
-    VERSION_2007      = 'Exchange2007'
-    VERSION_2007_SP1  = 'Exchange2007_SP1'
-    VERSION_2010      = 'Exchange2010'
-    VERSION_2010_SP1  = 'Exchange2010_SP1'
-    VERSION_2010_SP2  = 'Exchange2010_SP2'
-    VERSION_NONE      = 'none'
+    attr_accessor :server_version
 
     # @param [Viewpoint::EWS::Connection] connection the connection object
     # @param [Hash] opts additional options to the web service
@@ -671,7 +665,36 @@ module Viewpoint::EWS::SOAP
     end
 
 
+    private
     # Private Methods (Builders and Parsers)
+
+    # Validate or set default values for options parameters.
+    # @param [Hash] opts The options parameter passed to an EWS operation
+    # @param [Symbol] key The key in the Hash we are validating
+    # @param [Boolean] required Whether or not this key is required
+    # @param [Object] default_val If the key is not required use this as a
+    #   default value for the operation.
+    def validate_param(opts, key, required, default_val = nil)
+      if required
+        raise EwsBadArgumentError, "Required parameter(#{key}) not passed." unless opts.has_key?(key)
+        opts[key]
+      else
+        raise EwsBadArgumentError, "Default value not supplied." unless default_val
+        opts.has_key?(key) ? opts[key] : default_val
+      end
+    end
+
+    # Some operations only exist for certain versions of Exchange Server.
+    # This method should be called with the required version and we'll throw
+    # an exception of the currently set @server_version does not comply.
+    def validate_version(exchange_version)
+      if server_version < exchange_version
+        msg = 'The operation you are attempting to use is not compatible with'
+        msg << " your configured Exchange Server version(#{server_version})."
+        msg << " You must be running at least version (#{exchange_version})."
+        raise EwsServerVersionError, msg
+      end
+    end
 
     def parse!(response, opts = {})
       raise EwsError, "Can't parse an empty response. Please check your endpoint." if(response.nil?)
@@ -680,7 +703,7 @@ module Viewpoint::EWS::SOAP
 
     # Build the common elements in the SOAP message and yield to any custom elements.
     def build_soap!(&block)
-      opts = { :server_version => @server_version }
+      opts = { :server_version => server_version }
       EwsBuilder.new.build!(opts, &block)
     end
 

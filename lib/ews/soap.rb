@@ -39,6 +39,19 @@ module Viewpoint
       Contacts                = 'Contacts'
       ContactsActiveDirectory = 'ContactsActiveDirectory'
 
+      # Target specific Exchange Server versions
+      # @see http://msdn.microsoft.com/en-us/library/bb891876(v=exchg.140).aspx
+      VERSION_2007      = 'Exchange2007'
+      VERSION_2007_SP1  = 'Exchange2007_SP1'
+      VERSION_2010      = 'Exchange2010'
+      VERSION_2010_SP1  = 'Exchange2010_SP1'
+      VERSION_2010_SP2  = 'Exchange2010_SP2'
+      VERSION_NONE      = 'none'
+
+      HARD_DELETE = 'HardDelete'
+      SOFT_DELETE = 'SoftDelete'
+      MOVE_TO_DELETED_ITEMS = 'MoveToDeletedItems'
+
       def initialize
         @log = Logging.logger[self.class.name.to_s.to_sym]
         @default_ns = NAMESPACES["xmlns:#{NS_EWS_MESSAGES}"]

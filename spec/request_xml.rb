@@ -4,7 +4,7 @@ CREATE_FOLDER=<<EOF
 <?xml version="1.0"?>
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages">
   <soap:Header>
-    <t:RequestServerVersion Version="Exchange2010"/>
+    <t:RequestServerVersion Version="Exchange2010_SP2"/>
   </soap:Header>
   <soap:Body>
     <CreateFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/messages">
@@ -25,7 +25,7 @@ DELETE_FOLDER=<<EOF
 <?xml version="1.0"?>
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages">
   <soap:Header>
-    <t:RequestServerVersion Version="Exchange2010"/>
+    <t:RequestServerVersion Version="Exchange2010_SP2"/>
   </soap:Header>
   <soap:Body>
     <DeleteFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/messages" DeleteType="HardDelete">
@@ -41,7 +41,7 @@ FIND_FOLDER=<<EOF
 <?xml version="1.0"?>
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages">
   <soap:Header>
-    <t:RequestServerVersion Version="Exchange2010"/>
+    <t:RequestServerVersion Version="Exchange2010_SP2"/>
   </soap:Header>
   <soap:Body>
     <FindFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/messages" Traversal="Deep">
@@ -63,4 +63,21 @@ FIND_FOLDER=<<EOF
   </soap:Body>
 </soap:Envelope>
 EOF
+
+EMPTY_FOLDER=<<EOF
+<?xml version="1.0"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages">
+  <soap:Header>
+    <t:RequestServerVersion Version="Exchange2010_SP2"/>
+  </soap:Header>
+  <soap:Body>
+    <EmptyFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/messages" DeleteType="MoveToDeletedItems" DeleteSubFolders="false">
+      <FolderIds>
+        <t:FolderId Id="test_folder_id"/>
+      </FolderIds>
+    </EmptyFolder>
+  </soap:Body>
+</soap:Envelope>
+EOF
+
 end
