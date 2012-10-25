@@ -21,6 +21,25 @@ CREATE_FOLDER=<<EOF
 </soap:Envelope>
 EOF
 
+COPY_FOLDER=<<EOF
+<?xml version="1.0"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages">
+  <soap:Header>
+    <t:RequestServerVersion Version="Exchange2010_SP2"/>
+  </soap:Header>
+  <soap:Body>
+    <CopyFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/messages">
+      <m:ToFolderId>
+        <t:FolderId Id="dest_folder_id"/>
+      </m:ToFolderId>
+      <FolderIds>
+        <t:FolderId Id="src_folder_id"/>
+      </FolderIds>
+    </CopyFolder>
+  </soap:Body>
+</soap:Envelope>
+EOF
+
 DELETE_FOLDER=<<EOF
 <?xml version="1.0"?>
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages">

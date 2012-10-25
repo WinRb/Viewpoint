@@ -19,6 +19,14 @@ describe "Operations on Exchange Data Services" do
     @ews.create_folder opts
   end
 
+  it "generates CopyFolder XML" do
+    @ews.should_receive(:do_soap_request).
+      with(xml_matcher(RequestXml::COPY_FOLDER))
+
+    tofid = {:id => 'dest_folder_id'}
+    @ews.copy_folder tofid, [:id => 'src_folder_id']
+  end
+
   it "generates DeleteFolder XML" do
     @ews.should_receive(:do_soap_request).
       with(xml_matcher(RequestXml::DELETE_FOLDER))

@@ -41,18 +41,18 @@ module Viewpoint::EWS::SOAP
 
     # Defines a request to copy folders in the Exchange store
     # @see http://msdn.microsoft.com/en-us/library/aa563949.aspx
-    # @param [Hash] to_fid The target FolderId
+    # @param [Hash] to_folder_id The target FolderId
     #   {:id => <myid>, :change_key => <optional ck>}
     # @param [Array<Hash>] *sources The source Folders
     #   {:id => <myid>, :change_key => <optional_ck>},
     #   {:id => <myid2>, :change_key => <optional_ck>}
-    def copy_folder(to_fid, *sources)
+    def copy_folder(to_folder_id, *sources)
       req = build_soap! do |type, builder|
         if(type == :header)
         else
           builder.nbuild.CopyFolder {
             builder.nbuild.parent.default_namespace = @default_ns
-            builder.to_folder_id!(to_fid)
+            builder.to_folder_id!(to_folder_id)
             builder.folder_ids!(sources.flatten)
           }
         end
