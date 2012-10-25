@@ -54,6 +54,24 @@ describe "Operations on Exchange Data Services" do
     @ews.find_folder opts
   end
 
+  context "failing FindFolder XML" do
+    it "fails with missing key" do
+      opts = {:parent_folder_ids => [{id: :msgfolderroot}]}
+      opts[:folder_shape] = {:base_shape => 'Default'}
+      expect {
+        @ews.find_folder(opts)
+      }.to raise_error(Viewpoint::EWS::EwsBadArgumentError)
+    end
+  end
+
+  it "generates MoveFolder XML" do
+    @ews.should_receive(:do_soap_request).
+      with(xml_matcher(RequestXml::MOVE_FOLDER))
+
+    tofid = {:id => 'dest_folder_id'}
+    @ews.move_folder tofid, [:id => 'src_folder_id']
+  end
+
   it "generates EmptyFolder XML" do
     @ews.should_receive(:do_soap_request).
       with(xml_matcher(RequestXml::EMPTY_FOLDER))

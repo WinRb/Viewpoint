@@ -103,10 +103,12 @@ module Viewpoint::EWS::SOAP
     #   { :parent_folder_ids => [{:id => root}],
     #     :traversal => 'Deep',
     #     :folder_shape  => {:base_shape => 'Default'} }
-    # @todo Better error checking for opts parameters
     # @todo add FractionalPageFolderView
     def find_folder(opts)
       opts = opts.clone
+      [:parent_folder_ids, :traversal, :folder_shape].each do |k|
+        validate_param(opts, k, true)
+      end
       req = build_soap! do |type, builder|
         if(type == :header)
         else
@@ -127,7 +129,7 @@ module Viewpoint::EWS::SOAP
     # @param [Hash] opts
     # @option opts [Array<Hash>] :folder_ids An array of folder_ids in the form:
     #   [ {:id => 'myfolderID##asdfs', :change_key => 'asdfasdf'},
-    #     {:id => :msgfolderroot} ]  # Don't do this for real
+    #     {:id => :msgfolderroot} ]
     # @option opts [Hash] :folder_shape defines the FolderShape node
     # @option folder_shape [String] :base_shape IdOnly/Default/AllProperties
     # @option folder_shape :additional_properties
@@ -153,18 +155,20 @@ module Viewpoint::EWS::SOAP
     end
     
     # Defines a request to move folders in the Exchange store
-    # @see http://msdn.microsoft.com/en-us/library/aa566202(v=EXCHG.140).aspx
-    # @param [Array<Hash>] sources The source Folders
-    #   [ {:id => <myid>, :change_key => <optional_ck>} ]
-    # @param [Hash] to_fid The target FolderId {:id => <myid>, :change_key => <optional ck>}
-    def move_folder(sources, to_fid)
+    # @see http://msdn.microsoft.com/en-us/library/aa566202.aspx
+    # @param [Hash] to_folder_id The target FolderId
+    #   {:id => <myid>, :change_key => <optional ck>}
+    # @param [Array<Hash>] *sources The source Folders
+    #   {:id => <myid>, :change_key => <optional_ck>},
+    #   {:id => <myid2>, :change_key => <optional_ck>}
+    def move_folder(to_folder_id, *sources)
       req = build_soap! do |type, builder|
         if(type == :header)
         else
           builder.nbuild.MoveFolder {
             builder.nbuild.parent.default_namespace = @default_ns
-            builder.to_folder_id!(to_fid)
-            builder.folder_ids!(sources)
+            builder.to_folder_id!(to_folder_id)
+            builder.folder_ids!(sources.flatten)
           }
         end
       end
@@ -172,8 +176,9 @@ module Viewpoint::EWS::SOAP
     end
 
     # Update properties for a specified folder
-    # There is a lot more building in this method because most of the builders are only used
-    # for this operation so there was no need to externalize them for re-use.
+    # There is a lot more building in this method because most of the builders
+    # are only used for this operation so there was no need to externalize them
+    # for re-use.
     # @see http://msdn.microsoft.com/en-us/library/aa580519(v=EXCHG.140).aspx
     # @param [Array<Hash>] folder_changes an Array of well formatted Hashes
     def update_folder(folder_changes)
