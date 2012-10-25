@@ -83,6 +83,25 @@ FIND_FOLDER=<<EOF
 </soap:Envelope>
 EOF
 
+GET_FOLDER=<<EOF
+<?xml version="1.0"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages">
+  <soap:Header>
+    <t:RequestServerVersion Version="Exchange2010_SP2"/>
+  </soap:Header>
+  <soap:Body>
+    <GetFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/messages">
+      <FolderShape>
+        <t:BaseShape>Default</t:BaseShape>
+      </FolderShape>
+      <FolderIds>
+        <t:DistinguishedFolderId Id="msgfolderroot"/>
+      </FolderIds>
+    </GetFolder>
+  </soap:Body>
+</soap:Envelope>
+EOF
+
 MOVE_FOLDER=<<EOF
 <?xml version="1.0"?>
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages">

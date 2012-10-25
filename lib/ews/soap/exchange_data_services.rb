@@ -141,6 +141,10 @@ module Viewpoint::EWS::SOAP
     #     :folder_shape => {:base_shape => 'Default'} }
     def get_folder(opts)
       opts = opts.clone
+      [:folder_ids, :folder_shape].each do |k|
+        validate_param(opts, k, true)
+      end
+      validate_param(opts[:folder_shape], :base_shape, true)
       req = build_soap! do |type, builder|
         if(type == :header)
         else

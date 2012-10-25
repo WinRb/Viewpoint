@@ -64,6 +64,32 @@ describe "Operations on Exchange Data Services" do
     end
   end
 
+  it "generates GetFolder XML" do
+    @ews.should_receive(:do_soap_request).
+      with(xml_matcher(RequestXml::GET_FOLDER))
+
+    opts = { :folder_ids => [{:id => :msgfolderroot}],
+      :folder_shape => {:base_shape => 'Default'} }
+    @ews.get_folder opts
+  end
+
+  context "failing GetFolder XML" do
+    it "fails with missing key" do
+      opts = { :folder_ids => [{:id => :msgfolderroot}]}
+      expect {
+        @ews.get_folder(opts)
+      }.to raise_error(Viewpoint::EWS::EwsBadArgumentError)
+    end
+
+    it "fails with missing subkey" do
+      opts = { :folder_ids => [{:id => :msgfolderroot}],
+        :folder_shape => {:blah => 'Default'} }
+      expect {
+        @ews.get_folder(opts)
+      }.to raise_error(Viewpoint::EWS::EwsBadArgumentError)
+    end
+  end
+
   it "generates MoveFolder XML" do
     @ews.should_receive(:do_soap_request).
       with(xml_matcher(RequestXml::MOVE_FOLDER))
