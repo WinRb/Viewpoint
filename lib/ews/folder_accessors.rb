@@ -18,6 +18,69 @@
 module Viewpoint::EWS::FolderAccessors
   include Viewpoint::EWS
 
+  FOLDER_MAP = {
+    '/'       => :msgfolderroot,
+    '/public' => :publicfoldersroot,
+    '/inbox'  => :inbox
+  }
+
+
+  # @param [String] name The name of the new folder
+  # @param [String,Symbol] parent The parent folder, either a String
+  #   representing the path or a symbol that represents the Exchange
+  #   DistinguishedFolderName.
+  # @see http://msdn.microsoft.com/en-us/library/aa580808.aspx
+  def mkfolder(name, parent = '/', opts={})
+    parent = resolve_folder(parent)
+    resp = ews.create_folder :parent_folder_id => {:id => parent},
+      :folders => [:folder => {:display_name => name}]
+
+    if resp.success?
+      f = resp.items.first
+      class_by_name(f.keys.first).new(ews, f)
+    else
+      raise EwsError, "Could not create folder. #{resp.code}: #{resp.message}"
+    end
+  end
+
+  def delfolder(fid)
+    opts = {:folder_ids => [id: fid]}
+    opts[:delete_type] = 'HardDelete'
+    resp = ews.delete_folder(opts)
+    resp.success?
+  end
+
+  def find_by_name(name, parent = '/', opts={})
+    parent = resolve_folder(parent)
+    opts = {:restriction =>
+      {:is_equal_to => [
+        {:field_uRI => {:field_uRI=>'folder:DisplayName'}},
+        {:field_uRI_or_constant => {:constant => {:value=>name}}}
+      ]},
+      :parent_folder_ids => [{:id => parent}],
+      :traversal => 'Deep',
+      :folder_shape => {:base_shape => 'Default'}
+    }
+    resp = ews.find_folder opts
+    if resp.success?
+      folders = []
+      resp.items.each do |f|
+        folders << class_by_name(f.keys.first).new(ews, f)
+      end
+      folders
+    else
+      raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
+    end
+  end
+
+  def resolve_folder(folder)
+    if folder.instance_of?(String)
+      folder = FOLDER_MAP[folder]
+    end
+    folder
+  end
+
+
   # Return a list of folder names
   # @param [String,Symbol] root A DistinguishedFolderId(symbol) or
   #   FolderId(string). This is where we'll start the search from. Usually
@@ -33,7 +96,7 @@ module Viewpoint::EWS::FolderAccessors
         :additional_properties => {:FieldURI => ['folder:DisplayName']}
       }
     })
-    if(resp.status == 'Success')
+    if resp.success?
       flds = []
       resp.items.each do |f|
         flds << f[f.keys.first][:display_name][:text]

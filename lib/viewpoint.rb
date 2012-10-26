@@ -39,14 +39,6 @@ module Viewpoint
       Logging.logger.root
     end
 
-private
-
-    def class_by_name(cname)
-      if(cname.instance_of? Symbol)
-        cname = cname.to_s.camel_case
-      end
-      Viewpoint::EWS.const_get(cname)
-    end
   end # EWS
 end
 
@@ -65,34 +57,39 @@ require 'ews/soap/exchange_web_service'
 
 require 'ews/connection'
 
+# Base Types
+require 'ews/types'
+require 'ews/types/generic_folder'
+require 'ews/types/folder'
+
 # Load the model classes
 # Base Models
-require 'ews/model/model'
-require 'ews/model/mailbox_user'
-require 'ews/model/attendee'
-require 'ews/model/generic_folder'
-require 'ews/model/item_field_uri_map' # supports Item
-require 'ews/model/item'
+#require 'ews/model/model'
+#require 'ews/model/mailbox_user'
+#require 'ews/model/attendee'
+#require 'ews/model/generic_folder'
+#require 'ews/model/item_field_uri_map' # supports Item
+#require 'ews/model/item'
 # Specific Models
 # Folders
-require 'ews/model/folder'
-require 'ews/model/calendar_folder'
-require 'ews/model/contacts_folder'
-require 'ews/model/search_folder'
-require 'ews/model/tasks_folder'
+#require 'ews/model/folder'
+#require 'ews/model/calendar_folder'
+#require 'ews/model/contacts_folder'
+#require 'ews/model/search_folder'
+#require 'ews/model/tasks_folder'
 # Items
-require 'ews/model/message'
-require 'ews/model/calendar_item'
-require 'ews/model/contact'
-require 'ews/model/distribution_list'
-require 'ews/model/meeting_message'
-require 'ews/model/meeting_request'
-require 'ews/model/meeting_response'
-require 'ews/model/meeting_cancellation'
-require 'ews/model/task'
-require 'ews/model/attachment'
-require 'ews/model/file_attachment'
-require 'ews/model/item_attachment'
+#require 'ews/model/message'
+#require 'ews/model/calendar_item'
+#require 'ews/model/contact'
+#require 'ews/model/distribution_list'
+#require 'ews/model/meeting_message'
+#require 'ews/model/meeting_request'
+#require 'ews/model/meeting_response'
+#require 'ews/model/meeting_cancellation'
+#require 'ews/model/task'
+#require 'ews/model/attachment'
+#require 'ews/model/file_attachment'
+#require 'ews/model/item_attachment'
 
 # The proxy between the models and the web service
 require 'ews/ews_client'

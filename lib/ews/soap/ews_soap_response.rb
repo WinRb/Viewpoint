@@ -35,6 +35,10 @@ module Viewpoint::EWS::SOAP
     def set_soap_resp(response)
       @soap_response = response
     end
+
+    def success?
+      status == "Success"
+    end
   end # EwsSoapResponse
 
 end # Viewpoint::EWS::SOAP

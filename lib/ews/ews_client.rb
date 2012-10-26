@@ -6,6 +6,7 @@ require 'ews/mailbox_accessors'
 # This class is the glue between the Models and the Web Service.
 class Viewpoint::EWSClient
   include Viewpoint::EWS
+  include Viewpoint::EWS::Types
   include Viewpoint::EWS::FolderAccessors
   include Viewpoint::EWS::ItemAccessors
   include Viewpoint::EWS::MessageAccessors
