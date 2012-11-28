@@ -22,23 +22,79 @@ module Viewpoint::EWS::SOAP
   # @attr_reader [String] :message The text from the EWS element <m:ResponseCode>
   class EwsSoapResponse
 
-    attr_reader :status, :code, :message, :soap_response
-    attr_accessor :items
-
-    def initialize(status, code, message)
-      @status, @code, @message = status, code, message
-
-      # Items is an array where hash types get stored for return
-      @items = []
+    def initialize(sax_hash)
+      @resp = sax_hash
+      simplify!
     end
 
-    def set_soap_resp(response)
-      @soap_response = response
+    def envelope
+      @resp[:envelope][:elems]
     end
+
+    def header
+      envelope[0][:header][:elems]
+    end
+
+    def body
+      envelope[1][:body][:elems]
+    end
+
+    def response
+      body[0]
+    end
+
+    def response_messages
+      key = response.keys.first
+      response[key][:elems][0][:response_messages][:elems]
+    end
+
+    def response_message
+      key = response_messages[0].keys.first
+      response_messages[0][key]
+    end
+
+    def response_class
+      response_message[:attribs][:response_class]
+    end
+    alias :status :response_class
+
+    def response_code
+      response_message[:elems][:response_code][:text]
+    end
+    alias :code :response_code
+
+    def message_text
+      guard_hash response_message[:elems], [:response_code, :text]
+    end
+    alias :message :message_text
 
     def success?
-      status == "Success"
+      response_class == "Success"
     end
+
+
+    private
+
+
+    def simplify!
+      response_message[:elems] = response_message[:elems].inject(&:merge)
+    end
+
+    # If the keys don't exist in the Hash return nil
+    # @param[Hash] hsh
+    # @param[Array<Symbol,String>] keys keys to follow in the array
+    # @return [Object, nil]
+    def guard_hash(hsh, keys)
+      key = keys.shift
+      return nil unless hsh.is_a?(Hash) && hsh.has_key?(key)
+
+      if keys.empty?
+        hsh[key]
+      else
+        guard_hash hsh[key], keys
+      end
+    end
+
   end # EwsSoapResponse
 
 end # Viewpoint::EWS::SOAP

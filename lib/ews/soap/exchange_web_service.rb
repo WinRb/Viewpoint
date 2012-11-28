@@ -696,9 +696,9 @@ module Viewpoint::EWS::SOAP
       end
     end
 
-    def parse!(response, opts = {})
+    def parse!(response)
       raise EwsError, "Can't parse an empty response. Please check your endpoint." if(response.nil?)
-      EwsParser.new(response).parse(opts)
+      EwsParser.new(response).parse
     end
 
     # Build the common elements in the SOAP message and yield to any custom elements.
@@ -724,8 +724,7 @@ module Viewpoint::EWS::SOAP
         #{Nokogiri::XML(respmsg).to_xml}
         ----------------
       EOF
-      ndoc = Nokogiri::XML(respmsg)
-      parse!(ndoc)
+      parse!(respmsg)
     end
 
   end # class ExchangeWebService
