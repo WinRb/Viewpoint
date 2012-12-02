@@ -61,6 +61,9 @@ require 'ews/connection'
 require 'ews/types'
 require 'ews/types/generic_folder'
 require 'ews/types/folder'
+require 'ews/types/calendar_folder'
+require 'ews/types/contacts_folder'
+require 'ews/types/tasks_folder'
 
 # Load the model classes
 # Base Models
