@@ -202,7 +202,6 @@ module Viewpoint::EWS::FolderAccessors
     if(resp.status == 'Success')
       f = resp.response_message[:elems][:folders][:elems][0]
       ftype = f.keys.first
-      puts "TYPE: #{ftype}"
       class_by_name(ftype).new(ews, f[ftype])
     else
       raise EwsError, "Could not retrieve folder. #{resp.code}: #{resp.message}"
