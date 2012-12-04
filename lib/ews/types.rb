@@ -54,6 +54,10 @@ module Viewpoint::EWS
       super + key_paths.keys + key_alias.keys
     end
 
+    def ews_methods
+      key_paths.keys + key_alias.keys
+    end
+
 
     private
 
