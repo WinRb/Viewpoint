@@ -135,24 +135,15 @@ module Viewpoint::EWS::FolderAccessors
   # Get a specific folder by its ID.
   # @param [String,Symbol] folder_id Either a FolderId(String) or a
   #   DistinguishedFolderId(Symbol).
-  # @param [String,nil] act_as User to act on behalf as. This user must have
-  #   been given delegate access to the folder or this operation will fail.
   # @param [Hash] opts Misc options to control request
   # @option opts [String] :base_shape IdOnly/Default/AllProperties
+  # @option opts [String,nil] :act_as User to act on behalf as. This user must
+  #   have been given delegate access to the folder or this operation will fail.
   # @raise [EwsError] raised when the backend SOAP method returns an error.
-  def get_folder(folder_id, act_as = nil, opts = {})
-    opts[:base_shape] = 'Default' unless opts[:base_shape]
-    args =  {
-      :folder_ids   => [{:id => folder_id}],
-      :folder_shape => {:base_shape => opts[:base_shape]} }
-    args[:act_as] = act_as if act_as
+  def get_folder(folder_id, opts = {})
+    args = get_folder_args(folder_id, opts)
     resp = ews.get_folder(args)
-    if(resp.status == 'Success')
-      folder = resp.items.first
-      class_by_name(folder.keys.first).new(ews, folder[folder.keys.first])
-    else
-      raise EwsError, "Could not retrieve folder. #{resp.code}: #{resp.message}"
-    end
+    get_folder_parser(resp)
   end
 
   private
@@ -192,6 +183,29 @@ module Viewpoint::EWS::FolderAccessors
       folders
     else
       raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
+    end
+  end
+
+  # Build up the arguements for #get_folder
+  def get_folder_args(folder_id, opts)
+    opts[:base_shape] = 'Default' unless opts[:base_shape]
+    args =  {
+      :folder_ids   => [{:id => folder_id}],
+      :folder_shape => {:base_shape => opts[:base_shape]}
+    }
+    args[:act_as] = opts[:act_as] if opts[:act_as]
+    args
+  end
+
+  # @param [Viewpoint::EWS::SOAP::EwsSoapResponse] resp
+  def get_folder_parser(resp)
+    if(resp.status == 'Success')
+      f = resp.response_message[:elems][:folders][:elems][0]
+      ftype = f.keys.first
+      puts "TYPE: #{ftype}"
+      class_by_name(ftype).new(ews, f[ftype])
+    else
+      raise EwsError, "Could not retrieve folder. #{resp.code}: #{resp.message}"
     end
   end
 
