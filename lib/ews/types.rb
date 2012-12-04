@@ -5,9 +5,12 @@ module Viewpoint::EWS
     @@key_types = {} #blank by default, set in type classes
     @@key_alias = {} #blank by default, set in type classes
 
-    def initialize
+    # @param [SOAP::ExchangeWebService] ews the EWS reference
+    # @param [Hash] ews_item the EWS parsed response document
+    def initialize(ews, ews_item)
+      @ews      = ews
+      @ews_item = ews_item
       @shallow      = true
-      @auto_deepen  = true
     end
 
     def method_missing(method_sym, *arguments, &block)
@@ -26,7 +29,7 @@ module Viewpoint::EWS
     end
 
     def auto_deepen?
-      @auto_deepen
+      ews.auto_deepen
     end
 
     def deepen!
@@ -51,7 +54,13 @@ module Viewpoint::EWS
       super + key_paths.keys + key_alias.keys
     end
 
+
     private
+
+
+    def ews
+      @ews
+    end
 
     def class_by_name(cname)
       if(cname.instance_of? Symbol)

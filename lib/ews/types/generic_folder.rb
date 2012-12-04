@@ -27,13 +27,10 @@ module Viewpoint::EWS::Types
     attr_reader :ews_item
 
     # @param [SOAP::ExchangeWebService] ews the EWS reference
-    # @param [Hash] ews_item the EWS parsed response document that fetched this
-    #   folder.
+    # @param [Hash] ews_item the EWS parsed response document
     def initialize(ews, ews_item)
-      @ews      = ews
-      @ews_item = ews_item
+      super
       simplify!
-      super()
     end
 
     def delete!
@@ -57,9 +54,6 @@ module Viewpoint::EWS::Types
 
     private
 
-    def ews
-      @ews
-    end
 
     def simplify!
       @ews_item = @ews_item[:elems].inject(&:merge)

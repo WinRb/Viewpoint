@@ -30,4 +30,8 @@ class Viewpoint::EWSClient
     con.set_auth(user,pass) if(user && pass)
     @ews = SOAP::ExchangeWebService.new(con, opts)
   end
+
+  def auto_deepen=(deepen)
+    @ews.auto_deepen = (deepen ? true : false)
+  end
 end

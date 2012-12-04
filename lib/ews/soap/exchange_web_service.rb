@@ -22,7 +22,7 @@ module Viewpoint::EWS::SOAP
     include Viewpoint::EWS::SOAP
     include ExchangeDataServices
 
-    attr_accessor :server_version
+    attr_accessor :server_version, :auto_deepen
 
     # @param [Viewpoint::EWS::Connection] connection the connection object
     # @param [Hash] opts additional options to the web service
@@ -34,6 +34,7 @@ module Viewpoint::EWS::SOAP
       super()
       @con = connection
       @server_version = opts[:server_version] ? opts[:server_version] : VERSION_2010
+      @auto_deepen    = true
     end
 
     # Identifies items that are located in a specified folder
