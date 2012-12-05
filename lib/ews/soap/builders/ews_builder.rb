@@ -586,6 +586,14 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def calendar_item!(item)
+      nbuild[NS_EWS_TYPES].CalendarItem {
+        item.each_pair {|k,v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
     def subject!(sub)
       nbuild[NS_EWS_TYPES].Subject(sub)
     end
@@ -614,6 +622,39 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].BccRecipients {
         r.each {|mbox| mailbox!(mbox[:mailbox]) }
       }
+    end
+
+    def required_attendees!(attendees)
+      nbuild[NS_EWS_TYPES].RequiredAttendees {
+        attendees.each {|a| attendee!(a[:attendee])}
+      }
+    end
+
+    def optional_attendees!(attendees)
+      nbuild[NS_EWS_TYPES].OptionalAttendees {
+        attendees.each {|a| attendee!(a[:attendee])}
+      }
+    end
+
+    def resources!(attendees)
+      nbuild[NS_EWS_TYPES].Resources {
+        attendees.each {|a| attendee!(a[:attendee])}
+      }
+    end
+
+    def attendee!(a)
+      nbuild[NS_EWS_TYPES].Attendee {
+        mailbox!(a[:mailbox])
+        #@todo support ResponseType, LastResponseTime: http://msdn.microsoft.com/en-us/library/aa580339.aspx
+      }
+    end
+
+    def start!(st)
+      nbuild[NS_EWS_TYPES].Start(st[:text])
+    end
+
+    def end!(et)
+      nbuild[NS_EWS_TYPES].End(et[:text])
     end
 
     # @see http://msdn.microsoft.com/en-us/library/aa565428(v=exchg.140).aspx
