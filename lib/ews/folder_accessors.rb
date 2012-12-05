@@ -188,13 +188,12 @@ module Viewpoint::EWS::FolderAccessors
 
   # Build up the arguements for #get_folder
   def get_folder_args(folder_id, opts)
-    opts[:base_shape] = 'Default' unless opts[:base_shape]
-    args =  {
+    opts[:base_shape] ||= 'Default'
+    default_args =  {
       :folder_ids   => [{:id => folder_id}],
       :folder_shape => {:base_shape => opts[:base_shape]}
     }
-    args[:act_as] = opts[:act_as] if opts[:act_as]
-    args
+    default_args.merge opts
   end
 
   # @param [Viewpoint::EWS::SOAP::EwsSoapResponse] resp

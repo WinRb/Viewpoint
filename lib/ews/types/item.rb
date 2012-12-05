@@ -1,28 +1,55 @@
 module Viewpoint::EWS::Types
-  module GenericFolder
+  module Item
     include Viewpoint::EWS
     include Viewpoint::EWS::Types
 
+    module KlassMethods
+
+      def key_paths
+        KEY_PATHS
+      end
+
+      def key_types
+        KEY_TYPES
+      end
+
+      def key_alias
+        KEY_ALIAS
+      end
+
+    end
+
+    def self.included(klass)
+      klass.extend KlassMethods
+    end
+
     KEY_PATHS = {
-      :id               => [:folder_id, :attribs, :id],
-      :change_key       => [:folder_id, :attribs, :change_key],
-      :parent_folder_id => [:parent_folder_id, :attribs, :id],
-      :parent_folder_change_key => [:parent_folder_id, :attribs, :change_key],
-      :folder_class     => [:folder_class, :text],
-      :total_count      => [:total_count, :text],
-      :child_folder_count => [:child_folder_count, :text],
-      :display_name     => [:display_name, :text],
+      id:             [:item_id, :attribs, :id],
+      change_key:     [:item_id, :attribs, :change_key],
+      subject:        [:subject, :text],
+      sensitivity:    [:sensitivity, :text],
+      size:           [:size, :text],
+      date_time_sent: [:date_time_sent, :text],
+      date_time_created: [:date_time_created, :text],
+      has_attachments:[:has_attachments, :text],
+      is_associated:  [:is_associated, :text],
+      is_read:        [:is_read, :text],
     }
+    @@key_paths = KEY_PATHS
 
     KEY_TYPES = {
-      :total_count        => ->(str){str.to_i},
-      :child_folder_count => ->(str){str.to_i},
+      size:               ->(str){str.to_i},
+      date_time_sent:     ->(str){DateTime.parse(str)},
+      date_time_created:  ->(str){DateTime.parse(str)},
+      has_attachments:    ->(str){str.downcase == 'true'},
+      is_associated:      ->(str){str.downcase == 'true'},
+      is_read:            ->(str){str.downcase == 'true'},
     }
+    @@key_types = KEY_TYPES
 
     KEY_ALIAS = {
-      :name   => :display_name,
-      :ckey   => :change_key,
     }
+    @@key_alias = KEY_ALIAS
 
     attr_reader :ews_item
 
@@ -31,30 +58,6 @@ module Viewpoint::EWS::Types
     def initialize(ews, ews_item)
       super
       simplify!
-    end
-
-    def items
-      items_parser ews.find_item(items_args)
-    end
-
-    def items_args
-      { :parent_folder_ids => [{:id => self.id}],
-        :traversal => 'Shallow',
-        :item_shape  => {:base_shape => 'Default'} }
-    end
-
-    def items_parser(resp)
-      if(resp.status == 'Success')
-        allitems = resp.response_message[:elems][:root_folder][:elems][0][:items][:elems] || []
-        items = []
-        allitems.each do |i|
-          type = i.keys.first
-          items << class_by_name(type).new(ews, i[type])
-        end
-        items
-      else
-        raise EwsError, "Could not retrieve folder. #{resp.code}: #{resp.message}"
-      end
     end
 
     def delete!

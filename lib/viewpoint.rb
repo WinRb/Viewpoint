@@ -60,10 +60,26 @@ require 'ews/connection'
 # Base Types
 require 'ews/types'
 require 'ews/types/generic_folder'
+require 'ews/types/item'
+# Folders
 require 'ews/types/folder'
 require 'ews/types/calendar_folder'
 require 'ews/types/contacts_folder'
 require 'ews/types/tasks_folder'
+# Items
+require 'ews/types/message'
+require 'ews/types/calendar_item'
+require 'ews/types/contact'
+require 'ews/types/distribution_list'
+require 'ews/types/meeting_message'
+require 'ews/types/meeting_request'
+require 'ews/types/meeting_response'
+require 'ews/types/meeting_cancellation'
+require 'ews/types/task'
+require 'ews/types/attachment'
+require 'ews/types/file_attachment'
+require 'ews/types/item_attachment'
+
 
 # Load the model classes
 # Base Models

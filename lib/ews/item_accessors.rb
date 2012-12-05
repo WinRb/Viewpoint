@@ -24,20 +24,34 @@ module Viewpoint::EWS::ItemAccessors
   # @param [Symbol] shape The optional shape of the item :id_only/:default/:all_properties
   # @param [Hash] opts Misc options to control request
   # @option opts [String] :base_shape IdOnly/Default/AllProperties
-
   # @return [Item] Returns an Item or subclass of Item
   # @todo Add support to fetch an item with a ChangeKey
   def get_item(item_id, opts = {})
-    opts[:base_shape] = 'Default' unless opts[:base_shape]
-    # @todo fix shallow usage
-    #   shallow = item_shape[:base_shape] != 'AllProperties'
-    resp = ews.get_item(:item_ids => [{:item_id => {:id => item_id}}],
-                 :item_shape => {:base_shape => opts[:base_shape]})
+    args = get_item_args(item_id, opts)
+    resp = ews.get_item(args)
+    get_item_parser(resp)
+  end
+
+
+  private
+
+  def get_item_args(item_id, opts)
+    opts[:base_shape] ||= 'Default'
+    default_args = {
+      :item_ids => [{:item_id => {:id => item_id}}],
+      :item_shape => {:base_shape => opts[:base_shape]}
+    }
+    default_args.merge opts
+  end
+
+  def get_item_parser(resp)
     if(resp.status == 'Success')
-      item = resp.items.first
-      class_by_name(item.keys.first).new(ews, item[item.keys.first])
+      resp
+      #item = resp.items.first
+      #class_by_name(item.keys.first).new(ews, item[item.keys.first])
     else
       raise EwsError, "Could not retrieve item. #{resp.code}: #{resp.message}"
     end
   end
+
 end # Viewpoint::EWS::ItemAccessors

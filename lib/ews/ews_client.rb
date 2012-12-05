@@ -6,7 +6,6 @@ require 'ews/mailbox_accessors'
 # This class is the glue between the Models and the Web Service.
 class Viewpoint::EWSClient
   include Viewpoint::EWS
-  include Viewpoint::EWS::Types
   include Viewpoint::EWS::FolderAccessors
   include Viewpoint::EWS::ItemAccessors
   include Viewpoint::EWS::MessageAccessors
@@ -34,4 +33,18 @@ class Viewpoint::EWSClient
   def auto_deepen=(deepen)
     @ews.auto_deepen = (deepen ? true : false)
   end
+
+
+  private
+
+
+  # This method also exists in EWS::Types, but there is a lot of other stuff
+  # in there that I didn't want to include directly in this class.
+  def class_by_name(cname)
+    if(cname.instance_of? Symbol)
+      cname = cname.to_s.camel_case
+    end
+    Viewpoint::EWS::Types.const_get(cname)
+  end
+
 end
