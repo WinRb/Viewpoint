@@ -37,47 +37,6 @@ module Viewpoint::EWS::SOAP
       @auto_deepen    = true
     end
 
-    # Identifies items that are located in a specified folder
-    # @see http://msdn.microsoft.com/en-us/library/aa566107.aspx
-    #
-    # @param [Hash] opts
-    # @option opts [Array<Hash>] :parent_folder_ids An Array of folder id Hashes, either a
-    #   DistinguishedFolderId (must me a Symbol) or a FolderId (String)
-    #   [{:id => <myid>, :change_key => <ck>}, {:id => :root}]
-    # @option opts [String] :traversal Shallow/Deep/SoftDeleted
-    # @option opts [Hash] :item_shape defines the ItemShape node
-    # @option item_shape [String] :base_shape IdOnly/Default/AllProperties
-    # @option item_shape :additional_properties
-    #   See: http://msdn.microsoft.com/en-us/library/aa563810.aspx
-    # @option opts [Hash] :calendar_view Limit FindItem by a start and end date
-    #   {:calendar_view => {:max_entries_returned => 2, :start_date =>
-    #   <DateTime Obj>, :end_date => <DateTime Obj>}}
-    # @option opts [Hash] :contacts_view Limit FindItem between contact names
-    #   {:contacts_view => {:max_entries_returned => 2, :initial_name => 'Dan',
-    #   :final_name => 'Wally'}}
-    # @example
-    #   { :parent_folder_ids => [{:id => root}],
-    #     :traversal => 'Shallow',
-    #     :item_shape  => {:base_shape => 'Default'} }
-    def find_item(opts)
-      opts = opts.clone
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-          builder.nbuild.FindItem(:Traversal => opts[:traversal]) {
-            builder.nbuild.parent.default_namespace = @default_ns
-            builder.item_shape!(opts[:item_shape])
-            # @todo add FractionalPageFolderView
-            builder.calendar_view!(opts[:calendar_view]) if opts[:calendar_view]
-            builder.contacts_view!(opts[:contacts_view]) if opts[:contacts_view]
-            builder.restriction!(opts[:restriction]) if opts[:restriction]
-            builder.parent_folder_ids!(opts[:parent_folder_ids])
-          }
-        end
-      end
-      do_soap_request(req)
-    end
-
     # Used to subscribe client applications to either push, pull or stream notifications.
     # @see http://msdn.microsoft.com/en-us/library/aa566188(v=EXCHG.140).aspx
     # @param [Array<Hash>] subscriptions An array of Hash objects that describe each
