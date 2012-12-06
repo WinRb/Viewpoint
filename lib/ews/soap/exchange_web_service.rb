@@ -180,55 +180,6 @@ module Viewpoint::EWS::SOAP
       do_soap_request(req)
     end
 
-    # Used to modify the properties of an existing item in the Exchange store
-    # @see http://msdn.microsoft.com/en-us/library/aa581084(v=exchg.140).aspx
-    #
-    # @param [Hash] opts
-    # @option opts [String] :conflict_resolution Identifies the type of conflict resolution to
-    #   try during an update. The default value is AutoResolve. Available options are
-    #   'NeverOverwrite', 'AutoResolve', 'AlwaysOverwrite'
-    # @option opts [String] :message_disposition How the item will be handled after it is updated.
-    #   Only applicable for to e-mail. Must be one of 'SaveOnly', 'SendOnly', or 'SendAndSaveCopy'
-    # @option opts [String] :send_meeting_invitations_or_cancellations How meeting requests are
-    #   handled after they are updated. Required for calendar items. Must be one of 'SendToNone',
-    #   'SendOnlyToAll', 'SendOnlyToChanged', 'SendToAllAndSaveCopy', 'SendToChangedAndSaveCopy'
-    # @option opts [Hash] :saved_item_folder_id A well formatted folder_id Hash. Ex: {:id => :sentitems}
-    #   Will on work if 'SendOnly' is specified for :message_disposition
-    # @option opts [Array<Hash>] :item_changes an array of ItemChange elements that identify items
-    #   and the updates to apply to the items. See the Microsoft docs for more information.
-    # @example
-    #   opts = {
-    #     :send_meeting_invitations_or_cancellations => 'SendOnlyToChangedAndSaveCopy',
-    #     :item_changes => [
-    #       { :item_id => {:id => 'id1'},
-    #         :updates => [
-    #           {:set_item_field => {
-    #             :field_uRI => {:field_uRI => 'item:Subject'},
-    #             # The following needs to conform to #build_xml! format for now
-    #             :calendar_item => { :sub_elements => [{:subject => {:text => 'Test Subject'}}]}
-    #           }}
-    #         ]
-    #       }
-    #     ]
-    #   }
-    def update_item(opts)
-      req = build_soap! do |type, builder|
-        attribs = {}
-        attribs['MessageDisposition'] = opts[:message_disposition] if opts[:message_disposition]
-        attribs['ConflictResolution'] = opts[:conflict_resolution] if opts[:conflict_resolution]
-        attribs['SendMeetingInvitationsOrCancellations'] = opts[:send_meeting_invitations_or_cancellations] if opts[:send_meeting_invitations_or_cancellations]
-        if(type == :header)
-        else
-          builder.nbuild.UpdateItem(attribs) {
-            builder.nbuild.parent.default_namespace = @default_ns
-            builder.saved_item_folder_id!(opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
-            builder.item_changes!(opts[:item_changes])
-          }
-        end
-      end
-      do_soap_request(req)
-    end
-
     # Used to send e-mail messages that are located in the Exchange store.
     # @see http://msdn.microsoft.com/en-us/library/aa580238(v=exchg.140).aspx
     #

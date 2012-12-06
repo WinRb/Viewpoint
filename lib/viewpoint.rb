@@ -59,6 +59,7 @@ require 'ews/connection'
 
 # Base Types
 require 'ews/types'
+require 'ews/types/item_field_uri_map'
 require 'ews/types/generic_folder'
 require 'ews/types/item'
 # Folders

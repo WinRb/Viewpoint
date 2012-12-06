@@ -738,7 +738,6 @@ module Viewpoint::EWS::SOAP
     # A helper method to dispatch to an ItemId, OccurrenceItemId, or a RecurringMasterItemId
     # @param [Hash] iid The item id of some type
     def dispatch_item_id!(iid)
-      puts "DISPATCH: #{iid}"
       type = iid.keys.first
       item = iid[type]
       case type

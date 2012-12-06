@@ -63,10 +63,10 @@ module Viewpoint::EWS::SOAP
     end
     alias :code :response_code
 
-    def message_text
-      guard_hash response_message[:elems], [:response_code, :text]
+    def response_message_text
+      guard_hash response_message[:elems], [:message_text, :text]
     end
-    alias :message :message_text
+    alias :message :response_message_text
 
     def success?
       response_class == "Success"
