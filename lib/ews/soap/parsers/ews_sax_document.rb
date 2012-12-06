@@ -32,7 +32,12 @@ module Viewpoint::EWS::SOAP
 
     def characters(string)
       string.strip!
-      @elems.last[:text] = string unless string.empty?
+      return if string.empty?
+      if @elems.last[:text]
+        @elems.last[:text] += string
+      else
+        @elems.last[:text] = string
+      end
     end
 
     def start_element_namespace(name, attributes = [], prefix = nil, uri = nil, ns = [])
