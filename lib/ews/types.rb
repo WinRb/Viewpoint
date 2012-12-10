@@ -15,10 +15,7 @@ module Viewpoint::EWS
 
     def method_missing(method_sym, *arguments, &block)
       if method_keys.include?(method_sym)
-        type_convert(
-          method_sym,
-          resolve_key_path(@ews_item, method_path(method_sym))
-        )
+        type_convert( method_sym, resolve_method(method_sym) )
       else
         super
       end
@@ -51,7 +48,7 @@ module Viewpoint::EWS
     end
 
     def methods(include_super = true)
-      super + key_paths.keys + key_alias.keys
+      super + ews_methods
     end
 
     def ews_methods
@@ -78,11 +75,9 @@ module Viewpoint::EWS
       key_types[key] ? key_types[key].call(str) : str
     end
 
-    def resolve_key_path(hsh, path)
+    def resolve_method
       begin
-        k = path.first
-        return hsh[k] if path.length == 1
-        resolve_key_path(hsh[k],path[1..-1])
+        resolve_key_path(@ews_item, method_path(method_sym))
       rescue
         if shallow? && auto_deepen?
           enlighten!
@@ -91,9 +86,10 @@ module Viewpoint::EWS
       end
     end
 
-    def get_var(hsh, path)
-      val = resolve_key_path(hsh, path)
-      yield val if block_given?
+    def resolve_key_path(hsh, path)
+      k = path.first
+      return hsh[k] if path.length == 1
+      resolve_key_path(hsh[k],path[1..-1])
     end
 
     def key_paths
