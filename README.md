@@ -51,14 +51,26 @@ TO USE:
 ```ruby
 require 'rubygems'
 require 'viewpoint'
+include Viewpoint::EWS
+
+endpoint = 'https://example.com/ews/Exchange.asmx'
+user = 'username'
+pass = 'password'
+
+cli = Viewpoint::EWSClient.new endpoint, user, pass
+
+# Get all folders
+folders = cli.find_folders
+
+# Get a specific folder
+inbox = cli.get_folder :inbox
+
+# Get available EWS methods on an object
+inbox.ews_methods
+
+# Get items from an object (messages in this case)
+msgs = inbox.items
 ```
-
-# See REQUIRED GEMS below
-
-REQUIRED GEMS:
-
-# NTLM Library
-`gem install -r rubyntlm`
 
 --------------------------------------------------------------------------
 DESIGN GOALS/GUIDELINES:
