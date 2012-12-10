@@ -80,6 +80,7 @@ require 'ews/types/task'
 require 'ews/types/attachment'
 require 'ews/types/file_attachment'
 require 'ews/types/item_attachment'
+require 'ews/types/mailbox_user'
 
 
 # Load the model classes

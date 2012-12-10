@@ -75,7 +75,7 @@ module Viewpoint::EWS
       key_types[key] ? key_types[key].call(str) : str
     end
 
-    def resolve_method
+    def resolve_method(method_sym)
       begin
         resolve_key_path(@ews_item, method_path(method_sym))
       rescue

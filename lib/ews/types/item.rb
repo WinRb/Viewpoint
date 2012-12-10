@@ -33,11 +33,13 @@ module Viewpoint::EWS::Types
       date_time_sent: [:date_time_sent, :text],
       date_time_created: [:date_time_created, :text],
       has_attachments?:[:has_attachments, :text],
-      is_associated?:  [:is_associated, :text],
-      is_read?:        [:is_read, :text],
+      is_associated?: [:is_associated, :text],
+      is_read?:       [:is_read, :text],
       conversation_id:[:conversation_id, :attribs, :id],
       categories:     [:categories, :elems],
       internet_message_headers:[:internet_message_headers, :elems],
+      sender:         [:sender, :elems, 0, :mailbox, :elems],
+      from:           [:from, :elems, 0, :mailbox, :elems],
     }
     @@key_paths = KEY_PATHS
 
@@ -51,7 +53,7 @@ module Viewpoint::EWS::Types
       categories:         ->(obj){obj.collect{|s| s[:string][:text]}},
       internet_message_headers: ->(obj){obj.collect{|h|
           {h[:internet_message_header][:attribs][:header_name] =>
-            h[:internet_message_header][:text]} } }
+            h[:internet_message_header][:text]} } },
     }
     @@key_types = KEY_TYPES
 
