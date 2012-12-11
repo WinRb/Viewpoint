@@ -4,27 +4,7 @@ module Viewpoint::EWS::Types
     include Viewpoint::EWS::Types
     include ItemFieldUriMap
 
-    module KlassMethods
-
-      def key_paths
-        KEY_PATHS
-      end
-
-      def key_types
-        KEY_TYPES
-      end
-
-      def key_alias
-        KEY_ALIAS
-      end
-
-    end
-
-    def self.included(klass)
-      klass.extend KlassMethods
-    end
-
-    KEY_PATHS = {
+    ITEM_KEY_PATHS = {
       id:             [:item_id, :attribs, :id],
       change_key:     [:item_id, :attribs, :change_key],
       subject:        [:subject, :text],
@@ -41,9 +21,8 @@ module Viewpoint::EWS::Types
       sender:         [:sender, :elems, 0, :mailbox, :elems],
       from:           [:from, :elems, 0, :mailbox, :elems],
     }
-    @@key_paths = KEY_PATHS
 
-    KEY_TYPES = {
+    ITEM_KEY_TYPES = {
       size:               ->(str){str.to_i},
       date_time_sent:     ->(str){DateTime.parse(str)},
       date_time_created:  ->(str){DateTime.parse(str)},
@@ -55,11 +34,9 @@ module Viewpoint::EWS::Types
           {h[:internet_message_header][:attribs][:header_name] =>
             h[:internet_message_header][:text]} } },
     }
-    @@key_types = KEY_TYPES
 
-    KEY_ALIAS = {
+    ITEM_KEY_ALIAS = {
     }
-    @@key_alias = KEY_ALIAS
 
     attr_reader :ews_item
 
@@ -100,6 +77,17 @@ module Viewpoint::EWS::Types
 
     private
 
+    def key_paths
+      super.merge(ITEM_KEY_PATHS)
+    end
+
+    def key_types
+      super.merge(ITEM_KEY_TYPES)
+    end
+
+    def key_alias
+      super.merge(ITEM_KEY_ALIAS)
+    end
 
     def update_is_read_status(read)
       field = :is_read
@@ -130,7 +118,6 @@ module Viewpoint::EWS::Types
     # @raise [EwsError] raised when the backend SOAP method returns an error.
     def get_item(opts = {})
       args = get_item_args(opts)
-      puts "ARGS: #{args}"
       resp = ews.get_item(args)
       get_item_parser(resp)
     end
@@ -165,7 +152,6 @@ module Viewpoint::EWS::Types
       else 'MoveToDeletedItems'
       end
     end
-
 
   end
 end

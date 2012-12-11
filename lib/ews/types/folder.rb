@@ -4,26 +4,27 @@ module Viewpoint::EWS::Types
     include Viewpoint::EWS::Types
     include Viewpoint::EWS::Types::GenericFolder
 
-    @@folder_key_paths = GenericFolder::KEY_PATHS.merge(
+    FOLDER_KEY_PATHS = {
       :unread_count       => [:unread_count, :text],
-    )
-
-    @@folder_key_types = GenericFolder::KEY_TYPES.merge(
+    }
+    FOLDER_KEY_TYPES = {
       :unread_count       => ->(str){str.to_i},
-    )
+    }
+    FOLDER_KEY_ALIAS = {}
 
-    @@folder_key_alias = GenericFolder::KEY_ALIAS
 
-    def self.key_paths
-      @@folder_key_paths
+    private
+
+    def key_paths
+      @key_paths ||= super.merge(FOLDER_KEY_PATHS)
     end
 
-    def self.key_types
-      @@folder_key_types
+    def key_types
+      @key_types ||= super.merge(FOLDER_KEY_TYPES)
     end
 
-    def self.key_alias
-      @@folder_key_alias
+    def key_alias
+      @key_alias ||= super.merge(FOLDER_KEY_ALIAS)
     end
 
   end

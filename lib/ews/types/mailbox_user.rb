@@ -25,6 +25,10 @@ module Viewpoint::EWS::Types
     include Viewpoint::EWS
     include Viewpoint::EWS::Types
 
+    MAILBOX_KEY_PATHS = {}
+    MAILBOX_KEY_TYPES = {}
+    MAILBOX_KEY_ALIAS = {}
+
     def initialize(ews, mbox_user)
       @ews = ews
       @ews_item = mbox_user
@@ -111,6 +115,18 @@ module Viewpoint::EWS::Types
 
     def simplify!
       @ews_item = @ews_item[:elems].inject(&:merge)
+    end
+
+    def key_paths
+      @key_paths ||= super.merge(MAILBOX_KEY_PATHS)
+    end
+
+    def key_types
+      @key_types ||= super.merge(MAILBOX_KEY_TYPES)
+    end
+
+    def key_alias
+      @key_alias ||= super.merge(MAILBOX_KEY_ALIAS)
     end
 
   end # MailboxUser

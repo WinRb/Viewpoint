@@ -3,7 +3,7 @@ module Viewpoint::EWS::Types
     include Viewpoint::EWS
     include Viewpoint::EWS::Types
 
-    KEY_PATHS = {
+    GFOLDER_KEY_PATHS = {
       :id               => [:folder_id, :attribs, :id],
       :change_key       => [:folder_id, :attribs, :change_key],
       :parent_folder_id => [:parent_folder_id, :attribs, :id],
@@ -14,17 +14,15 @@ module Viewpoint::EWS::Types
       :display_name     => [:display_name, :text],
     }
 
-    KEY_TYPES = {
+    GFOLDER_KEY_TYPES = {
       :total_count        => ->(str){str.to_i},
       :child_folder_count => ->(str){str.to_i},
     }
 
-    KEY_ALIAS = {
+    GFOLDER_KEY_ALIAS = {
       :name   => :display_name,
       :ckey   => :change_key,
     }
-
-    attr_reader :ews_item
 
     # @param [SOAP::ExchangeWebService] ews the EWS reference
     # @param [Hash] ews_item the EWS parsed response document
@@ -78,6 +76,18 @@ module Viewpoint::EWS::Types
 
     private
 
+
+    def key_paths
+      @key_paths ||= super.merge(GFOLDER_KEY_PATHS)
+    end
+
+    def key_types
+      @key_types ||= super.merge(GFOLDER_KEY_TYPES)
+    end
+
+    def key_alias
+      @key_alias ||= super.merge(GFOLDER_KEY_ALIAS)
+    end
 
     def simplify!
       @ews_item = @ews_item[:elems].inject(&:merge)

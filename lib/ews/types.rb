@@ -1,9 +1,11 @@
 module Viewpoint::EWS
   module Types
 
-    @@key_paths = {} #blank by default, set in type classes
-    @@key_types = {} #blank by default, set in type classes
-    @@key_alias = {} #blank by default, set in type classes
+    KEY_PATHS = {}
+    KEY_TYPES = {}
+    KEY_ALIAS = {}
+
+    attr_reader :ews_item
 
     # @param [SOAP::ExchangeWebService] ews the EWS reference
     # @param [Hash] ews_item the EWS parsed response document
@@ -63,6 +65,18 @@ module Viewpoint::EWS
       @ews
     end
 
+    def key_paths
+      KEY_PATHS
+    end
+
+    def key_types
+      KEY_TYPES
+    end
+
+    def key_alias
+      KEY_ALIAS
+    end
+
     def class_by_name(cname)
       if(cname.instance_of? Symbol)
         cname = cname.to_s.camel_case
@@ -90,18 +104,6 @@ module Viewpoint::EWS
       k = path.first
       return hsh[k] if path.length == 1
       resolve_key_path(hsh[k],path[1..-1])
-    end
-
-    def key_paths
-      self.class.key_paths
-    end
-
-    def key_types
-      self.class.key_types
-    end
-
-    def key_alias
-      self.class.key_alias
     end
 
     def method_keys
