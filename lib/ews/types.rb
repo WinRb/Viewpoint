@@ -86,7 +86,11 @@ module Viewpoint::EWS
 
     def type_convert(key,str)
       return nil if str.nil?
-      key_types[key] ? key_types[key].call(str) : str
+      if key_types[key]
+        key_types[key].is_a?(Symbol) ? method(key_types[key]).call(str) : key_types[key].call(str)
+      else
+        str
+      end
     end
 
     def resolve_method(method_sym)

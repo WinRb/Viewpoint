@@ -25,13 +25,19 @@ module Viewpoint::EWS::Types
     include Viewpoint::EWS
     include Viewpoint::EWS::Types
 
-    MAILBOX_KEY_PATHS = {}
+    MAILBOX_KEY_PATHS = {
+      name: [:name],
+      email_address: [:email_address],
+    }
     MAILBOX_KEY_TYPES = {}
-    MAILBOX_KEY_ALIAS = {}
+    MAILBOX_KEY_ALIAS = {
+      email: :email_address,
+    }
 
     def initialize(ews, mbox_user)
       @ews = ews
       @ews_item = mbox_user
+      simplify!
     end
 
     def out_of_office_settings
@@ -114,7 +120,10 @@ module Viewpoint::EWS::Types
 
 
     def simplify!
-      @ews_item = @ews_item[:elems].inject(&:merge)
+      @ews_item = @ews_item.inject({}){|m,o|
+        m[o.keys.first] = o.values.first[:text];
+        m
+      }
     end
 
     def key_paths

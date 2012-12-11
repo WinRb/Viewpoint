@@ -33,6 +33,8 @@ module Viewpoint::EWS::Types
       internet_message_headers: ->(obj){obj.collect{|h|
           {h[:internet_message_header][:attribs][:header_name] =>
             h[:internet_message_header][:text]} } },
+      sender: :build_mailbox_user,
+      from:   :build_mailbox_user,
     }
 
     ITEM_KEY_ALIAS = {
@@ -151,6 +153,10 @@ module Viewpoint::EWS::Types
       when :recycle then 'MoveToDeletedItems'
       else 'MoveToDeletedItems'
       end
+    end
+
+    def build_mailbox_user(mbox_ews)
+      MailboxUser.new(ews, mbox_ews)
     end
 
   end
