@@ -24,8 +24,9 @@ class Viewpoint::EWSClient
   # @option opts [String] :server_version The Exchange server version to
   #   target. See the VERSION_* constants in
   #   Viewpoint::EWS::SOAP::ExchangeWebService.
+  # @option opts [Hash] :http_opts options to pass to the connection
   def initialize(endpoint, user = nil, pass = nil, opts = {})
-    con = Connection.new(endpoint)
+    con = Connection.new(endpoint, opts[:http_opts] || {})
     con.set_auth(user,pass) if(user && pass)
     @ews = SOAP::ExchangeWebService.new(con, opts)
   end

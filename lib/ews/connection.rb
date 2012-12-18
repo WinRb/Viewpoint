@@ -23,9 +23,12 @@ class Viewpoint::EWS::Connection
   attr_reader :endpoint
   # @param [String] endpoint the URL of the web service.
   #   @example https://<site>/ews/Exchange.asmx
-  def initialize(endpoint)
+  # @param [Hash] opts Misc config options (mostly for developement)
+  # @option opts [Fixnum] ssl_verify_mode
+  def initialize(endpoint, opts = {})
     @log = Logging.logger[self.class.name.to_s.to_sym]
     @httpcli = HTTPClient.new
+    @httpcli.ssl_config.verify_mode = opts[:ssl_verify_mode] if opts[:ssl_verify_mode]
     # Up the keep-alive so we don't have to do the NTLM dance as often.
     @httpcli.keep_alive_timeout = 60
     @endpoint = endpoint
