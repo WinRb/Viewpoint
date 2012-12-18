@@ -41,7 +41,7 @@ module Viewpoint::EWS::Types
     end
 
     def out_of_office_settings
-      mailbox = {:address => email_address}
+      mailbox = {:address => self.email_address}
       resp = @ews.get_user_oof_settings(mailbox)
       return resp
       s = resp[:oof_settings]

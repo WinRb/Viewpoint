@@ -24,12 +24,16 @@ module Viewpoint::EWS::MailboxAccessors
   # @return [Array<MailboxUser>] It returns an Array of MailboxUsers.
   def search_contacts(ustring)
     resp = ews.resolve_names(:name => ustring)
+
     users = []
     if(resp.status == 'Success')
-      users << MailboxUser.new(ews, resp.items.first[:mailbox])
+      mb = resp.response_message[:elems][:resolution_set][:elems][0][:resolution][:elems][0]
+      users << Types::MailboxUser.new(ews, mb[:mailbox][:elems])
     elsif(resp.code == 'ErrorNameResolutionMultipleResults')
-      resp.items.each do |u|
-        users << MailboxUser.new(ews, u[:mailbox])
+      resp.response_message[:elems][:resolution_set][:elems].each do |u|
+      if u[:resolution][:elems][0][:mailbox]
+        users << Types::MailboxUser.new(ews, u[:resolution][:elems][0][:mailbox][:elems])
+      end
       end
     else
       raise EwsError, "Find User produced an error: #{resp.code}: #{resp.message}"

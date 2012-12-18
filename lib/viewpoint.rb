@@ -53,6 +53,7 @@ require 'ews/soap/parsers/ews_parser'
 require 'ews/soap/parsers/ews_sax_document'
 # Mix-ins for the ExchangeWebService
 require 'ews/soap/exchange_data_services'
+require 'ews/soap/exchange_availability'
 require 'ews/soap/exchange_web_service'
 
 require 'ews/connection'
@@ -81,6 +82,7 @@ require 'ews/types/attachment'
 require 'ews/types/file_attachment'
 require 'ews/types/item_attachment'
 require 'ews/types/mailbox_user'
+require 'ews/types/out_of_office'
 
 
 # Load the model classes
