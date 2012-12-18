@@ -27,7 +27,8 @@ module Viewpoint::EWS::SOAP
         }
         end
       end
-      do_soap_request(req)
+      resp = do_soap_request(req, raw_response: true)
+      parse!(resp, response_class: EwsSoapAvailabilityResponse)
     end
 
     # Sets a mailbox user's Out of Office (OOF) settings and message.

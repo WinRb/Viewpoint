@@ -43,7 +43,9 @@ module Viewpoint::EWS::Types
     def out_of_office_settings
       mailbox = {:address => self.email_address}
       resp = @ews.get_user_oof_settings(mailbox)
-      return resp
+      ewsi = resp.response.clone
+      ewsi.delete(:response_message)
+      return OutOfOffice.new(self,ewsi)
       s = resp[:oof_settings]
       @oof_state = s[:oof_state][:text]
       @oof_ext_audience = s[:external_audience][:text]

@@ -17,27 +17,40 @@
 =end
 
 module Viewpoint::EWS::SOAP
-  class EwsParser
-    include Viewpoint::EWS
 
-    # @param [String] soap_resp
-    def initialize(soap_resp)
-      @soap_resp  = soap_resp
-      @sax_doc    = EwsSaxDocument.new
+  # This is a speciality response class to handle the idiosynracies of
+  # Availability responses.
+  # @attr_reader [String] :message The text from the EWS element <m:ResponseCode>
+  class EwsSoapAvailabilityResponse < EwsSoapResponse
+
+    def response_messages
+      nil
     end
 
-    def parse(opts = {})
-      opts[:response_class] ||= EwsSoapResponse
-      sax_parser.parse(@soap_resp)
-      opts[:response_class].new @sax_doc.struct
+    def response
+      body[0][response_key]
     end
 
+    def response_message
+      response[:response_message]
+    end
+
+    def response_code
+      response_message[:elems][0][:response_code][:text]
+    end
+    alias :code :response_code
+
+    def response_key
+      key = body[0].keys.first
+    end
 
     private
 
-    def sax_parser
-      @parser ||= Nokogiri::XML::SAX::Parser.new(@sax_doc)
+    def simplify!
+      key = response_key
+      body[0][key] = body[0][key][:elems].inject(&:merge)
     end
 
-  end # EwsParser
-end # Viewpoint
+  end # EwsSoapAvailabilityResponse
+
+end # Viewpoint::EWS::SOAP

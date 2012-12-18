@@ -57,13 +57,13 @@ module Viewpoint::EWS
       key_paths.keys + key_alias.keys
     end
 
-
-    private
-
+    protected # things like OutOfOffice need protected level access
 
     def ews
       @ews
     end
+
+    private
 
     def key_paths
       KEY_PATHS

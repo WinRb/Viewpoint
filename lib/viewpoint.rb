@@ -48,6 +48,7 @@ require 'ews/exceptions/exceptions'
 # Load the backend SOAP / EWS infrastructure.
 require 'ews/soap'
 require 'ews/soap/ews_soap_response'
+require 'ews/soap/ews_soap_availability_response'
 require 'ews/soap/builders/ews_builder'
 require 'ews/soap/parsers/ews_parser'
 require 'ews/soap/parsers/ews_sax_document'

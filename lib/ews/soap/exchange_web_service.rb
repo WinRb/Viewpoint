@@ -471,9 +471,13 @@ module Viewpoint::EWS::SOAP
       end
     end
 
-    def parse!(response)
+    # @param [String] response the SOAP response string
+    # @param [Hash] parse_opts misc options to send to the parser
+    # @option parse_opts [Class] :response_class the response class
+    def parse!(response, parse_opts = {})
       raise EwsError, "Can't parse an empty response. Please check your endpoint." if(response.nil?)
-      EwsParser.new(response).parse
+      parse_opts[:response_class] ||= EwsSoapResponse
+      EwsParser.new(response).parse(parse_opts)
     end
 
     # Build the common elements in the SOAP message and yield to any custom elements.
@@ -485,7 +489,10 @@ module Viewpoint::EWS::SOAP
     # Send the SOAP request to the endpoint and parse it.
     # @param [String] soapmsg an XML formatted string
     # @todo make this work for Viewpoint (imported from SPWS)
-    def do_soap_request(soapmsg)
+    # @param [Hash] opts misc options
+    # @option opts [Boolean] :raw_response if true do not parse and return
+    #   the raw response string.
+    def do_soap_request(soapmsg, opts = {})
       @log.debug <<-EOF
         Sending SOAP Request:
         ----------------
@@ -499,7 +506,7 @@ module Viewpoint::EWS::SOAP
         #{Nokogiri::XML(respmsg).to_xml}
         ----------------
       EOF
-      parse!(respmsg)
+      opts[:raw_response] ? respmsg : parse!(respmsg)
     end
 
   end # class ExchangeWebService

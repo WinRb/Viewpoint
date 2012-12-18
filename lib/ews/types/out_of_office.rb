@@ -31,8 +31,7 @@ module Viewpoint::EWS::Types
       @user = user
       @ews_item = ews_item
     end
+
   end #OutOfOffice
 
 end
-
-
