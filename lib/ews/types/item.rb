@@ -20,6 +20,7 @@ module Viewpoint::EWS::Types
       internet_message_headers:[:internet_message_headers, :elems],
       sender:         [:sender, :elems, 0, :mailbox, :elems],
       from:           [:from, :elems, 0, :mailbox, :elems],
+      attachments:    [:attachments, :elems],
     }
 
     ITEM_KEY_TYPES = {
@@ -35,6 +36,7 @@ module Viewpoint::EWS::Types
             h[:internet_message_header][:text]} } },
       sender: :build_mailbox_user,
       from:   :build_mailbox_user,
+      attachments: :build_attachments,
     }
 
     ITEM_KEY_ALIAS = {
@@ -157,6 +159,13 @@ module Viewpoint::EWS::Types
 
     def build_mailbox_user(mbox_ews)
       MailboxUser.new(ews, mbox_ews)
+    end
+
+    def build_attachments(attachments)
+      attachments.collect do |att|
+        key = att.keys.first
+        class_by_name(key).new(self, att[key])
+      end
     end
 
   end

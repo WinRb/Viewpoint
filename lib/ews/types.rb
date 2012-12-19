@@ -23,6 +23,10 @@ module Viewpoint::EWS
       end
     end
 
+    def to_s
+      "#{self.class.name}: EWS METHODS: #{self.ews_methods.sort.join(', ')}"
+    end
+
     def shallow?
       @shallow
     end

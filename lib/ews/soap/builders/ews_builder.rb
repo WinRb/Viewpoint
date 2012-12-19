@@ -720,6 +720,24 @@ module Viewpoint::EWS::SOAP
       @nbuild.ReturnNewItemIds(retval)
     end
 
+    # Build the AttachmentIds element
+    # @see http://msdn.microsoft.com/en-us/library/aa580686.aspx
+    def attachment_ids!(aids)
+      @nbuild.AttachmentIds {
+        @nbuild.parent.default_namespace = @default_ns
+        aids.each do |aid|
+          attachment_id!(aid)
+        end
+      }
+    end
+
+    # Build the AttachmentId element
+    # @see http://msdn.microsoft.com/en-us/library/aa580764.aspx
+    def attachment_id!(aid)
+      attribs = {'Id' => aid}
+      @nbuild[NS_EWS_TYPES].AttachmentId(attribs)
+    end
+
     # ---------------------- Helpers -------------------- #
 
     # A helper method to dispatch to a FolderId or DistinguishedFolderId correctly

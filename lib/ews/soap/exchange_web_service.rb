@@ -314,20 +314,6 @@ module Viewpoint::EWS::SOAP
       parse_delete_attachment(resp)
     end
 
-    # Used to retrieve existing attachments on items in the Exchange store
-    # @see http://msdn.microsoft.com/en-us/library/aa494316.aspx
-    # @param [Array] attachment_ids Attachment Ids to fetch
-    def get_attachment(attachment_ids)
-      action = "#{SOAP_ACTION_PREFIX}/GetAttachment"
-      resp = invoke("#{NS_EWS_MESSAGES}:GetAttachment", action) do |root|
-        build!(root) do
-          attachment_shape!(root)
-          attachment_ids!(root, attachment_ids)
-        end
-      end
-      parse!(resp)
-    end
-
     def create_managed_folder
       action = "#{SOAP_ACTION_PREFIX}/CreateManagedFolder"
       resp = invoke("#{NS_EWS_MESSAGES}:CreateManagedFolder", action) do |create_managed_folder|

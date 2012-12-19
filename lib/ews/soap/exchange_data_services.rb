@@ -475,6 +475,31 @@ module Viewpoint::EWS::SOAP
 
     # ----------- Attachment Operations ----------
 
+    # Used to retrieve existing attachments on items in the Exchange store
+    # @see http://msdn.microsoft.com/en-us/library/aa494316.aspx
+    # @param [Hash] opts
+    # @option opts [Array] :attachment_ids Attachment Ids to fetch
+    # @option opts [Hash] :attachment_shape Attachment shape
+    #   include_mime_content: true or false (optional)
+    #   body_type: "Best" | "HTML" | "Text" (optional)
+    #   filter_html_content: true or false  (optional)
+    #   additional_properties:  @todo finish implementation
+    def get_attachment(opts)
+      [:attachment_ids].each do |k|
+        validate_param(opts, k, true)
+      end
+      req = build_soap! do |type, builder|
+        if(type == :header)
+        else
+          builder.nbuild.GetAttachment {|x|
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.attachment_ids!(opts[:attachment_ids])
+          }
+        end
+      end
+      do_soap_request(req)
+    end
+
     # ------------ Utility Operations ------------
 
     # Exposes the full membership of distribution lists.
