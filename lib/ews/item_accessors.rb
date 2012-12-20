@@ -46,9 +46,9 @@ module Viewpoint::EWS::ItemAccessors
 
   def get_item_parser(resp)
     if(resp.status == 'Success')
-      resp
-      #item = resp.items.first
-      #class_by_name(item.keys.first).new(ews, item[item.keys.first])
+      i = resp.response_message[:elems][:items][:elems][0]
+      itype = i.keys.first
+      class_by_name(itype).new(ews, i[itype])
     else
       raise EwsError, "Could not retrieve item. #{resp.code}: #{resp.message}"
     end
