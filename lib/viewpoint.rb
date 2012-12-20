@@ -25,10 +25,6 @@ require 'logging'
 # Class Extensions (Monkey patches)
 require 'extensions/string'
 
-# Third Party Libraries
-require 'mail' # used to convert Message items to RFC822 compliant messages
-require 'icalendar' # used to convert Calendar items to iCalendar objects
-
 module Viewpoint
   module EWS
     attr_reader :logger
