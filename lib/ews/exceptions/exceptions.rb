@@ -21,23 +21,27 @@ module Viewpoint::EWS
   class EwsError < StandardError; end
 
   # Raise when authentication/authorization issues occur.
-  class EwsLoginError < StandardError; end
+  class EwsLoginError < EwsError; end
 
   # Raised when a user tries to query a folder subscription after the
   # subscription has timed out.
-  class EwsSubscriptionTimeout < StandardError; end
+  class EwsSubscriptionTimeout < EwsError; end
 
   # Represents a function in EWS that is not yet implemented in Viewpoint
-  class EwsNotImplemented < StandardError; end
+  class EwsNotImplemented < EwsError; end
 
   # Raised when an method is called in the wrong way
-  class EwsBadArgumentError < StandardError; end
+  class EwsBadArgumentError < EwsError; end
 
   # Raised when a folder that is asked for is not found
-  class EwsFolderNotFound < StandardError; end
+  class EwsFolderNotFound < EwsError; end
 
   # Raise an Exchange Server version error. This is in case some functionality
   # does not exist in a particular Server version but is called.
-  class EwsServerVersionError < StandardError; end
+  class EwsServerVersionError < EwsError; end
+
+  # Raised when #auto_deepen == false and a method is called for attributes
+  # that have not yet been fetched.
+  class EwsMinimalObjectError < EwsError; end
 
 end # Viewpoint::EWS
