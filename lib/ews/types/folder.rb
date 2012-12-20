@@ -23,6 +23,16 @@ module Viewpoint::EWS::Types
     end
 
 
+    def messages_with_attachments
+      opts = {:restriction =>
+        {:is_equal_to => [
+          {:field_uRI => {:field_uRI=>'item:HasAttachments'}},
+          {:field_uRI_or_constant => {:constant => {:value=> true}}}
+        ]}
+      }
+      self.items opts
+    end
+
     private
 
 
