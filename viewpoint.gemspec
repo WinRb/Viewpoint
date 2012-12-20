@@ -11,14 +11,14 @@ Gem::Specification.new do |s|
   s.summary = 'A Ruby client access library for Microsoft Exchange Web Services (EWS)'
   s.description = 'A Ruby client access library for Microsoft Exchange Web Services (EWS).  Examples can be found here: http://distributed-frostbite.blogspot.com'
 
-  s.required_ruby_version = '>= 1.8.7'
+  s.required_ruby_version = '>= 1.9.1'
 
   s.author = 'Dan Wanek'
   s.email = 'dan.wanek@gmail.com'
   s.homepage = 'http://github.com/zenchild/Viewpoint'
   s.rubyforge_project = nil
 
-  s.files = Dir['Changelog.txt', 'README', 'TODO', 'lib/**/*']
+  s.files = Dir['Changelog.txt', 'README.md', 'TODO', 'lib/**/*']
   s.require_path = 'lib'
   s.rdoc_options = %w(-x test/ -x examples/)
   s.extra_rdoc_files = %w(README)
@@ -27,6 +27,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency  'httpclient'
   s.add_runtime_dependency  'rubyntlm'
   s.add_runtime_dependency  'logging'
-  s.add_runtime_dependency  'icalendar', '>= 1.1.5'
-  s.add_runtime_dependency  'mail', '>= 2.2.5'
+  #s.add_runtime_dependency  'icalendar', '>= 1.1.5'
+  #s.add_runtime_dependency  'mail', '>= 2.2.5'
 end
