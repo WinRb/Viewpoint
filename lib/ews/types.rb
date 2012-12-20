@@ -101,10 +101,15 @@ module Viewpoint::EWS
       begin
         resolve_key_path(@ews_item, method_path(method_sym))
       rescue
-        if shallow? && auto_deepen?
-          enlighten!
-          retry
+        if shallow?
+          if auto_deepen?
+            enlighten!
+            retry
+          else
+            raise EwsMinimalObjectError, "Could not resolve :#{method_sym}. #auto_deepen set to false"
+          end
         end
+        raise
       end
     end
 

@@ -19,7 +19,27 @@
 module Viewpoint::EWS::Types
   class FileAttachment < Attachment
 
-    attr_reader :file_name, :content
+    FILE_ATTACH_KEY_PATHS = {
+      :id   => [:attachment_id, :attribs, :id],
+      :name => [:name, :text],
+      :content_type => [:content_type, :text],
+      :size => [:size, :text],
+      :last_modified_time => [:last_modified_time, :text],
+      :is_inline? => [:is_inline, :text],
+      :is_contact_photo? => [:is_contact_photo, :text],
+      :content  => [:content, :text],
+    }
+
+    FILE_ATTACH_KEY_TYPES = {
+      is_inline?:   ->(str){str.downcase == 'true'},
+      is_contact_photo?:   ->(str){str.downcase == 'true'},
+      last_modified_type: ->(str){DateTime.parse(str)},
+      size: ->(str){str.to_i},
+    }
+
+    FILE_ATTACH_KEY_ALIAS = {
+      :file_name   => :name,
+    }
 
     # @param [Hash] attachment The attachment ews_item
     def initialize(item, attachment)
@@ -27,18 +47,32 @@ module Viewpoint::EWS::Types
       super(item.ews, attachment)
     end
 
-    # Save this FileAttachment object to a file.  By default it saves
-    # it to the original file's name in the current working directory.
-    # @param [String,nil] base_dir the directory to save the file to.  Pass nil if you
-    #   do not want to specify a directory or you are passing a full path name to file_name
-    # @param [String] file_name The name of the file to save the content to.
-    #   Leave this blank to use the default attachment name.
-    def save_to_file(base_dir = nil, file_name = @file_name)
-      base_dir << '/' unless(base_dir.nil? or base_dir.end_with?('/'))
-      File.open("#{base_dir}#{file_name}", 'w+') do |f|
-        f.write(Base64.decode64(@content))
+    def get_all_properties!
+      resp = ews.get_attachment attachment_ids: [self.id]
+      @ews_item.merge!(parse_response(resp))
+    end
+
+    private
+
+
+    def key_paths
+      @key_paths ||= FILE_ATTACH_KEY_PATHS
+    end
+
+    def key_types
+      @key_types ||= FILE_ATTACH_KEY_TYPES
+    end
+
+    def key_alias
+      @key_alias ||= FILE_ATTACH_KEY_ALIAS
+    end
+
+    def parse_response(resp)
+      if(resp.status == 'Success')
+        resp.response_message[:elems][:attachments][:elems][0][:file_attachment][:elems].inject(&:merge)
+      else
+        raise EwsError, "Could not retrieve #{self.class}. #{resp.code}: #{resp.message}"
       end
-      true
     end
 
   end
