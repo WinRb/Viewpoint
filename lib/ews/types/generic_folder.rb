@@ -31,8 +31,8 @@ module Viewpoint::EWS::Types
       simplify!
     end
 
-    def items
-      items_parser ews.find_item(items_args)
+    def items(opts = {})
+      items_parser ews.find_item(items_args.merge(opts))
     end
 
     def items_args

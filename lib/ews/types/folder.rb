@@ -12,8 +12,28 @@ module Viewpoint::EWS::Types
     }
     FOLDER_KEY_ALIAS = {}
 
+    alias :messages :items
+
+    def unread_messages
+      self.items read_unread_restriction
+    end
+
+    def read_messages
+      self.items read_unread_restriction(true)
+    end
+
 
     private
+
+
+    def read_unread_restriction(read = false)
+      {:restriction =>
+        {:is_equal_to => [
+          {:field_uRI => {:field_uRI=>'message:IsRead'}},
+          {:field_uRI_or_constant => {:constant => {:value=> read}}}
+        ]}
+      }
+    end
 
     def key_paths
       @key_paths ||= super.merge(FOLDER_KEY_PATHS)
