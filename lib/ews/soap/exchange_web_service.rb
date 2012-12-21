@@ -22,6 +22,7 @@ module Viewpoint::EWS::SOAP
     include Viewpoint::EWS::SOAP
     include ExchangeDataServices
     include ExchangeAvailability
+    include ExchangeUserConfiguration
 
     attr_accessor :server_version, :auto_deepen
 

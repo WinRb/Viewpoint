@@ -738,6 +738,18 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_TYPES].AttachmentId(attribs)
     end
 
+    def user_configuration_name!(cfg_name)
+      attribs = {'Name' => cfg_name.delete(:name)}
+      @nbuild[NS_EWS_MESSAGES].UserConfigurationName(attribs) {
+        fid = cfg_name.keys.first
+        self.send "#{fid}!", cfg_name[fid][:id], cfg_name[fid][:change_key]
+      }
+    end
+
+    def user_configuration_properties!(cfg_prop)
+      @nbuild[NS_EWS_MESSAGES].UserConfigurationProperties(cfg_prop)
+    end
+
     # ---------------------- Helpers -------------------- #
 
     # A helper method to dispatch to a FolderId or DistinguishedFolderId correctly

@@ -51,6 +51,7 @@ require 'ews/soap/parsers/ews_sax_document'
 # Mix-ins for the ExchangeWebService
 require 'ews/soap/exchange_data_services'
 require 'ews/soap/exchange_availability'
+require 'ews/soap/exchange_user_configuration'
 require 'ews/soap/exchange_web_service'
 
 require 'ews/connection'
