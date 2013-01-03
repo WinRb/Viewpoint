@@ -70,9 +70,15 @@ module Viewpoint::EWS::FolderAccessors
     resp = ews.find_folder opts
     if resp.success?
       folders = []
-      resp.items.each do |f|
-        folders << class_by_name(f.keys.first).new(ews, f)
+
+      if resp.respond_to?('items')
+        resp.items.each do |f|
+          folders << class_by_name(f.keys.first).new(ews, f)
+        end
+      else
+          folders = find_folders_parser(resp)
       end
+
       folders
     else
       raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
