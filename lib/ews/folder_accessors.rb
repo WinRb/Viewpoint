@@ -30,7 +30,6 @@ module Viewpoint::EWS::FolderAccessors
     :task     => 'IPF.Task',
   }
 
-
   # @param [String] name The name of the new folder
   # @param [String,Symbol] parent The parent folder, either a String
   #   representing the path or a symbol that represents the Exchange
@@ -40,13 +39,8 @@ module Viewpoint::EWS::FolderAccessors
     parent = resolve_folder(parent)
     resp = ews.create_folder :parent_folder_id => {:id => parent},
       :folders => [:folder => {:display_name => name}]
-
-    if resp.success?
-      f = resp.items.first
-      class_by_name(f.keys.first).new(ews, f)
-    else
-      raise EwsError, "Could not create folder. #{resp.code}: #{resp.message}"
-    end
+    resp
+    create_folder_parser(resp).first
   end
 
   def delfolder(fid)
@@ -67,50 +61,9 @@ module Viewpoint::EWS::FolderAccessors
       :traversal => 'Deep',
       :folder_shape => {:base_shape => 'Default'}
     }
+    args = find_folders_args(opts)
     resp = ews.find_folder opts
-    if resp.success?
-      folders = []
-      resp.items.each do |f|
-        folders << class_by_name(f.keys.first).new(ews, f)
-      end
-      folders
-    else
-      raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
-    end
-  end
-
-  def resolve_folder(folder)
-    if folder.instance_of?(String)
-      folder = FOLDER_MAP[folder]
-    end
-    folder
-  end
-
-
-  # Return a list of folder names
-  # @param [String,Symbol] root A DistinguishedFolderId(symbol) or
-  #   FolderId(string). This is where we'll start the search from. Usually
-  #   :root, :msgfolderroot, or :publicfoldersroot
-  # @return [Array<String>] Return an Array of folder names.
-  # @raise [EwsError] raised when the backend SOAP method returns an error.
-  def folder_names(root = :msgfolderroot)
-    resp = ews.find_folder( {
-      :parent_folder_ids  => [{:id => root}],
-      :traversal          => 'Deep',
-      :folder_shape       => {
-        :base_shape => 'IdOnly',
-        :additional_properties => {:FieldURI => ['folder:DisplayName']}
-      }
-    })
-    if resp.success?
-      flds = []
-      resp.items.each do |f|
-        flds << f[f.keys.first][:display_name][:text]
-      end
-      flds
-    else
-      raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
-    end
+    find_folders_parser(resp).first
   end
 
   # Find subfolders of the passed root folder.  If no parameters are passed this
@@ -174,15 +127,25 @@ module Viewpoint::EWS::FolderAccessors
   # @param [Viewpoint::EWS::SOAP::EwsSoapResponse] resp
   def find_folders_parser(resp)
     if resp.status == 'Success'
-      rfolders = resp.response_message[:elems][:root_folder][:elems][0][:folders][:elems]
-      folders = []
-      rfolders.each do |f|
+      folders = resp.response_message[:elems][:root_folder][:elems][0][:folders][:elems]
+      folders.collect do |f|
         ftype = f.keys.first
-        folders << class_by_name(ftype).new(ews, f[ftype])
+        class_by_name(ftype).new(ews, f[ftype])
       end
-      folders
     else
       raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
+    end
+  end
+
+  def create_folder_parser(resp)
+    if resp.status == 'Success'
+      folders = resp.response_message[:elems][:folders][:elems]
+      folders.collect do |f|
+        ftype = f.keys.first
+        class_by_name(ftype).new(ews, f[ftype])
+      end
+    else
+      raise EwsError, "Could not create folder. #{resp.code}: #{resp.message}"
     end
   end
 
@@ -212,6 +175,13 @@ module Viewpoint::EWS::FolderAccessors
   # @param [Symbol] type a symbol in FOLDER_TYPE_MAP
   def map_folder_type(type)
     FOLDER_TYPE_MAP[type] || type
+  end
+
+  def resolve_folder(folder)
+    if folder.instance_of?(String)
+      folder = FOLDER_MAP[folder]
+    end
+    folder
   end
 
 end
