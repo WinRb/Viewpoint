@@ -5,3 +5,11 @@ source :rubygems
 gem "rubyntlm", :git => "git://github.com/wimm/rubyntlm.git"
 
 gemspec
+
+group :development do
+  gem 'rspec'
+  gem 'guard'
+  gem 'guard-rspec'
+  gem 'rb-inotify', :require => false
+  gem 'turn'
+end

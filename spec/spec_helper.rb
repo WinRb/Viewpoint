@@ -13,3 +13,5 @@ end
 
 RSpec.configure do |c|
 end
+
+Turn.config.format = :outline

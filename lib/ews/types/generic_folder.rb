@@ -73,6 +73,17 @@ module Viewpoint::EWS::Types
       simplify!
     end
 
+    def available_categories
+      opts = {
+        user_config_name: {
+          name: 'CategoryList',
+          distinguished_folder_id: {id: :calendar}
+        },
+        user_config_props: 'XmlData'
+      }
+      resp = ews.get_user_configuration(opts)
+    end
+
 
     private
 
