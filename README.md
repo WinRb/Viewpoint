@@ -14,9 +14,9 @@ Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
 
 Find me on irc.freenode.net in #ruby-lang (zenChild)
 
-## Features
+# Features
 
-### New in 1.0
+## New in 1.0
 
 * SOAP backend is now only dependant on Nokogiri. Before version 1.0 Viewpoint
 went through a number of iterations in backends including SOAP4r and Handsoap.
@@ -30,7 +30,7 @@ Singleton pattern for connection to the SOAP endpoint so with authentication
 I was forced to implement Viewpoint as a Singleton as well. Now with Handsoap
 out of the picture this is no longer required. Go crazy ;)
 
-### Enhanced in 1.0
+## Enhanced in 1.0
 
 * *Delegate access is supported*
   One thing that was often asked for, but missing from the previous version
@@ -45,7 +45,61 @@ out of the picture this is no longer required. Go crazy ;)
   the methods MailboxUser#add_delegate!, MailboxUser#update_delegate!, and 
   MailboxUser#get_delegate_info.
 
---------------------------------------------------------------------------
+
+# Using Viewpoint
+
+The version 1.0 API is quite a departure from the 0.1.x code base. If you have
+a lot of legacy code and aren't suffering from performance issues, think twice
+about upgrading. That said, I hope you'll find the new API much clean and more
+intuitive than previous versions.
+
+Note the `cli` variable in the setup code directly below. I will use that variable throughout without the setup code.
+
+## The Setup
+```ruby
+require 'viewpoint'
+include Viewpoint::EWS
+
+endpoint = 'https://example.com/ews/Exchange.asmx'
+user = 'username'
+pass = 'password'
+
+cli = Viewpoint::EWSClient.new endpoint, user, pass
+```
+
+There are also various options you can pass to EWSClient.
+
+If you are testing in an environment using a self-signed certificate you can pass a connection parameter to ignore SSL verification by passing `http_opts: {ssl_verify_mode: 0}`.
+
+If you want to target a specific version of Exchange you can pass `server_version: SOAP::ExchangeWebService::VERSION_2010_SP1`. You really shouldn't have to use this unless you know why.
+
+## Accessors
+
+There are some basic accessors available on the Viewpoint::EWSClient instance. In prior versions these were typically class methods off of the models themselves (ex: Folder.get_folder(id)). Now all accessors are available through EWSClient.
+
+### Folder Accessors
+
+#### Listing Folders
+```ruby
+# Find all folders under :msgfolderroot
+folders = cli.folders
+
+# Find all folders under Inbox
+inbox_folders = cli.folders root: :inbox
+
+# Find all folders under :root and do a Deep search
+all_folders = cli.folders root: :root, traversal: :deep
+```
+
+#### Finding single folders
+```ruby
+folder = cli.get_folder <folder_id>
+folder = cli.get_folder_by
+
+
+
+
+---
 TO USE:
 
 ```ruby
@@ -72,35 +126,15 @@ inbox.ews_methods
 msgs = inbox.items
 ```
 
---------------------------------------------------------------------------
-DESIGN GOALS/GUIDELINES:
+## Thanks go out to...
 
-  1. The SOAP back-end should not know about the Model.
-    I went around and around on this one for awhile.  There are some
-    simplicity advantages to creating Model objects within the SOAP
-    responses, but I ultimately decided against it so that one could use
-    the SOAP back-end without the Model.  Essentially the SOAP classes
-    pass back a Hash that the Model uses to create its own objects.
-
-  2. The use of Hashes is not a crime.
-    While some people decidedly do not like Hashes and believe complex
-    hashing should be in the form of objects, there are some instances
-    where hashing is just plain simpler and flexible.  To that end, I use
-    hashes pretty extensively in Viewpoint, both for objects being passed
-    to the SOAP back-end and returned from it.
-
-  3. Follow EWS naming conventions where it makes sense.
-    I try and follow the naming conventions of the Exchange Web Service
-    operations as much as it makes sense.  There are some things howerver
-    where they do not and I have deviated somewhat.  For example,
-    an instance method named delete_folder doesn't make much sense, but
-    an instance method named delete! is pretty clear what it deletes.
---------------------------------------------------------------------------
-!!!SHOUTS OUT!!!
---------------------------------------------------------------------------
-* Thanks to Harold Lee (https://github.com/haroldl) for working on the
+* The National Association of REALTORS® for providing a testing account
+  and much appreciated input and support.
+* The Holmes Group Limited for providing Exchange 2013 test accounts.
+* Harold Lee (https://github.com/haroldl) for working on the
   get_user_availability code.
---------------------------------------------------------------------------
+
+---
 DISCLAIMER:  If you see something that could be done better or would like
 to help out in the development of this code please feel free to clone the
 'git' repository and send me patches:
@@ -109,4 +143,4 @@ or add an issue on GitHub:
 http://github.com/zenchild/Viewpoint/issues
 
 Cheers!
---------------------------------------------------------------------------
+---
