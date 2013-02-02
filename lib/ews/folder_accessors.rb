@@ -18,53 +18,11 @@
 module Viewpoint::EWS::FolderAccessors
   include Viewpoint::EWS
 
-  FOLDER_MAP = {
-    '/'       => :msgfolderroot,
-    '/public' => :publicfoldersroot,
-    '/inbox'  => :inbox
-  }
-
   FOLDER_TYPE_MAP = {
     :mail     => 'IPF.Note',
     :calendar => 'IPF.Appointment',
     :task     => 'IPF.Task',
   }
-
-  # @param [String] name The name of the new folder
-  # @param [String,Symbol] parent The parent folder, either a String
-  #   representing the path or a symbol that represents the Exchange
-  #   DistinguishedFolderName.
-  # @see http://msdn.microsoft.com/en-us/library/aa580808.aspx
-  def mkfolder(name, parent = '/', opts={})
-    parent = resolve_folder(parent)
-    resp = ews.create_folder :parent_folder_id => {:id => parent},
-      :folders => [:folder => {:display_name => name}]
-    resp
-    create_folder_parser(resp).first
-  end
-
-  def delfolder(fid)
-    opts = {:folder_ids => [id: fid]}
-    opts[:delete_type] = 'HardDelete'
-    resp = ews.delete_folder(opts)
-    resp.success?
-  end
-
-  def find_by_name(name, parent = '/', opts={})
-    parent = resolve_folder(parent)
-    opts = {:restriction =>
-      {:is_equal_to => [
-        {:field_uRI => {:field_uRI=>'folder:DisplayName'}},
-        {:field_uRI_or_constant => {:constant => {:value=>name}}}
-      ]},
-      :parent_folder_ids => [{:id => parent}],
-      :traversal => 'Deep',
-      :folder_shape => {:base_shape => 'Default'}
-    }
-    args = find_folders_args(opts)
-    resp = ews.find_folder opts
-    find_folders_parser(resp).first
-  end
 
   # Find subfolders of the passed root folder.  If no parameters are passed this
   # method will search from the Root folder.
@@ -78,34 +36,72 @@ module Viewpoint::EWS::FolderAccessors
   #   limit the search to like 'IPF.Task'
   # @return [Array] Returns an Array of Folder or subclasses of Folder
   # @raise [EwsError] raised when the backend SOAP method returns an error.
-  def find_folders(opts={})
+  def folders(opts={})
+    opts = opts.clone
     args = find_folders_args(opts)
     resp = ews.find_folder( args )
     find_folders_parser(resp)
   end
-  alias :folders :find_folders
+  alias :find_folders :folders
 
-  # Get a specific folder by its ID.
-  # @param [String,Symbol] folder_id Either a FolderId(String) or a
+  # Get a specific folder by id or symbol
+  # @param [String,Symbol,Hash] folder_id Either a FolderId(String) or a
   #   DistinguishedFolderId(Symbol).
   # @param [Hash] opts Misc options to control request
-  # @option opts [String] :base_shape IdOnly/Default/AllProperties
+  # @option opts [String] :base_shape :id_only/:default/:all_properties
   # @option opts [String,nil] :act_as User to act on behalf as. This user must
   #   have been given delegate access to the folder or this operation will fail.
   # @raise [EwsError] raised when the backend SOAP method returns an error.
   def get_folder(folder_id, opts = {})
+    opts = opts.clone
     args = get_folder_args(folder_id, opts)
     resp = ews.get_folder(args)
     get_folder_parser(resp)
   end
 
-  private
+  # Get a specific folder by its name
+  # @param [String] name The folder name
+  # @param [Hash] opts Misc options to control request
+  # @option opts [String,Symbol] :parent Either a FolderId(String) or a
+  #   DistinguishedFolderId(Symbol) . This is the parent folder.
+  # @option opts [String] :base_shape :id_only/:default/:all_properties
+  # @option opts [String,nil] :act_as User to act on behalf as. This user must
+  #   have been given delegate access to the folder or this operation will fail.
+  # @raise [EwsError] raised when the backend SOAP method returns an error.
+  def get_folder_by_name(name, opts={})
+    opts = opts.clone
+    opts[:root] = opts[:parent] || :msgfolderroot
+    opts[:restriction] = {:is_equal_to => [
+      {:field_uRI => {:field_uRI=>'folder:DisplayName'}},
+      {:field_uRI_or_constant => {:constant => {:value=>name}}}
+    ]}
+    args = find_folders_args(opts)
+    args[:restriction] = opts[:restriction]
+    resp = ews.find_folder args
+    find_folders_parser(resp).first
+  end
+
+  # @param [String] name The name of the new folder
+  # @param [Hash] opts
+  # @option opts [String,Symbol] :parent Either a FolderId(String) or a
+  #   DistinguishedFolderId(Symbol) . This is the parent folder.
+  # @see http://msdn.microsoft.com/en-us/library/aa580808.aspx
+  def make_folder(name, opts={})
+    parent = opts[:parent] || :msgfolderroot
+    resp = ews.create_folder :parent_folder_id => {:id => parent},
+      :folders => [:folder => {:display_name => name}]
+    create_folder_parser(resp).first
+  end
+  alias :mkfolder :make_folder
+
+
+private
 
   # Build up the arguements for #find_folders
   def find_folders_args(opts)
-    opts[:root] = :msgfolderroot unless opts[:root]
-    opts[:traversal] = 'Shallow' unless opts[:traversal]
-    opts[:shape] = 'Default' unless opts[:shape]
+    opts[:root] = opts[:root] || :msgfolderroot
+    opts[:traversal] = normalize(opts[:traversal] || 'Shallow')
+    opts[:shape] = normalize(opts[:shape] || 'Default')
     if( opts[:folder_type] )
       restr = { :is_equal_to => 
         [
@@ -124,10 +120,20 @@ module Viewpoint::EWS::FolderAccessors
     args
   end
 
+  # Normalize the passed in args for proper EWS names, ex :id_only to IdOnly
+  def normalize(sym)
+    if sym.is_a?(String)
+      sym.downcase.capitalize
+    else
+      sym.to_s.camel_case
+    end
+  end
+
   # @param [Viewpoint::EWS::SOAP::EwsSoapResponse] resp
   def find_folders_parser(resp)
     if resp.status == 'Success'
       folders = resp.response_message[:elems][:root_folder][:elems][0][:folders][:elems]
+      return [] if folders.nil?
       folders.collect do |f|
         ftype = f.keys.first
         class_by_name(ftype).new(ews, f[ftype])
@@ -151,7 +157,7 @@ module Viewpoint::EWS::FolderAccessors
 
   # Build up the arguements for #get_folder
   def get_folder_args(folder_id, opts)
-    opts[:base_shape] ||= 'Default'
+    opts[:base_shape] = normalize(opts[:base_shape] || 'Default')
     default_args =  {
       :folder_ids   => [{:id => folder_id}],
       :folder_shape => {:base_shape => opts[:base_shape]}
@@ -175,13 +181,6 @@ module Viewpoint::EWS::FolderAccessors
   # @param [Symbol] type a symbol in FOLDER_TYPE_MAP
   def map_folder_type(type)
     FOLDER_TYPE_MAP[type] || type
-  end
-
-  def resolve_folder(folder)
-    if folder.instance_of?(String)
-      folder = FOLDER_MAP[folder]
-    end
-    folder
   end
 
 end

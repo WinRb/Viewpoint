@@ -66,6 +66,7 @@ require 'ews/types/folder'
 require 'ews/types/calendar_folder'
 require 'ews/types/contacts_folder'
 require 'ews/types/tasks_folder'
+require 'ews/types/search_folder'
 # Items
 require 'ews/types/message'
 require 'ews/types/calendar_item'
@@ -81,36 +82,6 @@ require 'ews/types/file_attachment'
 require 'ews/types/item_attachment'
 require 'ews/types/mailbox_user'
 require 'ews/types/out_of_office'
-
-
-# Load the model classes
-# Base Models
-#require 'ews/model/model'
-#require 'ews/model/mailbox_user'
-#require 'ews/model/attendee'
-#require 'ews/model/generic_folder'
-#require 'ews/model/item_field_uri_map' # supports Item
-#require 'ews/model/item'
-# Specific Models
-# Folders
-#require 'ews/model/folder'
-#require 'ews/model/calendar_folder'
-#require 'ews/model/contacts_folder'
-#require 'ews/model/search_folder'
-#require 'ews/model/tasks_folder'
-# Items
-#require 'ews/model/message'
-#require 'ews/model/calendar_item'
-#require 'ews/model/contact'
-#require 'ews/model/distribution_list'
-#require 'ews/model/meeting_message'
-#require 'ews/model/meeting_request'
-#require 'ews/model/meeting_response'
-#require 'ews/model/meeting_cancellation'
-#require 'ews/model/task'
-#require 'ews/model/attachment'
-#require 'ews/model/file_attachment'
-#require 'ews/model/item_attachment'
 
 # The proxy between the models and the web service
 require 'ews/ews_client'

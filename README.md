@@ -48,10 +48,9 @@ out of the picture this is no longer required. Go crazy ;)
 
 # Using Viewpoint
 
-The version 1.0 API is quite a departure from the 0.1.x code base. If you have
-a lot of legacy code and aren't suffering from performance issues, think twice
-about upgrading. That said, I hope you'll find the new API much clean and more
-intuitive than previous versions.
+The version 1.0 API is quite a departure from the 0.1.x code base. If you have a lot of legacy code and aren't suffering from performance issues, think twice about upgrading. That said, I hope you'll find the new API much clean and more intuitive than previous versions.
+
+I also try and document the code to the base of my ability. Included in that code are links to the official Microsoft EWS documentation that might be helpful when troubleshooting "interesting" issues. You can either generate the documentation yourself with yard or check it out on [rdoc.info]: http://rdoc.info/github/zenchild/Viewpoint/frames.
 
 Note the `cli` variable in the setup code directly below. I will use that variable throughout without the setup code.
 
@@ -93,38 +92,19 @@ all_folders = cli.folders root: :root, traversal: :deep
 
 #### Finding single folders
 ```ruby
-folder = cli.get_folder <folder_id>
-folder = cli.get_folder_by
-
-
-
-
----
-TO USE:
-
-```ruby
-require 'rubygems'
-require 'viewpoint'
-include Viewpoint::EWS
-
-endpoint = 'https://example.com/ews/Exchange.asmx'
-user = 'username'
-pass = 'password'
-
-cli = Viewpoint::EWSClient.new endpoint, user, pass
-
-# Get all folders
-folders = cli.find_folders
-
-# Get a specific folder
-inbox = cli.get_folder :inbox
-
-# Get available EWS methods on an object
-inbox.ews_methods
-
-# Get items from an object (messages in this case)
-msgs = inbox.items
+# If you know the EWS id
+cli.get_folder <folder_id>
+# ... or if it's a standard folder pass its symbol
+cli.get_folder :index
+# or by name
+cli.get_folder_by_name 'test'
+# by name as a subfolder under "Inbox"
+cli.get_folder_by_name 'test', parent: :inbox
 ```
+
+### Item Accessors
+### Mailbox Accessors
+### Message Accessors
 
 ## Thanks go out to...
 
