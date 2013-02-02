@@ -50,7 +50,7 @@ out of the picture this is no longer required. Go crazy ;)
 
 The version 1.0 API is quite a departure from the 0.1.x code base. If you have a lot of legacy code and aren't suffering from performance issues, think twice about upgrading. That said, I hope you'll find the new API much clean and more intuitive than previous versions.
 
-I also try and document the code to the base of my ability. Included in that code are links to the official Microsoft EWS documentation that might be helpful when troubleshooting "interesting" issues. You can either generate the documentation yourself with yard or check it out on [rdoc.info]: http://rdoc.info/github/zenchild/Viewpoint/frames.
+I also try and document the code to the base of my ability. Included in that code are links to the official Microsoft EWS documentation that might be helpful when troubleshooting "interesting" issues. You can either generate the documentation yourself with yard or check it out on [rdoc.info](http://rdoc.info/github/zenchild/Viewpoint/frames).
 
 Note the `cli` variable in the setup code directly below. I will use that variable throughout without the setup code.
 
