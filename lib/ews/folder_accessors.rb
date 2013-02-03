@@ -30,8 +30,8 @@ module Viewpoint::EWS::FolderAccessors
   # @option opts [String,Symbol] :root Either a FolderId(String) or a
   #   DistinguishedFolderId(Symbol) . This is where to start the search from.
   #   Usually :root,:msgfolderroot, or :publicfoldersroot
-  # @option opts [String] :traversal Shallow/Deep/SoftDeleted
-  # @option opts [String] :shape shape to return IdOnly/Default/AllProperties
+  # @option opts [Symbol] :traversal :shallow/:deep/:soft_deleted
+  # @option opts [Symbol] :shape :id_only/:default/:all_properties
   # @option opts [optional, String] :folder_type an optional folder type to
   #   limit the search to like 'IPF.Task'
   # @return [Array] Returns an Array of Folder or subclasses of Folder
@@ -48,7 +48,7 @@ module Viewpoint::EWS::FolderAccessors
   # @param [String,Symbol,Hash] folder_id Either a FolderId(String) or a
   #   DistinguishedFolderId(Symbol).
   # @param [Hash] opts Misc options to control request
-  # @option opts [String] :base_shape :id_only/:default/:all_properties
+  # @option opts [Symbol] :shape :id_only/:default/:all_properties
   # @option opts [String,nil] :act_as User to act on behalf as. This user must
   #   have been given delegate access to the folder or this operation will fail.
   # @raise [EwsError] raised when the backend SOAP method returns an error.
@@ -64,7 +64,7 @@ module Viewpoint::EWS::FolderAccessors
   # @param [Hash] opts Misc options to control request
   # @option opts [String,Symbol] :parent Either a FolderId(String) or a
   #   DistinguishedFolderId(Symbol) . This is the parent folder.
-  # @option opts [String] :base_shape :id_only/:default/:all_properties
+  # @option opts [Symbol] :shape :id_only/:default/:all_properties
   # @option opts [String,nil] :act_as User to act on behalf as. This user must
   #   have been given delegate access to the folder or this operation will fail.
   # @raise [EwsError] raised when the backend SOAP method returns an error.
@@ -100,8 +100,8 @@ private
   # Build up the arguements for #find_folders
   def find_folders_args(opts)
     opts[:root] = opts[:root] || :msgfolderroot
-    opts[:traversal] = normalize(opts[:traversal] || 'Shallow')
-    opts[:shape] = normalize(opts[:shape] || 'Default')
+    opts[:traversal] = opts[:traversal] || :shallow
+    opts[:shape] = opts[:shape] || :default
     if( opts[:folder_type] )
       restr = { :is_equal_to => 
         [
@@ -118,15 +118,6 @@ private
     }
     args[:restriction] = restr if restr
     args
-  end
-
-  # Normalize the passed in args for proper EWS names, ex :id_only to IdOnly
-  def normalize(sym)
-    if sym.is_a?(String)
-      sym.downcase.capitalize
-    else
-      sym.to_s.camel_case
-    end
   end
 
   # @param [Viewpoint::EWS::SOAP::EwsSoapResponse] resp
@@ -157,10 +148,10 @@ private
 
   # Build up the arguements for #get_folder
   def get_folder_args(folder_id, opts)
-    opts[:base_shape] = normalize(opts[:base_shape] || 'Default')
+    opts[:shape] ||= :default
     default_args =  {
       :folder_ids   => [{:id => folder_id}],
-      :folder_shape => {:base_shape => opts[:base_shape]}
+      :folder_shape => {:base_shape => opts[:shape]}
     }
     default_args.merge opts
   end

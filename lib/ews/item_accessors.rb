@@ -21,9 +21,8 @@ module Viewpoint::EWS::ItemAccessors
   # This is a class method that fetches an existing Item from the
   #  Exchange Store.
   # @param [String] item_id The id of the item.
-  # @param [Symbol] shape The optional shape of the item :id_only/:default/:all_properties
   # @param [Hash] opts Misc options to control request
-  # @option opts [String] :base_shape IdOnly/Default/AllProperties
+  # @option opts [Symbol] :shape :id_only/:default/:all_properties
   # @return [Item] Returns an Item or subclass of Item
   # @todo Add support to fetch an item with a ChangeKey
   def get_item(item_id, opts = {})
@@ -33,13 +32,13 @@ module Viewpoint::EWS::ItemAccessors
   end
 
 
-  private
+private
 
   def get_item_args(item_id, opts)
-    opts[:base_shape] ||= 'Default'
+    opts[:shape] ||= :default
     default_args = {
       :item_ids => [{:item_id => {:id => item_id}}],
-      :item_shape => {:base_shape => opts[:base_shape]}
+      :item_shape => {:base_shape => opts[:shape]}
     }
     default_args.merge opts
   end
