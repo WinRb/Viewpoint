@@ -19,19 +19,15 @@
 module Viewpoint::EWS::Types
 
     OOF_KEY_PATHS = {
-      :enabled?   => [:oof_settings, :oof_state, :text],
-      :scheduled? => [:oof_settings, :oof_state, :text],
+      :enabled?   => [:oof_settings, :oof_state],
+      :scheduled? => [:oof_settings, :oof_state],
       :duration   => [:oof_settings, :duration],
     }
 
     OOF_KEY_TYPES = {
-      :enabled?   => ->(str){str == 'Enabled'},
-      :scheduled? => ->(str){str == 'Scheduled'},
-      :duration   => ->(hsh){
-        { start_time: DateTime.iso8601(hsh[:start_time][:text]),
-          end_time: DateTime.iso8601(hsh[:end_time][:text])
-        }
-      },
+      :enabled?   => ->(str){str == :enabled},
+      :scheduled? => ->(str){str == :scheduled},
+      :duration   => ->(hsh){ hsh[:start_time]..hsh[:end_time] },
     }
 
     OOF_KEY_ALIAS = {}
@@ -42,20 +38,78 @@ module Viewpoint::EWS::Types
     include Viewpoint::EWS
     include Viewpoint::EWS::Types
 
+    attr_reader :user
+
     # @param [MailboxUser] user
     # @param [Hash] ews_item
     def initialize(user, ews_item)
       @ews =  user.ews
       @user = user
       @ews_item = ews_item
+      @changed = false
       simplify!
     end
 
-    def enable!
+    def changed?
+      @changed
     end
 
-    def disable!
+    def save!
+      return true unless changed?
+      opts = { mailbox: {address: user.email_address} }.merge(@ews_item[:oof_settings])
+      resp = @ews.set_user_oof_settings(opts)
+      if resp.success?
+        @changed = false
+        true
+      else
+        raise SaveFailed, "Could not save #{self.class}. #{resp.code}: #{resp.message}"
+      end
     end
+
+    def enable
+      return true if enabled?
+      @changed = true
+      @ews_item[:oof_settings][:oof_state] = :enabled
+    end
+
+    def disable
+      return true unless enabled? || scheduled?
+      @changed = true
+      @ews_item[:oof_settings][:oof_state] = :disabled
+    end
+
+    # Schedule an out of office.
+    # @param [DateTime] start_time
+    # @param [DateTime] end_time
+    def schedule(start_time, end_time)
+      @changed = true
+      @ews_item[:oof_settings][:oof_state] = :scheduled
+      set_duration start_time, end_time
+    end
+
+    # Specify a duration for this Out Of Office setting
+    # @param [DateTime] start_time
+    # @param [DateTime] end_time
+    def set_duration(start_time, end_time)
+      @changed = true
+      @ews_item[:oof_settings][:duration][:start_time] = start_time
+      @ews_item[:oof_settings][:duration][:end_time] = end_time
+    end
+
+    # A message to send to internal users
+    # @param [String] message
+    def internal_reply=(message)
+      @changed = true
+      @ews_item[:oof_settings][:internal_reply] = message
+    end
+
+    # A message to send to external users
+    # @param [String] message
+    def external_reply=(message)
+      @changed = true
+      @ews_item[:oof_settings][:external_reply] = message
+    end
+
 
 private
 
@@ -73,9 +127,17 @@ private
 
     def simplify!
       oof_settings = @ews_item[:oof_settings][:elems].inject(:merge)
+      oof_settings[:oof_state] = oof_settings[:oof_state][:text].downcase.to_sym
+      oof_settings[:external_audience] = oof_settings[:external_audience][:text]
       if oof_settings[:duration]
-        oof_settings[:duration] = oof_settings[:duration][:elems].inject(:merge)
+        dur = oof_settings[:duration][:elems].inject(:merge)
+        oof_settings[:duration] = {
+          start_time: DateTime.iso8601(dur[:start_time][:text]),
+          end_time:   DateTime.iso8601(dur[:end_time][:text])
+        }
       end
+      oof_settings[:internal_reply] = oof_settings[:internal_reply][:elems][0][:message][:text] || ""
+      oof_settings[:external_reply] = oof_settings[:external_reply][:elems][0][:message][:text] || ""
       @ews_item[:oof_settings] = oof_settings
       @ews_item[:allow_external_oof] = @ews_item[:allow_external_oof][:text]
     end

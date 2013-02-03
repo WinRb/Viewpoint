@@ -33,12 +33,31 @@ module Viewpoint::EWS::SOAP
 
     # Sets a mailbox user's Out of Office (OOF) settings and message.
     # @see http://msdn.microsoft.com/en-us/library/aa580294.aspx
-    def set_user_oof_settings(mailbox, oof_state, ext_audience, dt_start, dt_end, int_msg, ext_mg)
-      action = "#{SOAP_ACTION_PREFIX}/SetUserOofSettings"
-      resp = invoke("#{NS_EWS_MESSAGES}:SetUserOofSettings", action) do |root|
-        build!(root)
+    # @param [Hash] opts
+    # @option opts [Hash] :mailbox the mailbox hash for the use
+    # @option opts [String,Symbol] :oof_state :enabled, :disabled, :scheduled
+    # @option opts [Hash] :duration {start_time: DateTime, end_time: DateTime}
+    # @option opts [String] :internal_reply
+    # @option opts [String] :external_reply
+    # @option opts [String,Symbol] :external_audience :none, :known, :all
+    def set_user_oof_settings(opts)
+      opts = opts.clone
+      puts "OPTS: #{opts}"
+      [:mailbox, :oof_state].each do |k|
+        validate_param(opts, k, true)
       end
-      parse!(resp)
+      req = build_soap! do |type, builder|
+        if(type == :header)
+        else
+        builder.nbuild.SetUserOofSettingsRequest {|x|
+          x.parent.default_namespace = @default_ns
+          builder.mailbox! opts.delete(:mailbox)
+          builder.user_oof_settings!(opts)
+        }
+        end
+      end
+      resp = do_soap_request(req, raw_response: true)
+      parse!(resp, response_class: EwsSoapAvailabilityResponse)
     end
 
   end #ExchangeAvailability

@@ -36,7 +36,7 @@ module Viewpoint::EWS::SOAP
     end
 
     def response_code
-      response_message[:elems][0][:response_code][:text]
+      response_message[:elems][:response_code][:text]
     end
     alias :code :response_code
 
@@ -48,7 +48,8 @@ module Viewpoint::EWS::SOAP
 
     def simplify!
       key = response_key
-      body[0][key] = body[0][key][:elems].inject(&:merge)
+      body[0][key] = body[0][key][:elems].inject(:merge)
+      response_message[:elems] = response_message[:elems].inject(:merge)
     end
 
   end # EwsSoapAvailabilityResponse

@@ -319,6 +319,28 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].MailboxType(type)
     end
 
+    def user_oof_settings!(opts)
+      nbuild[NS_EWS_TYPES].UserOofSettings {
+        nbuild.OofState(opts[:oof_state].to_s.camel_case)
+        nbuild.ExternalAudience(opts[:external_audience].to_s.camel_case) if opts[:external_audience]
+        duration!(opts[:duration]) if opts[:duration]
+        nbuild.InternalReply {
+          nbuild.Message(opts[:internal_reply])
+        } if opts[:external_reply]
+        nbuild.ExternalReply {
+          nbuild.Message(opts[:external_reply])
+        } if opts[:external_reply]
+      }
+    end
+
+    def duration!(opts)
+      puts "HERE with #{opts}"
+      nbuild.Duration {
+        nbuild.StartTime(opts[:start_time].new_offset(0).strftime('%FT%H:%M:%SZ'))
+        nbuild.EndTime(opts[:end_time].new_offset(0).strftime('%FT%H:%M:%SZ'))
+      }
+    end
+
     def mailbox_data!(md)
       nbuild[NS_EWS_TYPES].MailboxData {
         nbuild.Email {

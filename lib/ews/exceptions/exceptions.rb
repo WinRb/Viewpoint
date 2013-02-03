@@ -44,4 +44,7 @@ module Viewpoint::EWS
   # that have not yet been fetched.
   class EwsMinimalObjectError < EwsError; end
 
+  # Failed to save an object back to the EWS store.
+  class SaveFailed < EwsError; end
+
 end # Viewpoint::EWS
