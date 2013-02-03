@@ -56,12 +56,24 @@ module Viewpoint::EWS::Types
       true
     end
 
-    # Get information about when this user is available.
-    # @param [String] start_time The start of the time range to check as an xs:dateTime.
-    # @param [String] end_time The end of the time range to check as an xs:dateTime.
-    # @see http://msdn.microsoft.com/en-us/library/aa494212.aspx
-    def get_user_availability(start_time, end_time)
-      return MailboxUser.get_user_availability(self.email_address, start_time, end_time)
+    # Get information about when the user with the given email address is available.
+    # @param [String] email_address The email address of the person to find availability for.
+    # @param [DateTime] start_time The start of the time range to check as an xs:dateTime.
+    # @param [DateTime] end_time The end of the time range to check as an xs:dateTime.
+    # @see http://msdn.microsoft.com/en-us/library/aa563800(v=exchg.140)
+    def get_user_availability(email_address, start_time, end_time)
+      opts = {
+        mailbox_data: [ :email =>{:address => email_address} ],
+        free_busy_view_options: {
+        time_window: {start_time: start_time, end_time: end_time},
+      }
+      }
+      resp = ews.get_user_availability(opts)
+      if(resp.status == 'Success')
+        return resp.items
+      else
+        raise EwsError, "GetUserAvailability produced an error: #{resp.code}: #{resp.message}"
+      end
     end
 
     # Adds one or more delegates to a principal's mailbox and sets specific access permissions

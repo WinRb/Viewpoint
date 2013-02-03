@@ -131,7 +131,7 @@ module Viewpoint::EWS::SOAP
     # Build the BaseShape element
     # @see http://msdn.microsoft.com/en-us/library/aa580545.aspx
     def base_shape!(base_shape)
-      @nbuild[NS_EWS_TYPES].BaseShape(base_shape)
+      @nbuild[NS_EWS_TYPES].BaseShape(base_shape.to_s.camel_case)
     end
 
     # Build the ParentFolderIds element
@@ -315,8 +315,46 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].RoutingType(type)
     end
 
-    def mailbox_type!(type)
+    def mailbox_type!(type)Standard
       nbuild[NS_EWS_TYPES].MailboxType(type)
+    end
+
+    def mailbox_data!(md)
+      nbuild[NS_EWS_TYPES].MailboxData {
+        nbuild.Email {
+          mbox = md[:email]
+          name!(mbox[:name]) if mbox[:name]
+          address!(mbox[:address]) if mbox[:address] # for Availability query
+          routing_type!(mbox[:routing_type]) if mbox[:routing_type]
+        }
+        nbuild.AttendeeType 'Required'
+      }
+    end
+
+    def free_busy_view_options!(opts)
+    end
+
+    def suggestions_view_options!(opts)
+    end
+
+    def time_zone!(zone)
+      nbuild[NS_EWS_TYPES].TimeZone {
+        nbuild.Bias(480)
+        nbuild.StandardTime {
+          nbuild.Bias(0)
+          nbuild.Time("02:00:00")
+          nbuild.DayOrder(5)
+          nbuild.Month(10)
+          nbuild.DayOfWeek('Sunday')
+        }
+        nbuild.DaylightTime {
+          nbuild.Bias(-60)
+          nbuild.Time("02:00:00")
+          nbuild.DayOrder(1)
+          nbuild.Month(4)
+          nbuild.DayOfWeek('Sunday')
+        }
+      }
     end
 
     # Build the Restriction element

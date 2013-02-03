@@ -18,6 +18,24 @@
 
 module Viewpoint::EWS::Types
 
+    OOF_KEY_PATHS = {
+      :enabled?   => [:oof_settings, :oof_state, :text],
+      :scheduled? => [:oof_settings, :oof_state, :text],
+      :duration   => [:oof_settings, :duration],
+    }
+
+    OOF_KEY_TYPES = {
+      :enabled?   => ->(str){str == 'Enabled'},
+      :scheduled? => ->(str){str == 'Scheduled'},
+      :duration   => ->(hsh){
+        { start_time: DateTime.iso8601(hsh[:start_time][:text]),
+          end_time: DateTime.iso8601(hsh[:end_time][:text])
+        }
+      },
+    }
+
+    OOF_KEY_ALIAS = {}
+
   # This represents OutOfOffice settings
   # @see http://msdn.microsoft.com/en-us/library/aa563465.aspx
   class OutOfOffice
@@ -30,6 +48,36 @@ module Viewpoint::EWS::Types
       @ews =  user.ews
       @user = user
       @ews_item = ews_item
+      simplify!
+    end
+
+    def enable!
+    end
+
+    def disable!
+    end
+
+private
+
+    def key_paths
+      @key_paths ||= super.merge(OOF_KEY_PATHS)
+    end
+
+    def key_types
+      @key_types ||= super.merge(OOF_KEY_TYPES)
+    end
+
+    def key_alias
+      @key_alias ||= super.merge(OOF_KEY_ALIAS)
+    end
+
+    def simplify!
+      oof_settings = @ews_item[:oof_settings][:elems].inject(:merge)
+      if oof_settings[:duration]
+        oof_settings[:duration] = oof_settings[:duration][:elems].inject(:merge)
+      end
+      @ews_item[:oof_settings] = oof_settings
+      @ews_item[:allow_external_oof] = @ews_item[:allow_external_oof][:text]
     end
 
   end #OutOfOffice

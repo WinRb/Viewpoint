@@ -41,18 +41,4 @@ module Viewpoint::EWS::MailboxAccessors
     users
   end
 
-  # Get information about when the user with the given email address is available.
-  # @param [String] email_address The email address of the person to find availability for.
-  # @param [String] start_time The start of the time range to check as an xs:dateTime.
-  # @param [String] end_time The end of the time range to check as an xs:dateTime.
-  # @see http://msdn.microsoft.com/en-us/library/aa563800(v=exchg.140)
-  def get_user_availability(email_address, start_time, end_time)
-    resp = ews.get_user_availability(email_address, start_time, end_time)
-    if(resp.status == 'Success')
-      return resp.items
-    else
-      raise EwsError, "GetUserAvailability produced an error: #{resp.code}: #{resp.message}"
-    end
-  end
-
 end # Viewpoint::EWS::MailboxAccessors

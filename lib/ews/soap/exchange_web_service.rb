@@ -412,12 +412,14 @@ module Viewpoint::EWS::SOAP
       req = build_soap! do |type, builder|
         if(type == :header)
         else
-        builder.nbuild.GetUserAvailabilityRequestType {|x|
+        builder.nbuild.GetUserAvailabilityRequest {|x|
           x.parent.default_namespace = @default_ns
           builder.time_zone!(opts[:time_zone])
+          builder.nbuild.MailboxDataArray {
           opts[:mailbox_data].each do |mbd|
             builder.mailbox_data!(mbd)
           end
+          }
           builder.free_busy_view_options!(opts[:free_busy_view_options])
           builder.suggestions_view_options!(opts[:suggestions_view_options])
         }

@@ -37,7 +37,7 @@ module Viewpoint::EWS::SOAP
       req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.nbuild.FindItem(:Traversal => opts[:traversal]) {
+          builder.nbuild.FindItem(:Traversal => opts[:traversal].to_s.camel_case) {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.item_shape!(opts[:item_shape])
             # @todo add FractionalPageFolderView
@@ -345,10 +345,11 @@ module Viewpoint::EWS::SOAP
       [:parent_folder_ids, :traversal, :folder_shape].each do |k|
         validate_param(opts, k, true)
       end
+
       req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.nbuild.FindFolder(:Traversal => opts[:traversal]) {
+          builder.nbuild.FindFolder(:Traversal => opts[:traversal].to_s.camel_case) {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.folder_shape!(opts[:folder_shape])
             builder.restriction!(opts[:restriction]) if opts[:restriction]
