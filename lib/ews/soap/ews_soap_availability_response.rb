@@ -32,7 +32,8 @@ module Viewpoint::EWS::SOAP
     end
 
     def response_message
-      response[:response_message]
+      key = response.keys.first
+      response[key]
     end
 
     def response_code

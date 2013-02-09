@@ -35,24 +35,38 @@ module Viewpoint::EWS::Types
       items_parser ews.find_item(items_args.merge(opts))
     end
 
-    def items_args
-      { :parent_folder_ids => [{:id => self.id}],
-        :traversal => 'Shallow',
-        :item_shape  => {:base_shape => 'Default'} }
+    # Fetch items since a give DateTime
+    # @param [DateTime] date_time the time to fetch Items since.
+    def items_since(date_time, opts = {})
+      unless date_time.kind_of?(Date)
+        raise EwsBadArgumentError, "First argument must be a Date or DateTime"
+      end
+      restr = {:restriction =>
+        {:is_greater_than_or_equal_to => 
+          [{:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
+            {:field_uRI_or_constant =>{:constant => {:value=>date_time.to_datetime}}}]
+        }}
+        items(opts.merge(restr))
     end
 
-    def items_parser(resp)
-      if(resp.status == 'Success')
-        allitems = resp.response_message[:elems][:root_folder][:elems][0][:items][:elems] || []
-        items = []
-        allitems.each do |i|
-          type = i.keys.first
-          items << class_by_name(type).new(ews, i[type])
-        end
-        items
-      else
-        raise EwsError, "Could not retrieve folder. #{resp.code}: #{resp.message}"
-      end
+    # Fetch only items from today (since midnight)
+    def todays_items(opts = {})
+      items_since(Date.today)
+    end
+
+    # Fetch items between a given time period
+    # @param [DateTime] start_date the time to start fetching Items from
+    # @param [DateTime] end_date the time to stop fetching Items from
+    def items_between(start_date, end_date, opts={})
+      restr = {:restriction =>  {:and => [
+        {:is_greater_than_or_equal_to => 
+          [{:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
+            {:field_uRI_or_constant=>{:constant => {:value =>start_date}}}]},
+            {:is_less_than_or_equal_to =>
+              [{:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
+                {:field_uRI_or_constant=>{:constant => {:value =>end_date}}}]}
+      ]}}
+      items(opts.merge(restr))
     end
 
     def delete!
@@ -82,6 +96,8 @@ module Viewpoint::EWS::Types
         user_config_props: 'XmlData'
       }
       resp = ews.get_user_configuration(opts)
+      #txt = resp.response_message[:elems][:get_user_configuration_response_message][:elems][1][:user_configuration][:elems][1][:xml_data][:text]
+      #Base64.decode64 txt
     end
 
 
@@ -129,6 +145,26 @@ module Viewpoint::EWS::Types
       if(resp.status == 'Success')
         f = resp.response_message[:elems][:folders][:elems][0]
         f.values.first
+      else
+        raise EwsError, "Could not retrieve folder. #{resp.code}: #{resp.message}"
+      end
+    end
+
+    def items_args
+      { :parent_folder_ids => [{:id => self.id}],
+        :traversal => 'Shallow',
+        :item_shape  => {:base_shape => 'Default'} }
+    end
+
+    def items_parser(resp)
+      if(resp.status == 'Success')
+        allitems = resp.response_message[:elems][:root_folder][:elems][0][:items][:elems] || []
+        items = []
+        allitems.each do |i|
+          type = i.keys.first
+          items << class_by_name(type).new(ews, i[type])
+        end
+        items
       else
         raise EwsError, "Could not retrieve folder. #{resp.code}: #{resp.message}"
       end

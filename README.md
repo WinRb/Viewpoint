@@ -118,6 +118,24 @@ my_folder.delete!
 ```
 
 ### Item Accessors
+
+#### Finding items
+```ruby
+items = inbox.items
+
+# for today
+inbox.todays_items
+
+# since a specific date
+sd = Date.iso8061 '2013-01-01'
+inbox.items_since sd
+
+# between 2 dates
+sd = Date.iso8061 '2013-01-01'
+ed = Date.iso8061 '2013-02-01'
+inbox.items_between sd, ed
+```
+
 ### Mailbox Accessors
 ### Message Accessors
 
