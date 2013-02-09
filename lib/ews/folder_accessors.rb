@@ -85,11 +85,13 @@ module Viewpoint::EWS::FolderAccessors
   # @param [Hash] opts
   # @option opts [String,Symbol] :parent Either a FolderId(String) or a
   #   DistinguishedFolderId(Symbol) . This is the parent folder.
+  # @option opts [Symbol] :type the type of folder to create. must be one of
+  #   :folder, :calendar, :contacts, :search, or :tasks
   # @see http://msdn.microsoft.com/en-us/library/aa580808.aspx
   def make_folder(name, opts={})
     parent = opts[:parent] || :msgfolderroot
     resp = ews.create_folder :parent_folder_id => {:id => parent},
-      :folders => [:folder => {:display_name => name}]
+      :folders => [folder_type(opts[:type]) => {:display_name => name}]
     create_folder_parser(resp).first
   end
   alias :mkfolder :make_folder
@@ -172,6 +174,17 @@ private
   # @param [Symbol] type a symbol in FOLDER_TYPE_MAP
   def map_folder_type(type)
     FOLDER_TYPE_MAP[type] || type
+  end
+
+  def folder_type(type)
+    case type
+    when nil, :folder
+      :folder
+    when :calendar, :contacts, :search, :tasks
+      "#{type}_folder".to_sym
+    else
+      raise EwsBadArgumentError, "Not a proper folder type: :#{type}"
+    end
   end
 
 end

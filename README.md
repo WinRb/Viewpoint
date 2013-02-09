@@ -102,6 +102,21 @@ cli.get_folder_by_name 'test'
 cli.get_folder_by_name 'test', parent: :inbox
 ```
 
+#### Creating/Deleting a folder
+```ruby
+# make a folder under :msgfolderroot
+cli.make_folder 'myfolder'
+
+# make a folder under Inbox
+my_folder = cli.make_folder 'My Stuff', parent: :inbox
+
+# make a new Tasks folder
+tasks = cli.make_folder 'New Tasks', type: :tasks
+
+# delete a folder
+my_folder.delete!
+```
+
 ### Item Accessors
 ### Mailbox Accessors
 ### Message Accessors

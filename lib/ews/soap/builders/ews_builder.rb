@@ -250,8 +250,8 @@ module Viewpoint::EWS::SOAP
       }
     end
 
-    def folder!(folder)
-      nbuild[NS_EWS_TYPES].Folder {|x|
+    def folder!(folder, type = :Folder)
+      nbuild[NS_EWS_TYPES].send(type) {|x|
         folder.each_pair do |e,v|
           ftype = "#{e}!".to_sym
           if e == :folder_id
@@ -264,6 +264,22 @@ module Viewpoint::EWS::SOAP
           end
         end
       }
+    end
+
+    def calendar_folder!(folder)
+      folder! folder, :CalendarFolder
+    end
+
+    def contacts_folder!(folder)
+      folder! folder, :ContactsFolder
+    end
+
+    def search_folder!(folder)
+      folder! folder, :SearchFolder
+    end
+
+    def tasks_folder!(folder)
+      folder! folder, :TasksFolder
     end
 
     def display_name!(name)
