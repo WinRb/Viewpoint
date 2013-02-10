@@ -1,7 +1,9 @@
+require 'ews/item_accessors'
 module Viewpoint::EWS::Types
   module GenericFolder
     include Viewpoint::EWS
     include Viewpoint::EWS::Types
+    include Viewpoint::EWS::ItemAccessors
 
     GFOLDER_KEY_PATHS = {
       :id               => [:folder_id, :attribs, :id],
