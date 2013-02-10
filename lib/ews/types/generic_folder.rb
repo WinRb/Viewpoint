@@ -31,6 +31,19 @@ module Viewpoint::EWS::Types
       simplify!
     end
 
+    def delete!
+      opts = {
+        :folder_ids   => [:id => id],
+        :delete_type  => 'HardDelete'
+      }
+      resp = @ews.delete_folder(opts)
+      if resp.success?
+        true
+      else
+        raise EwsError, "Could not delete folder. #{resp.code}: #{resp.message}"
+      end
+    end
+
     def items(opts = {})
       items_parser ews.find_item(items_args.merge(opts))
     end
@@ -69,17 +82,31 @@ module Viewpoint::EWS::Types
       items(opts.merge(restr))
     end
 
-    def delete!
-      opts = {
-        :folder_ids   => [:id => id],
-        :delete_type  => 'HardDelete'
-      }
-      resp = @ews.delete_folder(opts)
-      if resp.success?
-        true
-      else
-        raise EwsError, "Could not delete folder. #{resp.code}: #{resp.message}"
+    # Search on the item subject
+    # @param [String] match_str A simple string paramater to match against the
+    #   subject.  The search ignores case and does not accept regexes... only strings.
+    # @param [String,nil] exclude_str A string to exclude from matches against
+    #   the subject.  This is optional.
+    def search_by_subject(match_str, exclude_str = nil)
+      match = {:contains => {
+        :containment_mode => 'Substring',
+        :containment_comparison => 'IgnoreCase',
+        :field_uRI => {:field_uRI=>'item:Subject'},
+        :constant => {:value =>match_str}
+      }}
+      unless exclude_str.nil?
+        excl = {:not =>
+          {:contains => {
+            :containment_mode => 'Substring',
+            :containment_comparison => 'IgnoreCase',
+            :field_uRI => {:field_uRI=>'item:Subject'},
+            :constant => {:value =>exclude_str}
+          }}
+        }
+
+        match[:and] = [{:contains => match.delete(:contains)}, excl]
       end
+      items({:restriction => match})
     end
 
     def get_all_properties!

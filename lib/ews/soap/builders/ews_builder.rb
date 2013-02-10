@@ -350,7 +350,6 @@ module Viewpoint::EWS::SOAP
     end
 
     def duration!(opts)
-      puts "HERE with #{opts}"
       nbuild.Duration {
         nbuild.StartTime(opts[:start_time].new_offset(0).strftime('%FT%H:%M:%SZ'))
         nbuild.EndTime(opts[:end_time].new_offset(0).strftime('%FT%H:%M:%SZ'))
@@ -401,12 +400,7 @@ module Viewpoint::EWS::SOAP
     def restriction!(restriction)
       @nbuild[NS_EWS_MESSAGES].Restriction {
         restriction.each_pair do |k,v|
-          case k
-          when :and, :or, :not
-            self.send("#{k}_r", v)
-          else
-            self.send(k, v)
-          end
+          self.send normalize_type(k), v
         end
       }
     end
@@ -423,7 +417,7 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_TYPES].send(type) {
         expr.each do |e|
           type = e.keys.first
-          self.send(type, e[type])
+          self.send normalize_type(type), e[type]
         end
       }
     end
@@ -437,8 +431,8 @@ module Viewpoint::EWS::SOAP
 
     def contains(expr)
       @nbuild[NS_EWS_TYPES].Contains(
-        'ContainmentMode' => expr[:containment_mode],
-        'ContainmentComparison' => expr[:containment_comparison]) {
+        'ContainmentMode' => expr.delete(:containment_mode),
+        'ContainmentComparison' => expr.delete(:containment_comparison)) {
         c = expr.delete(:constant) # remove constant 1st for ordering
         type = expr.keys.first
         self.send(type, expr[type])
@@ -912,6 +906,16 @@ private
         nbuild[NS_EWS_TYPES].RequestServerVersion {|x|
           x.parent['Version'] = version
         }
+      end
+    end
+
+    # some methods need special naming so they use the '_r' suffix like 'and'
+    def normalize_type(type)
+      case type
+      when :and, :or, :not
+        "#{type}_r".to_sym
+      else
+        type
       end
     end
 
