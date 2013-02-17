@@ -17,10 +17,14 @@ module Viewpoint::EWS::Types
       read?:          [:is_read, :text],
       conversation_id:[:conversation_id, :attribs, :id],
       categories:     [:categories, :elems],
+      internet_message_id:[:internet_message_id, :text],
       internet_message_headers:[:internet_message_headers, :elems],
       sender:         [:sender, :elems, 0, :mailbox, :elems],
       from:           [:from, :elems, 0, :mailbox, :elems],
       attachments:    [:attachments, :elems],
+      importance:     [:importance, :text],
+      conversation_index:     [:conversation_index, :text],
+      conversation_topic:     [:conversation_topic, :text],
     }
 
     ITEM_KEY_TYPES = {
