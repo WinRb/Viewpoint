@@ -13,8 +13,8 @@ module Viewpoint::EWS::Types
       date_time_sent: [:date_time_sent, :text],
       date_time_created: [:date_time_created, :text],
       has_attachments?:[:has_attachments, :text],
-      is_associated?: [:is_associated, :text],
-      is_read?:       [:is_read, :text],
+      associated?:    [:is_associated, :text],
+      read?:          [:is_read, :text],
       conversation_id:[:conversation_id, :attribs, :id],
       categories:     [:categories, :elems],
       internet_message_headers:[:internet_message_headers, :elems],
@@ -28,8 +28,8 @@ module Viewpoint::EWS::Types
       date_time_sent:     ->(str){DateTime.parse(str)},
       date_time_created:  ->(str){DateTime.parse(str)},
       has_attachments?:   ->(str){str.downcase == 'true'},
-      is_associated?:     ->(str){str.downcase == 'true'},
-      is_read?:           ->(str){str.downcase == 'true'},
+      associated?:        ->(str){str.downcase == 'true'},
+      read?:              ->(str){str.downcase == 'true'},
       categories:         ->(obj){obj.collect{|s| s[:string][:text]}},
       internet_message_headers: ->(obj){obj.collect{|h|
           {h[:internet_message_header][:attribs][:header_name] =>
@@ -40,6 +40,8 @@ module Viewpoint::EWS::Types
     }
 
     ITEM_KEY_ALIAS = {
+      :read?        => :is_read?,
+      :associated?  => :is_associated?,
     }
 
     attr_reader :ews_item

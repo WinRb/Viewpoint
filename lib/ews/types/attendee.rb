@@ -16,22 +16,12 @@
   limitations under the License.
 =end
 
-module Viewpoint
-  module EWS
+module Viewpoint::EWS::Types
 
-    # This represents a Mailbox object in the Exchange data store
-    # @see http://msdn.microsoft.com/en-us/library/aa565036.aspx MSDN docs
-    # @todo Design a Class method that resolves to an Array of MailboxUsers
-    class Attendee < MailboxUser
-      include Model
+  # This represents a Mailbox object in the Exchange data store
+  # @see http://msdn.microsoft.com/en-us/library/aa565036.aspx MSDN docs
+  # @todo Design a Class method that resolves to an Array of MailboxUsers
+  class Attendee < MailboxUser
+  end # Attendee
 
-      attr_reader :response
-
-      def initialize(attendee)
-        @response = attendee[:response_type][:text]
-        super(attendee[:mailbox])
-      end
-
-    end # Attendee
-  end # EWS
-end # Viewpoint
+end # Viewpoint::EWS::Types
