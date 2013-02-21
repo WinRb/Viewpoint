@@ -42,7 +42,7 @@ module Viewpoint::EWS::SOAP
     # @option opts [String,Symbol] :external_audience :none, :known, :all
     def set_user_oof_settings(opts)
       opts = opts.clone
-      puts "OPTS: #{opts}"
+ #     puts "OPTS: #{opts}"
       [:mailbox, :oof_state].each do |k|
         validate_param(opts, k, true)
       end
