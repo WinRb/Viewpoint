@@ -369,6 +369,13 @@ module Viewpoint::EWS::SOAP
     end
 
     def free_busy_view_options!(opts)
+      nbuild[NS_EWS_TYPES].FreeBusyViewOptions {
+        nbuild.TimeWindow {
+          nbuild.StartTime(opts[:time_window][:start_time])
+          nbuild.EndTime(opts[:time_window][:end_time])          
+        }
+        nbuild.RequestedView(opts[:requested_view][:requested_free_busy_view])
+      }
     end
 
     def suggestions_view_options!(opts)

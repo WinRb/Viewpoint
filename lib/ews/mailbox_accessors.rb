@@ -40,5 +40,28 @@ module Viewpoint::EWS::MailboxAccessors
     end
     users
   end
+  
+  
+  #  Get user calendar free/busy with several options for the view to be returned
+  # requested_view can be None|MergedOnly|FreeBusy|FreeBusyMerged|Detailed|DetailedMerged} 
+  #        
+  def get_user_availability(email_address, start_time, end_time, requested_view )
+    opts = {
+       mailbox_data: [ :email =>{:address => email_address} ],
+       free_busy_view_options: {
+         time_window: {start_time: start_time, end_time: end_time},
+         requested_view: { :requested_free_busy_view => requested_view },
+       }
+     }
+    
+     resp = ews.get_user_availability(opts)   
+     if(resp.status == 'Success')
+       return resp
+     else
+       raise EwsError, "GetUserAvailability produced an error: #{resp.code}: #{resp.message}"
+     end
+    
+  end
+
 
 end # Viewpoint::EWS::MailboxAccessors

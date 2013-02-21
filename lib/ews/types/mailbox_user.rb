@@ -68,7 +68,7 @@ module Viewpoint::EWS::Types
         time_window: {start_time: start_time, end_time: end_time},
       }
       }
-      resp = ews.get_user_availability(opts)
+      resp = (Viewpoint::EWS::EWS.instance).ews.get_user_availability(opts)
       if(resp.status == 'Success')
         return resp.items
       else

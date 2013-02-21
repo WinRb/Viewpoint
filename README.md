@@ -135,6 +135,20 @@ sd = Date.iso8061 '2013-01-01'
 ed = Date.iso8061 '2013-02-01'
 inbox.items_between sd, ed
 ```
+### Free/Busy Calendar Accessors
+
+```ruby
+# Find when a user is busy
+require 'time'
+start_time = DateTime.parse("2013-02-19").iso8601
+end_time = DateTime.parse("2013-02-20").iso8601
+user_free_busy = cli.get_user_availability('joe.user@exchange.site.com', start_time, end_time, 'FreeBusy')
+user_free_busy.calendar_event_array
+
+# Find the user's working hours
+user_free_busy.working_hours
+```
+
 
 ### Mailbox Accessors
 ### Message Accessors
