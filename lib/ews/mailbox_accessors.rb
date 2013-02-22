@@ -40,28 +40,48 @@ module Viewpoint::EWS::MailboxAccessors
     end
     users
   end
-  
-  
-  #  Get user calendar free/busy with several options for the view to be returned
-  # requested_view can be None|MergedOnly|FreeBusy|FreeBusyMerged|Detailed|DetailedMerged} 
-  #        
-  def get_user_availability(email_address, start_time, end_time, requested_view )
-    opts = {
-       mailbox_data: [ :email =>{:address => email_address} ],
-       free_busy_view_options: {
-         time_window: {start_time: start_time, end_time: end_time},
-         requested_view: { :requested_free_busy_view => requested_view },
-       }
-     }
-    
-     resp = ews.get_user_availability(opts)   
-     if(resp.status == 'Success')
-       return resp
-     else
-       raise EwsError, "GetUserAvailability produced an error: #{resp.code}: #{resp.message}"
-     end
-    
+
+  # GetUserAvailability request
+  # @see http://msdn.microsoft.com/en-us/library/aa563800.aspx
+  # @param [Array<String>] emails A list of emails you want to retrieve free-busy info for.
+  # @param [Hash] opts
+  # @option opts [DateTime] :start_time
+  # @option opts [DateTime] :end_time
+  # @option opts [Symbol] :requested_view :merged_only/:free_busy/
+  #   :free_busy_merged/:detailed/:detailed_merged
+  def get_user_availability(emails, opts)
+    opts = opts.clone
+    args = get_user_availability_args(emails, opts)
+    resp = ews.get_user_availability(args)
+    get_user_availability_parser(resp)
   end
 
+
+private
+
+  def get_user_availability_args(emails, opts)
+    unless opts.has_key?(:start_time) && opts.has_key?(:end_time) && opts.has_key?(:requested_view)
+      raise EwsBadArgumentError, "You must specify a start_time, end_time and requested_view."
+    end
+
+    default_args = {
+      mailbox_data: (emails.collect{|e| [email: {address: e}]}.flatten),
+      free_busy_view_options: {
+        time_window: {
+          start_time: opts[:start_time],
+          end_time: opts[:end_time]
+        },
+        requested_view: { :requested_free_busy_view => opts[:requested_view] },
+      }
+    }
+  end
+
+  def get_user_availability_parser(resp)
+    if(resp.status == 'Success')
+      resp
+    else
+      raise EwsError, "GetUserAvailability produced an error: #{resp.code}: #{resp.message}"
+    end
+  end
 
 end # Viewpoint::EWS::MailboxAccessors

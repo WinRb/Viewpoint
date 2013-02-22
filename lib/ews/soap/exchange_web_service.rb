@@ -426,7 +426,6 @@ module Viewpoint::EWS::SOAP
         end
       end
 
-     
       resp = do_soap_request(req, raw_response: true)
       parse!(resp, response_class: EwsSoapFreeBusyResponse)
     end
@@ -466,9 +465,9 @@ module Viewpoint::EWS::SOAP
     # @param [String] response the SOAP response string
     # @param [Hash] parse_opts misc options to send to the parser
     # @option parse_opts [Class] :response_class the response class
-    def parse!(response, parse_opts = {}) 
+    def parse!(response, parse_opts = {})
       raise EwsError, "Can't parse an empty response. Please check your endpoint." if(response.nil?)
-      parse_opts[:response_class] ||= EwsSoapResponse   
+      parse_opts[:response_class] ||= EwsSoapResponse
       EwsParser.new(response).parse(parse_opts)
     end
 

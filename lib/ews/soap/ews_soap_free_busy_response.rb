@@ -17,7 +17,7 @@
 =end
 
 module Viewpoint::EWS::SOAP
-  
+
   class EwsSoapFreeBusyResponse  < EwsSoapResponse
 
     def initialize(sax_hash)
@@ -34,13 +34,13 @@ module Viewpoint::EWS::SOAP
     end
 
     def body
-      envelope[1][:body][:elems] 
+      envelope[1][:body][:elems]
     end
 
     def get_user_availability_response
       body.first[:get_user_availability_response][:elems].first[:free_busy_response_array][:elems].first[:free_busy_response][:elems]
     end
-        
+
     def response
       body
     end
@@ -48,11 +48,11 @@ module Viewpoint::EWS::SOAP
     def calendar_event_array
       get_user_availability_response[1][:free_busy_view][:elems][1][:calendar_event_array][:elems]
     end
-    
+
     def working_hours
       get_user_availability_response[1][:free_busy_view][:elems][2][:working_hours][:elems]
     end
-    
+
     def response_message
       get_user_availability_response.first[:response_message]
     end
@@ -61,7 +61,7 @@ module Viewpoint::EWS::SOAP
       response_message[:attribs][:response_class]
     end
     alias :status :response_class
-    
+
     def response_code
       response_message[:elems].first[:response_code][:text]
     end
@@ -73,13 +73,13 @@ module Viewpoint::EWS::SOAP
     alias :message :response_message_text
 
     def response_key
-      response_message[:elems]      
+      response_message[:elems]
     end
-    
+
     def success?
       response_class == "Success"
     end
-     
+
     private
 
     def simplify!
@@ -87,7 +87,7 @@ module Viewpoint::EWS::SOAP
 #     body[0][key] = body[0][key][:elems].inject(:merge)
 #     response_message[:elems] = response_message[:elems].inject(:merge)
     end
-    
+
     # If the keys don't exist in the Hash return nil
     # @param[Hash] hsh
     # @param[Array<Symbol,String>] keys keys to follow in the array
@@ -102,7 +102,7 @@ module Viewpoint::EWS::SOAP
         guard_hash hsh[key], keys
       end
     end
-    
+
 
   end # EwsSoapFreeBusyResponse
 
