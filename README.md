@@ -142,7 +142,10 @@ inbox.items_between sd, ed
 require 'time'
 start_time = DateTime.parse("2013-02-19").iso8601
 end_time = DateTime.parse("2013-02-20").iso8601
-user_free_busy = cli.get_user_availability('joe.user@exchange.site.com', start_time, end_time, 'FreeBusy')
+user_free_busy = cli.get_user_availability(['joe.user@exchange.site.com'],
+  start_time: start_time,
+  end_time:   end_time,
+  requested_view: :free_busy)
 user_free_busy.calendar_event_array
 
 # Find the user's working hours

@@ -374,7 +374,7 @@ module Viewpoint::EWS::SOAP
           nbuild.StartTime(opts[:time_window][:start_time])
           nbuild.EndTime(opts[:time_window][:end_time])
         }
-        nbuild.RequestedView(opts[:requested_view][:requested_free_busy_view])
+        nbuild.RequestedView(opts[:requested_view][:requested_free_busy_view].to_s.camel_case)
       }
     end
 
