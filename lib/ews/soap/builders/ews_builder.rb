@@ -162,6 +162,7 @@ module Viewpoint::EWS::SOAP
       ns = @nbuild.parent.name.match(/subscription/i) ? NS_EWS_TYPES : NS_EWS_MESSAGES
       @nbuild[ns].FolderIds {
         fids.each do |fid|
+          fid[:act_as] = act_as if act_as != nil
           dispatch_folder_id!(fid)
         end
       }
@@ -183,7 +184,7 @@ module Viewpoint::EWS::SOAP
       attribs['ChangeKey'] = change_key if change_key
       @nbuild[NS_EWS_TYPES].DistinguishedFolderId(attribs) {
         if ! act_as.nil?
-          mailbox!({:email_address => {:text => act_as}}, NS_EWS_TYPES)
+          mailbox!({:email_address => act_as})
         end
       }
     end
@@ -836,7 +837,7 @@ module Viewpoint::EWS::SOAP
         dispatch_field_uri!(uri)
       }
     end
-    
+
     # @see http://msdn.microsoft.com/en-us/library/ff709497(v=exchg.140).aspx
     def return_new_item_ids!(retval)
       @nbuild.ReturnNewItemIds(retval)
@@ -920,7 +921,7 @@ module Viewpoint::EWS::SOAP
         raise EwsBadArgumentError, "Bad ItemId type. #{type}"
       end
     end
-          
+
     # A helper method to dispatch to a AppendToItemField, SetItemField, or
     #   DeleteItemField
     # @param [Hash] update An update of some type
@@ -969,7 +970,7 @@ module Viewpoint::EWS::SOAP
       end
 
     end
-        
+
     def dispatch_field_item!(item)
       build_xml!(item)
     end
