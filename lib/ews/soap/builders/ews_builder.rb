@@ -134,6 +134,10 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_TYPES].BaseShape(base_shape.to_s.camel_case)
     end
 
+    def body_type!(body_type)
+      @nbuild[NS_EWS_TYPES].BodyType(body_type.to_s)
+    end
+
     # Build the ParentFolderIds element
     # @see http://msdn.microsoft.com/en-us/library/aa565998.aspx
     def parent_folder_ids!(pfids)
@@ -155,7 +159,7 @@ module Viewpoint::EWS::SOAP
     # Build the FolderIds element
     # @see http://msdn.microsoft.com/en-us/library/aa580509.aspx
     def folder_ids!(fids, act_as=nil)
-      @nbuild.FolderIds {
+      @nbuild[NS_EWS_TYPES].FolderIds {   # added NS_EWS_TYPES here for behavior like EventTypes, which also need to be in Types namespace
         @nbuild.parent.default_namespace = @default_ns
         fids.each do |fid|
           dispatch_folder_id!(fid)
@@ -596,7 +600,8 @@ module Viewpoint::EWS::SOAP
 
     # @see http://msdn.microsoft.com/en-us/library/aa563599(v=EXCHG.140).aspx
     def push_subscription_request(subopts)
-      subscribe_all = subopts[:subscribe_to_all_folders] ? 'True' : 'False'
+      #TODO: boolean string values on all these methods need to be downcased or there needs to be a better method of building them
+      subscribe_all = subopts[:subscribe_to_all_folders] ? 'true' : 'false'
       @nbuild.PushSubscriptionRequest('SubscribeToAllFolders' => subscribe_all) {
         folder_ids!(subopts[:folder_ids]) if subopts[:folder_ids]
         event_types!(subopts[:event_types]) if subopts[:event_types]

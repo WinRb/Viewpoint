@@ -21,10 +21,13 @@ module Viewpoint::EWS::Types
       internet_message_headers:[:internet_message_headers, :elems],
       sender:         [:sender, :elems, 0, :mailbox, :elems],
       from:           [:from, :elems, 0, :mailbox, :elems],
+      to_recipients:  [:to_recipients, :elems],
       attachments:    [:attachments, :elems],
       importance:     [:importance, :text],
       conversation_index:     [:conversation_index, :text],
       conversation_topic:     [:conversation_topic, :text],
+      body_type: [:body, :attribs, :body_type],
+      body: [:body, :text]
     }
 
     ITEM_KEY_TYPES = {
