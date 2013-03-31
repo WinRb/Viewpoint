@@ -54,7 +54,7 @@ private
       itype = i.keys.first
       class_by_name(itype).new(ews, i[itype])
     else
-      raise EwsError, "Could not retrieve item. #{resp.code}: #{resp.message}"
+      raise EwsItemNotFound, "Could not retrieve item. #{resp.code}: #{resp.message}"
     end
   end
 

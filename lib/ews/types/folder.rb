@@ -22,7 +22,6 @@ module Viewpoint::EWS::Types
       self.items read_unread_restriction(true)
     end
 
-
     def messages_with_attachments
       opts = {:restriction =>
         {:is_equal_to => [

@@ -83,9 +83,51 @@ module Viewpoint::EWS::Types
     end
 
     # Mark an item as read or if you pass false, unread
-    # @param [Boolean] read mark read if true, unread if not. 
+    # @param [Boolean] read mark read if true, unread if not.
     def mark_read!(read = true)
       resp = update_is_read_status read
+    end
+
+    # Move this item to a new folder
+    # @param [String,Symbol,GenericFolder] new_folder The new folder to move it to. This should
+    #   be a subclass of GenericFolder, a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+    # @return [String] the new Id of the moved item
+    def move!(new_folder)
+      new_folder = new_folder.id if new_folder.kind_of?(GenericFolder)
+      move_opts = {
+        :to_folder_id => {:id => new_folder},
+        :item_ids => [{:item_id => {:id => self.id}}]
+      }
+      resp = @ews.move_item(move_opts)
+
+      if(resp.status == 'Success')
+        key = resp.response_message[:elems][:items][:elems][0].keys[0]
+        id_h  = resp.response_message[:elems][:items][:elems][0][key][:elems][0][:item_id][:attribs]
+        id_h[:id]
+      else
+        raise EwsError, "Could not move item. #{resp.code}: #{resp.message}"
+      end
+    end
+
+    # Copy this item to a new folder
+    # @param [String,Symbol,GenericFolder] new_folder The new folder to move it to. This should
+    #   be a subclass of GenericFolder, a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
+    # @return [String] the new Id of the copied item
+    def copy(new_folder)
+      new_folder = new_folder.id if new_folder.kind_of?(GenericFolder)
+      copy_opts = {
+        :to_folder_id => {:id => new_folder},
+        :item_ids => [{:item_id => {:id => self.id}}]
+      }
+      resp = @ews.copy_item(copy_opts)
+
+      if(resp.status == 'Success')
+        key   = resp.response_message[:elems][:items][:elems][0].keys[0]
+        id_h  = resp.response_message[:elems][:items][:elems][0][key][:elems][0][:item_id][:attribs]
+        id_h[:id]
+      else
+        raise EwsError, "Could not copy item. #{resp.code}: #{resp.message}"
+      end
     end
 
     private
@@ -115,7 +157,7 @@ module Viewpoint::EWS::Types
         ]
       }
       resp = ews.update_item({conflict_resolution: 'AutoResolve'}.merge(opts))
-      unless resp.success? 
+      unless resp.success?
         raise EwsError, "#{resp.code}: #{resp.message}"
       end
       true

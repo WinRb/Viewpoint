@@ -133,7 +133,7 @@ private
         class_by_name(ftype).new(ews, f[ftype])
       end
     else
-      raise EwsError, "Could not retrieve folders. #{resp.code}: #{resp.message}"
+      raise EwsFolderNotFound, "Could not retrieve folders. #{resp.code}: #{resp.message}"
     end
   end
 
@@ -170,7 +170,7 @@ private
       ftype = f.keys.first
       class_by_name(ftype).new(ews, f[ftype])
     else
-      raise EwsError, "Could not retrieve folder. #{resp.code}: #{resp.message}"
+      raise EwsFolderNotFound, "Could not retrieve folder. #{resp.code}: #{resp.message}"
     end
   end
 

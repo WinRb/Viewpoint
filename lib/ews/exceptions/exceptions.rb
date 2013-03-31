@@ -33,6 +33,9 @@ module Viewpoint::EWS
   # Raised when an method is called in the wrong way
   class EwsBadArgumentError < EwsError; end
 
+  # Raised when an item that is asked for is not found
+  class EwsItemNotFound < EwsError; end
+
   # Raised when a folder that is asked for is not found
   class EwsFolderNotFound < EwsError; end
 

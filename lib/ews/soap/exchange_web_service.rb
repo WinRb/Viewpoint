@@ -216,41 +216,6 @@ module Viewpoint::EWS::SOAP
       do_soap_request(req)
     end
 
-    # Used to move one or more items to a single destination folder.
-    # @see http://msdn.microsoft.com/en-us/library/aa565781(v=exchg.140).aspx
-    #
-    # @param [Hash] opts
-    # @option opts [Hash] :to_folder_id A well formatted folder_id Hash. Ex: {:id => :inbox}
-    # @option opts [Array<Hash>] :item_ids ItemIds Hash. The keys in these Hashes can be
-    #   :item_id, :occurrence_item_id, or :recurring_master_item_id. Please see the
-    #   Microsoft docs for more information.
-    # @option opts [Boolean] :return_new_item_ids Indicates whether the item identifiers of
-    #   new items are returned in the response
-    # @example
-    #   opts = {
-    #     :to_folder_id => {:id => :inbox},
-    #     :item_ids => [
-    #       {:item_id => {:id => 'id1'}},
-    #       {:item_id => {:id => 'id2'}},
-    #     ],
-    #     :return_new_item_ids => true
-    #     }
-    #   obj.move_item(opts)
-    def move_item(opts)
-     req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-          builder.nbuild.MoveItem {
-            builder.nbuild.parent.default_namespace = @default_ns
-            builder.to_folder_id!(opts[:to_folder_id])
-            builder.item_ids!(opts[:item_ids])
-            builder.return_new_item_ids!(opts[:return_new_item_ids]) if opts[:return_new_item_ids]
-          }
-        end
-      end
-      do_soap_request(req)
-    end
-
     # Copies items and puts the items in a different folder
     # @see http://msdn.microsoft.com/en-us/library/aa565012(v=exchg.140).aspx
     #
