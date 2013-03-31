@@ -70,8 +70,8 @@ module Viewpoint::EWS::SOAP
             builder.nbuild.parent.default_namespace = @default_ns
             subscriptions.each do |sub|
               subtype = sub.keys.first
-              if(respond_to?(subtype))
-                method(subtype).call(builder, sub[subtype])
+              if(builder.respond_to?(subtype))
+                builder.send subtype, sub[subtype]
               else
                 raise EwsBadArgumentError, "Bad subscription type. #{subtype}"
               end
