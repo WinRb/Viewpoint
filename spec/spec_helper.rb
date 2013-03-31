@@ -1,6 +1,7 @@
 $: << File.dirname(__FILE__) + '/../lib/'
 require 'viewpoint'
 require 'ostruct'
+require 'turn/autorun'
 require_relative 'request_xml'
 require_relative 'response_xml'
 require_relative 'xml_matcher'

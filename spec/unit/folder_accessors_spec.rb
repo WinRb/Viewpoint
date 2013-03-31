@@ -21,29 +21,28 @@ describe Viewpoint::EWS::FolderAccessors do
       before do
         resp = OpenStruct.new
         resp.status = 'Success'
-        resp.items = ResponseObjects.folders
+        rhash = {:elems => {:root_folder => {:elems => [{:folders =>{:elems => ResponseObjects.folders}}]}}}
+        resp.response_message = rhash
         @ecli.ews.stub(:find_folder).with(an_instance_of(Hash)) { resp }
         cbn = double("ClassByName")
         cbn.stub(:new) { double("FolderMock") }
         @ecli.stub(:class_by_name) { cbn }
       end
 
-      it '#folder_names should return folder names' do
-        @ecli.folder_names.should include('Inbox', 'Drafts', 'Tasks')
-      end
       it '#find_folders should return folders' do
-        @ecli.find_folders.should be_instance_of(Array)
+        @ecli.folders.should be_instance_of(Array)
       end
     end
     context "methods utilizing ExchangeWebService#get_folder" do
       before do
         resp = OpenStruct.new
         resp.status = 'Success'
-        resp.items = ResponseObjects.folders
-          @ecli.ews.stub(:get_folder).with(an_instance_of(Hash)) { resp }
-          cbn = double("ClassByName")
-          cbn.stub(:new) { double("Folder") }
-          @ecli.stub(:class_by_name) { cbn }
+        rhash = {:elems => {:folders =>{:elems => ResponseObjects.folders}}}
+        resp.response_message = rhash
+        @ecli.ews.stub(:get_folder).with(an_instance_of(Hash)) { resp }
+        cbn = double("ClassByName")
+        cbn.stub(:new) { double("Folder") }
+        @ecli.stub(:class_by_name) { cbn }
       end
       it '#get_folder should return a Folder' do
         @ecli.get_folder(:inbox).should be_instance_of(RSpec::Mocks::Mock)
@@ -58,14 +57,9 @@ describe Viewpoint::EWS::FolderAccessors do
       @ecli.ews.stub(:find_folder).with(an_instance_of(Hash)) { resp }
       @ecli.ews.stub(:get_folder).with(an_instance_of(Hash)) { resp }
     end
-    it '#folder_names should raise an exception' do
-      expect {
-        @ecli.folder_names
-      }.to raise_error(Viewpoint::EWS::EwsError)
-    end
     it '#find_folders should raise an exception' do
       expect {
-        @ecli.find_folders
+        @ecli.folders
       }.to raise_error(Viewpoint::EWS::EwsError)
     end
     it '#get_folder should raise an exception' do
