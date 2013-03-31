@@ -20,7 +20,8 @@ module Viewpoint::EWS::ItemAccessors
 
   # This is a class method that fetches an existing Item from the
   #  Exchange Store.
-  # @param [String] item_id The id of the item.
+  # @param [String] item_id The id of the item. You can also pass a Hash in the
+  #   form: {id: <fold_id>, change_key: <change_key>}
   # @param [Hash] opts Misc options to control request
   # @option opts [Symbol] :shape :id_only/:default/:all_properties
   # @return [Item] Returns an Item or subclass of Item
@@ -37,9 +38,13 @@ private
   def get_item_args(item_id, opts)
     opts[:shape] ||= :default
     default_args = {
-      :item_ids => [{:item_id => {:id => item_id}}],
       :item_shape => {:base_shape => opts[:shape]}
     }
+    if item_id.is_a?(Hash)
+      default_args[:item_ids] = [{:item_id => item_id}]
+    else
+      default_args[:item_ids] = [{:item_id => {:id => item_id}}]
+    end
     default_args.merge opts
   end
 

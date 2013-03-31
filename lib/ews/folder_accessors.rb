@@ -46,7 +46,8 @@ module Viewpoint::EWS::FolderAccessors
 
   # Get a specific folder by id or symbol
   # @param [String,Symbol,Hash] folder_id Either a FolderId(String) or a
-  #   DistinguishedFolderId(Symbol).
+  #   DistinguishedFolderId(Symbol). You can also pass a Hash in the form:
+  #   {id: <fold_id>, change_key: <change_key>}
   # @param [Hash] opts Misc options to control request
   # @option opts [Symbol] :shape :id_only/:default/:all_properties
   # @option opts [String,nil] :act_as User to act on behalf as. This user must
@@ -152,9 +153,13 @@ private
   def get_folder_args(folder_id, opts)
     opts[:shape] ||= :default
     default_args =  {
-      :folder_ids   => [{:id => folder_id}],
       :folder_shape => {:base_shape => opts[:shape]}
     }
+    if folder_id.is_a?(Hash)
+      default_args[:folder_ids] = [folder_id]
+    else
+      default_args[:folder_ids] = [{:id => folder_id}]
+    end
     default_args.merge opts
   end
 
