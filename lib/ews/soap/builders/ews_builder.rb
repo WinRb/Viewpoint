@@ -159,8 +159,8 @@ module Viewpoint::EWS::SOAP
     # Build the FolderIds element
     # @see http://msdn.microsoft.com/en-us/library/aa580509.aspx
     def folder_ids!(fids, act_as=nil)
-      @nbuild[NS_EWS_TYPES].FolderIds {   # added NS_EWS_TYPES here for behavior like EventTypes, which also need to be in Types namespace
-        @nbuild.parent.default_namespace = @default_ns
+      ns = @nbuild.parent.name.match(/subscription/i) ? NS_EWS_TYPES : NS_EWS_MESSAGES
+      @nbuild[ns].FolderIds {
         fids.each do |fid|
           dispatch_folder_id!(fid)
         end
@@ -589,7 +589,7 @@ module Viewpoint::EWS::SOAP
 
     # @see http://msdn.microsoft.com/en-us/library/aa563455(v=EXCHG.140).aspx
     def pull_subscription_request(subopts)
-      subscribe_all = subopts[:subscribe_to_all_folders] ? 'True' : 'False'
+      subscribe_all = subopts[:subscribe_to_all_folders] ? 'true' : 'false'
       @nbuild.PullSubscriptionRequest('SubscribeToAllFolders' => subscribe_all) {
         folder_ids!(subopts[:folder_ids]) if subopts[:folder_ids]
         event_types!(subopts[:event_types]) if subopts[:event_types]
@@ -600,7 +600,6 @@ module Viewpoint::EWS::SOAP
 
     # @see http://msdn.microsoft.com/en-us/library/aa563599(v=EXCHG.140).aspx
     def push_subscription_request(subopts)
-      #TODO: boolean string values on all these methods need to be downcased or there needs to be a better method of building them
       subscribe_all = subopts[:subscribe_to_all_folders] ? 'true' : 'false'
       @nbuild.PushSubscriptionRequest('SubscribeToAllFolders' => subscribe_all) {
         folder_ids!(subopts[:folder_ids]) if subopts[:folder_ids]
@@ -613,7 +612,7 @@ module Viewpoint::EWS::SOAP
 
     # @see http://msdn.microsoft.com/en-us/library/ff406182(v=EXCHG.140).aspx
     def streaming_subscription_request(subopts)
-      subscribe_all = subopts[:subscribe_to_all_folders] ? 'True' : 'False'
+      subscribe_all = subopts[:subscribe_to_all_folders] ? 'true' : 'false'
       @nbuild.StreamingSubscriptionRequest('SubscribeToAllFolders' => subscribe_all) {
         folder_ids!(subopts[:folder_ids]) if subopts[:folder_ids]
         event_types!(subopts[:event_types]) if subopts[:event_types]
