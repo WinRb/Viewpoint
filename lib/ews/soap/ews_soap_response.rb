@@ -77,7 +77,10 @@ module Viewpoint::EWS::SOAP
 
 
     def simplify!
-      response_message[:elems] = response_message[:elems].inject(&:merge)
+      response_messages.each do |rm|
+        key = rm.keys.first
+        rm[key][:elems] = rm[key][:elems].inject(&:merge)
+      end
     end
 
     # If the keys don't exist in the Hash return nil

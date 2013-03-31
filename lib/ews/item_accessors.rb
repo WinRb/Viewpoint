@@ -32,6 +32,40 @@ module Viewpoint::EWS::ItemAccessors
     get_item_parser(resp)
   end
 
+  # Copy an array of items to the specified folder
+  # @param items [Array] an array of EWS Items that you want to copy
+  # @param folder [String,Symbol,GenericFolder] The folder to copy to. This must
+  #   be a subclass of GenericFolder, a DistinguishedFolderId (must me a Symbol)
+  #   or a FolderId (String)
+  # @return [Array<Hash>] returns a Hash for each item passed
+  #   on success:
+  #     {:success => true, :item_id => <new_item_id>}
+  #   on failure:
+  #     {:success => false, :error_message => <the message>}
+  def copy_items(items, folder)
+    folder = folder.id if folder.kind_of?(Types::GenericFolder)
+    item_ids = items.collect{|i| {item_id: {id: i.id, change_key: i.change_key}}}
+    copy_opts = {
+      :to_folder_id => {:id => folder},
+      :item_ids => item_ids
+    }
+    resp = ews.copy_item(copy_opts)
+    copy_move_items_parser(resp)
+  end
+
+  # Move an array of items to the specified folder
+  # @see #copy_items for parameter info
+  def move_items(items, folder)
+    folder = folder.id if folder.kind_of?(Types::GenericFolder)
+    item_ids = items.collect{|i| {item_id: {id: i.id, change_key: i.change_key}}}
+    move_opts = {
+      :to_folder_id => {:id => folder},
+      :item_ids => item_ids
+    }
+    resp = ews.move_item(move_opts)
+    copy_move_items_parser(resp, :move_item_response_message)
+  end
+
 
 private
 
@@ -56,6 +90,22 @@ private
     else
       raise EwsItemNotFound, "Could not retrieve item. #{resp.code}: #{resp.message}"
     end
+  end
+
+  def copy_move_items_parser(resp, resp_type = :copy_item_response_message)
+    resp.response_messages.collect {|r|
+      msg = r[resp_type]
+      obj = {}
+      if msg[:attribs][:response_class] == 'Success'
+        obj[:success] = true
+        key = msg[:elems][:items][:elems][0].keys[0]
+        obj[:item_id] = msg[:elems][:items][:elems][0][key][:elems][0][:item_id][:attribs][:id]
+      else
+        obj[:success] = false
+        obj[:error_message] = "#{msg[:elems][:response_code][:text]}: #{msg[:elems][:message_text][:text]}"
+      end
+      obj
+    }
   end
 
 end # Viewpoint::EWS::ItemAccessors

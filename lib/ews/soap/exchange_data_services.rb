@@ -325,6 +325,40 @@ module Viewpoint::EWS::SOAP
       do_soap_request(req)
     end
 
+    # Used to send e-mail messages that are located in the Exchange store.
+    # @see http://msdn.microsoft.com/en-us/library/aa580238(v=exchg.140).aspx
+    #
+    # @param [Hash] opts
+    # @option opts [Boolean] :save_item_to_folder To save or not to save... save! :-)
+    # @option opts [Hash] :saved_item_folder_id A well formatted folder_id Hash. Ex: {:id => :sentitems}
+    # @option opts [Array<Hash>] :item_ids ItemIds Hash. The keys in these Hashes can be
+    #   :item_id, :occurrence_item_id, or :recurring_master_item_id. Please see the
+    #   Microsoft docs for more information.
+    # @example
+    #   opts = {
+    #     :save_item_to_folder => true,
+    #     :saved_item_folder_id => {:id => :sentitems},
+    #     :item_ids => [
+    #       {:item_id => {:id => 'id1'}},
+    #       {:item_id => {:id => 'id2'}},
+    #     ]}
+    #   obj.send_item(opts)
+    def send_item(opts)
+      req = build_soap! do |type, builder|
+        attribs = {}
+        attribs['SaveItemToFolder'] = opts[:save_item_to_folder]
+        if(type == :header)
+        else
+          builder.nbuild.SendItem(attribs) {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.item_ids!(opts[:item_ids])
+            builder.saved_item_folder_id!(opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
+          }
+        end
+      end
+      do_soap_request(req)
+    end
+
 
     # ------------- Folder Operations ------------
 
