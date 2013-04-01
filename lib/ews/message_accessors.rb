@@ -33,15 +33,15 @@ module Viewpoint::EWS::MessageAccessors
   # @return [Message,true] Returns true if the message is sent, if draft is
   #   true it will return the Message object or it raises an error with a
   #   message stating why the e-mail could not be sent.
-  #def send(subject, body, to_recipients, cc_recipients=[], bcc_recipients=[], file_attachments=nil, draft=false)
   def send_message(opts)
     msg = set_message_params(opts)
     disposition = opts[:draft] ? 'SaveOnly' : 'SendAndSaveCopy'
     resp = ews.create_item(:items => [{:message => msg}], :message_disposition => disposition)
+    return resp
     if(resp.status == 'Success')
-      msg_key = resp.items.first.keys.first
+      #msg_key = resp.items.first.keys.first
       #msg_id = add_attachments(msg_id, file_attachments) unless (file_attachments.nil? || file_attachments.empty?)
-      Message.new(ews,resp.items.first[msg_key])
+      #Message.new(ews,resp.items.first[msg_key])
     else
       raise EwsError, "Could not send message. #{resp.code}: #{resp.message}"
     end

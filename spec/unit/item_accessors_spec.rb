@@ -19,13 +19,15 @@ describe Viewpoint::EWS::ItemAccessors do
   context "ensure that exceptions are being raised" do
     before do
       resp = OpenStruct.new
-      resp.status = 'Failure'
+      rm = OpenStruct.new
+      rm.status = 'Failure'
+      resp.response_messages = [rm]
       @ecli.ews.stub(:get_item).with(an_instance_of(Hash)) { resp }
     end
     it '#get_item should raise an exception' do
       expect {
         @ecli.get_item("MyItemId")
-      }.to raise_error(Viewpoint::EWS::EwsError)
+      }.to raise_error(Viewpoint::EWS::EwsItemNotFound)
     end
   end
 

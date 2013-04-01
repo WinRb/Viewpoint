@@ -83,12 +83,16 @@ private
   end
 
   def get_item_parser(resp)
-    if(resp.status == 'Success')
-      i = resp.response_message[:elems][:items][:elems][0]
+    rm = resp.response_messages[0]
+
+    if(rm && rm.status == 'Success')
+      i = rm.items.first
       itype = i.keys.first
       class_by_name(itype).new(ews, i[itype])
     else
-      raise EwsItemNotFound, "Could not retrieve item. #{resp.code}: #{resp.message}"
+      code = rm.respond_to?(:code) ? rm.code : "Unknown"
+      text = rm.respond_to?(:message_text) ? rm.message_text : "Unknown"
+      raise EwsItemNotFound, "Could not retrieve item. #{rm.code}: #{rm.message_text}"
     end
   end
 

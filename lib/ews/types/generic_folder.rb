@@ -186,16 +186,16 @@ module Viewpoint::EWS::Types
     end
 
     def items_parser(resp)
-      if(resp.status == 'Success')
-        allitems = resp.response_message[:elems][:root_folder][:elems][0][:items][:elems] || []
+      rm = resp.response_messages[0]
+      if(rm.status == 'Success')
         items = []
-        allitems.each do |i|
+        rm.root_folder.items.each do |i|
           type = i.keys.first
           items << class_by_name(type).new(ews, i[type])
         end
         items
       else
-        raise EwsError, "Could not retrieve folder. #{resp.code}: #{resp.message}"
+        raise EwsError, "Could not retrieve folder. #{rm.code}: #{rm.message_text}"
       end
     end
 
