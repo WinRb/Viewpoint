@@ -182,27 +182,6 @@ module Viewpoint::EWS::SOAP
       do_soap_request(req)
     end
 
-    # Creates either an item or file attachment and attaches it to the specified item.
-    # @see http://msdn.microsoft.com/en-us/library/aa565877.aspx
-    # @param [String,Hash] parent_id The id of the Item.  If this is a Hash
-    #   it should contain the Id and the ChangeKey.
-    # @option parent_id [String] :id The item Id
-    # @option parent_id [String] :change_key The ChangeKey
-    # @param [Array<Hash>] files An Array of Base64 encoded Strings with an associated name
-    #   hash format= :name => <name>, :content => <Base64 encoded string>
-    # @param [Array] items Exchange Items to attach to this Item
-    # @todo Need to implement attachment of Item types
-    def create_attachment(parent_id, files = [], items = [])
-      action = "#{SOAP_ACTION_PREFIX}/CreateAttachment"
-      resp = invoke("#{NS_EWS_MESSAGES}:CreateAttachment", action) do |root|
-        build!(root) do
-          item_id!(root, parent_id, "#{NS_EWS_MESSAGES}:ParentItemId")
-          attachments!(root, files, items)
-        end
-      end
-      parse!(resp)
-    end
-
     def delete_attachment
       action = "#{SOAP_ACTION_PREFIX}/DeleteAttachment"
       resp = invoke("#{NS_EWS_MESSAGES}:DeleteAttachment", action) do |delete_attachment|

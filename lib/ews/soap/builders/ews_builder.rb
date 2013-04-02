@@ -205,6 +205,13 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def parent_item_id!(id)
+      nbuild.ParentItemId {|x|
+        x.parent['Id'] = id[:id]
+        x.parent['ChangeKey'] = id[:change_key] if id[:change_key]
+      }
+    end
+
     # @see http://msdn.microsoft.com/en-us/library/aa580234(v=EXCHG.140).aspx
     def item_id!(id)
       nbuild[NS_EWS_TYPES].ItemId {|x|
@@ -799,6 +806,22 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/ff709497(v=exchg.140).aspx
     def return_new_item_ids!(retval)
       @nbuild.ReturnNewItemIds(retval)
+    end
+
+    def file_attachment!(fa)
+      @nbuild[NS_EWS_TYPES].FileAttachment {
+        @nbuild.Name(fa.name)
+        @nbuild.Content(fa.content)
+      }
+    end
+
+    def item_attachment!(ia)
+      @nbuild[NS_EWS_TYPES].ItemAttachment {
+        @nbuild.Name(ia.name)
+        @nbuild.Item {
+          item_id!(ia.item)
+        }
+      }
     end
 
     # Build the AttachmentIds element

@@ -28,43 +28,80 @@ module Viewpoint::EWS::MessageAccessors
   # @option opts [Array] :bcc_recipients An array of e-mail addresses to send to
   # @option opts [Boolean] :draft if true it will save to the draft folder
   #   without sending the message.
+  # @option opts [String,Symbol,Hash] saved_item_folder_id Either a
+  #   FolderId(String) or a DistinguishedFolderId(Symbol). You can also pass a
+  #   Hash in the form: {id: <fold_id>, change_key: <change_key>}
   # @option opts [Array<File>] file_attachments An array of File objects to
   #   read data from that will attach to this message.
-  # @return [Message,true] Returns true if the message is sent, if draft is
-  #   true it will return the Message object or it raises an error with a
-  #   message stating why the e-mail could not be sent.
+  # @return [Message,Boolean] Returns true if the message is sent, false if
+  #   nothing is returned from EWS or if draft is true it will return the
+  #   Message object. Finally, if something goes wrong, it raises an error
+  #   with a message stating why the e-mail could not be sent.
   def send_message(opts)
-    msg = set_message_params(opts)
-    disposition = opts[:draft] ? 'SaveOnly' : 'SendAndSaveCopy'
-    resp = ews.create_item(:items => [{:message => msg}], :message_disposition => disposition)
-    return resp
-    if(resp.status == 'Success')
-      #msg_key = resp.items.first.keys.first
-      #msg_id = add_attachments(msg_id, file_attachments) unless (file_attachments.nil? || file_attachments.empty?)
-      #Message.new(ews,resp.items.first[msg_key])
-    else
-      raise EwsError, "Could not send message. #{resp.code}: #{resp.message}"
-    end
+    opts = opts.clone
+    ews_opts = set_create_item_params(opts)
+    yield ews_opts if block_given?
+    resp = ews.create_item(ews_opts)
+    resp.response_messages ?  parse_create_item(resp) : false
   end
 
 
-private
+  private
 
-  def set_message_params(mopts)
+
+  def set_create_item_params(opts)
+    ews_opts = {}
+    set_disposition!(ews_opts, opts)
+    set_saved_item_folder_id!(ews_opts, opts)
+
     msg = {}
-    msg[:subject] = mopts[:subject] if mopts[:subject]
-    msg[:body] = {:text => mopts[:body]} if mopts[:body]
-    msg[:body][:body_type] = (mopts[:body_type] ? mopts[:body_type] : 'Text')
-    (msg[:to_recipients] = []) && mopts[:to_recipients].each do |a|
+    msg[:subject] = opts[:subject] if opts[:subject]
+    msg[:body] = {:text => opts[:body]} if opts[:body]
+    msg[:body][:body_type] = (opts[:body_type] ? opts[:body_type] : 'Text')
+    (msg[:to_recipients] = []) && opts[:to_recipients].each do |a|
       msg[:to_recipients] << {:mailbox => {:email_address => a}}
     end
-    (msg[:cc_recipients] = []) && mopts[:cc_recipients].each do |a|
+    (msg[:cc_recipients] = []) && opts[:cc_recipients].each do |a|
       msg[:cc_recipients] << {:mailbox => {:email_address => a}}
-    end if mopts[:cc_recipients]
-    (msg[:bcc_recipients] = []) && mopts[:bcc_recipients].each do |a|
+    end if opts[:cc_recipients]
+    (msg[:bcc_recipients] = []) && opts[:bcc_recipients].each do |a|
       msg[:bcc_recipients] << {:mailbox => {:email_address => a}}
-    end if mopts[:bcc_recipients]
-    msg
+    end if opts[:bcc_recipients]
+
+    ews_opts.merge!({items: [{message: msg}]})
+  end
+
+  def set_disposition!(ews_opts, opts)
+    if(opts[:draft] || opts[:file_attachments] || opts[:item_attachments])
+      d = 'SaveOnly'
+    else
+      d = 'SendAndSaveCopy'
+    end
+    ews_opts[:message_disposition] = d
+  end
+
+  def set_saved_item_folder_id!(ews_opts, opts)
+    if (fid = opts[:saved_item_folder_id])
+      if fid.kind_of?(Hash)
+        ews_opts[:saved_item_folder_id] = fid
+      else
+        ews_opts[:saved_item_folder_id] = {id: fid}
+      end
+    end
+  end
+
+  def parse_create_item(resp)
+    rm = resp.response_messages[0]
+    if(rm.status == 'Success')
+      rm.items.empty? ? true : parse_message(rm.items.first)
+    else
+      raise EwsError, "Could not send message. #{rm.code}: #{rm.message_text}"
+    end
+  end
+
+  def parse_message(msg)
+    mtype = msg.keys.first
+    message = class_by_name(mtype).new(ews, msg[mtype])
   end
 
 end # Viewpoint::EWS::MessageAccessors

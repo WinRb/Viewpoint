@@ -271,7 +271,7 @@ module Viewpoint::EWS::SOAP
       [:to_folder_id, :item_ids].each do |k|
         validate_param(opts, k, true)
       end
-      validate_param(opts, :return_new_item_ids, false, true)
+      return_new_ids = validate_param(opts, :return_new_item_ids, false, true)
 
       req = build_soap! do |type, builder|
         if(type == :header)
@@ -280,7 +280,7 @@ module Viewpoint::EWS::SOAP
             builder.nbuild.parent.default_namespace = @default_ns
             builder.to_folder_id!(opts[:to_folder_id])
             builder.item_ids!(opts[:item_ids])
-            builder.return_new_item_ids!(opts[:return_new_item_ids]) if opts[:return_new_item_ids]
+            builder.return_new_item_ids!(return_new_ids)
           }
         end
       end
@@ -312,7 +312,7 @@ module Viewpoint::EWS::SOAP
       [:to_folder_id, :item_ids].each do |k|
         validate_param(opts, k, true)
       end
-      validate_param(opts, :return_new_item_ids, false, true)
+      return_new_ids = validate_param(opts, :return_new_item_ids, false, true)
 
       req = build_soap! do |type, builder|
         if(type == :header)
@@ -321,7 +321,7 @@ module Viewpoint::EWS::SOAP
             builder.nbuild.parent.default_namespace = @default_ns
             builder.to_folder_id!(opts[:to_folder_id])
             builder.item_ids!(opts[:item_ids])
-            builder.return_new_item_ids!(opts[:return_new_item_ids]) if opts[:return_new_item_ids]
+            builder.return_new_item_ids!(return_new_ids)
           }
         end
       end
@@ -347,9 +347,14 @@ module Viewpoint::EWS::SOAP
     #     ]}
     #   obj.send_item(opts)
     def send_item(opts)
+      opts = opts.clone
+      [:item_ids].each do |k|
+        validate_param(opts, k, true)
+      end
+
       req = build_soap! do |type, builder|
         attribs = {}
-        attribs['SaveItemToFolder'] = opts[:save_item_to_folder]
+        attribs['SaveItemToFolder'] = validate_param(opts, :save_item_to_folder, false, true)
         if(type == :header)
         else
           builder.nbuild.SendItem(attribs) {
@@ -606,6 +611,7 @@ module Viewpoint::EWS::SOAP
     #   filter_html_content: true or false  (optional)
     #   additional_properties:  @todo finish implementation
     def get_attachment(opts)
+      opts = opts.clone
       [:attachment_ids].each do |k|
         validate_param(opts, k, true)
       end
@@ -620,6 +626,45 @@ module Viewpoint::EWS::SOAP
       end
       do_soap_request(req)
     end
+
+    # Creates either an item or file attachment and attaches it to the specified item.
+    # @see http://msdn.microsoft.com/en-us/library/aa565877.aspx
+    # @param [Hash] opts
+    # @option opts [Hash] :parent_id {id: <id>, change_key: <ck>}
+    # @option opts [Array<Hash>] :files An Array of Base64 encoded Strings with
+    #   an associated name:
+    #   {:name => <name>, :content => <Base64 encoded string>}
+    # @option opts [Array] :items Exchange Items to attach to this Item
+    # @todo Need to implement attachment of Item types
+    def create_attachment(opts)
+      opts = opts.clone
+      [:parent_id].each do |k|
+        validate_param(opts, k, true)
+      end
+      validate_param(opts, :files, false, [])
+      validate_param(opts, :items, false, [])
+
+      req = build_soap! do |type, builder|
+        if(type == :header)
+        else
+          builder.nbuild.CreateAttachment {|x|
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.parent_item_id!(opts[:parent_id])
+            x.Attachments {
+              opts[:files].each do |fa|
+                builder.file_attachment!(fa)
+              end
+              opts[:items].each do |ia|
+                builder.item_attachment!(ia)
+              end
+            }
+          }
+        end
+      end
+      resp = do_soap_request(req, raw_response: true)
+      parse!(resp, response_class: EwsResponse)
+    end
+
 
     # ------------ Utility Operations ------------
 

@@ -13,8 +13,10 @@ module Viewpoint::EWS::Types
       date_time_sent: [:date_time_sent, :text],
       date_time_created: [:date_time_created, :text],
       has_attachments?:[:has_attachments, :text],
-      associated?:    [:is_associated, :text],
-      read?:          [:is_read, :text],
+      is_associated?: [:is_associated, :text],
+      is_read?:       [:is_read, :text],
+      is_draft?:      [:is_draft, :text],
+      is_submitted?:  [:is_submitted, :text],
       conversation_id:[:conversation_id, :attribs, :id],
       categories:     [:categories, :elems],
       internet_message_id:[:internet_message_id, :text],
@@ -35,8 +37,10 @@ module Viewpoint::EWS::Types
       date_time_sent:     ->(str){DateTime.parse(str)},
       date_time_created:  ->(str){DateTime.parse(str)},
       has_attachments?:   ->(str){str.downcase == 'true'},
-      associated?:        ->(str){str.downcase == 'true'},
-      read?:              ->(str){str.downcase == 'true'},
+      is_associated?:     ->(str){str.downcase == 'true'},
+      is_read?:           ->(str){str.downcase == 'true'},
+      is_draft?:          ->(str){str.downcase == 'true'},
+      is_submitted?:      ->(str){str.downcase == 'true'},
       categories:         ->(obj){obj.collect{|s| s[:string][:text]}},
       internet_message_headers: ->(obj){obj.collect{|h|
           {h[:internet_message_header][:attribs][:header_name] =>
@@ -48,6 +52,8 @@ module Viewpoint::EWS::Types
 
     ITEM_KEY_ALIAS = {
       :read?        => :is_read?,
+      :draft?       => :is_draft?,
+      :submitted?   => :is_submitted?,
       :associated?  => :is_associated?,
     }
 
@@ -58,6 +64,8 @@ module Viewpoint::EWS::Types
     def initialize(ews, ews_item)
       super
       simplify!
+      @new_file_attachments = []
+      @new_item_attachments = []
     end
 
     def delete!(deltype = :hard)
@@ -130,6 +138,39 @@ module Viewpoint::EWS::Types
       end
     end
 
+    def add_file_attachment(file)
+      fa = OpenStruct.new
+      fa.name     = File.basename(file.path)
+      fa.content  = Base64.encode64(file.read)
+      @new_file_attachments << fa
+    end
+
+    def add_item_attachment(other_item, name = nil)
+      ia = OpenStruct.new
+      ia.name = (name ? name : other_item.subject)
+      ia.item = {id: other_item.id, change_key: other_item.change_key}
+      @new_item_attachments << ia
+    end
+
+    def submit!
+      if draft?
+        if (!@new_file_attachments.empty? || !@new_item_attachments.empty?)
+          opts = {
+            parent_id: {id: self.id, change_key: self.change_key},
+            files: @new_file_attachments,
+            items: @new_item_attachments
+          }
+          resp = ews.create_attachment(opts)
+          @new_file_attachments = []
+          @new_item_attachments = []
+        end
+        ews.send_item(item_ids: [{item_id: {id: self.id, change_key: self.change_key}}])
+      else
+        false
+      end
+    end
+
+
     private
 
     def key_paths
@@ -189,11 +230,11 @@ module Viewpoint::EWS::Types
     end
 
     def get_item_parser(resp)
-      if(resp.status == 'Success')
-        f = resp.response_message[:elems][:items][:elems][0]
-        f.values.first
+      rm = resp.response_messages[0]
+      if(rm.status == 'Success')
+        rm.items[0].values.first
       else
-        raise EwsError, "Could not retrieve #{self.class}. #{resp.code}: #{resp.message}"
+        raise EwsError, "Could not retrieve #{self.class}. #{rm.code}: #{rm.message}"
       end
     end
 
