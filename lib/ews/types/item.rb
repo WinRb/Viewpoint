@@ -161,10 +161,17 @@ module Viewpoint::EWS::Types
             items: @new_item_attachments
           }
           resp = ews.create_attachment(opts)
+          set_change_key resp.response_messages[0].attachments[0].parent_change_key
           @new_file_attachments = []
           @new_item_attachments = []
         end
-        ews.send_item(item_ids: [{item_id: {id: self.id, change_key: self.change_key}}])
+        resp = ews.send_item(item_ids: [{item_id: {id: self.id, change_key: self.change_key}}])
+        rm = resp.response_messages[0]
+        if rm.status == 'Success'
+          true
+        else
+          raise EwsError, "Could not send message. #{rm.code}: #{rm.message_text}"
+        end
       else
         false
       end
@@ -234,7 +241,7 @@ module Viewpoint::EWS::Types
       if(rm.status == 'Success')
         rm.items[0].values.first
       else
-        raise EwsError, "Could not retrieve #{self.class}. #{rm.code}: #{rm.message}"
+        raise EwsError, "Could not retrieve #{self.class}. #{rm.code}: #{rm.message_text}"
       end
     end
 
@@ -258,6 +265,11 @@ module Viewpoint::EWS::Types
         key = att.keys.first
         class_by_name(key).new(self, att[key])
       end
+    end
+
+    def set_change_key(ck)
+      p = resolve_key_path(ews_item, key_paths[:change_key][0..-2])
+      p[:change_key] = ck
     end
 
   end

@@ -20,32 +20,17 @@ module Viewpoint::EWS::Types
   class FileAttachment < Attachment
 
     FILE_ATTACH_KEY_PATHS = {
-      :id   => [:attachment_id, :attribs, :id],
-      :name => [:name, :text],
-      :content_type => [:content_type, :text],
-      :size => [:size, :text],
-      :last_modified_time => [:last_modified_time, :text],
-      :is_inline? => [:is_inline, :text],
       :is_contact_photo? => [:is_contact_photo, :text],
       :content  => [:content, :text],
     }
 
     FILE_ATTACH_KEY_TYPES = {
-      is_inline?:   ->(str){str.downcase == 'true'},
       is_contact_photo?:   ->(str){str.downcase == 'true'},
-      last_modified_type: ->(str){DateTime.parse(str)},
-      size: ->(str){str.to_i},
     }
 
     FILE_ATTACH_KEY_ALIAS = {
       :file_name   => :name,
     }
-
-    # @param [Hash] attachment The attachment ews_item
-    def initialize(item, attachment)
-      @item = item
-      super(item.ews, attachment)
-    end
 
     def get_all_properties!
       resp = ews.get_attachment attachment_ids: [self.id]
@@ -56,15 +41,15 @@ module Viewpoint::EWS::Types
 
 
     def key_paths
-      @key_paths ||= FILE_ATTACH_KEY_PATHS
+      super.merge(FILE_ATTACH_KEY_PATHS)
     end
 
     def key_types
-      @key_types ||= FILE_ATTACH_KEY_TYPES
+      super.merge(FILE_ATTACH_KEY_TYPES)
     end
 
     def key_alias
-      @key_alias ||= FILE_ATTACH_KEY_ALIAS
+      super.merge(FILE_ATTACH_KEY_ALIAS)
     end
 
     def parse_response(resp)

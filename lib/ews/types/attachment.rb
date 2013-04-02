@@ -23,5 +23,47 @@ module Viewpoint::EWS::Types
     include Viewpoint::EWS
     include Viewpoint::EWS::Types
     include Viewpoint::EWS::Types::Item
+
+    ATTACH_KEY_PATHS = {
+      :id   => [:attachment_id, :attribs, :id],
+      :parent_item_id  => [:attachment_id, :attribs, :root_item_id],
+      :parent_change_key  => [:attachment_id, :attribs, :root_item_change_key],
+      :name => [:name, :text],
+      :content_type => [:content_type, :text],
+      :size => [:size, :text],
+      :last_modified_time => [:last_modified_time, :text],
+      :is_inline? => [:is_inline, :text],
+    }
+
+    ATTACH_KEY_TYPES = {
+      is_inline?:   ->(str){str.downcase == 'true'},
+      last_modified_type: ->(str){DateTime.parse(str)},
+      size: ->(str){str.to_i},
+    }
+
+    ATTACH_KEY_ALIAS = { }
+
+    # @param [Hash] attachment The attachment ews_item
+    def initialize(item, attachment)
+      @item = item
+      super(item.ews, attachment)
+    end
+
+
+    private
+
+
+    def key_paths
+      @key_paths ||= ATTACH_KEY_PATHS
+    end
+
+    def key_types
+      @key_types ||= ATTACH_KEY_TYPES
+    end
+
+    def key_alias
+      @key_alias ||= ATTACH_KEY_ALIAS
+    end
+
   end
 end

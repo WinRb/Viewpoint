@@ -16,31 +16,31 @@
   limitations under the License.
 =end
 
-module Viewpoint::EWS::Types
-  class ItemAttachment < Attachment
+module Viewpoint::EWS::SOAP
 
-    ITEM_ATTACH_KEY_PATHS = { }
+  class CreateAttachmentResponseMessage < ResponseMessage
 
-    ITEM_ATTACH_KEY_TYPES = { }
+    def attachments
+      return @attachments if @attachments
 
-    ITEM_ATTACH_KEY_ALIAS = { }
+      a = safe_hash_access message, [:elems, :attachments, :elems]
+      @attachments = a.nil? ? nil : parse_attachments(a)
+    end
 
 
     private
 
 
-    def key_paths
-      super.merge(ITEM_ATTACH_KEY_PATHS)
+    def parse_attachments(att)
+      att.collect do |a|
+        type = a.keys.first
+        klass = Viewpoint::EWS::Types.const_get(type.to_s.camel_case)
+        item = OpenStruct.new
+        item.ews = nil
+        klass.new(item, a[type])
+      end
     end
 
-    def key_types
-      super.merge(ITEM_ATTACH_KEY_TYPES)
-    end
+  end # CreateAttachmentResponseMessage
 
-    def key_alias
-      super.merge(ITEM_ATTACH_KEY_ALIAS)
-    end
-
-  end
-end
-
+end # Viewpoint::EWS::SOAP
