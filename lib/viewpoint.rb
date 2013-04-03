@@ -89,6 +89,8 @@ require 'ews/types/out_of_office'
 
 # Template Objects
 require 'ews/templates/message'
+require 'ews/templates/forward_item'
+require 'ews/templates/reply_to_item'
 
 # The proxy between the models and the web service
 require 'ews/ews_client'

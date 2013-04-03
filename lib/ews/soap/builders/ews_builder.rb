@@ -682,12 +682,49 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def forward_item!(item)
+      nbuild[NS_EWS_TYPES].ForwardItem {
+        item.each_pair {|k,v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
+    def reply_to_item!(item)
+      nbuild[NS_EWS_TYPES].ReplyToItem {
+        item.each_pair {|k,v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
+    def reply_all_to_item!(item)
+      nbuild[NS_EWS_TYPES].ReplyAllToItem {
+        item.each_pair {|k,v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
+    def reference_item_id!(id)
+      nbuild[NS_EWS_TYPES].ReferenceItemId {|x|
+        x.parent['Id'] = id[:id]
+        x.parent['ChangeKey'] = id[:change_key] if id[:change_key]
+      }
+    end
+
     def subject!(sub)
       nbuild[NS_EWS_TYPES].Subject(sub)
     end
 
     def body!(b)
       nbuild[NS_EWS_TYPES].Body(b[:text]) {|x|
+        x.parent['BodyType'] = b[:body_type] if b[:body_type]
+      }
+    end
+
+    def new_body_content!(b)
+      nbuild[NS_EWS_TYPES].NewBodyContent(b[:text]) {|x|
         x.parent['BodyType'] = b[:body_type] if b[:body_type]
       }
     end

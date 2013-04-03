@@ -50,4 +50,8 @@ module Viewpoint::EWS
   # Failed to save an object back to the EWS store.
   class SaveFailed < EwsError; end
 
+  class EwsCreateItemError < EwsError; end
+
+  class EwsSendItemError < EwsError; end
+
 end # Viewpoint::EWS

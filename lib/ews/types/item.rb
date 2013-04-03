@@ -160,7 +160,7 @@ module Viewpoint::EWS::Types
         if rm.status == 'Success'
           true
         else
-          raise EwsError, "Could not send message. #{rm.code}: #{rm.message_text}"
+          raise EwsSendItemError, "#{rm.code}: #{rm.message_text}"
         end
       else
         false
@@ -179,6 +179,38 @@ module Viewpoint::EWS::Types
       set_change_key resp.response_messages[0].attachments[0].parent_change_key
       @new_file_attachments = []
       @new_item_attachments = []
+    end
+
+    # If you want to add to the body set #new_body_content. If you set #body
+    # it will override the body that is there.
+    # @see MessageAccessors#send_message for options
+    #   additional options:
+    #     :new_body_content, :new_body_type
+    # @example
+    #   item.forward do |i|
+    #     i.new_body_content = "Add this to the top"
+    #     i.to_recipients << 'test@example.com'
+    #   end
+    def forward(opts = {})
+      msg = Template::ForwardItem.new opts.clone
+      yield msg if block_given?
+      msg.reference_item_id = {id: self.id, change_key: self.change_key}
+      dispatch_create_item! msg
+    end
+
+    def reply_to(opts = {})
+      msg = Template::ReplyToItem.new opts.clone
+      yield msg if block_given?
+      msg.reference_item_id = {id: self.id, change_key: self.change_key}
+      dispatch_create_item! msg
+    end
+
+    def reply_to_all(opts = {})
+      msg = Template::ReplyToItem.new opts.clone
+      yield msg if block_given?
+      msg.reference_item_id = {id: self.id, change_key: self.change_key}
+      msg.ews_type = :reply_all_to_item
+      dispatch_create_item! msg
     end
 
 
@@ -274,6 +306,49 @@ module Viewpoint::EWS::Types
     def set_change_key(ck)
       p = resolve_key_path(ews_item, key_paths[:change_key][0..-2])
       p[:change_key] = ck
+    end
+
+    # Handles the CreateItem call for Forward, ReplyTo, and ReplyAllTo
+    # It will handle the neccessary actions for adding attachments.
+    def dispatch_create_item!(msg)
+      if msg.has_attachments?
+        draft = msg.draft
+        msg.draft = true
+        resp = validate_created_item(ews.create_item(msg.to_ews))
+        msg.file_attachments.each do |f|
+          next unless f.kind_of?(File)
+          resp.add_file_attachment(f)
+        end
+        if draft
+          resp.submit_attachments!
+          resp
+        else
+          resp.submit!
+        end
+      else
+        resp = ews.create_item(msg.to_ews)
+        validate_created_item resp
+      end
+    end
+
+    # validate the CreateItem response.
+    # @return [Boolean, Item] returns true if items is empty and status is
+    #   "Success" if items is not empty it will return the first Item since
+    #   we are only dealing with single items here.
+    # @raise EwsCreateItemError on failure
+    def validate_created_item(response)
+      msg = response.response_messages[0]
+
+      if(msg.status == 'Success')
+        msg.items.empty? ? true : parse_created_item(msg.items.first)
+      else
+        raise EwsCreateItemError, "#{msg.code}: #{msg.message_text}"
+      end
+    end
+
+    def parse_created_item(msg)
+      mtype = msg.keys.first
+      message = class_by_name(mtype).new(ews, msg[mtype])
     end
 
   end
