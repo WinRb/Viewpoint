@@ -154,17 +154,7 @@ module Viewpoint::EWS::Types
 
     def submit!
       if draft?
-        if (!@new_file_attachments.empty? || !@new_item_attachments.empty?)
-          opts = {
-            parent_id: {id: self.id, change_key: self.change_key},
-            files: @new_file_attachments,
-            items: @new_item_attachments
-          }
-          resp = ews.create_attachment(opts)
-          set_change_key resp.response_messages[0].attachments[0].parent_change_key
-          @new_file_attachments = []
-          @new_item_attachments = []
-        end
+        submit_attachments!
         resp = ews.send_item(item_ids: [{item_id: {id: self.id, change_key: self.change_key}}])
         rm = resp.response_messages[0]
         if rm.status == 'Success'
@@ -175,6 +165,20 @@ module Viewpoint::EWS::Types
       else
         false
       end
+    end
+
+    def submit_attachments!
+      return false unless draft? && !(@new_file_attachments.empty? && @new_item_attachments.empty?)
+
+      opts = {
+        parent_id: {id: self.id, change_key: self.change_key},
+        files: @new_file_attachments,
+        items: @new_item_attachments
+      }
+      resp = ews.create_attachment(opts)
+      set_change_key resp.response_messages[0].attachments[0].parent_change_key
+      @new_file_attachments = []
+      @new_item_attachments = []
     end
 
 

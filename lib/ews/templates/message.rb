@@ -37,6 +37,10 @@ module Viewpoint::EWS
         ews_opts.merge({items: [{message: msg}]})
       end
 
+      def has_attachments?
+        !(file_attachments.empty? && item_attachments.empty?)
+      end
+
 
       private
 
@@ -49,6 +53,8 @@ module Viewpoint::EWS
         self.to_recipients ||= []
         self.cc_recipients ||= []
         self.bcc_recipients ||= []
+        self.file_attachments ||= []
+        self.item_attachments ||= []
       end
 
     end
