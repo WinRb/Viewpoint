@@ -155,6 +155,19 @@ user_free_busy.working_hours
 
 ### Mailbox Accessors
 ### Message Accessors
+```ruby
+cli.send_message subject: "Test", body: "Test", to_recipients: ['test@example.com']
+
+# or
+cli.send_message do |m|
+  m.subject = "Test"
+  m.body    = "Test"
+  m.to_recipients << 'test@example.com'
+  m.to_recipients << 'test2@example.com'
+end
+
+# set :draft => true or use cli.draft_message to only create a draft and not send.
+```
 
 ## Thanks go out to...
 

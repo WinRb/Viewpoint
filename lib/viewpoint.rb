@@ -20,6 +20,7 @@ require 'kconv' if(RUBY_VERSION.start_with? '1.9') # bug in rubyntlm with ruby 1
 require 'date'
 require 'base64'
 require 'nokogiri'
+require 'ostruct'
 require 'logging'
 
 # Class Extensions (Monkey patches)
@@ -85,6 +86,9 @@ require 'ews/types/file_attachment'
 require 'ews/types/item_attachment'
 require 'ews/types/mailbox_user'
 require 'ews/types/out_of_office'
+
+# Template Objects
+require 'ews/templates/message'
 
 # The proxy between the models and the web service
 require 'ews/ews_client'
