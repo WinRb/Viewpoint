@@ -943,21 +943,27 @@ module Viewpoint::EWS::SOAP
     # @todo Implement ExtendedFieldURI
     def dispatch_field_uri!(uri)
       type = uri.keys.first
-      val  = uri[type]
+      vals = uri[type].is_a?(Array) ? uri[type] : [uri[type]]
       case type
       when :field_uRI, :field_uri
-        nbuild.FieldURI('FieldURI' => val[:field_uRI])
+        vals.each do |val|
+          nbuild.FieldURI('FieldURI' => val[:field_uRI])
+        end
       when :indexed_field_uRI, :indexed_field_uri
-        nbuild.IndexedFieldURI('FieldURI' => val[:field_uRI], 'FieldIndex' => val[:field_index])
+        vals.each do |val|
+          nbuild.IndexedFieldURI('FieldURI' => val[:field_uRI], 'FieldIndex' => val[:field_index])
+        end
       when :extended_field_uRI, :extended_field_uri
-        nbuild.ExtendedFieldURI {
-          nbuild.parent['DistinguishedPropertySetId'] = val[:distinguished_property_set_id] if val[:distinguished_property_set_id]
-          nbuild.parent['PropertySetId'] = val[:property_set_id] if val[:property_set_id]
-          nbuild.parent['PropertyTag'] = val[:property_tag] if val[:property_tag]
-          nbuild.parent['PropertyName'] = val[:property_name] if val[:property_name]
-          nbuild.parent['PropertyId'] = val[:property_id] if val[:property_id]
-          nbuild.parent['PropertyType'] = val[:property_type] if val[:property_type]
-        }
+        vals.each do |val|
+          nbuild.ExtendedFieldURI {
+            nbuild.parent['DistinguishedPropertySetId'] = val[:distinguished_property_set_id] if val[:distinguished_property_set_id]
+            nbuild.parent['PropertySetId'] = val[:property_set_id] if val[:property_set_id]
+            nbuild.parent['PropertyTag'] = val[:property_tag] if val[:property_tag]
+            nbuild.parent['PropertyName'] = val[:property_name] if val[:property_name]
+            nbuild.parent['PropertyId'] = val[:property_id] if val[:property_id]
+            nbuild.parent['PropertyType'] = val[:property_type] if val[:property_type]
+          }
+        end
       else
         raise EwsBadArgumentError, "Bad URI type. #{type}"
       end

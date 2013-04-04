@@ -1,8 +1,12 @@
 module Viewpoint::EWS
   module Types
 
-    KEY_PATHS = {}
-    KEY_TYPES = {}
+    KEY_PATHS = {
+      extended_properties: [:extended_property],
+    }
+    KEY_TYPES = {
+      extended_properties: :build_extended_properties,
+    }
     KEY_ALIAS = {}
 
     attr_reader :ews_item
@@ -127,6 +131,10 @@ module Viewpoint::EWS
     # Resolve the method path with or without an alias
     def method_path(sym)
       key_paths[key_alias[sym] || sym]
+    end
+
+    def build_extended_properties(eprops)
+      eprops.collect.collect {|e| e[:elems]}
     end
 
   end

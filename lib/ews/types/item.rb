@@ -248,7 +248,19 @@ module Viewpoint::EWS::Types
     end
 
     def simplify!
-      @ews_item = @ews_item[:elems].inject(&:merge)
+      @ews_item = @ews_item[:elems].inject({}) do |o,i|
+        key = i.keys.first
+        if o.has_key?(key)
+          if o[key].is_a?(Array)
+            o[key] << i[key]
+          else
+            o[key] = [o.delete(key), i[key]]
+          end
+        else
+          o[key] = i[key]
+        end
+        o
+      end
     end
 
     # Get a specific item by its ID.
