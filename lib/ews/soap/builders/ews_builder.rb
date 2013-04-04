@@ -300,13 +300,11 @@ module Viewpoint::EWS::SOAP
     # Build the AdditionalProperties element
     # @see http://msdn.microsoft.com/en-us/library/aa563810.aspx
     def additional_properties!(addprops)
-      if(addprops[:FieldURI] && !addprops[:FieldURI].empty?)
-        @nbuild[NS_EWS_TYPES].AdditionalProperties {
-          addprops[:FieldURI].each do |uri|
-            @nbuild[NS_EWS_TYPES].FieldURI('FieldURI' => uri)
-          end
+      @nbuild[NS_EWS_TYPES].AdditionalProperties {
+        addprops.each_pair {|k,v|
+          dispatch_field_uri!({k => v})
         }
-      end
+      }
     end
 
     # Build the Mailbox element.
@@ -948,13 +946,19 @@ module Viewpoint::EWS::SOAP
       type = uri.keys.first
       val  = uri[type]
       case type
-      when :field_uRI
-        @nbuild.FieldURI('FieldURI' => val[:field_uRI])
-      when :indexed_field_uRI
-        @nbuild.IndexedFieldURI(
-          'FieldURI' => val[:field_uRI], 'FieldIndex' => val[:field_index])
-      when :extended_field_uRI
-        raise EwsNotImplemented, 'This functionality has not yet been implemented.'
+      when :field_uRI, :field_uri
+        nbuild.FieldURI('FieldURI' => val[:field_uRI])
+      when :indexed_field_uRI, :indexed_field_uri
+        nbuild.IndexedFieldURI('FieldURI' => val[:field_uRI], 'FieldIndex' => val[:field_index])
+      when :extended_field_uRI, :extended_field_uri
+        nbuild.ExtendedFieldURI {
+          nbuild.parent['DistinguishedPropertySetId'] = val[:distinguished_property_set_id] if val[:distinguished_property_set_id]
+          nbuild.parent['PropertySetId'] = val[:property_set_id] if val[:property_set_id]
+          nbuild.parent['PropertyTag'] = val[:property_tag] if val[:property_tag]
+          nbuild.parent['PropertyName'] = val[:property_name] if val[:property_name]
+          nbuild.parent['PropertyId'] = val[:property_id] if val[:property_id]
+          nbuild.parent['PropertyType'] = val[:property_type] if val[:property_type]
+        }
       else
         raise EwsBadArgumentError, "Bad URI type. #{type}"
       end
