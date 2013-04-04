@@ -522,17 +522,16 @@ module Viewpoint::EWS::SOAP
     end
 
     def extended_field_uRI(expr)
-      nbuild[NS_EWS_TYPES].ExtendedFieldURI(
-        'PropertyType' => expr[:property_type]) {|x|
-        x.parent['ProperyId'] = expr[:property_id] if expr[:property_id]
-        x.parent['ProperyName'] = expr[:property_name] if expr[:property_name]
-        x.parent['ProperyTag'] = expr[:property_tag] if expr[:property_tag]
-        x.parent['ProperySetId'] = expr[:property_set_id] if expr[:property_set_id]
-        v = :distinguished_property_set_id
-        x.parent['DistinguishedPropertySetId'] = expr[v] if expr[v]
+      nbuild[NS_EWS_TYPES].ExtendedFieldURI {
+        nbuild.parent['DistinguishedPropertySetId'] = expr[:distinguished_property_set_id] if expr[:distinguished_property_set_id]
+        nbuild.parent['PropertySetId'] = expr[:property_set_id] if expr[:property_set_id]
+        nbuild.parent['PropertyTag'] = expr[:property_tag] if expr[:property_tag]
+        nbuild.parent['PropertyName'] = expr[:property_name] if expr[:property_name]
+        nbuild.parent['PropertyId'] = expr[:property_id] if expr[:property_id]
+        nbuild.parent['PropertyType'] = expr[:property_type] if expr[:property_type]
       }
     end
-      
+
     def field_uRI_or_constant(expr)
       nbuild[NS_EWS_TYPES].FieldURIOrConstant {
         type = expr.keys.first

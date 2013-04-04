@@ -27,7 +27,9 @@ module Viewpoint::EWS::ItemAccessors
   # @return [Item] Returns an Item or subclass of Item
   # @todo Add support to fetch an item with a ChangeKey
   def get_item(item_id, opts = {})
-    args = get_item_args(item_id, opts)
+    args = get_item_args(item_id, opts.clone)
+    obj = OpenStruct.new(opts: args)
+    yield obj if block_given?
     resp = ews.get_item(args)
     get_item_parser(resp)
   end

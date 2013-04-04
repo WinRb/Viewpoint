@@ -47,17 +47,23 @@ module Viewpoint::EWS::Types
     end
 
     def items(opts = {})
-      items_parser ews.find_item(items_args.merge(opts))
+      args = items_args(opts.clone)
+      obj = OpenStruct.new(opts: args, restriction: {})
+      yield obj if block_given?
+      merge_restrictions! obj
+      resp = ews.find_item(args)
+      items_parser resp
     end
 
     # Fetch items since a give DateTime
     # @param [DateTime] date_time the time to fetch Items since.
     def items_since(date_time, opts = {})
+      opts = opts.clone
       unless date_time.kind_of?(Date)
         raise EwsBadArgumentError, "First argument must be a Date or DateTime"
       end
       restr = {:restriction =>
-        {:is_greater_than_or_equal_to => 
+        {:is_greater_than_or_equal_to =>
           [{:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
             {:field_uRI_or_constant =>{:constant => {:value=>date_time.to_datetime}}}]
         }}
@@ -73,15 +79,24 @@ module Viewpoint::EWS::Types
     # @param [DateTime] start_date the time to start fetching Items from
     # @param [DateTime] end_date the time to stop fetching Items from
     def items_between(start_date, end_date, opts={})
-      restr = {:restriction =>  {:and => [
-        {:is_greater_than_or_equal_to => 
-          [{:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
-            {:field_uRI_or_constant=>{:constant => {:value =>start_date}}}]},
+      items do |obj|
+        obj.restriction = { :and =>
+          [
+            {:is_greater_than_or_equal_to =>
+              [
+                {:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
+                {:field_uRI_or_constant=>{:constant => {:value =>start_date}}}
+              ]
+            },
             {:is_less_than_or_equal_to =>
-              [{:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
-                {:field_uRI_or_constant=>{:constant => {:value =>end_date}}}]}
-      ]}}
-      items(opts.merge(restr))
+              [
+                {:field_uRI => {:field_uRI=>'item:DateTimeReceived'}},
+                {:field_uRI_or_constant=>{:constant => {:value =>end_date}}}
+              ]
+            }
+          ]
+        }
+      end
     end
 
     # Search on the item subject
@@ -90,25 +105,27 @@ module Viewpoint::EWS::Types
     # @param [String,nil] exclude_str A string to exclude from matches against
     #   the subject.  This is optional.
     def search_by_subject(match_str, exclude_str = nil)
-      match = {:contains => {
-        :containment_mode => 'Substring',
-        :containment_comparison => 'IgnoreCase',
-        :field_uRI => {:field_uRI=>'item:Subject'},
-        :constant => {:value =>match_str}
-      }}
-      unless exclude_str.nil?
-        excl = {:not =>
-          {:contains => {
-            :containment_mode => 'Substring',
-            :containment_comparison => 'IgnoreCase',
-            :field_uRI => {:field_uRI=>'item:Subject'},
-            :constant => {:value =>exclude_str}
-          }}
-        }
+      items do |obj|
+        match = {:contains => {
+          :containment_mode => 'Substring',
+          :containment_comparison => 'IgnoreCase',
+          :field_uRI => {:field_uRI=>'item:Subject'},
+          :constant => {:value =>match_str}
+        }}
+        unless exclude_str.nil?
+          excl = {:not =>
+            {:contains => {
+              :containment_mode => 'Substring',
+              :containment_comparison => 'IgnoreCase',
+              :field_uRI => {:field_uRI=>'item:Subject'},
+              :constant => {:value =>exclude_str}
+            }}
+          }
 
-        match[:and] = [{:contains => match.delete(:contains)}, excl]
+          match[:and] = [{:contains => match.delete(:contains)}, excl]
+        end
+        obj.restriction = match
       end
-      items({:restriction => match})
     end
 
     def get_all_properties!
@@ -179,10 +196,12 @@ module Viewpoint::EWS::Types
       end
     end
 
-    def items_args
-      { :parent_folder_ids => [{:id => self.id}],
+    def items_args(opts)
+      default_args = {
+        :parent_folder_ids => [{:id => self.id}],
         :traversal => 'Shallow',
-        :item_shape  => {:base_shape => 'Default'} }
+        :item_shape  => {:base_shape => 'Default'}
+      }.merge(opts)
     end
 
     def items_parser(resp)
@@ -196,6 +215,19 @@ module Viewpoint::EWS::Types
         items
       else
         raise EwsError, "Could not retrieve folder. #{rm.code}: #{rm.message_text}"
+      end
+    end
+
+    def merge_restrictions!(obj, merge_type = :and)
+      if obj.opts[:restriction] && !obj.opts[:restriction].empty? && !obj.restriction.empty?
+        obj.opts[:restriction] = {
+          merge_type => [
+            obj.opts.delete(:restriction),
+            obj.restriction
+        ]
+        }
+      elsif !obj.restriction.empty?
+        obj.opts[:restriction] = obj.restriction
       end
     end
 

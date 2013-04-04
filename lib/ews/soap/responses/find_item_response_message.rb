@@ -47,7 +47,7 @@ module Viewpoint::EWS::SOAP
     end
 
     def items
-      root[:elems][0][:items][:elems]
+      root[:elems][0][:items][:elems] || []
     end
 
     def groups

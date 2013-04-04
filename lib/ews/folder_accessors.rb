@@ -39,6 +39,9 @@ module Viewpoint::EWS::FolderAccessors
   def folders(opts={})
     opts = opts.clone
     args = find_folders_args(opts)
+    obj = OpenStruct.new(opts: args, restriction: {})
+    yield obj if block_given?
+    merge_restrictions! obj
     resp = ews.find_folder( args )
     find_folders_parser(resp)
   end
@@ -71,15 +74,16 @@ module Viewpoint::EWS::FolderAccessors
   # @raise [EwsError] raised when the backend SOAP method returns an error.
   def get_folder_by_name(name, opts={})
     opts = opts.clone
-    opts[:root] = opts[:parent] || :msgfolderroot
-    opts[:restriction] = {:is_equal_to => [
-      {:field_uRI => {:field_uRI=>'folder:DisplayName'}},
-      {:field_uRI_or_constant => {:constant => {:value=>name}}}
-    ]}
-    args = find_folders_args(opts)
-    args[:restriction] = opts[:restriction]
-    resp = ews.find_folder args
-    find_folders_parser(resp).first
+    opts[:root] = opts.delete(:parent)
+    folders(opts) do |obj|
+      obj.restriction = {
+        :is_equal_to =>
+        [
+          {:field_uRI => {:field_uRI=>'folder:DisplayName'}},
+          {:field_uRI_or_constant => {:constant => {:value=>name}}}
+        ]
+      }
+    end.first
   end
 
   # @param [String] name The name of the new folder
@@ -189,6 +193,19 @@ private
       "#{type}_folder".to_sym
     else
       raise EwsBadArgumentError, "Not a proper folder type: :#{type}"
+    end
+  end
+
+  def merge_restrictions!(obj, merge_type = :and)
+    if obj.opts[:restriction] && !obj.opts[:restriction].empty? && !obj.restriction.empty?
+      obj.opts[:restriction] = {
+        merge_type => [
+          obj.opts.delete(:restriction),
+          obj.restriction
+        ]
+      }
+    elsif !obj.restriction.empty?
+      obj.opts[:restriction] = obj.restriction
     end
   end
 
