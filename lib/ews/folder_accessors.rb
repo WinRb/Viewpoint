@@ -196,17 +196,4 @@ private
     end
   end
 
-  def merge_restrictions!(obj, merge_type = :and)
-    if obj.opts[:restriction] && !obj.opts[:restriction].empty? && !obj.restriction.empty?
-      obj.opts[:restriction] = {
-        merge_type => [
-          obj.opts.delete(:restriction),
-          obj.restriction
-        ]
-      }
-    elsif !obj.restriction.empty?
-      obj.opts[:restriction] = obj.restriction
-    end
-  end
-
 end

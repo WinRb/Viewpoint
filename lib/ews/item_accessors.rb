@@ -34,6 +34,18 @@ module Viewpoint::EWS::ItemAccessors
     get_item_parser(resp)
   end
 
+  # @param [Hash] opts Misc options to control request
+  # @option opts [Symbol] :folder_id
+  # @see GenericFolder#items
+  def find_items(opts = {})
+    args = find_items_args(opts.clone)
+    obj = OpenStruct.new(opts: args, restriction: {})
+    yield obj if block_given?
+    merge_restrictions! obj
+    resp = ews.find_item(args)
+    find_items_parser resp
+  end
+
   # Copy an array of items to the specified folder
   # @param items [Array] an array of EWS Items that you want to copy
   # @param folder [String,Symbol,GenericFolder] The folder to copy to. This must
@@ -95,6 +107,34 @@ private
       code = rm.respond_to?(:code) ? rm.code : "Unknown"
       text = rm.respond_to?(:message_text) ? rm.message_text : "Unknown"
       raise EwsItemNotFound, "Could not retrieve item. #{rm.code}: #{rm.message_text}"
+    end
+  end
+
+  def find_items_args(opts)
+    default_args = {
+      :traversal => 'Shallow',
+      :item_shape  => {:base_shape => 'Default'}
+    }
+
+    if opts[:folder_id].is_a?(Hash)
+      default_args[:parent_folder_ids] = [opts.delete(:folder_id)]
+    else
+      default_args[:parent_folder_ids] = [{:id => opts.delete(:folder_id)}]
+    end
+    default_args.merge(opts)
+  end
+
+  def find_items_parser(resp)
+    rm = resp.response_messages[0]
+    if(rm.status == 'Success')
+      items = []
+      rm.root_folder.items.each do |i|
+        type = i.keys.first
+        items << class_by_name(type).new(ews, i[type])
+      end
+      items
+    else
+      raise EwsError, "Could not retrieve folder. #{rm.code}: #{rm.message_text}"
     end
   end
 
