@@ -72,7 +72,7 @@ module Viewpoint::EWS::SOAP
         if(cname.instance_of? Symbol)
           cname = cname.to_s.camel_case
         end
-        SOAP.const_get(cname)
+        Viewpoint::EWS::SOAP.const_get(cname)
       rescue NameError => e
         ResponseMessage
       end
