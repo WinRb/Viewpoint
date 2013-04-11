@@ -30,6 +30,7 @@ module Viewpoint::EWS::Types
       :parent_change_key  => [:attachment_id, :attribs, :root_item_change_key],
       :name => [:name, :text],
       :content_type => [:content_type, :text],
+      :content_id => [:content_id],
       :size => [:size, :text],
       :last_modified_time => [:last_modified_time, :text],
       :is_inline? => [:is_inline, :text],
@@ -39,6 +40,7 @@ module Viewpoint::EWS::Types
       is_inline?:   ->(str){str.downcase == 'true'},
       last_modified_type: ->(str){DateTime.parse(str)},
       size: ->(str){str.to_i},
+      content_id: :fix_content_id,
     }
 
     ATTACH_KEY_ALIAS = { }
@@ -63,6 +65,12 @@ module Viewpoint::EWS::Types
 
     def key_alias
       @key_alias ||= ATTACH_KEY_ALIAS
+    end
+
+    # Sometimes the SOAP response comes back with two identical content_ids.
+    # This method fishes them out no matter which way them come.
+    def fix_content_id(content_id)
+      content_id.is_a?(Array) ? content_id.last[:text] : content_id[:text]
     end
 
   end
