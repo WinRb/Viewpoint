@@ -26,8 +26,7 @@ module Viewpoint::EWS::SOAP
         }
         end
       end
-      resp = do_soap_request(req, raw_response: true)
-      parse!(resp, response_class: EwsSoapAvailabilityResponse)
+      do_soap_request(req, response_class: EwsSoapAvailabilityResponse)
     end
 
   end #ExchangeUserConfiguration

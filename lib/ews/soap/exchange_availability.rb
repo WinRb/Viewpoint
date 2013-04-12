@@ -27,8 +27,7 @@ module Viewpoint::EWS::SOAP
         }
         end
       end
-      resp = do_soap_request(req, raw_response: true)
-      parse!(resp, response_class: EwsSoapAvailabilityResponse)
+      do_soap_request(req, response_class: EwsSoapAvailabilityResponse)
     end
 
     # Sets a mailbox user's Out of Office (OOF) settings and message.
@@ -42,7 +41,6 @@ module Viewpoint::EWS::SOAP
     # @option opts [String,Symbol] :external_audience :none, :known, :all
     def set_user_oof_settings(opts)
       opts = opts.clone
- #     puts "OPTS: #{opts}"
       [:mailbox, :oof_state].each do |k|
         validate_param(opts, k, true)
       end
@@ -56,8 +54,7 @@ module Viewpoint::EWS::SOAP
         }
         end
       end
-      resp = do_soap_request(req, raw_response: true)
-      parse!(resp, response_class: EwsSoapAvailabilityResponse)
+      do_soap_request(req, response_class: EwsSoapAvailabilityResponse)
     end
 
   end #ExchangeAvailability

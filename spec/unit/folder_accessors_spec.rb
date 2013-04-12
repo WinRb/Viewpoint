@@ -14,6 +14,7 @@ describe Viewpoint::EWS::FolderAccessors do
     @ecli = double("EWSClient")
     @ecli.extend subject
     @ecli.stub(:ews) {ews}
+    @ecli.stub(:merge_restrictions!)
   end
 
   context "ensure FolderAccessors methods are returning good data" do

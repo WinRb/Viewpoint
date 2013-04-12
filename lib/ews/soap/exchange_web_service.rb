@@ -24,7 +24,7 @@ module Viewpoint::EWS::SOAP
     include ExchangeAvailability
     include ExchangeUserConfiguration
 
-    attr_accessor :server_version, :auto_deepen
+    attr_accessor :server_version, :auto_deepen, :connection
 
     # @param [Viewpoint::EWS::Connection] connection the connection object
     # @param [Hash] opts additional options to the web service
@@ -34,7 +34,7 @@ module Viewpoint::EWS::SOAP
     #   default is VERSION_2010.
     def initialize(connection, opts = {})
       super()
-      @con = connection
+      @connection = connection
       @server_version = opts[:server_version] ? opts[:server_version] : VERSION_2010
       @auto_deepen    = true
     end
@@ -210,7 +210,7 @@ module Viewpoint::EWS::SOAP
           mailbox!(root, {:email_address => {:text => owner}})
         end
       end
-      parse!(resp)
+      parse_soap_response(resp)
     end
 
     # Adds one or more delegates to a principal's mailbox and sets specific access permissions.
@@ -227,7 +227,7 @@ module Viewpoint::EWS::SOAP
           add_delegate!(owner, delegate, permissions)
         end
       end
-      parse!(resp)
+      parse_soap_response(resp)
     end
 
     # Removes one or more delegates from a user's mailbox.
@@ -242,7 +242,7 @@ module Viewpoint::EWS::SOAP
           remove_delegate!(owner, delegate)
         end
       end
-      parse!(resp)
+      parse_soap_response(resp)
     end
 
     # Updates delegate permissions on a principal's mailbox
@@ -259,7 +259,7 @@ module Viewpoint::EWS::SOAP
           add_delegate!(owner, delegate, permissions)
         end
       end
-      parse!(resp)
+      parse_soap_response(resp)
     end
 
     # Provides detailed information about the availability of a set of users, rooms, and resources
@@ -301,8 +301,33 @@ module Viewpoint::EWS::SOAP
         end
       end
 
-      resp = do_soap_request(req, raw_response: true)
-      parse!(resp, response_class: EwsSoapFreeBusyResponse)
+      do_soap_request(req, response_class: EwsSoapFreeBusyResponse)
+    end
+
+
+    # Send the SOAP request to the endpoint and parse it.
+    # @param [String] soapmsg an XML formatted string
+    # @todo make this work for Viewpoint (imported from SPWS)
+    # @param [Hash] opts misc options
+    # @option opts [Boolean] :raw_response if true do not parse and return
+    #   the raw response string.
+    def do_soap_request(soapmsg, opts = {})
+      @log.debug <<-EOF.gsub(/^ {8}/, '')
+        Sending SOAP Request:
+        ----------------
+        #{soapmsg}
+        ----------------
+      EOF
+      connection.dispatch(self, soapmsg, opts)
+    end
+
+    # @param [String] response the SOAP response string
+    # @param [Hash] opts misc options to send to the parser
+    # @option opts [Class] :response_class the response class
+    def parse_soap_response(soapmsg, opts = {})
+      raise EwsError, "Can't parse an empty response. Please check your endpoint." if(soapmsg.nil?)
+      opts[:response_class] ||= EwsSoapResponse
+      EwsParser.new(soapmsg).parse(opts)
     end
 
 
@@ -337,42 +362,10 @@ module Viewpoint::EWS::SOAP
       end
     end
 
-    # @param [String] response the SOAP response string
-    # @param [Hash] parse_opts misc options to send to the parser
-    # @option parse_opts [Class] :response_class the response class
-    def parse!(response, parse_opts = {})
-      raise EwsError, "Can't parse an empty response. Please check your endpoint." if(response.nil?)
-      parse_opts[:response_class] ||= EwsSoapResponse
-      EwsParser.new(response).parse(parse_opts)
-    end
-
     # Build the common elements in the SOAP message and yield to any custom elements.
     def build_soap!(&block)
       opts = { :server_version => server_version }
       EwsBuilder.new.build!(opts, &block)
-    end
-
-    # Send the SOAP request to the endpoint and parse it.
-    # @param [String] soapmsg an XML formatted string
-    # @todo make this work for Viewpoint (imported from SPWS)
-    # @param [Hash] opts misc options
-    # @option opts [Boolean] :raw_response if true do not parse and return
-    #   the raw response string.
-    def do_soap_request(soapmsg, opts = {})
-      @log.debug <<-EOF
-        Sending SOAP Request:
-        ----------------
-#{soapmsg}
-        ----------------
-      EOF
-      respmsg = @con.post(soapmsg)
-      @log.debug <<-EOF
-        Received SOAP Response:
-        ----------------
-        #{Nokogiri::XML(respmsg).to_xml}
-        ----------------
-      EOF
-      opts[:raw_response] ? respmsg : parse!(respmsg)
     end
 
   end # class ExchangeWebService

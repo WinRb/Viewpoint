@@ -48,8 +48,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      resp = do_soap_request(req, raw_response: true)
-      parse!(resp, response_class: EwsResponse)
+      do_soap_request(req, response_class: EwsResponse)
     end
 
     # Gets items from the Exchange store
@@ -84,8 +83,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      resp = do_soap_request(req, raw_response: true)
-      parse!(resp, response_class: EwsResponse)
+      do_soap_request(req, response_class: EwsResponse)
     end
 
     # Defines a request to create an item in the Exchange store.
@@ -148,8 +146,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      resp = do_soap_request(req, raw_response: true)
-      parse!(resp, response_class: EwsResponse)
+      do_soap_request(req, response_class: EwsResponse)
     end
 
     # Used to modify the properties of an existing item in the Exchange store
@@ -364,8 +361,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      resp = do_soap_request(req, raw_response: true)
-      parse!(resp, response_class: EwsResponse)
+      do_soap_request(req, response_class: EwsResponse)
     end
 
 
@@ -662,8 +658,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      resp = do_soap_request(req, raw_response: true)
-      parse!(resp, response_class: EwsResponse)
+      do_soap_request(req, response_class: EwsResponse)
     end
 
 

@@ -45,6 +45,27 @@ class Viewpoint::EWS::Connection
     self.get && true
   end
 
+  # Every Connection class must have the dispatch method. It is what sends the
+  # SOAP request to the server and calls the parser method on the EWS instance.
+  #
+  # This was originally in the ExchangeWebService class but it was added here
+  # to make the processing chain easier to modify. For example, it allows the
+  # reactor pattern to handle the request with a callback.
+  # @param ews [Viewpoint::EWS::SOAP::ExchangeWebService] used to call
+  #   #parse_soap_response
+  # @param soapmsg [String]
+  # @param opts [Hash] misc opts for handling the Response
+  def dispatch(ews, soapmsg, opts)
+    respmsg = post(soapmsg)
+    @log.debug <<-EOF.gsub(/^ {6}/, '')
+      Received SOAP Response:
+      ----------------
+      #{Nokogiri::XML(respmsg).to_xml}
+      ----------------
+    EOF
+    opts[:raw_response] ? respmsg : ews.parse_soap_response(respmsg, opts)
+  end
+
   # Send a GET to the web service
   # @return [String] If the request is successful (200) it returns the body of
   #   the response.
