@@ -18,6 +18,7 @@
 require 'httpclient'
 
 class Viewpoint::EWS::Connection
+  include Viewpoint::EWS::ConnectionHelper
   include Viewpoint::EWS
 
   attr_reader :endpoint
