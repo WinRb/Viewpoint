@@ -126,7 +126,7 @@ private
 
   def find_items_parser(resp)
     rm = resp.response_messages[0]
-    if(rm.status == 'Success')
+    if rm.success?
       items = []
       rm.root_folder.items.each do |i|
         type = i.keys.first
@@ -140,15 +140,15 @@ private
 
   def copy_move_items_parser(resp, resp_type = :copy_item_response_message)
     resp.response_messages.collect {|r|
-      msg = r[resp_type]
       obj = {}
-      if msg[:attribs][:response_class] == 'Success'
+      if r.success?
         obj[:success] = true
-        key = msg[:elems][:items][:elems][0].keys[0]
-        obj[:item_id] = msg[:elems][:items][:elems][0][key][:elems][0][:item_id][:attribs][:id]
+        item = r.items.first
+        key = item.keys.first
+        obj[:item_id] = item[key][:elems][0][:item_id][:attribs][:id]
       else
         obj[:success] = false
-        obj[:error_message] = "#{msg[:elems][:response_code][:text]}: #{msg[:elems][:message_text][:text]}"
+        obj[:error_message] = "#{r.response_code}: #{r.message_text}"
       end
       obj
     }

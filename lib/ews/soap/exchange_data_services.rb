@@ -199,7 +199,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      do_soap_request(req, response_class: EwsResponse)
     end
 
     # Delete an item from a mailbox in the Exchange store
@@ -240,7 +240,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      do_soap_request(req, response_class: EwsResponse)
     end
 
     # Used to move one or more items to a single destination folder.
@@ -281,7 +281,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      do_soap_request(req, response_class: EwsResponse)
     end
 
     # Copies items and puts the items in a different folder
@@ -322,7 +322,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      do_soap_request(req, response_class: EwsResponse)
     end
 
     # Used to send e-mail messages that are located in the Exchange store.

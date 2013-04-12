@@ -74,11 +74,11 @@ module Viewpoint::EWS::Types
         :item_ids => [{:item_id => {:id => id}}]
       }
       resp = @ews.delete_item(opts)
-      if resp.success?
-        true
-      else
-        raise EwsError, "Could not delete #{self.class}. #{resp.code}: #{resp.message}"
+      rmsg = resp.response_messages[0]
+      unless rmsg.success?
+        raise EwsError, "Could not delete #{self.class}. #{rmsg.response_code}: #{rmsg.message_text}"
       end
+      true
     end
 
     def recycle!
@@ -107,11 +107,12 @@ module Viewpoint::EWS::Types
         :item_ids => [{:item_id => {:id => self.id}}]
       }
       resp = @ews.move_item(move_opts)
+      rmsg = resp.response_messages[0]
 
-      if(resp.status == 'Success')
-        key = resp.response_message[:elems][:items][:elems][0].keys[0]
-        id_h  = resp.response_message[:elems][:items][:elems][0][key][:elems][0][:item_id][:attribs]
-        id_h[:id]
+      if rmsg.success?
+        obj = rmsg.items.first
+        itype = obj.keys.first
+        obj[itype][:elems][0][:item_id][:attribs][:id]
       else
         raise EwsError, "Could not move item. #{resp.code}: #{resp.message}"
       end
@@ -128,13 +129,14 @@ module Viewpoint::EWS::Types
         :item_ids => [{:item_id => {:id => self.id}}]
       }
       resp = @ews.copy_item(copy_opts)
+      rmsg = resp.response_messages[0]
 
-      if(resp.status == 'Success')
-        key   = resp.response_message[:elems][:items][:elems][0].keys[0]
-        id_h  = resp.response_message[:elems][:items][:elems][0][key][:elems][0][:item_id][:attribs]
-        id_h[:id]
+      if rmsg.success?
+        obj = rmsg.items.first
+        itype = obj.keys.first
+        obj[itype][:elems][0][:item_id][:attribs][:id]
       else
-        raise EwsError, "Could not copy item. #{resp.code}: #{resp.message}"
+        raise EwsError, "Could not copy item. #{rmsg.response_code}: #{rmsg.message_text}"
       end
     end
 
@@ -157,7 +159,7 @@ module Viewpoint::EWS::Types
         submit_attachments!
         resp = ews.send_item(item_ids: [{item_id: {id: self.id, change_key: self.change_key}}])
         rm = resp.response_messages[0]
-        if rm.status == 'Success'
+        if rm.success?
           true
         else
           raise EwsSendItemError, "#{rm.code}: #{rm.message_text}"
@@ -241,8 +243,9 @@ module Viewpoint::EWS::Types
         ]
       }
       resp = ews.update_item({conflict_resolution: 'AutoResolve'}.merge(opts))
-      unless resp.success?
-        raise EwsError, "#{resp.code}: #{resp.message}"
+      rmsg = resp.response_messages[0]
+      unless rmsg.success?
+        raise EwsError, "#{rmsg.response_code}: #{rmsg.message_text}"
       end
       true
     end

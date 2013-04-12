@@ -31,6 +31,10 @@ module Viewpoint::EWS::SOAP
     end
     alias :status :response_class
 
+    def success?
+      response_class == 'Success'
+    end
+
     def message_text
       safe_hash_access message, [:elems, :message_text, :text]
     end
