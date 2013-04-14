@@ -35,6 +35,10 @@ module Viewpoint::EWS
       @shallow
     end
 
+    def mark_deep!
+      @shallow = false
+    end
+
     def auto_deepen?
       ews.auto_deepen
     end
@@ -119,6 +123,7 @@ module Viewpoint::EWS
     end
 
     def resolve_key_path(hsh, path)
+      return nil if hsh.nil?
       k = path.first
       return hsh[k] if path.length == 1
       resolve_key_path(hsh[k],path[1..-1])
