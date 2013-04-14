@@ -54,6 +54,7 @@ require 'ews/soap/parsers/ews_parser'
 require 'ews/soap/parsers/ews_sax_document'
 # Mix-ins for the ExchangeWebService
 require 'ews/soap/exchange_data_services'
+require 'ews/soap/exchange_notification'
 require 'ews/soap/exchange_availability'
 require 'ews/soap/exchange_user_configuration'
 require 'ews/soap/exchange_web_service'
@@ -87,6 +88,17 @@ require 'ews/types/file_attachment'
 require 'ews/types/item_attachment'
 require 'ews/types/mailbox_user'
 require 'ews/types/out_of_office'
+
+# Events
+require 'ews/types/event'
+require 'ews/types/copied_event'
+require 'ews/types/created_event'
+require 'ews/types/deleted_event'
+require 'ews/types/free_busy_changed_event'
+require 'ews/types/modified_event'
+require 'ews/types/moved_event'
+require 'ews/types/new_mail_event'
+require 'ews/types/status_event'
 
 # Template Objects
 require 'ews/templates/message'

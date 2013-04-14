@@ -21,6 +21,7 @@ module Viewpoint::EWS::SOAP
     include Viewpoint::EWS
     include Viewpoint::EWS::SOAP
     include ExchangeDataServices
+    include ExchangeNotification
     include ExchangeAvailability
     include ExchangeUserConfiguration
 
@@ -37,85 +38,6 @@ module Viewpoint::EWS::SOAP
       @connection = connection
       @server_version = opts[:server_version] ? opts[:server_version] : VERSION_2010
       @auto_deepen    = true
-    end
-
-    # Used to subscribe client applications to either push, pull or stream notifications.
-    # @see http://msdn.microsoft.com/en-us/library/aa566188(v=EXCHG.140).aspx
-    # @param [Array<Hash>] subscriptions An array of Hash objects that describe each
-    #   subscription.
-    #   Ex: [ {:pull_subscription_request => {
-    #         :subscribe_to_all_folders => false,
-    #         :folder_ids => [ {:id => 'id', :change_key => 'ck'} ],
-    #         :event_types=> %w{CopiedEvent CreatedEvent},
-    #         :watermark  => 'watermark id',
-    #         :timeout    => intval
-    #       }},
-    #       {:push_subscription_request => {
-    #         :subscribe_to_all_folders => true,
-    #         :event_types=> %w{CopiedEvent CreatedEvent},
-    #         :status_frequency => 15,
-    #         :uRL => 'http://my.endpoint.for.updates/',
-    #       }},
-    #       {:streaming_subscription_request => {
-    #         :subscribe_to_all_folders => false,
-    #         :folder_ids => [ {:id => 'id', :change_key => 'ck'} ],
-    #         :event_types=> %w{NewMailEvent DeletedEvent},
-    #       }},
-    #       ]
-    def subscribe(subscriptions)
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-          builder.nbuild.Subscribe {
-            builder.nbuild.parent.default_namespace = @default_ns
-            subscriptions.each do |sub|
-              subtype = sub.keys.first
-              if(builder.respond_to?(subtype))
-                builder.send subtype, sub[subtype]
-              else
-                raise EwsBadArgumentError, "Bad subscription type. #{subtype}"
-              end
-            end
-          }
-        end
-      end
-      do_soap_request(req)
-    end
-
-    # End a pull notification subscription.
-    # @see http://msdn.microsoft.com/en-us/library/aa564263.aspx
-    #
-    # @param [String] subscription_id The Id of the subscription
-    def unsubscribe(subscription_id)
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-          builder.nbuild.Unsubscribe {
-            builder.nbuild.parent.default_namespace = @default_ns
-            builder.subscription_id!(subscription_id)
-          }
-        end
-      end
-      do_soap_request(req)
-    end
-
-    # Used by pull subscription clients to request notifications from the Client Access server
-    # @see http://msdn.microsoft.com/en-us/library/aa566199.aspx GetEvents on MSDN
-    #
-    # @param [String] subscription_id Subscription identifier
-    # @param [String] watermark Event bookmark in the events queue
-    def get_events(subscription_id, watermark)
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-          builder.nbuild.GetEvents {
-            builder.nbuild.parent.default_namespace = @default_ns
-            builder.subscription_id!(subscription_id)
-            builder.watermark!(watermark)
-          }
-        end
-      end
-      do_soap_request(req)
     end
 
     # Defines a request to synchronize a folder hierarchy on a client

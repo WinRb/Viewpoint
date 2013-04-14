@@ -561,14 +561,14 @@ module Viewpoint::EWS::SOAP
     def event_types!(evtypes)
       @nbuild[NS_EWS_TYPES].EventTypes {
         evtypes.each do |et|
-          @nbuild[NS_EWS_TYPES].EventType(et)
+          @nbuild[NS_EWS_TYPES].EventType(et.to_s.camel_case)
         end
       }
     end
 
     # @see http://msdn.microsoft.com/en-us/library/aa565886(v=EXCHG.140).aspx
-    def watermark!(wmark)
-      @nbuild[NS_EWS_TYPES].Watermark(wmark)
+    def watermark!(wmark, ns = NS_EWS_TYPES)
+      @nbuild[ns].Watermark(wmark)
     end
 
     # @see http://msdn.microsoft.com/en-us/library/aa565201(v=EXCHG.140).aspx

@@ -26,6 +26,8 @@ module Viewpoint::EWS::Types
       :ckey   => :change_key,
     }
 
+    attr_accessor :subscription_id, :watermark
+
     # @param [SOAP::ExchangeWebService] ews the EWS reference
     # @param [Hash] ews_item the EWS parsed response document
     def initialize(ews, ews_item)
@@ -147,6 +149,77 @@ module Viewpoint::EWS::Types
       #Base64.decode64 txt
     end
 
+    # Subscribe this folder to events.  This method initiates an Exchange pull
+    # type subscription.
+    #
+    # @param event_types [Array] Which event types to subscribe to. By default
+    #   we subscribe to all Exchange event types: :all, :copied, :created,
+    #   :deleted, :modified, :moved, :new_mail, :free_busy_changed
+    # @param watermark [String] pass a watermark if you wish to start the
+    #   subscription at a specific point.
+    # @param timeout [Fixnum] the time in minutes that the subscription can
+    #   remain idle between calls to #get_events. default: 240 minutes
+    # @return [Boolean] Did the subscription happen successfully?
+    def subscribe(evtypes = [:all], watermark = nil, timeout = 240)
+      # Refresh the subscription if already subscribed
+      unsubscribe if subscribed?
+
+      event_types = normalize_event_names(evtypes)
+      folder = {id: self.id, change_key: self.change_key}
+      resp = ews.pull_subscribe_folder(folder, event_types, timeout, watermark)
+      rmsg = resp.response_messages.first
+      if rmsg.success?
+        @subscription_id = rmsg.subscription_id
+        @watermark = rmsg.watermark
+        true
+      else
+        raise EwsSubscriptionError, "Could not subscribe: #{rmsg.code}: #{rmsg.message_text}"
+      end
+    end
+
+    # Check if there is a subscription for this folder.
+    # @return [Boolean] Are we subscribed to this folder?
+    def subscribed?
+      ( @subscription_id.nil? or @watermark.nil? )? false : true
+    end
+
+    # Unsubscribe this folder from further Exchange events.
+    # @return [Boolean] Did we unsubscribe successfully?
+    def unsubscribe
+      return true if @subscription_id.nil?
+
+      resp = ews.unsubscribe(@subscription_id)
+      rmsg = resp.response_messages.first
+      if rmsg.success?
+        @subscription_id, @watermark = nil, nil
+        true
+      else
+        raise EwsSubscriptionError, "Could not unsubscribe: #{rmsg.code}: #{rmsg.message_text}"
+      end
+    end
+
+    # Checks a subscribed folder for events
+    # @return [Array] An array of Event items
+    def get_events
+      begin
+        if subscribed?
+          resp = ews.get_events(@subscription_id, @watermark)
+          rmsg = resp.response_messages[0]
+          @watermark = rmsg.new_watermark
+          # @todo if parms[:more_events] # get more events
+          rmsg.events.collect{|ev|
+            type = ev.keys.first
+            class_by_name(type).new(ews, ev[type])
+          }
+        else
+          raise EwsSubscriptionError, "Folder <#{self.display_name}> not subscribed to. Issue a Folder#subscribe before checking events."
+        end
+      rescue EwsSubscriptionTimeout => e
+        @subscription_id, @watermark = nil, nil
+        raise e
+      end
+    end
+
 
     private
 
@@ -243,6 +316,21 @@ module Viewpoint::EWS::Types
         }
       elsif !obj.restriction.empty?
         obj.opts[:restriction] = obj.restriction
+      end
+    end
+
+    def normalize_event_names(events)
+      if events.include?(:all)
+        events = [:copied, :created, :deleted, :modified, :moved, :new_mail, :free_busy_changed]
+      end
+
+      events.collect do |ev|
+        nev = ev.to_s.ruby_case
+        if nev.end_with?('_event')
+          nev.to_sym
+        else
+          "#{nev}_event".to_sym
+        end
       end
     end
 

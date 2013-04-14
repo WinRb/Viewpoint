@@ -23,9 +23,11 @@ module Viewpoint::EWS
   # Raise when authentication/authorization issues occur.
   class EwsLoginError < EwsError; end
 
+  class EwsSubscriptionError < EwsError; end
+
   # Raised when a user tries to query a folder subscription after the
   # subscription has timed out.
-  class EwsSubscriptionTimeout < EwsError; end
+  class EwsSubscriptionTimeout < EwsSubscriptionError; end
 
   # Represents a function in EWS that is not yet implemented in Viewpoint
   class EwsNotImplemented < EwsError; end
