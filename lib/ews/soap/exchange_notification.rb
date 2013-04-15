@@ -122,6 +122,25 @@ module Viewpoint::EWS::SOAP
       subscribe([{pull_subscription_request: psr}])
     end
 
+    # Create a push subscription to a single folder
+    # @param folder [Hash] a hash with the folder :id and :change_key
+    # @param evtypes [Array] the events you would like to subscribe to.
+    # @param url [String,URI] http://msdn.microsoft.com/en-us/library/aa566309.aspx
+    # @param watermark [String] http://msdn.microsoft.com/en-us/library/aa565886.aspx
+    # @param status_frequency [Fixnum] http://msdn.microsoft.com/en-us/library/aa564048.aspx
+    def push_subscribe_folder(folder, evtypes, url, status_frequency = nil, watermark = nil)
+      status_frequency ||= 30
+      psr = {
+        :subscribe_to_all_folders => false,
+        :folder_ids => [ {:id => folder[:id], :change_key => folder[:change_key]} ],
+        :event_types=> evtypes,
+        :status_frequency => status_frequency,
+        :uRL => url.to_s
+      }
+      psr[:watermark] = watermark if watermark
+      subscribe([{push_subscription_request: psr}])
+    end
+
 
   end #ExchangeNotification
 end

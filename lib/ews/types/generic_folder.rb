@@ -177,6 +177,23 @@ module Viewpoint::EWS::Types
       end
     end
 
+    def push_subscribe(url, evtypes = [:all], watermark = nil, status_frequency = nil)
+      # Refresh the subscription if already subscribed
+      unsubscribe if subscribed?
+
+      event_types = normalize_event_names(evtypes)
+      folder = {id: self.id, change_key: self.change_key}
+      resp = ews.push_subscribe_folder(folder, event_types, url, status_frequency, watermark)
+      rmsg = resp.response_messages.first
+      if rmsg.success?
+        @subscription_id = rmsg.subscription_id
+        @watermark = rmsg.watermark
+        true
+      else
+        raise EwsSubscriptionError, "Could not subscribe: #{rmsg.code}: #{rmsg.message_text}"
+      end
+    end
+
     # Check if there is a subscription for this folder.
     # @return [Boolean] Are we subscribed to this folder?
     def subscribed?
