@@ -57,12 +57,14 @@ module Viewpoint::EWS::Types
       :associated?  => :is_associated?,
     }
 
-    attr_reader :ews_item
+    attr_reader :ews_item, :parent
 
-    # @param [SOAP::ExchangeWebService] ews the EWS reference
-    # @param [Hash] ews_item the EWS parsed response document
-    def initialize(ews, ews_item)
-      super
+    # @param ews [SOAP::ExchangeWebService] the EWS reference
+    # @param ews_item [Hash] the EWS parsed response document
+    # @param parent [GenericFolder] an optional parent object
+    def initialize(ews, ews_item, parent = nil)
+      super(ews, ews_item)
+      @parent = parent
       simplify!
       @new_file_attachments = []
       @new_item_attachments = []

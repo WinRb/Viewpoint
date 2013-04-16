@@ -312,7 +312,7 @@ module Viewpoint::EWS::Types
         items = []
         rm.root_folder.items.each do |i|
           type = i.keys.first
-          items << class_by_name(type).new(ews, i[type])
+          items << class_by_name(type).new(ews, i[type], self)
         end
         items
       else
