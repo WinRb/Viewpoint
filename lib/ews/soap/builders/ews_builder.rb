@@ -122,6 +122,7 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_MESSAGES].ItemShape {
         @nbuild.parent.default_namespace = @default_ns
         base_shape!(item_shape[:base_shape])
+        body_type!(item_shape[:body_type]) if item_shape[:body_type]
         if(item_shape[:additional_properties])
           additional_properties!(item_shape[:additional_properties])
         end
@@ -135,7 +136,13 @@ module Viewpoint::EWS::SOAP
     end
 
     def body_type!(body_type)
-      @nbuild[NS_EWS_TYPES].BodyType(body_type.to_s)
+      body_type = body_type.to_s
+      if body_type =~ /html/i
+        body_type = body_type.upcase
+      else
+        body_type = body_type.downcase.capitalize
+      end
+      nbuild[NS_EWS_TYPES].BodyType(body_type)
     end
 
     # Build the ParentFolderIds element
