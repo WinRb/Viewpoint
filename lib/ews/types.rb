@@ -117,13 +117,13 @@ module Viewpoint::EWS
           else
             raise EwsMinimalObjectError, "Could not resolve :#{method_sym}. #auto_deepen set to false"
           end
+        else
+          nil
         end
-        raise
       end
     end
 
     def resolve_key_path(hsh, path)
-      return nil if hsh.nil?
       k = path.first
       return hsh[k] if path.length == 1
       resolve_key_path(hsh[k],path[1..-1])
