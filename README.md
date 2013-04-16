@@ -178,11 +178,11 @@ end
 
 ## Thanks go out to...
 
+* Handl.it for sponsoring a good portion of the development effort.
+** https://www.handle.com/
 * The National Association of REALTORS® for providing a testing account
   and much appreciated input and support.
 * The Holmes Group Limited for providing Exchange 2013 test accounts.
-* Harold Lee (https://github.com/haroldl) for working on the
-  get_user_availability code.
 
 ---
 DISCLAIMER:  If you see something that could be done better or would like
