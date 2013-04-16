@@ -146,7 +146,14 @@ user_free_busy = cli.get_user_availability(['joe.user@exchange.site.com'],
   start_time: start_time,
   end_time:   end_time,
   requested_view: :free_busy)
-user_free_busy.calendar_event_array
+busy_times = user_free_busy.calendar_event_array
+
+# Parse events from the calendar event array for start/end times and type
+busy_times.each { | event |
+  cli.event_busy_type(event)
+  cli.event_start_time(event)
+  cli.event_end_time(event)
+}
 
 # Find the user's working hours
 user_free_busy.working_hours
