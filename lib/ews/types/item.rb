@@ -65,9 +65,17 @@ module Viewpoint::EWS::Types
     def initialize(ews, ews_item, parent = nil)
       super(ews, ews_item)
       @parent = parent
+      @body_type = false
       simplify!
       @new_file_attachments = []
       @new_item_attachments = []
+    end
+
+    # Specify a body_type to fetch this item with if it hasn't already been fetched.
+    # @param body_type [String, Symbol, FalseClass] must be :best, :text, or
+    #   :html. You can also set it to false to make it use the default.
+    def default_body_type=(body_type)
+      @body_type = body_type
     end
 
     def delete!(deltype = :hard)
@@ -286,6 +294,7 @@ module Viewpoint::EWS::Types
         item_shape: {base_shape: opts[:base_shape]},
         item_ids:   [{item_id:{id: id, change_key: change_key}}]
       }
+      default_args[:item_shape][:body_type] = @body_type if @body_type
       default_args
     end
 
