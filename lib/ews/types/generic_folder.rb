@@ -53,9 +53,8 @@ module Viewpoint::EWS::Types
       obj = OpenStruct.new(opts: args, restriction: {})
       yield obj if block_given?
       merge_restrictions! obj
-      all_properties = !(args[:item_shape][:base_shape].to_s =~ /all/i).nil?
       resp = ews.find_item(args)
-      items_parser resp, all_properties
+      items_parser resp
     end
 
     # Fetch items since a give DateTime
@@ -307,15 +306,13 @@ module Viewpoint::EWS::Types
       }.merge(opts)
     end
 
-    def items_parser(resp, all_properties = false)
+    def items_parser(resp)
       rm = resp.response_messages[0]
       if(rm.status == 'Success')
         items = []
         rm.root_folder.items.each do |i|
           type = i.keys.first
-          item = class_by_name(type).new(ews, i[type])
-          item.mark_deep! if all_properties
-          items << item
+          items << class_by_name(type).new(ews, i[type])
         end
         items
       else
