@@ -4,6 +4,17 @@ module Viewpoint::EWS::Types
     include Viewpoint::EWS::Types
     include ItemFieldUriMap
 
+    def self.included(klass)
+      klass.extend ClassMethods
+    end
+
+    module ClassMethods
+      def init_simple_item(ews, id, change_key = nil, parent = nil)
+        ews_item = {item_id: {attribs: {id: id, change_key: change_key}}}
+        self.new ews, ews_item, parent
+      end
+    end
+
     ITEM_KEY_PATHS = {
       id:             [:item_id, :attribs, :id],
       change_key:     [:item_id, :attribs, :change_key],
@@ -261,6 +272,7 @@ module Viewpoint::EWS::Types
     end
 
     def simplify!
+      return unless @ews_item.has_key?(:elems)
       @ews_item = @ews_item[:elems].inject({}) do |o,i|
         key = i.keys.first
         if o.has_key?(key)
