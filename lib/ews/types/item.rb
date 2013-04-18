@@ -35,6 +35,7 @@ module Viewpoint::EWS::Types
       sender:         [:sender, :elems, 0, :mailbox, :elems],
       from:           [:from, :elems, 0, :mailbox, :elems],
       to_recipients:  [:to_recipients, :elems],
+      cc_recipients:  [:cc_recipients, :elems],
       attachments:    [:attachments, :elems],
       importance:     [:importance, :text],
       conversation_index:     [:conversation_index, :text],
@@ -58,6 +59,8 @@ module Viewpoint::EWS::Types
             h[:internet_message_header][:text]} } },
       sender: :build_mailbox_user,
       from:   :build_mailbox_user,
+      to_recipients:   :build_mailbox_users,
+      cc_recipients:   :build_mailbox_users,
       attachments: :build_attachments,
     }
 
@@ -332,6 +335,10 @@ module Viewpoint::EWS::Types
 
     def build_mailbox_user(mbox_ews)
       MailboxUser.new(ews, mbox_ews)
+    end
+
+    def build_mailbox_users(users)
+      users.collect{|u| build_mailbox_user(u[:mailbox][:elems])}
     end
 
     def build_attachments(attachments)
