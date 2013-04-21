@@ -101,6 +101,31 @@ module Viewpoint::EWS::FolderAccessors
   end
   alias :mkfolder :make_folder
 
+  # Get a specific folder by id or symbol
+  # @param [Hash] opts Misc options to control request
+  # @option opts [Symbol] :shape :id_only/:default/:all_properties
+  # @option opts [String,Symbol,Hash] :folder_id You can optionally specify a
+  #   folder_id to limit the hierarchy synchronization to it. It must be a
+  #   FolderId(String), a DistinguishedFolderId(Symbol) or you can pass a Hash
+  #   in the form: {id: <fold_id>, change_key: <change_key>}
+  # @option opts [String] :sync_state an optional Base64 encoded SyncState
+  #   String from a previous sync call.
+  # @yield [Hash] yields the formatted argument Hash for last-minute
+  #   modification before calling the backend EWS method.
+  # @return [Hash] A hash with the following keys
+  #   :all_synced, whether or not additional calls are needed to get all folders
+  #   :sync_state, the sync state to use for the next call
+  #   and the following optional keys depending on the changes
+  #   :create, :update, :delete
+  # @raise [EwsError] raised when the backend SOAP method returns an error.
+  def sync_folders(opts = {})
+    opts = opts.clone
+    args = sync_folders_args(opts)
+    yield args if block_given?
+    resp = ews.sync_folder_hierarchy( args )
+    sync_folders_parser(resp)
+  end
+
 
 private
 
@@ -175,6 +200,44 @@ private
       class_by_name(ftype).new(ews, f[ftype])
     else
       raise EwsFolderNotFound, "Could not retrieve folder. #{resp.code}: #{resp.message}"
+    end
+  end
+
+  def sync_folders_args(opts)
+    opts[:shape] = opts[:shape] || :default
+    args = { :folder_shape => {:base_shape => opts[:shape]} }
+    if opts[:folder_id]
+      folder_id = opts[:folder_id]
+      if folder_id.is_a?(Hash)
+        args[:sync_folder_id] = folder_id
+      else
+        args[:sync_folder_id] = {:id => folder_id}
+      end
+    end
+    args[:sync_state] = opts[:sync_state] if opts[:sync_state]
+    args
+  end
+
+  def sync_folders_parser(resp)
+    rmsg = resp.response_messages[0]
+    if rmsg.success?
+      rhash = {}
+      rhash[:all_synced] = rmsg.includes_last_folder_in_range?
+      rhash[:sync_state] = rmsg.sync_state
+      rmsg.changes.each do |c|
+        ctype = c.keys.first
+        rhash[ctype] = [] unless rhash.has_key?(ctype)
+        if ctype == :delete
+          rhash[ctype] << c[ctype][:elems][0][:folder_id][:attribs]
+        else
+          type = c[ctype][:elems][0].keys.first
+          item = class_by_name(type).new(ews, c[ctype][:elems][0][type])
+          rhash[ctype] << item
+        end
+      end
+      rhash
+    else
+      raise EwsError, "Could not synchronize folders. #{rmsg.response_code}: #{rmsg.message_text}"
     end
   end
 
