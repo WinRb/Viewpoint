@@ -16,6 +16,7 @@ module Viewpoint::EWS::Types
     end
 
     ITEM_KEY_PATHS = {
+      item_id:        [:item_id, :attribs],
       id:             [:item_id, :attribs, :id],
       change_key:     [:item_id, :attribs, :change_key],
       subject:        [:subject, :text],

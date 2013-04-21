@@ -6,6 +6,7 @@ module Viewpoint::EWS::Types
     include Viewpoint::EWS::ItemAccessors
 
     GFOLDER_KEY_PATHS = {
+      :folder_id        => [:folder_id, :attribs],
       :id               => [:folder_id, :attribs, :id],
       :change_key       => [:folder_id, :attribs, :change_key],
       :parent_folder_id => [:parent_folder_id, :attribs, :id],
@@ -26,13 +27,15 @@ module Viewpoint::EWS::Types
       :ckey   => :change_key,
     }
 
-    attr_accessor :subscription_id, :watermark
+    attr_accessor :subscription_id, :watermark, :sync_state
 
     # @param [SOAP::ExchangeWebService] ews the EWS reference
     # @param [Hash] ews_item the EWS parsed response document
     def initialize(ews, ews_item)
       super
       simplify!
+      @sync_state = nil
+      @synced = false
     end
 
     def delete!
@@ -146,6 +149,51 @@ module Viewpoint::EWS::Types
       resp = ews.get_user_configuration(opts)
       #txt = resp.response_message[:elems][:get_user_configuration_response_message][:elems][1][:user_configuration][:elems][1][:xml_data][:text]
       #Base64.decode64 txt
+    end
+
+    # Syncronize Items in this folder. If this method is issued multiple
+    # times it will continue where the last sync completed.
+    # @param [Integer] sync_amount The number of items to synchronize per sync
+    # @param [Boolean] sync_all Whether to sync all the data by looping through.
+    #   The default is to just sync the first set.  You can manually loop through
+    #   with multiple calls to #sync_items!
+    # @return [Hash] Returns a hash with keys for each change type that ocurred.
+    #   Possible key values are:
+    #     (:create/:udpate/:delete/:read_flag_change).
+    #   For :deleted and :read_flag_change items a simple hash with :id and
+    #   :change_key is returned.
+    #   See: http://msdn.microsoft.com/en-us/library/aa565609.aspx
+    def sync_items!(sync_state = nil, sync_amount = 256, sync_all = false, opts = {})
+      item_shape = opts.has_key?(:item_shape) ? opts.delete(:item_shape) : {:base_shape => :default}
+      sync_state ||= @sync_state
+
+      resp = ews.sync_folder_items item_shape: item_shape,
+        sync_folder_id: self.folder_id, max_changes_returned: sync_amount, sync_state: sync_state
+      rmsg = resp.response_messages[0]
+
+      if rmsg.success?
+        @synced = rmsg.includes_last_item_in_range?
+        @sync_state = rmsg.sync_state
+        rhash = {}
+        rmsg.changes.each do |c|
+          ctype = c.keys.first
+          rhash[ctype] = [] unless rhash.has_key?(ctype)
+          if ctype == :delete || ctype == :read_flag_change
+            rhash[ctype] << c[ctype][:elems][0][:item_id][:attribs]
+          else
+            type = c[ctype][:elems][0].keys.first
+            item = class_by_name(type).new(ews, c[ctype][:elems][0][type])
+            rhash[ctype] << item
+          end
+        end
+        rhash
+      else
+        raise EwsError, "Could not synchronize: #{rmsg.code}: #{rmsg.message_text}"
+      end
+    end
+
+    def synced?
+      @synced
     end
 
     # Subscribe this folder to events.  This method initiates an Exchange pull
