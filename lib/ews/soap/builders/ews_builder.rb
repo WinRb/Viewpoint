@@ -540,6 +540,30 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def extended_properties!(eprops)
+      eprops.each {|ep| extended_property!(ep)}
+    end
+
+    def extended_property!(eprop)
+      nbuild[NS_EWS_TYPES].ExtendedProperty {
+        key = eprop.keys.grep(/extended/i).first
+        dispatch_field_uri!({key => eprop[key]}, NS_EWS_TYPES)
+        if eprop[:values]
+          nbuild.Values {
+            eprop[:values].each do |v|
+                value! v
+            end
+          }
+        elsif eprop[:value]
+          value! eprop[:value]
+        end
+      }
+    end
+
+    def value!(val)
+      nbuild[NS_EWS_TYPES].Value(val)
+    end
+
     def field_uRI_or_constant(expr)
       nbuild[NS_EWS_TYPES].FieldURIOrConstant {
         type = expr.keys.first
@@ -673,6 +697,9 @@ module Viewpoint::EWS::SOAP
 
     def message!(item)
       nbuild[NS_EWS_TYPES].Message {
+        if item[:extended_properties]
+          extended_properties! item.delete(:extended_properties)
+        end
         item.each_pair {|k,v|
           self.send("#{k}!", v)
         }
@@ -949,21 +976,21 @@ module Viewpoint::EWS::SOAP
 
     # A helper to dispatch to a FieldURI, IndexedFieldURI, or an ExtendedFieldURI
     # @todo Implement ExtendedFieldURI
-    def dispatch_field_uri!(uri)
+    def dispatch_field_uri!(uri, ns=NS_EWS_MESSAGES)
       type = uri.keys.first
       vals = uri[type].is_a?(Array) ? uri[type] : [uri[type]]
       case type
       when :field_uRI, :field_uri
         vals.each do |val|
-          nbuild.FieldURI('FieldURI' => val[:field_uRI])
+          nbuild[ns].FieldURI('FieldURI' => val[:field_uRI])
         end
       when :indexed_field_uRI, :indexed_field_uri
         vals.each do |val|
-          nbuild.IndexedFieldURI('FieldURI' => val[:field_uRI], 'FieldIndex' => val[:field_index])
+          nbuild[ns].IndexedFieldURI('FieldURI' => val[:field_uRI], 'FieldIndex' => val[:field_index])
         end
       when :extended_field_uRI, :extended_field_uri
         vals.each do |val|
-          nbuild.ExtendedFieldURI {
+          nbuild[ns].ExtendedFieldURI {
             nbuild.parent['DistinguishedPropertySetId'] = val[:distinguished_property_set_id] if val[:distinguished_property_set_id]
             nbuild.parent['PropertySetId'] = val[:property_set_id] if val[:property_set_id]
             nbuild.parent['PropertyTag'] = val[:property_tag] if val[:property_tag]
@@ -975,7 +1002,6 @@ module Viewpoint::EWS::SOAP
       else
         raise EwsBadArgumentError, "Bad URI type. #{type}"
       end
-
     end
 
     def dispatch_field_item!(item)

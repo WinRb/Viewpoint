@@ -26,6 +26,8 @@ module Viewpoint::EWS::MessageAccessors
   # @option opts [Array] :to_recipients An array of e-mail addresses to send to
   # @option opts [Array] :cc_recipients An array of e-mail addresses to send to
   # @option opts [Array] :bcc_recipients An array of e-mail addresses to send to
+  # @option opts [Array] :extended_properties An array of extended properties
+  #   [{extended_field_uri: {epros}, value: <val>}] or values: [<val>, <val>]
   # @option opts [Boolean] :draft if true it will save to the draft folder
   #   without sending the message.
   # @option opts [String,Symbol,Hash] saved_item_folder_id Either a

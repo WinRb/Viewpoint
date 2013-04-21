@@ -137,11 +137,11 @@ module Viewpoint::EWS::SOAP
             builder.saved_item_folder_id!(opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
             builder.nbuild.Items {
               opts[:items].each {|i|
-              # The key can be any number of item types like :message,
-              #   :calendar, etc
-              ikey = i.keys.first
-              builder.send("#{ikey}!",i[ikey])
-            }
+                # The key can be any number of item types like :message,
+                #   :calendar, etc
+                ikey = i.keys.first
+                builder.send("#{ikey}!",i[ikey])
+              }
             }
           }
         end
