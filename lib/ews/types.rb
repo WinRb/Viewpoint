@@ -16,7 +16,8 @@ module Viewpoint::EWS
     def initialize(ews, ews_item)
       @ews      = ews
       @ews_item = ews_item
-      @shallow      = true
+      @shallow  = true
+      @frozen = false
     end
 
     def method_missing(method_sym, *arguments, &block)
@@ -29,6 +30,19 @@ module Viewpoint::EWS
 
     def to_s
       "#{self.class.name}: EWS METHODS: #{self.ews_methods.sort.join(', ')}"
+    end
+
+    def frozen?
+      @frozen
+    end
+
+    # @param ronly [Boolean] true to freeze
+    def freeze!
+      @frozen = true
+    end
+
+    def unfreeze!
+      @frozen = false
     end
 
     def shallow?
@@ -111,11 +125,16 @@ module Viewpoint::EWS
         resolve_key_path(@ews_item, method_path(method_sym))
       rescue
         if shallow?
-          if auto_deepen?
+          if frozen?
+            raise EwsFrozenObjectError, "Could not resolve :#{method_sym} on frozen object."
+          elsif auto_deepen?
             enlighten!
             retry
           else
-            raise EwsMinimalObjectError, "Could not resolve :#{method_sym}. #auto_deepen set to false"
+            if !auto_deepen?
+              raise EwsMinimalObjectError, "Could not resolve :#{method_sym}. #auto_deepen set to false"
+            else
+            end
           end
         else
           nil
