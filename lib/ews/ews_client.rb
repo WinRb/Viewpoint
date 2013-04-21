@@ -37,10 +37,23 @@ class Viewpoint::EWSClient
     @ews = SOAP::ExchangeWebService.new(con, opts)
   end
 
-  def auto_deepen=(deepen)
-    @ews.auto_deepen = (deepen ? true : false)
+  # @param deepen [Boolean] true to autodeepen, false otherwise
+  # @param behavior [Symbol] :raise, :nil When setting autodeepen to false you
+  #   can choose what the behavior is when an attribute does not exist. The
+  #   default is to raise a EwsMinimalObjectError.
+  def set_auto_deepen(deepen, behavior = :raise)
+    if deepen
+      @ews.auto_deepen = true
+    else
+      behavior = [:raise, :nil].include?(behavior) ? behavior : :raise
+      @ews.no_auto_deepen_behavior = behavior
+      @ews.auto_deepen = false
+    end
   end
 
+  def auto_deepen=(deepen)
+    set_auto_deepen deepen
+  end
 
   private
 

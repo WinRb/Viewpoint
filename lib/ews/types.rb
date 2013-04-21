@@ -132,7 +132,11 @@ module Viewpoint::EWS
             retry
           else
             if !auto_deepen?
-              raise EwsMinimalObjectError, "Could not resolve :#{method_sym}. #auto_deepen set to false"
+              if ews.no_auto_deepen_behavior == :raise
+                raise EwsMinimalObjectError, "Could not resolve :#{method_sym}. #auto_deepen set to false"
+              else
+                nil
+              end
             else
             end
           end

@@ -26,7 +26,7 @@ module Viewpoint::EWS::SOAP
     include ExchangeUserConfiguration
     include ExchangeSynchronization
 
-    attr_accessor :server_version, :auto_deepen, :connection
+    attr_accessor :server_version, :auto_deepen, :no_auto_deepen_behavior, :connection
 
     # @param [Viewpoint::EWS::Connection] connection the connection object
     # @param [Hash] opts additional options to the web service
@@ -39,6 +39,7 @@ module Viewpoint::EWS::SOAP
       @connection = connection
       @server_version = opts[:server_version] ? opts[:server_version] : VERSION_2010
       @auto_deepen    = true
+      @no_auto_deepen_behavior = :raise
     end
 
     def delete_attachment
