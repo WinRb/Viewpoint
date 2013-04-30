@@ -310,7 +310,7 @@ module Viewpoint::EWS::SOAP
     def additional_properties!(addprops)
       @nbuild[NS_EWS_TYPES].AdditionalProperties {
         addprops.each_pair {|k,v|
-          dispatch_field_uri!({k => v})
+          dispatch_field_uri!({k => v}, NS_EWS_TYPES)
         }
       }
     end
@@ -982,7 +982,7 @@ module Viewpoint::EWS::SOAP
       case type
       when :field_uRI, :field_uri
         vals.each do |val|
-          nbuild[ns].FieldURI('FieldURI' => val[:field_uRI])
+          nbuild[ns].FieldURI('FieldURI' => val)
         end
       when :indexed_field_uRI, :indexed_field_uri
         vals.each do |val|
