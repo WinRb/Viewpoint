@@ -375,23 +375,23 @@ module Viewpoint::EWS::SOAP
 
     def mailbox_data!(md)
       nbuild[NS_EWS_TYPES].MailboxData {
-        nbuild.Email {
+        nbuild[NS_EWS_TYPES].Email {
           mbox = md[:email]
           name!(mbox[:name]) if mbox[:name]
           address!(mbox[:address]) if mbox[:address] # for Availability query
           routing_type!(mbox[:routing_type]) if mbox[:routing_type]
         }
-        nbuild.AttendeeType 'Required'
+        nbuild[NS_EWS_TYPES].AttendeeType 'Required'
       }
     end
 
     def free_busy_view_options!(opts)
       nbuild[NS_EWS_TYPES].FreeBusyViewOptions {
-        nbuild.TimeWindow {
-          nbuild.StartTime(opts[:time_window][:start_time])
-          nbuild.EndTime(opts[:time_window][:end_time])
+        nbuild[NS_EWS_TYPES].TimeWindow {
+          nbuild[NS_EWS_TYPES].StartTime(opts[:time_window][:start_time])
+          nbuild[NS_EWS_TYPES].EndTime(opts[:time_window][:end_time])
         }
-        nbuild.RequestedView(opts[:requested_view][:requested_free_busy_view].to_s.camel_case)
+        nbuild[NS_EWS_TYPES].RequestedView(opts[:requested_view][:requested_free_busy_view].to_s.camel_case)
       }
     end
 
@@ -400,20 +400,20 @@ module Viewpoint::EWS::SOAP
 
     def time_zone!(zone)
       nbuild[NS_EWS_TYPES].TimeZone {
-        nbuild.Bias(480)
-        nbuild.StandardTime {
-          nbuild.Bias(0)
-          nbuild.Time("02:00:00")
-          nbuild.DayOrder(5)
-          nbuild.Month(10)
-          nbuild.DayOfWeek('Sunday')
+        nbuild[NS_EWS_TYPES].Bias(480)
+        nbuild[NS_EWS_TYPES].StandardTime {
+          nbuild[NS_EWS_TYPES].Bias(0)
+          nbuild[NS_EWS_TYPES].Time("02:00:00")
+          nbuild[NS_EWS_TYPES].DayOrder(5)
+          nbuild[NS_EWS_TYPES].Month(10)
+          nbuild[NS_EWS_TYPES].DayOfWeek('Sunday')
         }
-        nbuild.DaylightTime {
-          nbuild.Bias(-60)
-          nbuild.Time("02:00:00")
-          nbuild.DayOrder(1)
-          nbuild.Month(4)
-          nbuild.DayOfWeek('Sunday')
+        nbuild[NS_EWS_TYPES].DaylightTime {
+          nbuild[NS_EWS_TYPES].Bias(-60)
+          nbuild[NS_EWS_TYPES].Time("02:00:00")
+          nbuild[NS_EWS_TYPES].DayOrder(1)
+          nbuild[NS_EWS_TYPES].Month(4)
+          nbuild[NS_EWS_TYPES].DayOfWeek('Sunday')
         }
       }
     end
