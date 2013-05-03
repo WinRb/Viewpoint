@@ -31,6 +31,9 @@ class Viewpoint::EWSClient
   # @option opts [Object] :http_class specify an alternate HTTP connection class.
   # @option opts [Hash] :http_opts options to pass to the connection
   def initialize(endpoint, user = nil, pass = nil, opts = {})
+    # dup all. @see ticket https://github.com/zenchild/Viewpoint/issues/68
+    endpoint, user, pass = endpoint.dup, user.dup, pass.dup
+    opts = opts.dup
     http_klass = opts[:http_class] || Viewpoint::EWS::Connection
     con = http_klass.new(endpoint, opts[:http_opts] || {})
     con.set_auth(user,pass) if(user && pass)
