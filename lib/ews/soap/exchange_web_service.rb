@@ -150,7 +150,7 @@ module Viewpoint::EWS::SOAP
         builder.nbuild.GetUserAvailabilityRequest {|x|
           x.parent.default_namespace = @default_ns
           builder.time_zone!(opts[:time_zone])
-          builder.nbuild.MailboxDataArray {
+          builder.nbuild[NS_EWS_MESSAGES].MailboxDataArray {
           opts[:mailbox_data].each do |mbd|
             builder.mailbox_data!(mbd)
           end
