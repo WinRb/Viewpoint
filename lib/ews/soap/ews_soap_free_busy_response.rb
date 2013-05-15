@@ -47,7 +47,7 @@ module Viewpoint::EWS::SOAP
 
     def calendar_event_array
       result = find_in_hash_list(get_user_availability_response[1][:free_busy_view][:elems], :calendar_event_array)
-      result ? result[:elems] : nil
+      result ? result[:elems] : []
     end
 
     def working_hours

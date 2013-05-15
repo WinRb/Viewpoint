@@ -86,8 +86,8 @@ EOS
       resp.status.should eq "Success"
     end
 
-    it "the calendar_event_array should be nil" do
-      resp.calendar_event_array.should be_nil
+    it "the calendar_event_array should be an empty list" do
+      resp.calendar_event_array.should eq []
     end
   end
 
