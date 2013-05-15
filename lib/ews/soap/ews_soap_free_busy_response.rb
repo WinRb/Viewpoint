@@ -54,7 +54,7 @@ module Viewpoint::EWS::SOAP
     end
 
     def response_message
-      get_user_availability_response.first[:response_message]
+      get_user_availability_response.find { |elem| elem.keys.include? :response_message }[:response_message]
     end
 
     def response_class
@@ -63,7 +63,7 @@ module Viewpoint::EWS::SOAP
     alias :status :response_class
 
     def response_code
-      response_message[:elems].first[:response_code][:text]
+      response_message[:elems].find { |elem| elem.keys.include? :response_code }[:response_code][:text]
     end
     alias :code :response_code
 
