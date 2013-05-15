@@ -46,7 +46,8 @@ module Viewpoint::EWS::SOAP
     end
 
     def calendar_event_array
-      get_user_availability_response[1][:free_busy_view][:elems][1][:calendar_event_array][:elems]
+      result = find_in_hash_list(get_user_availability_response[1][:free_busy_view][:elems], :calendar_event_array)
+      result ? result[:elems] : []
     end
 
     def working_hours
@@ -103,6 +104,14 @@ module Viewpoint::EWS::SOAP
       end
     end
 
+    # Find the first element in a list of hashes or return nil
+    # Example:
+    #     find_in_hash_list([{:foo => :bar}, {:bar => :baz}], :foo)
+    #     => :bar
+    def find_in_hash_list(collection, key)
+      result = collection.find { |hsh| hsh.keys.include?(key) }
+      result ? result[key] : nil
+    end
 
   end # EwsSoapFreeBusyResponse
 
