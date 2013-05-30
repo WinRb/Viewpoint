@@ -88,7 +88,7 @@ module Viewpoint::EWS::SOAP
         se = vals.delete(:sub_elements)
         txt = vals.delete(:text)
 
-        @nbuild.send(keys.first.to_s.camel_case, txt, vals) {|x|
+        @nbuild[NS_EWS_TYPES].send(keys.first.to_s.camel_case, txt, vals) {|x|
           build_xml!(se) if se
         }
       when 'Array'
@@ -688,7 +688,7 @@ module Viewpoint::EWS::SOAP
 
     # @see http://msdn.microsoft.com/en-us/library/aa565652(v=exchg.140).aspx
     def item!(item)
-      nbuild.Item {
+      nbuild[NS_EWS_TYPES].Item {
         item.each_pair {|k,v|
           self.send("#{k}!", v)
         }
@@ -857,7 +857,7 @@ module Viewpoint::EWS::SOAP
       uri = upd.select {|k,v| k =~ /_uri/i}
       raise EwsBadArgumentError, "Bad argument given for SetItemField." if uri.keys.length != 1
       upd.delete(uri.keys.first)
-      @nbuild.SetItemField {
+      @nbuild[NS_EWS_TYPES].SetItemField {
         dispatch_field_uri!(uri)
         dispatch_field_item!(upd)
       }
@@ -976,7 +976,7 @@ module Viewpoint::EWS::SOAP
 
     # A helper to dispatch to a FieldURI, IndexedFieldURI, or an ExtendedFieldURI
     # @todo Implement ExtendedFieldURI
-    def dispatch_field_uri!(uri, ns=NS_EWS_MESSAGES)
+    def dispatch_field_uri!(uri, ns=NS_EWS_TYPES)
       type = uri.keys.first
       vals = uri[type].is_a?(Array) ? uri[type] : [uri[type]]
       case type
