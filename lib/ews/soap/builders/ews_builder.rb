@@ -714,6 +714,10 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def is_all_day_event!(value)
+      nbuild[NS_EWS_TYPES].IsAllDayEvent(value)
+    end
+
     def forward_item!(item)
       nbuild[NS_EWS_TYPES].ForwardItem {
         item.each_pair {|k,v|
