@@ -818,6 +818,15 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].End(et[:text])
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/exchange/dd899524(v=exchg.140).aspx
+    def start_time_zone!(id)
+      nbuild[NS_EWS_TYPES].StartTimeZone { |x| x.parent['Id'] = id[:id] }
+    end
+
+    def end_time_zone!(id)
+      nbuild[NS_EWS_TYPES].EndTimeZone { |x| x.parent['Id'] = id[:id] }
+    end
+
     # @see http://msdn.microsoft.com/en-us/library/aa565428(v=exchg.140).aspx
     def item_changes!(changes)
       nbuild.ItemChanges {
