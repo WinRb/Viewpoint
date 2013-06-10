@@ -781,6 +781,12 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def from!(f)
+      nbuild[NS_EWS_TYPES].From {
+        mailbox! f
+      }
+    end
+
     def required_attendees!(attendees)
       nbuild[NS_EWS_TYPES].RequiredAttendees {
         attendees.each {|a| attendee!(a[:attendee])}
