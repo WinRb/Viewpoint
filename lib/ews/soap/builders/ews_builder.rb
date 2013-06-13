@@ -982,7 +982,7 @@ module Viewpoint::EWS::SOAP
       case type
       when :field_uRI, :field_uri
         vals.each do |val|
-          nbuild[ns].FieldURI('FieldURI' => val)
+          nbuild[ns].FieldURI('FieldURI' => val[type])
         end
       when :indexed_field_uRI, :indexed_field_uri
         vals.each do |val|
