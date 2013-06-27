@@ -17,7 +17,7 @@
 =end
 module Viewpoint::EWS::ItemAccessors
   include Viewpoint::EWS
-
+    
   # This is a class method that fetches an existing Item from the
   #  Exchange Store.
   # @param [String] item_id The id of the item. You can also pass a Hash in the
@@ -80,6 +80,16 @@ module Viewpoint::EWS::ItemAccessors
     copy_move_items_parser(resp, :move_item_response_message)
   end
 
+  # Exports an entire item into base64 string
+  # @param item_ids [Array] array of item ids. Can also be a single id value
+  # return [Array] array of bulk items
+  def export_items(item_ids)
+    args = export_items_args(item_ids)
+    obj = OpenStruct.new(opts: args)
+    yield obj if block_given?
+    resp = ews.export_items(args)
+    export_items_parser(resp)
+  end
 
 private
 
@@ -98,7 +108,6 @@ private
 
   def get_item_parser(resp)
     rm = resp.response_messages[0]
-
     if(rm && rm.status == 'Success')
       i = rm.items.first
       itype = i.keys.first
@@ -152,6 +161,38 @@ private
       end
       obj
     }
+  end
+
+  def export_items_args(item_ids)
+    default_args = {}
+    default_args[:item_ids] = []
+    if item_ids.is_a?(Array) || item_ids.is_a?(Hash) then
+      item_ids.each do |id|
+        default_args[:item_ids] = default_args[:item_ids] + [{:item_id => {:id => id}}]
+      end
+    else
+      default_args[:item_ids] = [{:item_id => {:id => item_ids}}]
+    end
+    default_args
+  end
+  
+  
+  def export_items_parser(resp)
+    rm = resp.response_messages
+    if(rm)
+      items = []
+      rm.each do |i|
+        if i.success? then
+          type = i.type
+          items << class_by_name(type).new(ews, i.message[:elems])
+        else
+          code = i.respond_to?(:code) ? i.code : "Unknown"
+          text = i.respond_to?(:message_text) ? i.message_text : "Unknown"
+          items << "Could not retrieve item. #{code}: #{text}"
+        end
+      end
+    items
+    end
   end
 
 end # Viewpoint::EWS::ItemAccessors

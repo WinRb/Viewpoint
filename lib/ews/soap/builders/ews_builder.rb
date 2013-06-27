@@ -228,6 +228,18 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/ff709503(v=exchg.140).aspx
+    def export_item_ids!(item_ids)
+      ns = @nbuild.parent.name.match(/subscription/i) ? NS_EWS_TYPES : NS_EWS_MESSAGES
+      @nbuild[ns].ExportItems{
+        @nbuild.ItemIds {
+          item_ids.each do |iid|
+            dispatch_item_id!(iid)
+          end
+        }
+      }
+    end
+
     # @see http://msdn.microsoft.com/en-us/library/aa580744(v=EXCHG.140).aspx
     def occurrence_item_id!(id)
       @nbuild[NS_EWS_TYPES].OccurrenceItemId {|x|
