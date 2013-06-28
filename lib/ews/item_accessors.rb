@@ -107,7 +107,7 @@ private
 
   def get_item_parser(resp)
     rm = resp.response_messages[0]
-    
+
     if(rm && rm.status == 'Success')
       i = rm.items.first
       itype = i.keys.first
@@ -166,7 +166,7 @@ private
   def export_items_args(item_ids)
     default_args = {}
     default_args[:item_ids] = []
-    if item_ids.is_a?(Array) || item_ids.is_a?(Hash) then
+    if item_ids.is_a?(Array) then
       item_ids.each do |id|
         default_args[:item_ids] = default_args[:item_ids] + [{:item_id => {:id => id}}]
       end
