@@ -7,14 +7,13 @@ module Viewpoint::EWS::Types
 
     BULK_KEY_PATHS = {
       :id          => [:item_id, :attribs, :id],
+      :change_key  => [:item_id, :attribs, :change_key],
       :data        => [:data, :text]
     }
 
     BULK_KEY_TYPES = { }
 
     BULK_KEY_ALIAS = { }
-
-    attr_reader :data, :id
 
     def initialize(ews, bulk_item)
       super(ews, bulk_item)
@@ -24,6 +23,10 @@ module Viewpoint::EWS::Types
 
     def id
       @item[:item_id][:attribs][:id]
+    end
+
+    def change_key
+      @item[:item_id][:attribs][:change_key]
     end
 
     def data

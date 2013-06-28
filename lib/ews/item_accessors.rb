@@ -17,7 +17,7 @@
 =end
 module Viewpoint::EWS::ItemAccessors
   include Viewpoint::EWS
-    
+
   # This is a class method that fetches an existing Item from the
   #  Exchange Store.
   # @param [String] item_id The id of the item. You can also pass a Hash in the
@@ -85,8 +85,7 @@ module Viewpoint::EWS::ItemAccessors
   # return [Array] array of bulk items
   def export_items(item_ids)
     args = export_items_args(item_ids)
-    obj = OpenStruct.new(opts: args)
-    yield obj if block_given?
+    
     resp = ews.export_items(args)
     export_items_parser(resp)
   end
@@ -108,6 +107,7 @@ private
 
   def get_item_parser(resp)
     rm = resp.response_messages[0]
+    
     if(rm && rm.status == 'Success')
       i = rm.items.first
       itype = i.keys.first

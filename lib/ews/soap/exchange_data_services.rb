@@ -50,7 +50,7 @@ module Viewpoint::EWS::SOAP
       end
       do_soap_request(req, response_class: EwsResponse)
     end
-  
+
     # Gets items from the Exchange store
     # @see http://msdn.microsoft.com/en-us/library/aa565934(v=EXCHG.140).aspx
     #
