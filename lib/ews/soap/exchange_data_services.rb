@@ -40,6 +40,7 @@ module Viewpoint::EWS::SOAP
           builder.nbuild.FindItem(:Traversal => opts[:traversal].to_s.camel_case) {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.item_shape!(opts[:item_shape])
+            builder.indexed_page_item_view!(opts[:indexed_page_item_view]) if opts[:indexed_page_item_view]
             # @todo add FractionalPageFolderView
             builder.calendar_view!(opts[:calendar_view]) if opts[:calendar_view]
             builder.contacts_view!(opts[:contacts_view]) if opts[:contacts_view]

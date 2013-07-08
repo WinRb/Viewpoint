@@ -131,6 +131,15 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    # Build the IndexedPageItemView element
+    # @see http://msdn.microsoft.com/en-us/library/exchange/aa563549(v=exchg.150).aspx
+    # @todo needs peer check
+    def indexed_page_item_view!(indexed_page_item_view)
+      attribs = {}
+      indexed_page_item_view.each_pair {|k,v| attribs[k.to_s.camel_case] = v.to_s}
+      @nbuild[NS_EWS_MESSAGES].IndexedPageItemView(attribs)
+    end
+
     # Build the BaseShape element
     # @see http://msdn.microsoft.com/en-us/library/aa580545.aspx
     def base_shape!(base_shape)
