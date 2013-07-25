@@ -116,6 +116,7 @@ module Viewpoint::EWS::SOAP
     #        body: {body_type: 'Text', text: 'this is a test cal item'},
     #        start: {text: Chronic.parse('tomorrow at 4pm').to_datetime.to_s},
     #        end: {text: Chronic.parse('tomorrow at 5pm').to_datetime.to_s},
+    #        is_all_day_event: true,
     #        required_attendees: [
     #         {attendee: {mailbox: {email_address: 'dan.wanek@gmail.com'}}},
     #        ]
