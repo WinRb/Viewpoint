@@ -122,6 +122,7 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_MESSAGES].ItemShape {
         @nbuild.parent.default_namespace = @default_ns
         base_shape!(item_shape[:base_shape])
+        mime_content!(item_shape[:include_mime_content]) if item_shape.has_key?(:include_mime_content)
         body_type!(item_shape[:body_type]) if item_shape[:body_type]
         if(item_shape[:additional_properties])
           additional_properties!(item_shape[:additional_properties])
@@ -133,6 +134,10 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa580545.aspx
     def base_shape!(base_shape)
       @nbuild[NS_EWS_TYPES].BaseShape(base_shape.to_s.camel_case)
+    end
+
+    def mime_content!(include_mime_content)
+      @nbuild[NS_EWS_TYPES].IncludeMimeContent(include_mime_content.to_s.downcase)
     end
 
     def body_type!(body_type)

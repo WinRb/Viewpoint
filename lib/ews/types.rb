@@ -162,7 +162,15 @@ module Viewpoint::EWS
     end
 
     def build_extended_properties(eprops)
-      eprops.collect.collect {|e| e[:elems]}
+      h = {}
+      eprops.each do |e|
+        e[:elems].each_cons(2) do |k,v|
+          key = k[:extended_field_u_r_i][:attribs][:property_name].downcase.to_sym if k[:extended_field_u_r_i][:attribs][:property_type] == 'String'
+          val = v[:value][:text]
+          h.store(key,val)
+        end
+      end
+      h
     end
 
   end
