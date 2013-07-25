@@ -63,6 +63,8 @@ require 'ews/soap/exchange_web_service'
 require 'ews/connection_helper'
 require 'ews/connection'
 
+require 'ews/impersonation'
+
 # Base Types
 require 'ews/types'
 require 'ews/types/item_field_uri_map'
@@ -89,6 +91,7 @@ require 'ews/types/file_attachment'
 require 'ews/types/item_attachment'
 require 'ews/types/mailbox_user'
 require 'ews/types/out_of_office'
+require 'ews/types/export_items_response_message'
 
 # Events
 require 'ews/types/event'

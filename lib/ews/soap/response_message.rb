@@ -19,7 +19,7 @@
 module Viewpoint::EWS::SOAP
   class ResponseMessage
 
-    attr_reader :message
+    attr_reader :message, :type
 
     def initialize(message)
       @type    = message.keys.first
