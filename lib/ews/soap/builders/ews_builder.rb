@@ -48,6 +48,7 @@ module Viewpoint::EWS::SOAP
         node.parent.namespace = parent_namespace(node)
         node.Header {
           set_version_header! opts[:server_version]
+		      set_impersonation! opts[:impersonation_type], opts[:impersonation_mail]
           yield(:header, self) if block_given?
         }
         node.Body {
@@ -230,6 +231,18 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].ItemId {|x|
         x.parent['Id'] = id[:id]
         x.parent['ChangeKey'] = id[:change_key] if id[:change_key]
+      }
+    end
+
+    # @see http://msdn.microsoft.com/en-us/library/ff709503(v=exchg.140).aspx
+    def export_item_ids!(item_ids)
+      ns = @nbuild.parent.name.match(/subscription/i) ? NS_EWS_TYPES : NS_EWS_MESSAGES
+      @nbuild[ns].ExportItems{
+        @nbuild.ItemIds {
+          item_ids.each do |iid|
+            dispatch_item_id!(iid)
+          end
+        }
       }
     end
 
@@ -1046,6 +1059,16 @@ private
         }
       end
     end
+
+    def set_impersonation!(type, address)
+	    if type && type != ""
+	      nbuild[NS_EWS_TYPES].ExchangeImpersonation {
+		      nbuild[NS_EWS_TYPES].ConnectingSID {
+		        nbuild[NS_EWS_TYPES].method_missing type, address
+		      }
+        }
+      end
+	  end
 
     # some methods need special naming so they use the '_r' suffix like 'and'
     def normalize_type(type)

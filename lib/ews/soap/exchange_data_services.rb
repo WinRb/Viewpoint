@@ -364,6 +364,26 @@ module Viewpoint::EWS::SOAP
       do_soap_request(req, response_class: EwsResponse)
     end
 
+    # Export items as a base64 string
+    # @see http://msdn.microsoft.com/en-us/library/ff709503(v=exchg.140).aspx
+    #
+    # (Requires Exchange version equal or newer than VERSION 2010 SP 1)
+    #
+    # @param ids [Array] array of item ids. Can also be a single id value
+    def export_items(ids)
+      validate_version(VERSION_2010_SP1)
+      ids = ids.clone
+      [:item_ids].each do |k|
+        validate_param(ids, k, true)
+      end
+      req = build_soap! do |type, builder|
+        if(type == :header)
+        else
+      builder.export_item_ids!(ids[:item_ids])
+        end
+      end
+      do_soap_request(req, response_class: EwsResponse)
+    end
 
     # ------------- Folder Operations ------------
 
