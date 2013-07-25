@@ -54,7 +54,7 @@ module Viewpoint::EWS::SOAP
     end
 
     def response_message
-      get_user_availability_response.first[:response_message]
+      find_in_hash_list(get_user_availability_response, :response_message)
     end
 
     def response_class
@@ -63,7 +63,8 @@ module Viewpoint::EWS::SOAP
     alias :status :response_class
 
     def response_code
-      response_message[:elems].first[:response_code][:text]
+      result = find_in_hash_list(response_message[:elems], :response_code)
+      result ? result[:text] : nil
     end
     alias :code :response_code
 
@@ -103,6 +104,14 @@ module Viewpoint::EWS::SOAP
       end
     end
 
+    # Find the first element in a list of hashes or return nil
+    # Example:
+    #     find_in_hash_list([{:foo => :bar}, {:bar => :baz}], :foo)
+    #     => :bar
+    def find_in_hash_list(collection, key)
+      result = collection.find { |hsh| hsh.keys.include?(key) }
+      result ? result[key] : nil
+    end
 
   end # EwsSoapFreeBusyResponse
 
