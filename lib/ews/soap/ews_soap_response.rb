@@ -45,11 +45,7 @@ module Viewpoint::EWS::SOAP
 
     def response_messages
       key = response.keys.first
-      if elem = response[key][:elems].find{|e| e.has_key?(:response_message)}
-       elem[:response_messages][:elems]
-      else
-        []
-      end
+      response[key][:elems][0][:response_messages][:elems]
     end
 
     def response_message

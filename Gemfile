@@ -1,9 +1,8 @@
-source 'https://rubygems.org'
+source :rubygems
 
 gemspec
 
 group :development do
-  gem 'rake'
   gem 'rspec'
   gem 'guard'
   gem 'guard-rspec'
