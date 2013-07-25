@@ -45,7 +45,7 @@ module Viewpoint::EWS::SOAP
 
     def response_messages
       key = response.keys.first
-      response[key][:elems][0][:response_messages][:elems]
+      response[key][:elems][0].try(:[], :response_messages).try(:[], :elems) || []
     end
 
     def response_message
