@@ -399,21 +399,40 @@ module Viewpoint::EWS::SOAP
     end
 
     def time_zone!(zone)
+      zone ||= {}
+      zone = {
+        bias: zone[:bias] || 480,
+        standard_time: {
+          bias: 0,
+          time: "02:00:00",
+          day_order: 5,
+          month: 10,
+          day_of_week: 'Sunday'
+        }.merge(zone[:standard_time] || {}),
+        daylight_time: {
+          bias: -60,
+          time: "02:00:00",
+          day_order: 1,
+          month: 4,
+          day_of_week: 'Sunday'
+        }.merge(zone[:daylight_time] || {})
+      }
+
       nbuild[NS_EWS_TYPES].TimeZone {
-        nbuild[NS_EWS_TYPES].Bias(480)
+        nbuild[NS_EWS_TYPES].Bias(zone[:bias])
         nbuild[NS_EWS_TYPES].StandardTime {
-          nbuild[NS_EWS_TYPES].Bias(0)
-          nbuild[NS_EWS_TYPES].Time("02:00:00")
-          nbuild[NS_EWS_TYPES].DayOrder(5)
-          nbuild[NS_EWS_TYPES].Month(10)
-          nbuild[NS_EWS_TYPES].DayOfWeek('Sunday')
+          nbuild[NS_EWS_TYPES].Bias(zone[:standard_time][:bias])
+          nbuild[NS_EWS_TYPES].Time(zone[:standard_time][:time])
+          nbuild[NS_EWS_TYPES].DayOrder(zone[:standard_time][:day_order])
+          nbuild[NS_EWS_TYPES].Month(zone[:standard_time][:month])
+          nbuild[NS_EWS_TYPES].DayOfWeek(zone[:standard_time][:day_of_week])
         }
         nbuild[NS_EWS_TYPES].DaylightTime {
-          nbuild[NS_EWS_TYPES].Bias(-60)
-          nbuild[NS_EWS_TYPES].Time("02:00:00")
-          nbuild[NS_EWS_TYPES].DayOrder(1)
-          nbuild[NS_EWS_TYPES].Month(4)
-          nbuild[NS_EWS_TYPES].DayOfWeek('Sunday')
+          nbuild[NS_EWS_TYPES].Bias(zone[:daylight_time][:bias])
+          nbuild[NS_EWS_TYPES].Time(zone[:daylight_time][:time])
+          nbuild[NS_EWS_TYPES].DayOrder(zone[:daylight_time][:day_order])
+          nbuild[NS_EWS_TYPES].Month(zone[:daylight_time][:month])
+          nbuild[NS_EWS_TYPES].DayOfWeek(zone[:daylight_time][:day_of_week])
         }
       }
     end
