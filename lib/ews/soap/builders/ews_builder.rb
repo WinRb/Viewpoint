@@ -794,6 +794,10 @@ module Viewpoint::EWS::SOAP
     def subject!(sub)
       nbuild[NS_EWS_TYPES].Subject(sub)
     end
+    
+    def importance!(sub)
+      nbuild[NS_EWS_TYPES].Importance(sub)
+    end
 
     def body!(b)
       nbuild[NS_EWS_TYPES].Body(b[:text]) {|x|
