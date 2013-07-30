@@ -24,4 +24,11 @@ describe Viewpoint::EWS::SOAP::EwsBuilder do
     doc.xpath('//t:BodyType[3]').text.should eq('Best')
   end
 
+  it 'should format various Time inputs' do
+    @builder.send(:format_time, Date.iso8601('2013-01-01')).should eq('2013-01-01T00:00:00+00:00')
+    @builder.send(:format_time, DateTime.iso8601('2013-01-01T23:01:00-05:00')).should eq('2013-01-02T04:01:00+00:00')
+    expect {@builder.send(:format_time, true)}.to raise_error(Viewpoint::EWS::EwsBadArgumentError)
+    expect {@builder.send(:format_time, 'asdf')}.to raise_error(Viewpoint::EWS::EwsBadArgumentError)
+  end
+
 end

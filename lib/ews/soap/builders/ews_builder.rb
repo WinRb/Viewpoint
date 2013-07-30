@@ -21,6 +21,7 @@ module Viewpoint::EWS::SOAP
   # know how to build themselves so each parent element can delegate creation of
   # subelements to a method of the same name with a '!' after it.
   class EwsBuilder
+    include Viewpoint::EWS
 
     attr_reader :nbuild
     def initialize
@@ -395,8 +396,8 @@ module Viewpoint::EWS::SOAP
 
     def duration!(opts)
       nbuild.Duration {
-        nbuild.StartTime(opts[:start_time].new_offset(0).strftime('%FT%H:%M:%SZ'))
-        nbuild.EndTime(opts[:end_time].new_offset(0).strftime('%FT%H:%M:%SZ'))
+        nbuild.StartTime(format_time opts[:start_time])
+        nbuild.EndTime(format_time opts[:end_time])
       }
     end
 
@@ -415,8 +416,8 @@ module Viewpoint::EWS::SOAP
     def free_busy_view_options!(opts)
       nbuild[NS_EWS_TYPES].FreeBusyViewOptions {
         nbuild[NS_EWS_TYPES].TimeWindow {
-          nbuild[NS_EWS_TYPES].StartTime(opts[:time_window][:start_time])
-          nbuild[NS_EWS_TYPES].EndTime(opts[:time_window][:end_time])
+          nbuild[NS_EWS_TYPES].StartTime(format_time opts[:time_window][:start_time])
+          nbuild[NS_EWS_TYPES].EndTime(format_time opts[:time_window][:end_time])
         }
         nbuild[NS_EWS_TYPES].RequestedView(opts[:requested_view][:requested_free_busy_view].to_s.camel_case)
       }
@@ -1090,6 +1091,21 @@ private
         "#{type}_r".to_sym
       else
         type
+      end
+    end
+
+    def format_time(time)
+      case time
+      when Time, Date, DateTime
+        time.to_datetime.new_offset(0).iso8601
+      when String
+        begin
+          DateTime.parse(time).new_offset(0).iso8601
+        rescue ArgumentError
+          raise EwsBadArgumentError, "Invalid Time argument (#{time})"
+        end
+      else
+        raise EwsBadArgumentError, "Invalid Time argument (#{time})"
       end
     end
 
