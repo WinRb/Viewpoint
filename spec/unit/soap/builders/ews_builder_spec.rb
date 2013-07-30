@@ -1,10 +1,14 @@
-require_relative '../spec_helper'
+require_relative '../../../spec_helper'
 
 describe Viewpoint::EWS::SOAP::EwsBuilder do
-  include Viewpoint::EWS::SOAP
   before do
     @builder = described_class.new
     @namespaces = Viewpoint::EWS::SOAP::NAMESPACES
+  end
+
+  it 'should #build a basic structure' do
+    doc = @builder.build!(server_version: Viewpoint::EWS::SOAP::VERSION_2007) {|s| }
+    doc.should match_xml(load_soap('basic', :request))
   end
 
   it 'should build BodyType' do
