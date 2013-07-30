@@ -2,17 +2,21 @@ $: << File.dirname(__FILE__) + '/../lib/'
 require 'viewpoint'
 require 'ostruct'
 require 'turn/autorun'
-require_relative 'request_xml'
-require_relative 'response_xml'
 require_relative 'xml_matcher'
-
-module SpecHelper
-  def self.specdir
-    File.dirname(__FILE__)
-  end
-end
 
 RSpec.configure do |c|
 end
 
 Turn.config.format = :outline
+
+module SpecHelper
+  def specdir
+    File.dirname(__FILE__)
+  end
+
+  def load_soap(name, type)
+    File.read("#{specdir}/soap_data/#{name}_#{type}.xml")
+  end
+end
+
+include SpecHelper

@@ -1,10 +1,10 @@
 class XmlMatcher
   def initialize(expected)
-    @expected = expected
+    @expected = Nokogiri::XML(expected)
   end
 
   def ==(actual)
-    @expected == actual.to_xml
+    @expected.to_xml == actual.to_xml
   end
 end
 

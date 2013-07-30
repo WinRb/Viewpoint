@@ -38,7 +38,7 @@ describe Viewpoint::EWS::MailboxAccessors do
         should_receive(:do_soap_request) do |request_document|
           request_document.at_xpath('//soap:Envelope/soap:Body//t:TimeZone').to_s.should eq timezone_request
         end.
-        and_return(stub(:resp, :status => 'Success'))
+        and_return(double(:resp, :status => 'Success'))
 
       ecli.get_user_availability(
         recipients,
