@@ -25,6 +25,7 @@ module Viewpoint::EWS
         self.subject ||= nil
         self.body ||= nil
         self.body_type ||= 'Text'
+        self.importance ||= 'Normal'
         self.draft ||= false
         self.to_recipients ||= []
         self.cc_recipients ||= []
@@ -49,6 +50,8 @@ module Viewpoint::EWS
         msg = {}
         msg[:subject] = subject if subject
         msg[:body] = {text: body, body_type: body_type} if body
+        
+        msg[:importance] = importance if importance
 
         to_r = to_recipients.collect{|r| {mailbox: {email_address: r}}}
         msg[:to_recipients] = to_r unless to_r.empty?
