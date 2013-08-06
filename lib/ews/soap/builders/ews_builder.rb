@@ -21,6 +21,7 @@ module Viewpoint::EWS::SOAP
   # know how to build themselves so each parent element can delegate creation of
   # subelements to a method of the same name with a '!' after it.
   class EwsBuilder
+    include Viewpoint::EWS
 
     attr_reader :nbuild
     def initialize
@@ -48,6 +49,7 @@ module Viewpoint::EWS::SOAP
         node.parent.namespace = parent_namespace(node)
         node.Header {
           set_version_header! opts[:server_version]
+		      set_impersonation! opts[:impersonation_type], opts[:impersonation_mail]
           yield(:header, self) if block_given?
         }
         node.Body {
@@ -122,6 +124,7 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_MESSAGES].ItemShape {
         @nbuild.parent.default_namespace = @default_ns
         base_shape!(item_shape[:base_shape])
+        mime_content!(item_shape[:include_mime_content]) if item_shape.has_key?(:include_mime_content)
         body_type!(item_shape[:body_type]) if item_shape[:body_type]
         if(item_shape[:additional_properties])
           additional_properties!(item_shape[:additional_properties])
@@ -129,10 +132,23 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    # Build the IndexedPageItemView element
+    # @see http://msdn.microsoft.com/en-us/library/exchange/aa563549(v=exchg.150).aspx
+    # @todo needs peer check
+    def indexed_page_item_view!(indexed_page_item_view)
+      attribs = {}
+      indexed_page_item_view.each_pair {|k,v| attribs[k.to_s.camel_case] = v.to_s}
+      @nbuild[NS_EWS_MESSAGES].IndexedPageItemView(attribs)
+    end
+
     # Build the BaseShape element
     # @see http://msdn.microsoft.com/en-us/library/aa580545.aspx
     def base_shape!(base_shape)
       @nbuild[NS_EWS_TYPES].BaseShape(base_shape.to_s.camel_case)
+    end
+
+    def mime_content!(include_mime_content)
+      @nbuild[NS_EWS_TYPES].IncludeMimeContent(include_mime_content.to_s.downcase)
     end
 
     def body_type!(body_type)
@@ -225,6 +241,18 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].ItemId {|x|
         x.parent['Id'] = id[:id]
         x.parent['ChangeKey'] = id[:change_key] if id[:change_key]
+      }
+    end
+
+    # @see http://msdn.microsoft.com/en-us/library/ff709503(v=exchg.140).aspx
+    def export_item_ids!(item_ids)
+      ns = @nbuild.parent.name.match(/subscription/i) ? NS_EWS_TYPES : NS_EWS_MESSAGES
+      @nbuild[ns].ExportItems{
+        @nbuild.ItemIds {
+          item_ids.each do |iid|
+            dispatch_item_id!(iid)
+          end
+        }
       }
     end
 
@@ -368,8 +396,8 @@ module Viewpoint::EWS::SOAP
 
     def duration!(opts)
       nbuild.Duration {
-        nbuild.StartTime(opts[:start_time].new_offset(0).strftime('%FT%H:%M:%SZ'))
-        nbuild.EndTime(opts[:end_time].new_offset(0).strftime('%FT%H:%M:%SZ'))
+        nbuild.StartTime(format_time opts[:start_time])
+        nbuild.EndTime(format_time opts[:end_time])
       }
     end
 
@@ -388,8 +416,8 @@ module Viewpoint::EWS::SOAP
     def free_busy_view_options!(opts)
       nbuild[NS_EWS_TYPES].FreeBusyViewOptions {
         nbuild[NS_EWS_TYPES].TimeWindow {
-          nbuild[NS_EWS_TYPES].StartTime(opts[:time_window][:start_time])
-          nbuild[NS_EWS_TYPES].EndTime(opts[:time_window][:end_time])
+          nbuild[NS_EWS_TYPES].StartTime(format_time opts[:time_window][:start_time])
+          nbuild[NS_EWS_TYPES].EndTime(format_time opts[:time_window][:end_time])
         }
         nbuild[NS_EWS_TYPES].RequestedView(opts[:requested_view][:requested_free_busy_view].to_s.camel_case)
       }
@@ -399,21 +427,40 @@ module Viewpoint::EWS::SOAP
     end
 
     def time_zone!(zone)
+      zone ||= {}
+      zone = {
+        bias: zone[:bias] || 480,
+        standard_time: {
+          bias: 0,
+          time: "02:00:00",
+          day_order: 5,
+          month: 10,
+          day_of_week: 'Sunday'
+        }.merge(zone[:standard_time] || {}),
+        daylight_time: {
+          bias: -60,
+          time: "02:00:00",
+          day_order: 1,
+          month: 4,
+          day_of_week: 'Sunday'
+        }.merge(zone[:daylight_time] || {})
+      }
+
       nbuild[NS_EWS_TYPES].TimeZone {
-        nbuild[NS_EWS_TYPES].Bias(480)
+        nbuild[NS_EWS_TYPES].Bias(zone[:bias])
         nbuild[NS_EWS_TYPES].StandardTime {
-          nbuild[NS_EWS_TYPES].Bias(0)
-          nbuild[NS_EWS_TYPES].Time("02:00:00")
-          nbuild[NS_EWS_TYPES].DayOrder(5)
-          nbuild[NS_EWS_TYPES].Month(10)
-          nbuild[NS_EWS_TYPES].DayOfWeek('Sunday')
+          nbuild[NS_EWS_TYPES].Bias(zone[:standard_time][:bias])
+          nbuild[NS_EWS_TYPES].Time(zone[:standard_time][:time])
+          nbuild[NS_EWS_TYPES].DayOrder(zone[:standard_time][:day_order])
+          nbuild[NS_EWS_TYPES].Month(zone[:standard_time][:month])
+          nbuild[NS_EWS_TYPES].DayOfWeek(zone[:standard_time][:day_of_week])
         }
         nbuild[NS_EWS_TYPES].DaylightTime {
-          nbuild[NS_EWS_TYPES].Bias(-60)
-          nbuild[NS_EWS_TYPES].Time("02:00:00")
-          nbuild[NS_EWS_TYPES].DayOrder(1)
-          nbuild[NS_EWS_TYPES].Month(4)
-          nbuild[NS_EWS_TYPES].DayOfWeek('Sunday')
+          nbuild[NS_EWS_TYPES].Bias(zone[:daylight_time][:bias])
+          nbuild[NS_EWS_TYPES].Time(zone[:daylight_time][:time])
+          nbuild[NS_EWS_TYPES].DayOrder(zone[:daylight_time][:day_order])
+          nbuild[NS_EWS_TYPES].Month(zone[:daylight_time][:month])
+          nbuild[NS_EWS_TYPES].DayOfWeek(zone[:daylight_time][:day_of_week])
         }
       }
     end
@@ -748,6 +795,10 @@ module Viewpoint::EWS::SOAP
     def subject!(sub)
       nbuild[NS_EWS_TYPES].Subject(sub)
     end
+    
+    def importance!(sub)
+      nbuild[NS_EWS_TYPES].Importance(sub)
+    end
 
     def body!(b)
       nbuild[NS_EWS_TYPES].Body(b[:text]) {|x|
@@ -1029,6 +1080,16 @@ private
       end
     end
 
+    def set_impersonation!(type, address)
+	    if type && type != ""
+	      nbuild[NS_EWS_TYPES].ExchangeImpersonation {
+		      nbuild[NS_EWS_TYPES].ConnectingSID {
+		        nbuild[NS_EWS_TYPES].method_missing type, address
+		      }
+        }
+      end
+	  end
+
     # some methods need special naming so they use the '_r' suffix like 'and'
     def normalize_type(type)
       case type
@@ -1036,6 +1097,21 @@ private
         "#{type}_r".to_sym
       else
         type
+      end
+    end
+
+    def format_time(time)
+      case time
+      when Time, Date, DateTime
+        time.to_datetime.new_offset(0).iso8601
+      when String
+        begin
+          DateTime.parse(time).new_offset(0).iso8601
+        rescue ArgumentError
+          raise EwsBadArgumentError, "Invalid Time argument (#{time})"
+        end
+      else
+        raise EwsBadArgumentError, "Invalid Time argument (#{time})"
       end
     end
 

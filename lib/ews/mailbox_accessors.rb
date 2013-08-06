@@ -49,10 +49,15 @@ module Viewpoint::EWS::MailboxAccessors
   # @option opts [DateTime] :end_time
   # @option opts [Symbol] :requested_view :merged_only/:free_busy/
   #   :free_busy_merged/:detailed/:detailed_merged
+  # @option opts [Hash] :time_zone The TimeZone data
+  #   Example: {:bias => 'UTC offset in minutes',
+  #   :standard_time => {:bias => 480, :time => '02:00:00',
+  #     :day_order => 5, :month => 10, :day_of_week => 'Sunday'},
+  #   :daylight_time => {same options as :standard_time}}
   def get_user_availability(emails, opts)
     opts = opts.clone
     args = get_user_availability_args(emails, opts)
-    resp = ews.get_user_availability(args)
+    resp = ews.get_user_availability(args.merge(opts))
     get_user_availability_parser(resp)
   end
 
