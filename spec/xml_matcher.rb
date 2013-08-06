@@ -1,13 +1,9 @@
-class XmlMatcher
-  def initialize(expected)
-    @expected = expected
+RSpec::Matchers.define :match_xml do |expected|
+  match do |actual|
+    compare_xml(actual, expected)
   end
 
-  def ==(actual)
-    @expected == actual.to_xml
+  def compare_xml(actual, expected)
+    actual.to_xml == Nokogiri::XML(expected).to_xml
   end
-end
-
-def xml_matcher(expected_xml)
-  XmlMatcher.new(expected_xml)
 end

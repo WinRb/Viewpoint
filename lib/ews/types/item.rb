@@ -24,6 +24,7 @@ module Viewpoint::EWS::Types
       size:           [:size, :text],
       date_time_sent: [:date_time_sent, :text],
       date_time_created: [:date_time_created, :text],
+      mime_content: [:mime_content, :text],
       has_attachments?:[:has_attachments, :text],
       is_associated?: [:is_associated, :text],
       is_read?:       [:is_read, :text],

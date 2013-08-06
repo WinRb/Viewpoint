@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages">
+  <soap:Header>
+    <t:RequestServerVersion Version="Exchange2010_SP2"/>
+  </soap:Header>
+  <soap:Body>
+    <GetFolder xmlns="http://schemas.microsoft.com/exchange/services/2006/messages">
+      <FolderShape>
+        <t:BaseShape>Default</t:BaseShape>
+      </FolderShape>
+      <m:FolderIds>
+        <t:DistinguishedFolderId Id="msgfolderroot"/>
+      </m:FolderIds>
+    </GetFolder>
+  </soap:Body>
+</soap:Envelope>
