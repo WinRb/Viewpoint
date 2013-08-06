@@ -162,7 +162,28 @@ module Viewpoint::EWS
     end
 
     def build_extended_properties(eprops)
-      eprops.collect.collect {|e| e[:elems]}
+      h = {}
+      # todo
+      # the return pattern seems broken in some cases,
+      # probably needs fixing via a dedicated response parser
+      eprops.each do |e|
+        if e.size == 1
+          e[:elems].each_cons(2) do |k,v|
+            key = k[:extended_field_u_r_i][:attribs][:property_name].downcase.to_sym
+            val = v[:value][:text]
+            h.store(key,val)
+          end
+        elsif e.size == 2
+          e[1].each_cons(2) do |k,v|
+            key = k[:extended_field_u_r_i][:attribs][:property_name].downcase.to_sym
+            val = v[:value][:text]
+            h.store(key,val)
+          end
+        else
+          raise EwsMinimalObjectError, "Not prepared to deal with elements greater than 2"
+        end
+      end
+      h
     end
 
   end
