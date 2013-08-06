@@ -10,13 +10,13 @@ describe "Exchange Response Parser Functionality" do
   }
 
   it 'parses a successful response' do
-    soap_resp = ResponseXml::FIND_FOLDER
+    soap_resp = load_soap 'find_folder', :response
     resp = Viewpoint::EWS::SOAP::EwsParser.new(soap_resp).parse
     resp.body.should == success_body
   end
 
   it 'parses an unsuccessful response' do
-    soap_resp = ResponseXml::FIND_FOLDER_ERROR
+    soap_resp = load_soap 'find_folder_error', :response
     resp = Viewpoint::EWS::SOAP::EwsParser.new(soap_resp).parse
     resp.body.should == error_body
   end
