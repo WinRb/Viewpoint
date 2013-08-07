@@ -31,7 +31,10 @@ module Viewpoint::EWS::SOAP
     end
 
     def characters(string)
-      string.strip!
+      # FIXME: Move white space removal to somewhere else.
+      # This function can be called multiple times. In this case newlines in Text Bodies get stripped.
+      # See: https://github.com/zenchild/Viewpoint/issues/90
+      #string.strip!
       return if string.empty?
       if @elems.last[:text]
         @elems.last[:text] += string
