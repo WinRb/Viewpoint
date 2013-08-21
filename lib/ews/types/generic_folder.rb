@@ -113,13 +113,13 @@ module Viewpoint::EWS::Types
           [
             {:is_greater_than_or_equal_to =>
               [
-                {:field_uRI => {:field_uRI=>'item:Start'}},
+                {:field_uRI => {:field_uRI=>'calendar:Start'}},
                 {:field_uRI_or_constant=>{:constant => {:value =>start_date}}}
               ]
             },
             {:is_less_than_or_equal_to =>
               [
-                {:field_uRI => {:field_uRI=>'item:End'}},
+                {:field_uRI => {:field_uRI=>'calendar:End'}},
                 {:field_uRI_or_constant=>{:constant => {:value =>end_date}}}
               ]
             }
