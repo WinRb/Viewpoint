@@ -89,10 +89,14 @@ module Viewpoint::EWS::SOAP
         vals = vals.first.clone
         se = vals.delete(:sub_elements)
         txt = vals.delete(:text)
+        xmlns_attribute = vals.delete(:xmlns_attribute)
 
-        @nbuild.send(keys.first.to_s.camel_case, txt, vals) {|x|
+        node = @nbuild.send(keys.first.to_s.camel_case, txt, vals) {|x|
           build_xml!(se) if se
         }
+
+        # Set node level namespace
+        node.xmlns = NAMESPACES["xmlns:#{xmlns_attribute}"] if xmlns_attribute
       when 'Array'
         elems.each do |e|
           build_xml!(e)
@@ -1061,7 +1065,9 @@ module Viewpoint::EWS::SOAP
       end
     end
 
-    def dispatch_field_item!(item)
+    # Insert item, enforce xmlns attribute if prefix is present
+    def dispatch_field_item!(item, ns_prefix = nil)
+      item.values.first[:xmlns_attribute] = ns_prefix if ns_prefix
       build_xml!(item)
     end
 
