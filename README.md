@@ -33,13 +33,18 @@ out of the picture this is no longer required. Go crazy ;)
 ## Enhanced in 1.0
 
 * *Delegate access is supported*
-  One thing that was often asked for, but missing from the previous version
-  was delegate access to mailboxes and calendars.  This is now supported via
-  the 'act_as' parameter to the GenericFolder::get_folder method. For example:
-  ofolder = Folder.get_folder(:inbox,'otheruser@test.com')
-  If your user has delegate access to the Inbox for otheruser@test.com this
-  operation will retrieve their inbox and allow you to manipulate it as you
-  would with your own Inbox.
+  One thing that was often asked for, but missing from the previous version was delegate access to mailboxes and calendars.  This is now supported via the 'act_as' parameter to the GenericFolder::get_folder method. 
+
+>> Inbox example:
+  ```ofolder = Folder.get_folder(:inbox, opts = {act_as: "user@host.com"})```
+
+>> If your user has delegate access to the Inbox for otheruser@test.com this operation will retrieve their inbox and allow you to manipulate it as you would with your own Inbox.
+
+>> Calendar example:
+  ```oCalendar = cli.get_folder(:calendar, opts = {act_as: "user@host.com"})```
+
+>> If your user has delegate access to the Calendar for otheruser@test.com this operation will retrieve their calendar and allow you to manipulate it as you would with your own Calendar, depending on the permissions the other user has granted you.
+
 
 * There is also some support for manipulation of delegate access itself via
   the methods MailboxUser#add_delegate!, MailboxUser#update_delegate!, and 
