@@ -134,6 +134,8 @@ private
     opts[:root] = opts[:root] || :msgfolderroot
     opts[:traversal] = opts[:traversal] || :shallow
     opts[:shape] = opts[:shape] || :default
+    folder_id = {:id => opts[:root]}
+    folder_id[:act_as] = opts[:act_as] if opts[:act_as]
     if( opts[:folder_type] )
       restr = { :is_equal_to => 
         [
@@ -144,7 +146,7 @@ private
       }
     end
     args = {
-      :parent_folder_ids => [{:id => opts[:root]}],
+      :parent_folder_ids => [folder_id],
       :traversal => opts[:traversal],
       :folder_shape => {:base_shape => opts[:shape]}
     }
