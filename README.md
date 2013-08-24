@@ -127,12 +127,12 @@ items = inbox.items
 inbox.todays_items
 
 # since a specific date
-sd = Date.iso8061 '2013-01-01'
+sd = Date.iso8601 '2013-01-01'
 inbox.items_since sd
 
 # between 2 dates
-sd = Date.iso8061 '2013-01-01'
-ed = Date.iso8061 '2013-02-01'
+sd = Date.iso8601 '2013-01-01'
+ed = Date.iso8601 '2013-02-01'
 inbox.items_between sd, ed
 ```
 ### Free/Busy Calendar Accessors
