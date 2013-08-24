@@ -4,3 +4,4 @@ Gemfile.lock
 *.swp
 /test*.rb
 /\.test*
+.idea
