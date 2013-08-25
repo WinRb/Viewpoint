@@ -31,4 +31,8 @@ module Viewpoint::EWS::CalendarAccessors
     the_event[:calendar_event][:elems][1][:end_time][:text]
   end
 
+  def event_subject ( the_event)
+    the_event[:calendar_event][:elems][3][:calendar_event_details][:elems][1][:subject][:text]
+  end
+
 end # Viewpoint::EWS::CalendarAccessors
