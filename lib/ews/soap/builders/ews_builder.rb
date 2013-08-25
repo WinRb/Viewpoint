@@ -1071,6 +1071,16 @@ module Viewpoint::EWS::SOAP
       build_xml!(item)
     end
 
+    def room_list!(cfg_prop)
+      @nbuild[NS_EWS_MESSAGES].RoomList {
+        email_address!(cfg_prop)
+      }
+    end
+
+    def room_lists!
+      @nbuild[NS_EWS_MESSAGES].GetRoomLists
+    end
+
 
 private
 
