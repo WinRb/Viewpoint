@@ -38,12 +38,12 @@ out of the picture this is no longer required. Go crazy ;)
 >> Inbox example:
   ```ofolder = Folder.get_folder(:inbox, opts = {act_as: "user@host.com"})```
 
->> If your user has delegate access to the Inbox for otheruser@test.com this operation will retrieve their inbox and allow you to manipulate it as you would with your own Inbox.
+>> If your user has delegate access to the Inbox for user@host.com this operation will retrieve their inbox and allow you to manipulate it as you would with your own Inbox.
 
 >> Calendar example:
   ```oCalendar = cli.get_folder(:calendar, opts = {act_as: "user@host.com"})```
 
->> If your user has delegate access to the Calendar for otheruser@test.com this operation will retrieve their calendar and allow you to manipulate it as you would with your own Calendar, depending on the permissions the other user has granted you.
+>> If your user has delegate access to the Calendar for user@host.com this operation will retrieve their calendar and allow you to manipulate it as you would with your own Calendar, depending on the permissions the other user has granted you.
 
 
 * There is also some support for manipulation of delegate access itself via
