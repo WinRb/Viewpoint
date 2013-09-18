@@ -875,6 +875,14 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].End(et[:text])
     end
 
+    def location!(loc)
+      nbuild[NS_EWS_TYPES].Location(loc)
+    end
+
+    def is_all_day_event!(all_day)
+      nbuild[NS_EWS_TYPES].IsAllDayEvent(all_day)
+    end
+
     # @see http://msdn.microsoft.com/en-us/library/aa565428(v=exchg.140).aspx
     def item_changes!(changes)
       nbuild.ItemChanges {
