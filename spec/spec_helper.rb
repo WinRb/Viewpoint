@@ -15,7 +15,7 @@ module SpecHelper
   end
 
   def load_soap(name, type)
-    File.read("#{specdir}/soap_data/#{name}_#{type}.xml")
+    File.read("#{specdir}/soap_data/#{name}_#{type}.xml").gsub(%r{>\s+}, '>')
   end
 end
 
