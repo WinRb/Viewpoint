@@ -9,12 +9,12 @@ module Viewpoint::EWS::Types
     # @option attributes :subject [String]
     # @option attributes :start [Time]
     # @option attributes :end [Time]
-    # @return (CalendarItem)
+    # @return [CalendarItem]
     # @see Template::CalendarItem
     def create_item(attributes)
       template = Viewpoint::EWS::Template::CalendarItem.new attributes
       template.saved_item_folder_id = {id: self.id, change_key: self.change_key}
-      rm = ews.create_item(template.to_ews).response_messages.first
+      rm = ews.create_item(template.to_ews_create).response_messages.first
       if rm && rm.success?
         CalendarItem.new ews, rm.items.first[:calendar_item][:elems].first
       else

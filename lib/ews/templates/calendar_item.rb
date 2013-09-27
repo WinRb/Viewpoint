@@ -24,19 +24,9 @@ module Viewpoint::EWS
         super opts.dup
       end
 
-      # Create EWS item hash
-      # @return (Hash)
-      def to_ews
-        structure = to_ews_container
-        structure[:items] = [calendar_item: to_ews_item]
-        structure
-      end
-
-      private
-
       # EWS CreateItem container
-      # @return (Hash)
-      def to_ews_container
+      # @return [Hash]
+      def to_ews_create
         structure = {}
         structure[:message_disposition] = (draft ? 'SaveOnly' : 'SendAndSaveCopy')
         structure[:send_meeting_invitations] = 'SendToNone'
@@ -49,13 +39,14 @@ module Viewpoint::EWS
           end
         end
 
+        structure[:items] = [{calendar_item: to_ews_item}]
         structure
       end
 
-      # EWS Item parameters
+      # EWS Item hash
       #
       # Puts all known parameters in the required ordering and structure
-      # @return (Hash)
+      # @return [Hash]
       def to_ews_item
         item_parameters = {}
         PARAMETERS.each do |key|
