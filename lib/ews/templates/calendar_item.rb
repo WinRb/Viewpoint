@@ -51,6 +51,14 @@ module Viewpoint::EWS
         item_parameters = {}
         PARAMETERS.each do |key|
           if (value = self[key])
+
+            # Convert non duplicable values to String
+            case value
+              when NilClass, FalseClass, TrueClass, Symbol, Numeric
+                value = value.to_s
+            end
+
+            # Convert attributes
             case key
               when :start, :end
                 item_parameters[key] = {text: value.iso8601}
