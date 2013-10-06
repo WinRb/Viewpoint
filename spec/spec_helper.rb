@@ -1,3 +1,5 @@
+require 'coveralls'
+Coveralls.wear!
 $: << File.dirname(__FILE__) + '/../lib/'
 require 'viewpoint'
 require 'ostruct'
