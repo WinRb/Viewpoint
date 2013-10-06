@@ -20,7 +20,7 @@ module Viewpoint::EWS::RoomAccessors
   include Viewpoint::EWS
 
   # Gets the rooms that are available within the specified room distribution list
-  # @see http://msdn.microsoft.com/en-us/library/aa563465.aspx
+  # @see http://msdn.microsoft.com/en-us/library/dd899415.aspx
   # @param [String] roomDistributionList
   def get_rooms(roomDistributionList)
     resp = ews.get_rooms(roomDistributionList)
