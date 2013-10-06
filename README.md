@@ -3,6 +3,14 @@
 # Viewpoint for Exchange Web Services 1.0
 http://github.com/zenchild/Viewpoint/wiki
 
+[![Build Status](https://secure.travis-ci.org/camilleldn/viewpoint.png?branch=master)](http://travis-ci.org/camilleldn/viewpoint)
+
+[![Dependency Status](https://gemnasium.com/camilleldn/viewpoint.png)](https://gemnasium.com/camilleldn/viewpoint)
+
+[![Coverage Status](https://coveralls.io/repos/camilleldn/viewpoint/badge.png)](https://coveralls.io/r/camilleldn/viewpoint)
+
+[![Code Climate](https://codeclimate.com/github/camilleldn/viewpoint.png)](https://codeclimate.com/github/camilleldn/viewpoint)
+
 Viewpoint for EWS provides a thin Ruby layer on top of Microsoft Exchange
 Web Services(EWS). It also includes a bunch of model classes that add an
 additional layer of abstraction on top of EWS for use in implementing
