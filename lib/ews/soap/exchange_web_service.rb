@@ -166,6 +166,34 @@ module Viewpoint::EWS::SOAP
       do_soap_request(req, response_class: EwsSoapFreeBusyResponse)
     end
 
+    # Gets the rooms that are in the specified room distribution list
+    # @see http://msdn.microsoft.com/en-us/library/aa563465.aspx
+    # @param [string] roomDistributionList
+    def get_rooms(roomDistributionList)
+      req = build_soap! do |type, builder|
+        if(type == :header)
+        else
+          builder.nbuild.GetRooms {|x|
+            x.parent.default_namespace = @default_ns
+            builder.room_list!(roomDistributionList)
+          }
+        end
+      end
+      do_soap_request(req, response_class: EwsSoapRoomResponse)
+    end
+
+    # Gets the room lists that are available within the Exchange organization.
+    # @see http://msdn.microsoft.com/en-us/library/aa563465.aspx
+    def get_room_lists
+      req = build_soap! do |type, builder|
+        if(type == :header)
+        else
+          builder.room_lists!
+        end
+      end
+      do_soap_request(req, response_class: EwsSoapRoomlistResponse)
+    end
+
     # Send the SOAP request to the endpoint and parse it.
     # @param [String] soapmsg an XML formatted string
     # @todo make this work for Viewpoint (imported from SPWS)

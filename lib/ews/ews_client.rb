@@ -4,6 +4,8 @@ require 'ews/message_accessors'
 require 'ews/mailbox_accessors'
 require 'ews/push_subscription_accessors'
 require 'ews/calendar_accessors'
+require 'ews/room_accessors'
+require 'ews/roomlist_accessors'
 
 # This class is the glue between the Models and the Web Service.
 class Viewpoint::EWSClient
@@ -14,6 +16,8 @@ class Viewpoint::EWSClient
   include Viewpoint::EWS::MailboxAccessors
   include Viewpoint::EWS::PushSubscriptionAccessors
   include Viewpoint::EWS::CalendarAccessors
+  include Viewpoint::EWS::RoomAccessors
+  include Viewpoint::EWS::RoomlistAccessors
 
   # The instance of Viewpoint::EWS::SOAP::ExchangeWebService 
   attr_reader :ews
