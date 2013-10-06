@@ -20,7 +20,7 @@ module Viewpoint::EWS::RoomlistAccessors
   include Viewpoint::EWS
 
   # Gets the room lists that are available within the Exchange organization.
-  # @see http://msdn.microsoft.com/en-us/library/aa563465.aspx
+  # @see http://msdn.microsoft.com/en-us/library/dd899416.aspx
   def get_room_lists
     resp = ews.get_room_lists
     get_room_lists_parser(resp)
