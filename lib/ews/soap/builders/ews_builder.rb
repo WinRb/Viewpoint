@@ -62,7 +62,8 @@ module Viewpoint::EWS::SOAP
     # Build XML from a passed in Hash or Array in a specified format.
     # @param [Array,Hash] elems The elements to add to the Builder. They must
     #   be specified like so:
-    #   {:top =>
+    #
+    #   !{:top =>
     #     { :xmlns => 'http://stonesthrow/soap',
     #       :sub_elements => [
     #         {:elem1 => {:text => 'inside'}},
@@ -860,10 +861,10 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    # @todo support ResponseType, LastResponseTime: http://msdn.microsoft.com/en-us/library/aa580339.aspx
     def attendee!(a)
       nbuild[NS_EWS_TYPES].Attendee {
         mailbox!(a[:mailbox])
-        #@todo support ResponseType, LastResponseTime: http://msdn.microsoft.com/en-us/library/aa580339.aspx
       }
     end
 
