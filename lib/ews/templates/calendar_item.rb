@@ -50,7 +50,7 @@ module Viewpoint::EWS
       def to_ews_item
         item_parameters = {}
         PARAMETERS.each do |key|
-          if (value = self[key])
+          if !(value = self[key]).nil?
 
             # Convert non duplicable values to String
             case value

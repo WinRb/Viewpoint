@@ -38,8 +38,10 @@ module Viewpoint::EWS::Types
         field = {field_uRI: {field_uRI: item_field}}
 
         if value.nil? && item_field
+          # Build DeleteItemField Change
           item_updates << {delete_item_field: field}
         elsif item_field
+          # Build SetItemField Change
           item = Viewpoint::EWS::Template::CalendarItem.new(attribute => value)
 
           # Remap attributes because ews_builder #dispatch_field_item! uses #build_xml!
