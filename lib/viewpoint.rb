@@ -58,6 +58,7 @@ require 'ews/soap/exchange_notification'
 require 'ews/soap/exchange_synchronization'
 require 'ews/soap/exchange_availability'
 require 'ews/soap/exchange_user_configuration'
+require 'ews/soap/exchange_time_zones'
 require 'ews/soap/exchange_web_service'
 
 require 'ews/connection_helper'

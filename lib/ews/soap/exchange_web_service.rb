@@ -25,6 +25,7 @@ module Viewpoint::EWS::SOAP
     include ExchangeAvailability
     include ExchangeUserConfiguration
     include ExchangeSynchronization
+    include ExchangeTimeZones
 
     attr_accessor :server_version, :auto_deepen, :no_auto_deepen_behavior, :connection, :impersonation_type, :impersonation_address
 
@@ -226,6 +227,7 @@ module Viewpoint::EWS::SOAP
     # Build the common elements in the SOAP message and yield to any custom elements.
     def build_soap!(&block)
       opts = { :server_version => server_version, :impersonation_type => impersonation_type, :impersonation_mail => impersonation_address }
+      opts[:time_zone_context] = @time_zone_context if @time_zone_context
       EwsBuilder.new.build!(opts, &block)
     end
 

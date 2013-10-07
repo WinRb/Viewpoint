@@ -35,6 +35,7 @@ module Viewpoint::EWS::SOAP
     # @param [Hash] opts
     # @option opts [String] :server_version The version string that should get
     #   set in the Header. See ExchangeWebService#initialize
+    # @option opts [Hash] :time_zone_context TimeZoneDefinition. Format: !{id: time_zone_identifier}
     # @example
     #   xb = EwsBuilder.new
     #   xb.build! do |part, b|
@@ -50,6 +51,7 @@ module Viewpoint::EWS::SOAP
         node.Header {
           set_version_header! opts[:server_version]
 		      set_impersonation! opts[:impersonation_type], opts[:impersonation_mail]
+          set_time_zone_context_header! opts[:time_zone_context]
           yield(:header, self) if block_given?
         }
         node.Body {
@@ -467,6 +469,54 @@ module Viewpoint::EWS::SOAP
           nbuild[NS_EWS_TYPES].DayOfWeek(zone[:daylight_time][:day_of_week])
         }
       }
+    end
+
+    # Request all known time_zones from server
+    def get_server_time_zones!(get_time_zone_options)
+      nbuild[NS_EWS_MESSAGES].GetServerTimeZones('ReturnFullTimeZoneData' => get_time_zone_options[:full]) do
+        if get_time_zone_options[:ids] && get_time_zone_options[:ids].any?
+          nbuild[NS_EWS_MESSAGES].Ids do
+            get_time_zone_options[:ids].each do |id|
+              nbuild[NS_EWS_TYPES].Id id
+            end
+          end
+        end
+      end
+    end
+
+    # Specifies an optional time zone for the start time
+    # @param [Hash] attributes
+    # @option attributes :id [String] ID of the Microsoft well known time zone
+    # @option attributes :name [String] Optional name of the time zone
+    # @todo Implement sub elements Periods, TransitionsGroups and Transitions to override zone
+    # @see http://msdn.microsoft.com/en-us/library/exchange/dd899524.aspx
+    def start_time_zone!(zone)
+      attributes = {}
+      attributes['Id'] = zone[:id] if zone[:id]
+      attributes['Name'] = zone[:name] if zone[:name]
+      nbuild[NS_EWS_TYPES].StartTimeZone(attributes)
+    end
+
+    # Specifies an optional time zone for the end time
+    # @param [Hash] attributes
+    # @option attributes :id [String] ID of the Microsoft well known time zone
+    # @option attributes :name [String] Optional name of the time zone
+    # @todo Implement sub elements Periods, TransitionsGroups and Transitions to override zone
+    # @see http://msdn.microsoft.com/en-us/library/exchange/dd899434.aspx
+    def end_time_zone!(zone)
+      attributes = {}
+      attributes['Id'] = zone[:id] if zone[:id]
+      attributes['Name'] = zone[:name] if zone[:name]
+      nbuild[NS_EWS_TYPES].EndTimeZone(attributes)
+    end
+
+    # Specify a time zone
+    # @todo Implement subelements Periods, TransitionsGroups and Transitions to override zone
+    # @see http://msdn.microsoft.com/en-us/library/exchange/dd899488.aspx
+    def time_zone_definition!(zone)
+      attributes = {'Id' => zone[:id]}
+      attributes['Name'] = zone[:name] if zone[:name]
+      nbuild[NS_EWS_TYPES].TimeZoneDefinition(attributes)
     end
 
     # Build the Restriction element
@@ -1095,6 +1145,16 @@ private
         }
       end
 	  end
+
+    # Set TimeZoneContext Header
+    # @param time_zone_def [Hash] !{id: time_zone_identifier, name: time_zone_name}
+    def set_time_zone_context_header!(time_zone_def)
+      if time_zone_def
+        nbuild[NS_EWS_TYPES].TimeZoneContext do
+          time_zone_definition! time_zone_def
+        end
+      end
+    end
 
     # some methods need special naming so they use the '_r' suffix like 'and'
     def normalize_type(type)
