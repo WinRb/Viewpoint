@@ -62,6 +62,13 @@ class Viewpoint::EWSClient
     set_auto_deepen deepen
   end
 
+  # Specify a default time zone context for all time attributes
+  # @param id [String] Identifier of a Microsoft well known time zone (e.g: 'UTC', 'W. Europe Standard Time')
+  # @note A list of time zones known by the server can be requested via {EWS::SOAP::ExchangeTimeZones#get_time_zones}
+  def set_time_zone(microsoft_time_zone_id)
+    @ews.set_time_zone_context microsoft_time_zone_id
+  end
+
   private
 
 

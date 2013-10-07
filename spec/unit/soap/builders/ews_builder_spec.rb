@@ -31,4 +31,9 @@ describe Viewpoint::EWS::SOAP::EwsBuilder do
     expect {@builder.send(:format_time, 'asdf')}.to raise_error(Viewpoint::EWS::EwsBadArgumentError)
   end
 
+  it 'should contain time zone context' do
+    doc = @builder.build!(time_zone_context: {id: 'SpaceTime'})
+    selector = "//soap:Header/t:TimeZoneContext/t:TimeZoneDefinition[@Id='SpaceTime']"
+    doc.root.xpath(selector, @namespaces).should be_any
+  end
 end
