@@ -936,8 +936,8 @@ module Viewpoint::EWS::SOAP
     def delete_item_field!(upd)
       uri = upd.select {|k,v| k =~ /_uri/i}
       raise EwsBadArgumentError, "Bad argument given for SetItemField." if uri.keys.length != 1
-      @nbuild.DeleteItemField {
-        dispatch_field_uri!(uri)
+      @nbuild[NS_EWS_TYPES].DeleteItemField {
+        dispatch_field_uri!(uri, NS_EWS_TYPES)
       }
     end
 
