@@ -21,7 +21,7 @@ module Viewpoint
     module ItemFieldUriMap
 
       FIELD_URIS= {
-        :folder_id  => {:text => 'older:FolderId', :writable => true},
+        :folder_id  => {:text => 'folder:FolderId', :writable => true},
         :parent_folder_id  => {:text => 'folder:ParentFolderId', :writable => true},
         :display_name  => {:text => 'folder:DisplayName', :writable => true},
         :unread_count  => {:text => 'folder:UnreadCount', :writable => true},
