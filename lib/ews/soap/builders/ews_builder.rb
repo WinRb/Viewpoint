@@ -883,6 +883,18 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].IsAllDayEvent(all_day)
     end
 
+    def reminder_is_set!(reminder)
+      nbuild[NS_EWS_TYPES].ReminderIsSet reminder
+    end
+
+    def reminder_due_by!(date)
+      nbuild[NS_EWS_TYPES].ReminderDueBy format_time(date)
+    end
+
+    def reminder_minutes_before_start!(minutes)
+      nbuild[NS_EWS_TYPES].ReminderMinutesBeforeStart minutes
+    end
+
     # @see http://msdn.microsoft.com/en-us/library/aa565428(v=exchg.140).aspx
     def item_changes!(changes)
       nbuild.ItemChanges {
