@@ -4,7 +4,7 @@ describe Viewpoint::EWS::SOAP::EwsSoapFreeBusyResponse do
 
   let(:ews) { Viewpoint::EWS::SOAP::ExchangeWebService.new(double(:connection)) }
 
-  ERROR_INVALID_SMTP_ADDRESS = <<EOS
+  ERROR_INVALID_SMTP_ADDRESS = <<EOS.gsub(%r{>\s+}, '>')
 <?xml version="1.0" encoding="utf-8"?>
 <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
   <s:Header>
@@ -46,7 +46,7 @@ EOS
       extracted_response_message = {
         attribs: {response_class: "Error"},
         elems: [
-          {message_text:         {text: "E-mail address<>SMTP:foobar is not a valid SMTP address."}},
+          {message_text:         {text: "E-mail address <>SMTP:foobar is not a valid SMTP address."}},
           {response_code:        {text: "ErrorInvalidSmtpAddress"}},
           {descriptive_link_key: {text: "0"}},
           {message_xml: {
@@ -62,7 +62,7 @@ EOS
     end
   end
 
-  CALENDAR_EVENT_ARRAY = <<EOS
+  CALENDAR_EVENT_ARRAY = <<EOS.gsub(%r{>\s+}, '>')
 <?xml version="1.0" encoding="utf-8"?>
 <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
   <s:Header>
@@ -114,7 +114,7 @@ EOS
     end
   end
 
-  EMPTY_RESPONSE = <<EOS
+  EMPTY_RESPONSE = <<EOS.gsub(%r{>\s+}, '>')
 <?xml version="1.0" encoding="utf-8"?>
 <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
   <s:Header>
