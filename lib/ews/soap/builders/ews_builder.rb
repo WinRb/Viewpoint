@@ -766,6 +766,14 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def task!(item)
+      nbuild[NS_EWS_TYPES].Task {
+        item.each_pair {|k,v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
     def forward_item!(item)
       nbuild[NS_EWS_TYPES].ForwardItem {
         item.each_pair {|k,v|
@@ -874,6 +882,14 @@ module Viewpoint::EWS::SOAP
 
     def end!(et)
       nbuild[NS_EWS_TYPES].End(et[:text])
+    end
+
+    def start_date!(sd)
+      nbuild[NS_EWS_TYPES].StartDate format_time(sd[:text])
+    end
+
+    def due_date!(dd)
+      nbuild[NS_EWS_TYPES].DueDate format_time(dd[:text])
     end
 
     def location!(loc)
