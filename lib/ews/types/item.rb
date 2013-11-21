@@ -343,6 +343,14 @@ module Viewpoint::EWS::Types
       users.collect{|u| build_mailbox_user(u[:mailbox][:elems])}
     end
 
+    def build_attendees_users(users)
+      users.collect do |u|
+        u[:attendee][:elems].collect do |a|
+          build_mailbox_user(a[:mailbox][:elems]) if a[:mailbox]
+        end
+      end.flatten.compact
+    end
+
     def build_attachments(attachments)
       attachments.collect do |att|
         key = att.keys.first
