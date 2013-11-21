@@ -17,7 +17,8 @@ module Viewpoint::EWS::Types
       my_response_type:   [:my_response_type, :text],
       organizer: [:organizer, :elems, 0, :mailbox, :elems],
       required_attendees: [:required_attendees, :elems ],
-      recurrence: [:recurrence, :elems ]
+      recurrence: [:recurrence, :elems ],
+      deleted_occurrences: [:deleted_occurrences, :elems ]
    }
 
     CALENDAR_ITEM_KEY_TYPES = {
@@ -26,7 +27,8 @@ module Viewpoint::EWS::Types
       cancelled?:   ->(str){str.downcase == 'true'},
       all_day?:   ->(str){str.downcase == 'true'},
       organizer: :build_mailbox_user,
-      required_attendees: :build_attendees_users
+      required_attendees: :build_attendees_users,
+      deleted_occurrences: :build_deleted_occurrences
     }
     CALENDAR_ITEM_KEY_ALIAS = {}
 

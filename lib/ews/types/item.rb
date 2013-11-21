@@ -335,6 +335,10 @@ module Viewpoint::EWS::Types
       end
     end
 
+    def build_deleted_occurrences(occurrences)
+      occurrences.collect{|a| DateTime.parse a[:deleted_occurrence][:elems][0][:start][:text]}
+    end
+
     def build_mailbox_user(mbox_ews)
       MailboxUser.new(ews, mbox_ews)
     end
