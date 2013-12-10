@@ -339,6 +339,19 @@ module Viewpoint::EWS::Types
       occurrences.collect{|a| DateTime.parse a[:deleted_occurrence][:elems][0][:start][:text]}
     end
 
+    def build_modified_occurrences(occurrences)
+      {}.tap do |h|
+        occurrences.collect do |a|
+          elems = a[:occurrence][:elems]
+
+          h[DateTime.parse(elems.find{|e| e[:original_start]}[:original_start][:text])] = {
+            start: elems.find{|e| e[:start]}[:start][:text],
+            end: elems.find{|e| e[:end]}[:end][:text]
+          }
+        end
+      end
+    end
+
     def build_mailbox_user(mbox_ews)
       MailboxUser.new(ews, mbox_ews)
     end
