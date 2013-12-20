@@ -24,7 +24,7 @@ module Viewpoint::EWS::ConvertAccessors
   # @option opts [Symbol] :format :ews_legacy_id/:ews_id/:entry_id/:hex_entry_id/:store_id/:owa_id
   # @option opts [Symbol] :destination_format :ews_legacy_id/:ews_id/:entry_id/:hex_entry_id/:store_id/:owa_id
   # @option opts [String] :mailbox Mailbox, if required
-  # @return [Convert Id Response] Returns a Convert Id Response
+  # @return [EwsResponse] Returns an EwsResponse containing the convert response message
 
   def convert_id(id, opts = {})
     args = convert_id_args(id, opts.clone)
@@ -37,7 +37,6 @@ module Viewpoint::EWS::ConvertAccessors
 private
 
   def convert_id_args(id, opts)
-    # TODO default :destination_format?
   	{ id: id }.merge opts
   end
 
@@ -45,10 +44,7 @@ private
     rm = resp.response_messages[0]
 
     if(rm && rm.status == 'Success')
-      pp rm
-      # TODO create custom class
-      # itype = i.keys.first
-      # class_by_name(itype).new(ews, i[itype])
+      # @todo create custom response class
       rm
     else
       code = rm.respond_to?(:code) ? rm.code : "Unknown"
