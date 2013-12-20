@@ -750,7 +750,7 @@ module Viewpoint::EWS::SOAP
     def convert_id(opts)
       opts = opts.clone
 
-      [:id, :format, :destination_format :mailbox ].each do |k|
+      [:id, :format, :destination_format, :mailbox ].each do |k|
         validate_param(opts, k, true)
       end
 
