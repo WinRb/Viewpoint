@@ -750,11 +750,8 @@ module Viewpoint::EWS::SOAP
     def convert_id(opts)
       opts = opts.clone
 
-      [:id, :format, :destination_format].each do |k|
+      [:id, :format, :destination_format :mailbox ].each do |k|
         validate_param(opts, k, true)
-      end
-      if opts[:format] == :hex_entry_id then
-        validate_param(opts, :mailbox, true)
       end
 
       req = build_soap! do |type, builder|
