@@ -750,16 +750,22 @@ module Viewpoint::EWS::SOAP
     def convert_id(opts)
       opts = opts.clone
 
+      [:id, :format, :destination_format].each do |k|
+        validate_param(opts, k, true)
+      end
+      if opts[:format] == :hex_entry_id then
+        validate_param(opts, :mailbox, true)
+      end
+
       req = build_soap! do |type, builder|
         if(type == :header)
         else
         builder.nbuild.ConvertId {|x|
             builder.nbuild.parent.default_namespace = @default_ns
-            x.parent['DestinationFormat'] = "EwsId"
+            x.parent['DestinationFormat'] = opts[:destination_format].to_s.to_camel_case
             x.SourceIds { |x|
                 x[NS_EWS_TYPES].AlternateId { |x|
-                    # TODO get destination format from opts symbol
-                    x.parent['Format'] = "HexEntryId"
+                    x.parent['Format'] = opts[:format].to_s.to_camel_case
                     x.parent['Id'] = opts[:id]
                     x.parent['Mailbox'] = opts[:mailbox]
                 }
