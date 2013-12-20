@@ -759,10 +759,10 @@ module Viewpoint::EWS::SOAP
         else
         builder.nbuild.ConvertId {|x|
             builder.nbuild.parent.default_namespace = @default_ns
-            x.parent['DestinationFormat'] = opts[:destination_format].to_s.to_camel_case
+            x.parent['DestinationFormat'] = opts[:destination_format].to_s.camel_case
             x.SourceIds { |x|
                 x[NS_EWS_TYPES].AlternateId { |x|
-                    x.parent['Format'] = opts[:format].to_s.to_camel_case
+                    x.parent['Format'] = opts[:format].to_s.camel_case
                     x.parent['Id'] = opts[:id]
                     x.parent['Mailbox'] = opts[:mailbox]
                 }
