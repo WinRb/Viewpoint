@@ -42,7 +42,7 @@ module Viewpoint
       #   Leave this blank to use the default attachment name.
       def save_to_file(base_dir = nil, file_name = @file_name)
         base_dir << '/' unless(base_dir.nil? or base_dir.end_with?('/'))
-        File.open("#{base_dir}#{file_name}", 'w+') do |f|
+        File.open("#{base_dir}#{file_name}", 'wb') do |f|
           f.write(Base64.decode64(@content))
         end
         true
