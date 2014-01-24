@@ -962,6 +962,13 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].ReminderMinutesBeforeStart minutes
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa566143(v=exchg.150).aspx
+    # possible values Exchange Server 2010 = [Free, Tentative, Busy, OOF, NoData]
+    #                 Exchange Server 2013 = [Free, Tentative, Busy, OOF, WorkingElsewhere, NoData]
+    def legacy_free_busy_status!(state)
+      nbuild[NS_EWS_TYPES].LegacyFreeBusyStatus(state)
+    end
+
     # @see http://msdn.microsoft.com/en-us/library/aa565428(v=exchg.140).aspx
     def item_changes!(changes)
       nbuild.ItemChanges {
