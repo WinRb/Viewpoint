@@ -335,12 +335,37 @@ module Viewpoint::EWS::Types
       end
     end
 
+    def build_deleted_occurrences(occurrences)
+      occurrences.collect{|a| DateTime.parse a[:deleted_occurrence][:elems][0][:start][:text]}
+    end
+
+    def build_modified_occurrences(occurrences)
+      {}.tap do |h|
+        occurrences.collect do |a|
+          elems = a[:occurrence][:elems]
+
+          h[DateTime.parse(elems.find{|e| e[:original_start]}[:original_start][:text])] = {
+            start: elems.find{|e| e[:start]}[:start][:text],
+            end: elems.find{|e| e[:end]}[:end][:text]
+          }
+        end
+      end
+    end
+
     def build_mailbox_user(mbox_ews)
       MailboxUser.new(ews, mbox_ews)
     end
 
     def build_mailbox_users(users)
       users.collect{|u| build_mailbox_user(u[:mailbox][:elems])}
+    end
+
+    def build_attendees_users(users)
+      users.collect do |u|
+        u[:attendee][:elems].collect do |a|
+          build_mailbox_user(a[:mailbox][:elems]) if a[:mailbox]
+        end
+      end.flatten.compact
     end
 
     def build_attachments(attachments)
