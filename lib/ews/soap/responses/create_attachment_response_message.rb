@@ -19,6 +19,7 @@
 module Viewpoint::EWS::SOAP
 
   class CreateAttachmentResponseMessage < ResponseMessage
+    include Viewpoint::StringUtils
 
     def attachments
       return @attachments if @attachments
@@ -34,7 +35,7 @@ module Viewpoint::EWS::SOAP
     def parse_attachments(att)
       att.collect do |a|
         type = a.keys.first
-        klass = Viewpoint::EWS::Types.const_get(type.to_s.camel_case)
+        klass = Viewpoint::EWS::Types.const_get(camel_case(type))
         item = OpenStruct.new
         item.ews = nil
         klass.new(item, a[type])
