@@ -18,6 +18,7 @@
 
 module Viewpoint::EWS::SOAP
   class SendNotificationResponseMessage < ResponseMessage
+    include Viewpoint::StringUtils
 
     def notification
       safe_hash_access message, [:elems, :notification, :elems]
@@ -49,7 +50,7 @@ module Viewpoint::EWS::SOAP
       @events ||=
         notification[3..-1].collect do |ev|
           type = ev.keys.first
-          klass = Viewpoint::EWS::Types.const_get(type.to_s.camel_case)
+          klass = Viewpoint::EWS::Types.const_get(camel_case(type))
           klass.new(nil, ev[type])
         end
     end

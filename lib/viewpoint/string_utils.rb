@@ -16,20 +16,24 @@
   limitations under the License.
 =end
 
-# Custom extensions to the class String
-class String
-  # Change CamelCased strings to ruby_cased strings
-  # It uses the lookahead assertion ?=  In this case it basically says match
-  # anything followed by a capital letter, but not the capital letter itself.
-  # @see http://www.pcre.org/pcre.txt The PCRE guide for more details
-  def ruby_case
-    self.split(/(?=[A-Z])/).join('_').downcase
-  end
+module Viewpoint
+  # Collection of utility methods for working with Strings
+  module StringUtils
+    private
 
-  # Change a ruby_cased string to CamelCased
-  def camel_case
-    self.split(/_/).map { |i|
-      i.sub(/^./) { |s| s.upcase }
-    }.join
-  end
-end # String
+    # Change CamelCased strings to ruby_cased strings
+    # It uses the lookahead assertion ?=  In this case it basically says match
+    # anything followed by a capital letter, but not the capital letter itself.
+    # @see http://www.pcre.org/pcre.txt The PCRE guide for more details
+    def ruby_case(input)
+      input.to_s.split(/(?=[A-Z])/).join('_').downcase
+    end
+
+    # Change a ruby_cased string to CamelCased
+    def camel_case(input)
+      input.to_s.split(/_/).map { |i|
+        i.sub(/^./) { |s| s.upcase }
+      }.join
+    end
+  end # StringUtils
+end # Viewpoint

@@ -23,8 +23,8 @@ require 'nokogiri'
 require 'ostruct'
 require 'logging'
 
-# Class Extensions (Monkey patches)
-require 'extensions/string'
+# String utilities
+require 'viewpoint/string_utils'
 
 module Viewpoint
   module EWS

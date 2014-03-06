@@ -18,6 +18,7 @@ class Viewpoint::EWSClient
   include Viewpoint::EWS::CalendarAccessors
   include Viewpoint::EWS::RoomAccessors
   include Viewpoint::EWS::RoomlistAccessors
+  include Viewpoint::StringUtils
 
   # The instance of Viewpoint::EWS::SOAP::ExchangeWebService 
   attr_reader :ews
@@ -76,7 +77,7 @@ class Viewpoint::EWSClient
   # in there that I didn't want to include directly in this class.
   def class_by_name(cname)
     if(cname.instance_of? Symbol)
-      cname = cname.to_s.camel_case
+      cname = camel_case(cname)
     end
     Viewpoint::EWS::Types.const_get(cname)
   end

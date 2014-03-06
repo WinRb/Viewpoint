@@ -22,6 +22,7 @@ module Viewpoint::EWS::SOAP
   # 132% faster than the DOM-based parser for large documents.
   class EwsSaxDocument < Nokogiri::XML::SAX::Document
     include Viewpoint::EWS
+    include Viewpoint::StringUtils
 
     attr_reader :struct
 
@@ -44,18 +45,18 @@ module Viewpoint::EWS::SOAP
     end
 
     def start_element_namespace(name, attributes = [], prefix = nil, uri = nil, ns = [])
-      name = name.ruby_case.to_sym
+      name = ruby_case(name).to_sym
       elem = {}
       unless attributes.empty?
         elem[:attribs] = attributes.collect{|a|
-          {a.localname.ruby_case.to_sym => a.value}
+          { ruby_case(a.localname).to_sym => a.value}
         }.inject(&:merge)
       end
       @elems << elem
     end
 
     def end_element_namespace name, prefix=nil, uri=nil
-      name = name.ruby_case.to_sym
+      name = ruby_case(name).to_sym
       elem = @elems.pop
       if @elems.empty?
         @struct[name] = elem

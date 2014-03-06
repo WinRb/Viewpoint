@@ -1,5 +1,6 @@
 module Viewpoint::EWS
   module Types
+    extend Viewpoint::StringUtils
 
     KEY_PATHS = {
       extended_properties: [:extended_property],
@@ -105,7 +106,7 @@ module Viewpoint::EWS
 
     def class_by_name(cname)
       if(cname.instance_of? Symbol)
-        cname = cname.to_s.camel_case
+        cname = camel_case(cname)
       end
       Viewpoint::EWS::Types.const_get(cname)
     end
