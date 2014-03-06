@@ -37,7 +37,7 @@ module Viewpoint::EWS::SOAP
       req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.nbuild.FindItem(:Traversal => opts[:traversal].to_s.camel_case) {
+          builder.nbuild.FindItem(:Traversal => camel_case(opts[:traversal])) {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.item_shape!(opts[:item_shape])
             builder.indexed_page_item_view!(opts[:indexed_page_item_view]) if opts[:indexed_page_item_view]
@@ -492,7 +492,7 @@ module Viewpoint::EWS::SOAP
       req = build_soap! do |type, builder|
         if(type == :header)
         else
-          builder.nbuild.FindFolder(:Traversal => opts[:traversal].to_s.camel_case) {
+          builder.nbuild.FindFolder(:Traversal => camel_case(opts[:traversal])) {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.folder_shape!(opts[:folder_shape])
             builder.restriction!(opts[:restriction]) if opts[:restriction]
@@ -601,7 +601,7 @@ module Viewpoint::EWS::SOAP
       validate_version(VERSION_2010_SP1)
       ef_opts = {}
       [:delete_type, :delete_sub_folders].each do |k|
-        ef_opts[k.to_s.camel_case] = validate_param(opts, k, true)
+        ef_opts[camel_case(k)] = validate_param(opts, k, true)
       end
       fids = validate_param opts, :folder_ids, true
 

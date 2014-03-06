@@ -3,6 +3,7 @@ module Viewpoint::EWS::Types
     include Viewpoint::EWS
     include Viewpoint::EWS::Types
     include Viewpoint::EWS::Types::Item
+    include Viewpoint::StringUtils
 
     CALENDAR_ITEM_KEY_PATHS = {
       recurring?:   [:is_recurring, :text],
@@ -70,7 +71,7 @@ module Viewpoint::EWS::Types
             elsif value.is_a? Hash
               node = {name => {}}
               value.each do |attrib_key, attrib_value|
-                attrib_key = attrib_key.to_s.camel_case unless attrib_key == :text
+                attrib_key = camel_case(attrib_key) unless attrib_key == :text
                 node[name][attrib_key] = attrib_value
               end
               node
