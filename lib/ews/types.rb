@@ -1,6 +1,6 @@
 module Viewpoint::EWS
   module Types
-    extend Viewpoint::StringUtils
+    include Viewpoint::StringUtils
 
     KEY_PATHS = {
       extended_properties: [:extended_property],

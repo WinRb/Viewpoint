@@ -19,6 +19,11 @@
 module Viewpoint
   # Collection of utility methods for working with Strings
   module StringUtils
+
+    def self.included(klass)
+      klass.extend StringUtils
+    end
+
     private
 
     # Change CamelCased strings to ruby_cased strings
