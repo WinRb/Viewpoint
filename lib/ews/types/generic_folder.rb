@@ -23,7 +23,7 @@ module Viewpoint::EWS::Types
     include Viewpoint::EWS
     include Viewpoint::EWS::Types
     include Viewpoint::EWS::ItemAccessors
-    extend Viewpoint::StringUtils
+    include Viewpoint::StringUtils
 
     GFOLDER_KEY_PATHS = {
       :folder_id        => [:folder_id, :attribs],
