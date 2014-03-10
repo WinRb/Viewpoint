@@ -20,6 +20,7 @@ module Viewpoint::EWS::SOAP
   class ExchangeWebService
     include Viewpoint::EWS
     include Viewpoint::EWS::SOAP
+    include Viewpoint::StringUtils
     include ExchangeDataServices
     include ExchangeNotification
     include ExchangeAvailability

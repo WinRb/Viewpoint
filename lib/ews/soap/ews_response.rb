@@ -20,6 +20,7 @@ module Viewpoint::EWS::SOAP
 
   # A Generic Class for SOAP returns.
   class EwsResponse
+    include Viewpoint::StringUtils
 
     def initialize(sax_hash)
       @resp = sax_hash
@@ -70,7 +71,7 @@ module Viewpoint::EWS::SOAP
     def class_by_name(cname)
       begin
         if(cname.instance_of? Symbol)
-          cname = cname.to_s.camel_case
+          cname = camel_case(cname)
         end
         Viewpoint::EWS::SOAP.const_get(cname)
       rescue NameError => e
