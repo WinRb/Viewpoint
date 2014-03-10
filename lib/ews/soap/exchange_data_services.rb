@@ -675,6 +675,9 @@ module Viewpoint::EWS::SOAP
               opts[:items].each do |ia|
                 builder.item_attachment!(ia)
               end
+              opts[:inline_files].each do |fi|
+                builder.inline_attachment!(fi)
+              end
             }
           }
         end

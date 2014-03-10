@@ -1025,6 +1025,15 @@ module Viewpoint::EWS::SOAP
       @nbuild.ReturnNewItemIds(retval)
     end
 
+    def inline_attachment!(fa)
+      @nbuild[NS_EWS_TYPES].FileAttachment {
+        @nbuild.Name(fa.name)
+        @nbuild.ContentId(fa.name)
+        @nbuild.IsInline(true)
+        @nbuild.Content(fa.content)
+      }
+    end
+
     def file_attachment!(fa)
       @nbuild[NS_EWS_TYPES].FileAttachment {
         @nbuild.Name(fa.name)

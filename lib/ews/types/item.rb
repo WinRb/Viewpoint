@@ -85,6 +85,7 @@ module Viewpoint::EWS::Types
       simplify!
       @new_file_attachments = []
       @new_item_attachments = []
+      @new_inline_attachments = []
     end
 
     # Specify a body_type to fetch this item with if it hasn't already been fetched.
@@ -180,6 +181,13 @@ module Viewpoint::EWS::Types
       @new_item_attachments << ia
     end
 
+    def add_inline_attachment(file)
+      fi = OpenStruct.new
+      fi.name     = File.basename(file.path)
+      fi.content  = Base64.encode64(file.read)
+      @new_inline_attachments << fi
+    end
+
     def submit!
       if draft?
         submit_attachments!
@@ -196,17 +204,19 @@ module Viewpoint::EWS::Types
     end
 
     def submit_attachments!
-      return false unless draft? && !(@new_file_attachments.empty? && @new_item_attachments.empty?)
+      return false unless draft? && !(@new_file_attachments.empty? && @new_item_attachments.empty? && @new_inline_attachments.empty?)
 
       opts = {
         parent_id: {id: self.id, change_key: self.change_key},
         files: @new_file_attachments,
-        items: @new_item_attachments
+        items: @new_item_attachments,
+        inline_files: @new_inline_attachments
       }
       resp = ews.create_attachment(opts)
       set_change_key resp.response_messages[0].attachments[0].parent_change_key
       @new_file_attachments = []
       @new_item_attachments = []
+      @new_inline_attachments = []
     end
 
     # If you want to add to the body set #new_body_content. If you set #body

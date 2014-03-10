@@ -14,7 +14,7 @@ module Viewpoint::EWS
       end
 
       def has_attachments?
-        !(file_attachments.empty? && item_attachments.empty?)
+        !(file_attachments.empty? && item_attachments.empty? && inline_attachments.empty?)
       end
 
 
@@ -32,6 +32,7 @@ module Viewpoint::EWS
         self.bcc_recipients ||= []
         self.file_attachments ||= []
         self.item_attachments ||= []
+        self.inline_attachments ||= []
         self.extended_properties ||= []
       end
 
