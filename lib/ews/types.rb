@@ -170,13 +170,13 @@ module Viewpoint::EWS
       eprops.each do |e|
         if e.size == 1
           e[:elems].each_cons(2) do |k,v|
-            key = k[:extended_field_u_r_i][:attribs][:property_name].downcase.to_sym
+            key = ruby_case(k[:extended_field_u_r_i][:attribs][:property_name]).to_sym
             val = v[:value][:text]
             h.store(key,val)
           end
         elsif e.size == 2
           e[1].each_cons(2) do |k,v|
-            key = k[:extended_field_u_r_i][:attribs][:property_name].downcase.to_sym
+            key = ruby_case(k[:extended_field_u_r_i][:attribs][:property_name]).to_sym
             val = v[:value][:text]
             h.store(key,val)
           end

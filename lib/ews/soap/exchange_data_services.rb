@@ -49,6 +49,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
+
       do_soap_request(req, response_class: EwsResponse)
     end
 
@@ -147,6 +148,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
+
       do_soap_request(req, response_class: EwsResponse)
     end
 

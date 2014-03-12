@@ -6,22 +6,25 @@ module Viewpoint::EWS::Types
     include Viewpoint::StringUtils
 
     CALENDAR_ITEM_KEY_PATHS = {
-      recurring?:   [:is_recurring, :text],
-      meeting?:     [:is_meeting, :text],
-      cancelled?:   [:is_cancelled, :text],
+      recurring?: [:is_recurring, :text],
+      meeting?:   [:is_meeting, :text],
+      cancelled?: [:is_cancelled, :text],
       duration:   [:duration, :text],
-      time_zone:   [:time_zone, :text],
-      start:   [:start, :text],
-      end:   [:end, :text],
+      time_zone:  [:time_zone, :text],
+      reminder_set?: [:is_reminder_set, :text],
+      start:      [:start, :text],
+      end:        [:end, :text],
       location:   [:location, :text],
-      all_day?:   [:is_all_day_event, :text]
+      all_day?:   [:is_all_day_event, :text],
+      uid:        [:u_i_d, :text],
    }
 
     CALENDAR_ITEM_KEY_TYPES = {
-      recurring?:   ->(str){str.downcase == 'true'},
-      meeting?:     ->(str){str.downcase == 'true'},
-      cancelled?:   ->(str){str.downcase == 'true'},
-      all_day?:   ->(str){str.downcase == 'true'}
+      recurring?:    ->(str){str.downcase == 'true'},
+      meeting?:      ->(str){str.downcase == 'true'},
+      cancelled?:    ->(str){str.downcase == 'true'},
+      all_day?:      ->(str){str.downcase == 'true'},
+      reminder_set?: ->(str){str.downcase == 'true'}
     }
     CALENDAR_ITEM_KEY_ALIAS = {}
 

@@ -927,6 +927,10 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def uid!(uid)
+      nbuild[NS_EWS_TYPES].UID(uid)
+    end
+
     def start!(st)
       nbuild[NS_EWS_TYPES].Start(st[:text])
     end
@@ -1128,6 +1132,7 @@ module Viewpoint::EWS::SOAP
     def dispatch_field_uri!(uri, ns=NS_EWS_MESSAGES)
       type = uri.keys.first
       vals = uri[type].is_a?(Array) ? uri[type] : [uri[type]]
+
       case type
       when :field_uRI, :field_uri
         vals.each do |val|
