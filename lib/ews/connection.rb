@@ -91,16 +91,18 @@ class Viewpoint::EWS::Connection
       resp.body
     when 302
       # @todo redirect
-      raise "Unhandled HTTP Redirect"
+      raise Errors::UnhandledResponseError.new("Unhandled HTTP Redirect", resp)
+    when 401
+      raise Errors::UnauthorizedResponseError.new("Unauthorized request", resp)
     when 500
       if resp.headers['Content-Type'].include?('xml')
         err_string, err_code = parse_soap_error(resp.body)
-        raise "SOAP Error: Message: #{err_string}  Code: #{err_code}"
+        raise Errors::SoapResponseError.new("SOAP Error: Message: #{err_string}  Code: #{err_code}", resp, err_code, err_string)
       else
-        raise "Internal Server Error. Message: #{resp.body}"
+        raise Errors::ServerError.new("Internal Server Error. Message: #{resp.body}", resp)
       end
     else
-      raise "HTTP Error Code: #{resp.status}, Msg: #{resp.body}"
+      raise Errors::ResponseError.new("HTTP Error Code: #{resp.status}, Msg: #{resp.body}", resp)
     end
   end
 
