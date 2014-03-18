@@ -1027,24 +1027,24 @@ module Viewpoint::EWS::SOAP
 
     def inline_attachment!(fa)
       @nbuild[NS_EWS_TYPES].FileAttachment {
-        @nbuild.Name(fa.name)
-        @nbuild.ContentId(fa.name)
-        @nbuild.IsInline(true)
-        @nbuild.Content(fa.content)
+        @nbuild[NS_EWS_TYPES].Name(fa.name)
+        @nbuild[NS_EWS_TYPES].ContentId(fa.name)
+        @nbuild[NS_EWS_TYPES].IsInline(true)
+        @nbuild[NS_EWS_TYPES].Content(fa.content)
       }
     end
 
     def file_attachment!(fa)
       @nbuild[NS_EWS_TYPES].FileAttachment {
-        @nbuild.Name(fa.name)
-        @nbuild.Content(fa.content)
+        @nbuild[NS_EWS_TYPES].Name(fa.name)
+        @nbuild[NS_EWS_TYPES].Content(fa.content)
       }
     end
 
     def item_attachment!(ia)
       @nbuild[NS_EWS_TYPES].ItemAttachment {
-        @nbuild.Name(ia.name)
-        @nbuild.Item {
+        @nbuild[NS_EWS_TYPES].Name(ia.name)
+        @nbuild[NS_EWS_TYPES].Item {
           item_id!(ia.item)
         }
       }
