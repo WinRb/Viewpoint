@@ -26,18 +26,8 @@ require 'logging'
 # Class Extensions (Monkey patches)
 require 'extensions/string'
 
-module Viewpoint
-  module EWS
-    attr_reader :logger
-    Logging.logger.root.level = :debug
-    Logging.logger.root.appenders = Logging.appenders.stdout
-
-    def self.root_logger
-      Logging.logger.root
-    end
-
-  end # EWS
-end
+# Load the logging setup
+require 'viewpoint/logging'
 
 # Load the Exception classes
 require 'ews/exceptions/exceptions'

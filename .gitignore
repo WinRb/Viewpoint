@@ -5,3 +5,5 @@ Gemfile.lock
 /test*.rb
 /\.test*
 .idea
+tmp
+vendor
