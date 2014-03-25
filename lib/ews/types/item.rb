@@ -94,11 +94,12 @@ module Viewpoint::EWS::Types
       @body_type = body_type
     end
 
-    def delete!(deltype = :hard)
+    def delete!(deltype = :hard, opts = {})
       opts = {
         :delete_type => delete_type(deltype),
         :item_ids => [{:item_id => {:id => id}}]
-      }
+      }.merge(opts)
+
       resp = @ews.delete_item(opts)
       rmsg = resp.response_messages[0]
       unless rmsg.success?
