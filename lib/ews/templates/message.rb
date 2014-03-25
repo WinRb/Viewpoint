@@ -50,7 +50,7 @@ module Viewpoint::EWS
         msg = {}
         msg[:subject] = subject if subject
         msg[:body] = {text: body, body_type: body_type} if body
-        
+
         msg[:importance] = importance if importance
 
         to_r = to_recipients.collect{|r| {mailbox: {email_address: r}}}
