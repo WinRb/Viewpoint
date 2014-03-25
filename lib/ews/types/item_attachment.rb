@@ -19,15 +19,45 @@
 module Viewpoint::EWS::Types
   class ItemAttachment < Attachment
 
-    ITEM_ATTACH_KEY_PATHS = { }
+    ITEM_ATTACH_KEY_PATHS = {
+      item: [:item],
+      message: [:message],
+      calendar_item: [:calendar_item],
+      contact: [:contact],
+      task: [:task],
+      meeting_message: [:meeting_message],
+      meeting_request: [:meeting_request],
+      meeting_response: [:meeting_response],
+      meeting_cancellation: [:meeting_cancellation]
+    }
 
-    ITEM_ATTACH_KEY_TYPES = { }
+    ITEM_ATTACH_KEY_TYPES = {
+      message: :build_message,
+      calendar_item: :build_calendar_item,
+      contact: :build_contact,
+      task: :build_task,
+      meeting_message: :build_meeting_message,
+      meeting_request: :build_meeting_request,
+      meeting_response: :build_meeting_response,
+      meeting_cancellation: :build_meeting_cancellation
+    }
 
     ITEM_ATTACH_KEY_ALIAS = { }
 
+    def get_all_properties!
+      resp = ews.get_attachment attachment_ids: [self.id]
+      @ews_item.merge!(parse_response(resp))
+    end
 
     private
 
+    def self.method_missing(method, *args, &block)
+      if method.to_s =~ /^build_(.+)$/
+        class_by_name($1).new(ews, args[0])
+      else
+        super
+      end
+    end
 
     def key_paths
       super.merge(ITEM_ATTACH_KEY_PATHS)
@@ -39,6 +69,14 @@ module Viewpoint::EWS::Types
 
     def key_alias
       super.merge(ITEM_ATTACH_KEY_ALIAS)
+    end
+
+    def parse_response(resp)
+      if(resp.status == 'Success')
+        resp.response_message[:elems][:attachments][:elems][0][:item_attachment][:elems].inject(&:merge)
+      else
+        raise EwsError, "Could not retrieve #{self.class}. #{resp.code}: #{resp.message}"
+      end
     end
 
   end
