@@ -53,6 +53,7 @@ require 'ews/soap/exchange_user_configuration'
 require 'ews/soap/exchange_time_zones'
 require 'ews/soap/exchange_web_service'
 
+require 'ews/errors'
 require 'ews/connection_helper'
 require 'ews/connection'
 
