@@ -625,12 +625,16 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].FieldURI('FieldURI' => expr[:field_uRI])
     end
 
+    alias_method :field_uri, :field_uRI
+
     def indexed_field_uRI(expr)
       nbuild[NS_EWS_TYPES].IndexedFieldURI(
         'FieldURI'    => expr[:field_uRI],
         'FieldIndex'  => expr[:field_index]
       )
     end
+
+    alias_method :indexed_field_uri, :indexed_field_uRI
 
     def extended_field_uRI(expr)
       nbuild[NS_EWS_TYPES].ExtendedFieldURI {
@@ -642,6 +646,8 @@ module Viewpoint::EWS::SOAP
         nbuild.parent['PropertyType'] = expr[:property_type] if expr[:property_type]
       }
     end
+
+    alias_method :extended_field_uri, :extended_field_uRI
 
     def extended_properties!(eprops)
       eprops.each {|ep| extended_property!(ep)}
@@ -673,6 +679,8 @@ module Viewpoint::EWS::SOAP
         self.send(type, expr[type])
       }
     end
+
+    alias_method :field_uri_or_constant, :field_uRI_or_constant
 
     def constant(expr)
       nbuild[NS_EWS_TYPES].Constant('Value' => expr[:value])
