@@ -34,10 +34,10 @@ module Viewpoint::EWS::ConvertAccessors
     convert_id_parser(resp)
   end
 
-private
+  private
 
   def convert_id_args(id, opts)
-  	{ id: id }.merge opts
+    { id: id }.merge opts
   end
 
   def convert_id_parser(resp)

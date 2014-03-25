@@ -757,17 +757,17 @@ module Viewpoint::EWS::SOAP
       req = build_soap! do |type, builder|
         if(type == :header)
         else
-        builder.nbuild.ConvertId {|x|
+          builder.nbuild.ConvertId {|x|
             builder.nbuild.parent.default_namespace = @default_ns
             x.parent['DestinationFormat'] = opts[:destination_format].to_s.camel_case
             x.SourceIds { |x|
-                x[NS_EWS_TYPES].AlternateId { |x|
-                    x.parent['Format'] = opts[:format].to_s.camel_case
-                    x.parent['Id'] = opts[:id]
-                    x.parent['Mailbox'] = opts[:mailbox]
-                }
+              x[NS_EWS_TYPES].AlternateId { |x|
+                x.parent['Format'] = opts[:format].to_s.camel_case
+                x.parent['Id'] = opts[:id]
+                x.parent['Mailbox'] = opts[:mailbox]
+              }
             }
-        }
+          }
         end
       end
       do_soap_request(req, response_class: EwsResponse)
