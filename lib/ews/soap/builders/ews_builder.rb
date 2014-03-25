@@ -858,7 +858,7 @@ module Viewpoint::EWS::SOAP
     def subject!(sub)
       nbuild[NS_EWS_TYPES].Subject(sub)
     end
-    
+
     def importance!(sub)
       nbuild[NS_EWS_TYPES].Importance(sub)
     end
