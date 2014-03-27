@@ -34,6 +34,11 @@ module Viewpoint::EWS::ItemAccessors
     get_item_parser(resp)
   end
 
+  def get_items(opts = {})
+    resp = ews.get_item(opts)
+    get_items_parser(resp)
+  end
+
   # @param [Hash] opts Misc options to control request
   # @option opts [Symbol] :folder_id
   # @see GenericFolder#items
@@ -116,6 +121,27 @@ private
       code = rm.respond_to?(:code) ? rm.code : "Unknown"
       text = rm.respond_to?(:message_text) ? rm.message_text : "Unknown"
       raise EwsItemNotFound, "Could not retrieve item. #{rm.code}: #{rm.message_text}"
+    end
+  end
+
+  def get_items_parser(resp)
+    rm = resp.response_messages[0]
+
+    if(rm && rm.status == 'Success')
+      items = []
+
+      resp.response_messages.each do |rm|
+        rm.items.each do |i|
+          type = i.keys.first
+          items << class_by_name(type).new(ews, i[type])
+        end
+      end
+
+      items
+    else
+      code = rm.respond_to?(:code) ? rm.code : "Unknown"
+      text = rm.respond_to?(:message_text) ? rm.message_text : "Unknown"
+      raise EwsItemNotFound, "Could not retrieve items. #{rm.code}: #{rm.message_text}"
     end
   end
 
