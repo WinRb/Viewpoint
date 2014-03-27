@@ -30,5 +30,17 @@ module Viewpoint::EWS::CalendarAccessors
   def event_end_time( the_event )
     the_event[:calendar_event][:elems][1][:end_time][:text]
   end
+  
+  def event_name( the_event )
+    the_event[:calendar_event][:elems][3][:calendar_event_details][:elems][1][:subject][:text]
+  end
+  
+  def event_location( the_event )
+    the_event[:calendar_event][:elems][3][:calendar_event_details][:elems][2][:location][:text]
+  end
+  
+  def event_is_recurring( the_event )
+    the_event[:calendar_event][:elems][3][:calendar_event_details][:elems][4][:is_recurring][:text]
+  end
 
 end # Viewpoint::EWS::CalendarAccessors
