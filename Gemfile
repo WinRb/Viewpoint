@@ -8,4 +8,5 @@ group :development do
   gem 'guard-rspec'
   gem 'rb-inotify', :require => false
   gem 'turn'
+  gem "pry-nav"
 end
