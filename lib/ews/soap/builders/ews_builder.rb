@@ -51,7 +51,7 @@ module Viewpoint::EWS::SOAP
         node.parent.namespace = parent_namespace(node)
         node.Header {
           set_version_header! opts[:server_version]
-		      set_impersonation! opts[:impersonation_type], opts[:impersonation_mail]
+          set_impersonation! opts[:impersonation_type], opts[:impersonation_mail]
           set_time_zone_context_header! opts[:time_zone_context]
           yield(:header, self) if block_given?
         }
@@ -621,15 +621,20 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def ews_types_builder
+      nbuild[NS_EWS_TYPES]
+    end
+
     def field_uRI(expr)
-      nbuild[NS_EWS_TYPES].FieldURI('FieldURI' => expr[:field_uRI])
+      value = expr.is_a?(Hash) ? (expr[:field_uRI] || expr[:field_uri]) : expr
+      ews_types_builder.FieldURI('FieldURI' => value)
     end
 
     alias_method :field_uri, :field_uRI
 
     def indexed_field_uRI(expr)
       nbuild[NS_EWS_TYPES].IndexedFieldURI(
-        'FieldURI'    => expr[:field_uRI],
+        'FieldURI'    => (expr[:field_uRI] || expr[:field_uri]),
         'FieldIndex'  => expr[:field_index]
       )
     end
@@ -1155,11 +1160,15 @@ module Viewpoint::EWS::SOAP
       case type
       when :field_uRI, :field_uri
         vals.each do |val|
-          nbuild[ns].FieldURI('FieldURI' => val[type])
+          value = val.is_a?(Hash) ? val[type] : val
+          nbuild[ns].FieldURI('FieldURI' => value)
         end
       when :indexed_field_uRI, :indexed_field_uri
         vals.each do |val|
-          nbuild[ns].IndexedFieldURI('FieldURI' => val[:field_uRI], 'FieldIndex' => val[:field_index])
+          nbuild[ns].IndexedFieldURI(
+            'FieldURI'   => (val[:field_uRI] || val[:field_uri]),
+            'FieldIndex' => val[:field_index]
+          )
         end
       when :extended_field_uRI, :extended_field_uri
         vals.each do |val|

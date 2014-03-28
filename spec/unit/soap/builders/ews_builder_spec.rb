@@ -34,4 +34,35 @@ describe Viewpoint::EWS::SOAP::EwsBuilder do
     selector = "//soap:Header/t:TimeZoneContext/t:TimeZoneDefinition[@Id='SpaceTime']"
     doc.root.xpath(selector, namespaces).should be_any
   end
+
+  describe "#field_uRI" do
+    let(:field_uri_string) { "message:ToRecipients" }
+    let(:match_string)     { "<FieldURI FieldURI=\"#{field_uri_string}\"/>" }
+
+    before do
+      builder.stub(:ews_types_builder) { builder.nbuild }
+    end
+
+    it "builds a fieldURI from a String" do
+      builder.field_uri(field_uri_string)
+      ndoc = builder.nbuild.doc
+      expect(ndoc.children.length).to eq(1)
+      expect(ndoc.children.first.to_s).to eq(match_string)
+    end
+
+    it "builds a fieldURI from a Hash with key :field_uRI" do
+      builder.field_uri({field_uRI: field_uri_string})
+      ndoc = builder.nbuild.doc
+      expect(ndoc.children.length).to eq(1)
+      expect(ndoc.children.first.to_s).to eq(match_string)
+    end
+
+    it "builds a fieldURI from a Hash with key :field_uri" do
+      builder.field_uri({field_uri: field_uri_string})
+      ndoc = builder.nbuild.doc
+      expect(ndoc.children.length).to eq(1)
+      expect(ndoc.children.first.to_s).to eq(match_string)
+    end
+
+  end
 end
