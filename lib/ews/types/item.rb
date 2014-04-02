@@ -368,10 +368,12 @@ module Viewpoint::EWS::Types
     end
 
     def build_mailbox_users(users)
+      return [] if users.nil?
       users.collect{|u| build_mailbox_user(u[:mailbox][:elems])}
     end
 
     def build_attendees_users(users)
+      return [] if users.nil?
       users.collect do |u|
         u[:attendee][:elems].collect do |a|
           build_mailbox_user(a[:mailbox][:elems]) if a[:mailbox]
@@ -380,6 +382,7 @@ module Viewpoint::EWS::Types
     end
 
     def build_attachments(attachments)
+      return [] if users.nil?
       attachments.collect do |att|
         key = att.keys.first
         class_by_name(key).new(self, att[key])
