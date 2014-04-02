@@ -17,8 +17,22 @@
 =end
 
 module Viewpoint
+
+  class StringFormatException < ::Exception; end
+
   # Collection of utility methods for working with Strings
   module StringUtils
+
+    DURATION_RE = /
+      (?<start>P)
+      ((?<weeks>\d+)W)?
+      ((?<days>\d+)D)?
+      (?<time>T
+        ((?<hours>\d+)H)?
+        ((?<minutes>\d+)M)?
+        ((?<seconds>\d+)S)?
+      )?
+      /x
 
     def self.included(klass)
       klass.extend StringUtils
@@ -40,5 +54,23 @@ module Viewpoint
         i.sub(/^./) { |s| s.upcase }
       }.join
     end
+
+    # Convert an ISO8601 Duration format to seconds
+    # @see http://tools.ietf.org/html/rfc2445#section-4.3.6
+    # @param [String] input
+    # @return [nil,Fixnum] the number of seconds in this duration
+    #   nil if there is no known duration
+    def iso8601_duration_to_seconds(input)
+      return nil if input.nil? || input.empty?
+      match_data = DURATION_RE.match(input)
+      raise(StringFormatException, "Invalid duration given") if match_data.nil?
+      duration = 0
+      duration += match_data[:weeks].to_i   * 604800
+      duration += match_data[:days].to_i    * 86400
+      duration += match_data[:hours].to_i   * 3600
+      duration += match_data[:minutes].to_i * 60
+      duration += match_data[:seconds].to_i
+    end
+
   end # StringUtils
 end # Viewpoint
