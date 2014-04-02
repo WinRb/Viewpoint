@@ -102,8 +102,13 @@ module Viewpoint::EWS::Types
 
     end
 
+    def duration_in_seconds
+      iso8601_duration_to_seconds(duration)
+    end
+
 
     private
+
 
     def key_paths
       super.merge(CALENDAR_ITEM_KEY_PATHS)
