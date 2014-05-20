@@ -95,7 +95,7 @@ class Viewpoint::EWS::Connection
     when 401
       raise Errors::UnauthorizedResponseError.new("Unauthorized request", resp)
     when 500
-      if resp.headers['Content-Type'].include?('xml')
+      if resp.headers['Content-Type'] =~ /xml/
         err_string, err_code = parse_soap_error(resp.body)
         raise Errors::SoapResponseError.new("SOAP Error: Message: #{err_string}  Code: #{err_code}", resp, err_code, err_string)
       else
