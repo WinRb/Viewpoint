@@ -30,12 +30,13 @@ class Viewpoint::EWS::Connection
   def initialize(endpoint, opts = {})
     @log = Logging.logger[self.class.name.to_s.to_sym]
     @httpcli = HTTPClient.new
-    @httpcli.ssl_config.verify_mode = opts[:ssl_verify_mode] if opts[:ssl_verify_mode]
     if opts[:trust_ca]
+      @httpcli.ssl_config.clear_cert_store
       opts[:trust_ca].each do |ca|
         @httpcli.ssl_config.add_trust_ca ca
       end
     end
+    @httpcli.ssl_config.verify_mode = opts[:ssl_verify_mode] if opts[:ssl_verify_mode]
     # Up the keep-alive so we don't have to do the NTLM dance as often.
     @httpcli.keep_alive_timeout = 60
     @endpoint = endpoint
