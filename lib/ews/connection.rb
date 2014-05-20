@@ -25,11 +25,17 @@ class Viewpoint::EWS::Connection
   # @param [String] endpoint the URL of the web service.
   #   @example https://<site>/ews/Exchange.asmx
   # @param [Hash] opts Misc config options (mostly for developement)
-  # @option opts [Fixnum] ssl_verify_mode
+  # @option opts [Fixnum] :ssl_verify_mode
+  # @option opts [Array]  :trust_ca an array of hashed dir paths or a file
   def initialize(endpoint, opts = {})
     @log = Logging.logger[self.class.name.to_s.to_sym]
     @httpcli = HTTPClient.new
     @httpcli.ssl_config.verify_mode = opts[:ssl_verify_mode] if opts[:ssl_verify_mode]
+    if opts[:trust_ca]
+      opts[:trust_ca].each do |ca|
+        @httpcli.ssl_config.add_trust_ca ca
+      end
+    end
     # Up the keep-alive so we don't have to do the NTLM dance as often.
     @httpcli.keep_alive_timeout = 60
     @endpoint = endpoint
