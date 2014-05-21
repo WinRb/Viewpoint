@@ -382,7 +382,7 @@ module Viewpoint::EWS::Types
     end
 
     def build_attachments(attachments)
-      return [] if users.nil?
+      return [] if attachments.nil?
       attachments.collect do |att|
         key = att.keys.first
         class_by_name(key).new(self, att[key])
