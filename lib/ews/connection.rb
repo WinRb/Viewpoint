@@ -97,7 +97,7 @@ class Viewpoint::EWS::Connection
     when 500
       if resp.headers['Content-Type'].include?('xml')
         err_string, err_code = parse_soap_error(resp.body)
-        raise Errors::SoapResponseError.new("SOAP Error: Message: #{err_string}  Code: #{err_code}", resp, err_code, err_string)
+        raise Errors::SoapResponseError.new("SOAP Error: Message: #{err_string}  Code: #{err_code} - #{resp.body}", resp, err_code, err_string)
       else
         raise Errors::ServerError.new("Internal Server Error. Message: #{resp.body}", resp)
       end
