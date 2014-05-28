@@ -46,11 +46,6 @@ module Viewpoint::EWS::ItemAccessors
     find_items_parser resp
   end
 
-  def get_items_custom(opts = {})
-    resp = ews.get_item(opts)
-    get_items_parser(resp)
-  end
-
   # This is a class method that fetches an existing Item from the
   #  Exchange Store.
   # @param [String] item_id The id of the item. You can also pass a Hash in the
