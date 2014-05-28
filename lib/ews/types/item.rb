@@ -372,12 +372,18 @@ module Viewpoint::EWS::Types
       users.collect{|u| build_mailbox_user(u[:mailbox][:elems])}
     end
 
+    Attendee = Struct.new(:response_type, :mailbox)
+
     def build_attendees_users(users)
       return [] if users.nil?
       users.collect do |u|
-        u[:attendee][:elems].collect do |a|
+        response_type = u[:response_type][:text]
+
+        mailbox = u[:attendee][:elems].collect do |a|
           build_mailbox_user(a[:mailbox][:elems]) if a[:mailbox]
-        end
+        end.compact.first
+
+        Attendee.new(response_type, mailbox)
       end.flatten.compact
     end
 
