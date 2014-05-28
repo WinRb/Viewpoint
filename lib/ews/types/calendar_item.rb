@@ -33,13 +33,14 @@ module Viewpoint::EWS::Types
       meeting?:     ->(str){str.downcase == 'true'},
       cancelled?:   ->(str){str.downcase == 'true'},
       all_day?:     ->(str){str.downcase == 'true'},
-      reminder_set?: ->(str){str.downcase == 'true'}
+      reminder_set?: ->(str){str.downcase == 'true'},
       organizer: :build_mailbox_user,
       optional_attendees: :build_attendees_users,
       required_attendees: :build_attendees_users,
       deleted_occurrences: :build_deleted_occurrences,
       modified_occurrences: :build_modified_occurrences
     }
+
     CALENDAR_ITEM_KEY_ALIAS = {}
 
     # Updates the specified item attributes
