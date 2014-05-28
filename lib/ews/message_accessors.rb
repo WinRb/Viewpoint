@@ -33,7 +33,8 @@ module Viewpoint::EWS::MessageAccessors
   # @option opts [String,Symbol,Hash] saved_item_folder_id Either a
   #   FolderId(String) or a DistinguishedFolderId(Symbol). You can also pass a
   #   Hash in the form: {id: <fold_id>, change_key: <change_key>}
-  # @option opts [Array<File>] :file_attachments an Array of File objects
+  # @option opts [Array<File>] :file_attachments an Array of File or Tempfile objects
+  # @option opts [Array<File>] :inline_attachments an Array of Inline File or Tempfile objects
   # @return [Message,Boolean] Returns true if the message is sent, false if
   #   nothing is returned from EWS or if draft is true it will return the
   #   Message object. Finally, if something goes wrong, it raises an error
@@ -47,8 +48,12 @@ module Viewpoint::EWS::MessageAccessors
       msg.draft = true
       resp = parse_create_item(ews.create_item(msg.to_ews))
       msg.file_attachments.each do |f|
-        next unless f.kind_of?(File)
+        next unless f.kind_of?(File) or f.kind_of?(Tempfile)
         resp.add_file_attachment(f)
+      end
+      msg.inline_attachments.each do |f|
+        next unless f.kind_of?(File) or f.kind_of?(Tempfile)
+        resp.add_inline_attachment(f)
       end
       if draft
         resp.submit_attachments!

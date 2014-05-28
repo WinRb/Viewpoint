@@ -47,6 +47,7 @@ module Viewpoint
       VERSION_2010_SP1  = 'Exchange2010_SP1'
       VERSION_2010_SP2  = 'Exchange2010_SP2'
       VERSION_2013      = 'Exchange2013'
+      VERSION_2013_SP1  = 'Exchange2013_SP1'
       VERSION_NONE      = 'none'
 
       HARD_DELETE = 'HardDelete'

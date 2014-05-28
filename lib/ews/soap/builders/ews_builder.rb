@@ -51,7 +51,7 @@ module Viewpoint::EWS::SOAP
         node.parent.namespace = parent_namespace(node)
         node.Header {
           set_version_header! opts[:server_version]
-		      set_impersonation! opts[:impersonation_type], opts[:impersonation_mail]
+          set_impersonation! opts[:impersonation_type], opts[:impersonation_mail]
           set_time_zone_context_header! opts[:time_zone_context]
           yield(:header, self) if block_given?
         }
@@ -621,15 +621,20 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def ews_types_builder
+      nbuild[NS_EWS_TYPES]
+    end
+
     def field_uRI(expr)
-      nbuild[NS_EWS_TYPES].FieldURI('FieldURI' => expr[:field_uRI])
+      value = expr.is_a?(Hash) ? (expr[:field_uRI] || expr[:field_uri]) : expr
+      ews_types_builder.FieldURI('FieldURI' => value)
     end
 
     alias_method :field_uri, :field_uRI
 
     def indexed_field_uRI(expr)
       nbuild[NS_EWS_TYPES].IndexedFieldURI(
-        'FieldURI'    => expr[:field_uRI],
+        'FieldURI'    => (expr[:field_uRI] || expr[:field_uri]),
         'FieldIndex'  => expr[:field_index]
       )
     end
@@ -867,7 +872,7 @@ module Viewpoint::EWS::SOAP
     def subject!(sub)
       nbuild[NS_EWS_TYPES].Subject(sub)
     end
-    
+
     def importance!(sub)
       nbuild[NS_EWS_TYPES].Importance(sub)
     end
@@ -975,6 +980,13 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].ReminderMinutesBeforeStart minutes
     end
 
+    # @see http://msdn.microsoft.com/en-us/library/aa566143(v=exchg.150).aspx
+    # possible values Exchange Server 2010 = [Free, Tentative, Busy, OOF, NoData]
+    #                 Exchange Server 2013 = [Free, Tentative, Busy, OOF, WorkingElsewhere, NoData]
+    def legacy_free_busy_status!(state)
+      nbuild[NS_EWS_TYPES].LegacyFreeBusyStatus(state)
+    end
+
     # @see http://msdn.microsoft.com/en-us/library/aa565428(v=exchg.140).aspx
     def item_changes!(changes)
       nbuild.ItemChanges {
@@ -1038,17 +1050,26 @@ module Viewpoint::EWS::SOAP
       @nbuild.ReturnNewItemIds(retval)
     end
 
+    def inline_attachment!(fa)
+      @nbuild[NS_EWS_TYPES].FileAttachment {
+        @nbuild[NS_EWS_TYPES].Name(fa.name)
+        @nbuild[NS_EWS_TYPES].ContentId(fa.name)
+        @nbuild[NS_EWS_TYPES].IsInline(true)
+        @nbuild[NS_EWS_TYPES].Content(fa.content)
+      }
+    end
+
     def file_attachment!(fa)
       @nbuild[NS_EWS_TYPES].FileAttachment {
-        @nbuild.Name(fa.name)
-        @nbuild.Content(fa.content)
+        @nbuild[NS_EWS_TYPES].Name(fa.name)
+        @nbuild[NS_EWS_TYPES].Content(fa.content)
       }
     end
 
     def item_attachment!(ia)
       @nbuild[NS_EWS_TYPES].ItemAttachment {
-        @nbuild.Name(ia.name)
-        @nbuild.Item {
+        @nbuild[NS_EWS_TYPES].Name(ia.name)
+        @nbuild[NS_EWS_TYPES].Item {
           item_id!(ia.item)
         }
       }
@@ -1144,11 +1165,15 @@ module Viewpoint::EWS::SOAP
       case type
       when :field_uRI, :field_uri
         vals.each do |val|
-          nbuild[ns].FieldURI('FieldURI' => val[type])
+          value = val.is_a?(Hash) ? val[type] : val
+          nbuild[ns].FieldURI('FieldURI' => value)
         end
       when :indexed_field_uRI, :indexed_field_uri
         vals.each do |val|
-          nbuild[ns].IndexedFieldURI('FieldURI' => val[:field_uRI], 'FieldIndex' => val[:field_index])
+          nbuild[ns].IndexedFieldURI(
+            'FieldURI'   => (val[:field_uRI] || val[:field_uri]),
+            'FieldIndex' => val[:field_index]
+          )
         end
       when :extended_field_uRI, :extended_field_uri
         vals.each do |val|

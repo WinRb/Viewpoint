@@ -85,6 +85,7 @@ module Viewpoint::EWS::Types
       simplify!
       @new_file_attachments = []
       @new_item_attachments = []
+      @new_inline_attachments = []
     end
 
     # Specify a body_type to fetch this item with if it hasn't already been fetched.
@@ -181,6 +182,13 @@ module Viewpoint::EWS::Types
       @new_item_attachments << ia
     end
 
+    def add_inline_attachment(file)
+      fi = OpenStruct.new
+      fi.name     = File.basename(file.path)
+      fi.content  = Base64.encode64(file.read)
+      @new_inline_attachments << fi
+    end
+
     def submit!
       if draft?
         submit_attachments!
@@ -197,17 +205,19 @@ module Viewpoint::EWS::Types
     end
 
     def submit_attachments!
-      return false unless draft? && !(@new_file_attachments.empty? && @new_item_attachments.empty?)
+      return false unless draft? && !(@new_file_attachments.empty? && @new_item_attachments.empty? && @new_inline_attachments.empty?)
 
       opts = {
         parent_id: {id: self.id, change_key: self.change_key},
         files: @new_file_attachments,
-        items: @new_item_attachments
+        items: @new_item_attachments,
+        inline_files: @new_inline_attachments
       }
       resp = ews.create_attachment(opts)
       set_change_key resp.response_messages[0].attachments[0].parent_change_key
       @new_file_attachments = []
       @new_item_attachments = []
+      @new_inline_attachments = []
     end
 
     # If you want to add to the body set #new_body_content. If you set #body
@@ -336,15 +346,43 @@ module Viewpoint::EWS::Types
       end
     end
 
+    def build_deleted_occurrences(occurrences)
+      occurrences.collect{|a| DateTime.parse a[:deleted_occurrence][:elems][0][:start][:text]}
+    end
+
+    def build_modified_occurrences(occurrences)
+      {}.tap do |h|
+        occurrences.collect do |a|
+          elems = a[:occurrence][:elems]
+
+          h[DateTime.parse(elems.find{|e| e[:original_start]}[:original_start][:text])] = {
+            start: elems.find{|e| e[:start]}[:start][:text],
+            end: elems.find{|e| e[:end]}[:end][:text]
+          }
+        end
+      end
+    end
+
     def build_mailbox_user(mbox_ews)
       MailboxUser.new(ews, mbox_ews)
     end
 
     def build_mailbox_users(users)
+      return [] if users.nil?
       users.collect{|u| build_mailbox_user(u[:mailbox][:elems])}
     end
 
+    def build_attendees_users(users)
+      return [] if users.nil?
+      users.collect do |u|
+        u[:attendee][:elems].collect do |a|
+          build_mailbox_user(a[:mailbox][:elems]) if a[:mailbox]
+        end
+      end.flatten.compact
+    end
+
     def build_attachments(attachments)
+      return [] if attachments.nil?
       attachments.collect do |att|
         key = att.keys.first
         class_by_name(key).new(self, att[key])

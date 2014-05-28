@@ -12,15 +12,17 @@ describe "Room operations on Exchange Data Services" do
 
   it "generates GetRooms XML" do
     @ews.should_receive(:do_soap_request) do |request_document|
-          request_document.to_s.should eq load_soap("get_rooms", :request)
-        end
+      doc = request_document.to_s.gsub(%r{>\s+}, '>')
+      doc.should eq load_soap("get_rooms", :request)
+    end
     @ews.get_rooms 'TestRoomList@test.microsoft.com'
   end
 
   it "generates GetRoomLists XML" do
     @ews.should_receive(:do_soap_request) do |request_document|
-          request_document.to_s.should eq load_soap("get_room_lists", :request)
-        end.and_return(double(:resp))
+      doc = request_document.to_s.gsub(%r{>\s+}, '>')
+      doc.should eq load_soap("get_room_lists", :request)
+    end.and_return(double(:resp))
     @ews.get_room_lists
   end
 

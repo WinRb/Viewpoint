@@ -34,11 +34,6 @@ module Viewpoint::EWS::ItemAccessors
     get_item_parser(resp)
   end
 
-  def get_items(opts = {})
-    resp = ews.get_item(opts)
-    get_items_parser(resp)
-  end
-
   # @param [Hash] opts Misc options to control request
   # @option opts [Symbol] :folder_id
   # @see GenericFolder#items
@@ -49,6 +44,27 @@ module Viewpoint::EWS::ItemAccessors
     merge_restrictions! obj
     resp = ews.find_item(args)
     find_items_parser resp
+  end
+
+  def get_items_custom(opts = {})
+    resp = ews.get_item(opts)
+    get_items_parser(resp)
+  end
+
+  # This is a class method that fetches an existing Item from the
+  #  Exchange Store.
+  # @param [String] item_id The id of the item. You can also pass a Hash in the
+  #   form: {id: <fold_id>, change_key: <change_key>}
+  # @param [Hash] opts Misc options to control request
+  # @option opts [Symbol] :shape :id_only/:default/:all_properties
+  # @return [Item] Returns an Item or subclass of Item
+  # @todo Add support to fetch an item with a ChangeKey
+  def get_items(item_ids, opts = {})
+    args = get_item_args(item_ids, opts.clone)
+    obj = OpenStruct.new(opts: args)
+    yield obj if block_given?
+    resp = ews.get_item(args)
+    get_items_parser(resp)
   end
 
   # Copy an array of items to the specified folder
@@ -90,7 +106,7 @@ module Viewpoint::EWS::ItemAccessors
   # return [Array] array of bulk items
   def export_items(item_ids)
     args = export_items_args(item_ids)
-    
+
     resp = ews.export_items(args)
     export_items_parser(resp)
   end
@@ -102,10 +118,13 @@ private
     default_args = {
       :item_shape => {:base_shape => opts[:shape]}
     }
-    if item_id.is_a?(Hash)
-      default_args[:item_ids] = [{:item_id => item_id}]
+    default_args[:item_ids] = case item_id
+    when Hash
+      [{:item_id => item_id}]
+    when Array
+      item_id.map{|i| {:item_id => {:id => i}}}
     else
-      default_args[:item_ids] = [{:item_id => {:id => item_id}}]
+      [{:item_id => {:id => item_id}}]
     end
     default_args.merge opts
   end
@@ -125,24 +144,18 @@ private
   end
 
   def get_items_parser(resp)
-    rm = resp.response_messages[0]
+    items = []
 
-    if(rm && rm.status == 'Success')
-      items = []
-
-      resp.response_messages.each do |rm|
+    resp.response_messages.each do |rm|
+      if(rm && rm.status == 'Success')
         rm.items.each do |i|
           type = i.keys.first
           items << class_by_name(type).new(ews, i[type])
         end
       end
-
-      items
-    else
-      code = rm.respond_to?(:code) ? rm.code : "Unknown"
-      text = rm.respond_to?(:message_text) ? rm.message_text : "Unknown"
-      raise EwsItemNotFound, "Could not retrieve items. #{rm.code}: #{rm.message_text}"
     end
+
+    items
   end
 
   def find_items_args(opts)
@@ -201,8 +214,7 @@ private
     end
     default_args
   end
-  
-  
+
   def export_items_parser(resp)
     rm = resp.response_messages
     if(rm)

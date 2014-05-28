@@ -14,7 +14,7 @@ module Viewpoint::EWS
       end
 
       def has_attachments?
-        !(file_attachments.empty? && item_attachments.empty?)
+        !(file_attachments.empty? && item_attachments.empty? && inline_attachments.empty?)
       end
 
 
@@ -32,6 +32,7 @@ module Viewpoint::EWS
         self.bcc_recipients ||= []
         self.file_attachments ||= []
         self.item_attachments ||= []
+        self.inline_attachments ||= []
         self.extended_properties ||= []
       end
 
@@ -50,7 +51,7 @@ module Viewpoint::EWS
         msg = {}
         msg[:subject] = subject if subject
         msg[:body] = {text: body, body_type: body_type} if body
-        
+
         msg[:importance] = importance if importance
 
         to_r = to_recipients.collect{|r| {mailbox: {email_address: r}}}

@@ -677,6 +677,9 @@ module Viewpoint::EWS::SOAP
               opts[:items].each do |ia|
                 builder.item_attachment!(ia)
               end
+              opts[:inline_files].each do |fi|
+                builder.inline_attachment!(fi)
+              end
             }
           }
         end
@@ -751,14 +754,28 @@ module Viewpoint::EWS::SOAP
     # @todo Needs to be finished
     def convert_id(opts)
       opts = opts.clone
+
+      [:id, :format, :destination_format, :mailbox ].each do |k|
+        validate_param(opts, k, true)
+      end
+
       req = build_soap! do |type, builder|
         if(type == :header)
         else
-        builder.nbuild.ConvertId {|x|
-        }
+          builder.nbuild.ConvertId {|x|
+            builder.nbuild.parent.default_namespace = @default_ns
+            x.parent['DestinationFormat'] = opts[:destination_format].to_s.camel_case
+            x.SourceIds { |x|
+              x[NS_EWS_TYPES].AlternateId { |x|
+                x.parent['Format'] = opts[:format].to_s.camel_case
+                x.parent['Id'] = opts[:id]
+                x.parent['Mailbox'] = opts[:mailbox]
+              }
+            }
+          }
         end
       end
-      do_soap_request(req)
+      do_soap_request(req, response_class: EwsResponse)
     end
 
   end #ExchangeDataServices
