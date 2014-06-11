@@ -376,15 +376,21 @@ module Viewpoint::EWS::Types
 
     def build_attendees_users(users)
       return [] if users.nil?
-      users.collect do |u|
-        response_type = u[:response_type][:text]
 
-        mailbox = u[:attendee][:elems].collect do |a|
-          build_mailbox_user(a[:mailbox][:elems]) if a[:mailbox]
-        end.compact.first
+      users.collect do |u|
+        response_type = nil
+        mailbox = nil
+
+        u[:attendee][:elems].each do |a|
+          response_type = a[:response_type][:text] if a[:response_type]
+          mailbox = build_mailbox_user(a[:mailbox][:elems]) if a[:mailbox]
+        end
 
         Attendee.new(response_type, mailbox)
       end.flatten.compact
+    rescue => e
+      log.error "Failed to build attendees users - #{e.message}", e
+      raise
     end
 
     def build_attachments(attachments)
