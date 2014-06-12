@@ -17,6 +17,7 @@
 =end
 
 require 'ews/item_accessors'
+require 'ews/folder_view'
 
 module Viewpoint::EWS::Types
   module GenericFolder
@@ -377,7 +378,7 @@ module Viewpoint::EWS::Types
     def items_parser(resp)
       rm = resp.response_messages[0]
       if(rm.status == 'Success')
-        items = []
+        items = FolderView.new(rm.root_folder)
         rm.root_folder.items.each do |i|
           type = i.keys.first
           items << class_by_name(type).new(ews, i[type], self)
