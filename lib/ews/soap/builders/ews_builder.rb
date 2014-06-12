@@ -148,6 +148,30 @@ module Viewpoint::EWS::SOAP
       indexed_page_item_view.each_pair {|k,v| attribs[camel_case(k)] = v.to_s}
       @nbuild[NS_EWS_MESSAGES].IndexedPageItemView(attribs)
     end
+    
+    # Build the SortOrder element
+    # @see http://msdn.microsoft.com/en-us/library/office/aa565191(v=exchg.150).aspx
+    # @todo needs peer check
+    def sort_order!(sort_order)
+      @nbuild[NS_EWS_MESSAGES].SortOrder {
+        sort_order[:field_orders].each { |field_order|
+          field_order!(field_order)
+        }
+      }
+    end
+    
+    # Build the FieldOrder element
+    # @see http://msdn.microsoft.com/en-us/library/office/aa564968(v=exchg.150).aspx
+    # @todo needs peer check
+    def field_order!(field_order)
+      field_order = field_order.dup
+      order = field_order.delete(:order)
+      @nbuild[NS_EWS_TYPES].FieldOrder('Order' => order) {
+        field_order.each_pair { |k, v|
+          dispatch_field_uri!({k => v}, NS_EWS_TYPES)
+        }
+      }
+    end
 
     # Build the BaseShape element
     # @see http://msdn.microsoft.com/en-us/library/aa580545.aspx
