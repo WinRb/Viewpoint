@@ -45,6 +45,7 @@ module Viewpoint::EWS::SOAP
             builder.calendar_view!(opts[:calendar_view]) if opts[:calendar_view]
             builder.contacts_view!(opts[:contacts_view]) if opts[:contacts_view]
             builder.restriction!(opts[:restriction]) if opts[:restriction]
+            builder.sort_order!(opts[:sort_order]) if opts[:sort_order]
             builder.parent_folder_ids!(opts[:parent_folder_ids])
           }
         end
