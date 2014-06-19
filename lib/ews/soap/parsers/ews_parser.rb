@@ -28,8 +28,16 @@ module Viewpoint::EWS::SOAP
 
     def parse(opts = {})
       opts[:response_class] ||= EwsSoapResponse
-      sax_parser.parse(@soap_resp)
+      sax_parser.parse(sanitize_response(@soap_resp))
       opts[:response_class].new @sax_doc.struct
+    end
+
+    #
+    # We empirically encountered a &#x10; in the wild which is an invalid XML character.
+    # In order to parse correctly we need to remove
+    #
+    def sanitize_response(resp)
+      resp.gsub "&#x10;", ""
     end
 
 

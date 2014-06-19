@@ -21,4 +21,10 @@ describe "Exchange Response Parser Functionality" do
     resp.body.should == error_body
   end
 
+  it 'parses an error case with a bad character' do
+    soap_resp = load_soap 'get_item_bad_character', :response
+    resp = Viewpoint::EWS::SOAP::EwsParser.new(soap_resp).parse
+    expect(resp.envelope).to_not be_empty
+  end
+
 end

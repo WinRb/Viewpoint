@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+  <s:Header>
+    <h:ServerVersionInfo MajorBuildNumber="949" MajorVersion="15" MinorBuildNumber="19" MinorVersion="0" Version="V2_12" xmlns="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+  </s:Header>
+  <s:Body xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <m:GetItemResponse xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types">
+      <m:ResponseMessages>
+        <m:GetItemResponseMessage ResponseClass="Success">
+          <m:ResponseCode>NoError</m:ResponseCode>
+          <m:Items>
+            <t:Message>
+              <t:ItemId ChangeKey="CQAAABYAAABaqp/eGAOMSKnyxtt5HcnSAACMaPta" Id="AAMkADBhYzVhZmNhLWIwNTctNGU3OC1hNjc5LWY4NDc4MzhjNDBlMwBGAAAAAAAK1NwydHVrS7NBp/qX4fRNBwDWjI9T1MriRo2Ck+LXWkDXAIZikaT5AABaqp/eGAOMSKnyxtt5HcnSAACMMmVVAAA="/>
+              <t:Subject>Re: &#x10; Introduction Alex &lt;&gt; Dan</t:Subject>
+              <t:InReplyTo>&lt;3673FD18-F1E6-4C04-A339-79ED9076341F@test.com&gt;</t:InReplyTo>
+              <t:DateTimeSent>2014-05-21T17:31:18Z</t:DateTimeSent>
+              <t:DateTimeCreated>2014-05-21T17:31:17Z</t:DateTimeCreated>
+              <t:ToRecipients>
+                <t:Mailbox>
+                  <t:Name>Alex Exeter</t:Name>
+                  <t:EmailAddress>exeter@gmail.com</t:EmailAddress>
+                  <t:RoutingType>SMTP</t:RoutingType>
+                  <t:MailboxType>OneOff</t:MailboxType>
+                </t:Mailbox>
+              </t:ToRecipients>
+              <t:CcRecipients>
+                <t:Mailbox>
+                  <t:Name>Chris Joe</t:Name>
+                  <t:EmailAddress>cmccann@test.com</t:EmailAddress>
+                  <t:RoutingType>SMTP</t:RoutingType>
+                  <t:MailboxType>Mailbox</t:MailboxType>
+                </t:Mailbox>
+              </t:CcRecipients>
+              <t:From>
+                <t:Mailbox>
+                  <t:Name>Dan Yoman</t:Name>
+                  <t:EmailAddress>dYoman@test.com</t:EmailAddress>
+                  <t:RoutingType>SMTP</t:RoutingType>
+                  <t:MailboxType>Mailbox</t:MailboxType>
+                </t:Mailbox>
+              </t:From>
+              <t:InternetMessageId>&lt;CC91F4AB-D1DC-42E8-8139-88BDD4A9A353@test.com&gt;</t:InternetMessageId>
+              <t:References>&lt;8D3960970B624E6482BDD5A6B229F225@cs.stanford.edu&gt; &lt;9F7253DA-8595-4EAE-91EA-B6263BAFEFCF@test.com&gt; &lt;CAFt8JvMmHGRP78MmDQBgV7_n=gcugUp015MoDisLtZj6i99Q9A@mail.gmail.com&gt; &lt;BBFED081-426C-4053-9AB0-6A6AB431D260@test.com&gt; &lt;CAFt8JvP8k3A=r=iHPPZAt+cYCrMr3yqHO8YtHtZET3K4gW9X2g@mail.gmail.com&gt; &lt;3673FD18-F1E6-4C04-A339-79ED9076341F@test.com&gt;</t:References>
+            </t:Message>
+          </m:Items>
+        </m:GetItemResponseMessage>
+      </m:ResponseMessages>
+    </m:GetItemResponse>
+  </s:Body>
+</s:Envelope>
