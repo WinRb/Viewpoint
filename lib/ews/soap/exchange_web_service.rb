@@ -164,7 +164,6 @@ module Viewpoint::EWS::SOAP
         }
         end
       end
-
       do_soap_request(req, response_class: EwsSoapFreeBusyResponse)
     end
 

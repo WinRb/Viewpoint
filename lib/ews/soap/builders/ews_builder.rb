@@ -427,6 +427,7 @@ module Viewpoint::EWS::SOAP
           nbuild[NS_EWS_TYPES].StartTime(format_time opts[:time_window][:start_time])
           nbuild[NS_EWS_TYPES].EndTime(format_time opts[:time_window][:end_time])
         }
+        nbuild[NS_EWS_TYPES].MergedFreeBusyIntervalInMinutes(opts[:merged_free_busy_interval_in_minutes])
         nbuild[NS_EWS_TYPES].RequestedView(camel_case(opts[:requested_view][:requested_free_busy_view]))
       }
     end
