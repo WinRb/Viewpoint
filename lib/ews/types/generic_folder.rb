@@ -334,6 +334,11 @@ module Viewpoint::EWS::Types
         end
         o
       end
+
+      if log.debug?
+        log.debug { "========= SIMPLIFIED ============" }
+        log.debug { JSON.pretty_generate(@ews_item) }
+      end
     end
 
     # Get a specific folder by its ID.

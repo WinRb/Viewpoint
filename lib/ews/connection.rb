@@ -68,6 +68,11 @@ class Viewpoint::EWS::Connection
   # @param soapmsg [String]
   # @param opts [Hash] misc opts for handling the Response
   def dispatch(ews, soapmsg, opts)
+    if log.debug?
+      log.debug { "REQUEST =============" }
+      log.debug soapmsg
+    end
+
     respmsg = post(soapmsg)
     @log.debug <<-EOF.gsub(/^ {6}/, '')
       Received SOAP Response:
@@ -75,6 +80,12 @@ class Viewpoint::EWS::Connection
       #{Nokogiri::XML(respmsg).to_xml}
       ----------------
     EOF
+
+    if log.debug?
+      log.debug { "RESPONSE =============" }
+      log.debug Nokogiri::XML(respmsg).to_xml
+    end
+
     opts[:raw_response] ? respmsg : ews.parse_soap_response(respmsg, opts)
   end
 
