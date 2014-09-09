@@ -124,6 +124,19 @@ module Viewpoint::EWS::Types
       end
     end
 
+    # Fetch items with paging
+    # @param [Integer] max_entries Maximum number of items returned
+    # @param [Integer] offset Offset from the starting point. This is optional.
+    # @param [String] basepoint Starting point in the list of items.
+    #   The valid options for this parameter are 'Beginning' and 'End'. This is optional.
+    def paging_items(max_entries, offset = 0, basepoint = 'Beginning')
+      items(indexed_page_item_view: {
+                                      'MaxEntriesReturned' => max_entries,
+                                      'Offset' => offset,
+                                      'BasePoint' => basepoint
+                                    })
+    end
+
     # Search on the item subject
     # @param [String] match_str A simple string paramater to match against the
     #   subject.  The search ignores case and does not accept regexes... only strings.
