@@ -2,13 +2,10 @@ $: << File.dirname(__FILE__) + '/../lib/'
 require 'viewpoint'
 require 'viewpoint/logging/config'
 require 'ostruct'
-require 'turn/autorun'
 require_relative 'xml_matcher'
 
 RSpec.configure do |c|
 end
-
-Turn.config.format = :outline
 
 module SpecHelper
   def specdir

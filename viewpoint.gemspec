@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
 
   s.files = Dir['Changelog.txt', 'README.md', 'TODO', 'lib/**/*']
   s.require_path = 'lib'
-  s.rdoc_options = %w(-x test/ -x examples/)
+  s.rdoc_options = %w(-x test/ -x examples/ -x spec/)
   s.extra_rdoc_files = %w(README.md)
 
   s.add_runtime_dependency  'nokogiri'
