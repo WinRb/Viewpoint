@@ -16,7 +16,7 @@
   limitations under the License.
 =end
 
-require 'ews/item_accessors'
+require 'viewpoint/ews/item_accessors'
 
 module Viewpoint::EWS::Types
   module GenericFolder

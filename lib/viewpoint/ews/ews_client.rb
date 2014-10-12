@@ -1,12 +1,12 @@
-require 'ews/folder_accessors'
-require 'ews/item_accessors'
-require 'ews/message_accessors'
-require 'ews/mailbox_accessors'
-require 'ews/push_subscription_accessors'
-require 'ews/calendar_accessors'
-require 'ews/room_accessors'
-require 'ews/roomlist_accessors'
-require 'ews/convert_accessors'
+require 'viewpoint/ews/folder_accessors'
+require 'viewpoint/ews/item_accessors'
+require 'viewpoint/ews/message_accessors'
+require 'viewpoint/ews/mailbox_accessors'
+require 'viewpoint/ews/push_subscription_accessors'
+require 'viewpoint/ews/calendar_accessors'
+require 'viewpoint/ews/room_accessors'
+require 'viewpoint/ews/roomlist_accessors'
+require 'viewpoint/ews/convert_accessors'
 
 # This class is the glue between the Models and the Web Service.
 class Viewpoint::EWSClient
