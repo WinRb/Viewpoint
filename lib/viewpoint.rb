@@ -106,4 +106,4 @@ require 'viewpoint/ews/templates/calendar_item'
 require 'viewpoint/ews/templates/task'
 
 # The proxy between the models and the web service
-require 'viewpoint/ews/ews_client'
+require 'viewpoint/ews/client'

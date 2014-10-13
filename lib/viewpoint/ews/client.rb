@@ -9,7 +9,7 @@ require 'viewpoint/ews/roomlist_accessors'
 require 'viewpoint/ews/convert_accessors'
 
 # This class is the glue between the Models and the Web Service.
-class Viewpoint::EWSClient
+class Viewpoint::Client
   include Viewpoint::EWS
   include Viewpoint::EWS::FolderAccessors
   include Viewpoint::EWS::ItemAccessors
