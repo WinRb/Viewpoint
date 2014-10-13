@@ -1,9 +1,9 @@
-module Viewpoint::EWS::SOAP
+module Viewpoint::EWS::Operations
 
   # Exchange Data Service operations as listed in the EWS Documentation.
   # @see http://msdn.microsoft.com/en-us/library/bb409286.aspx
-  module ExchangeDataServices
-    include Viewpoint::EWS::SOAP
+  module MailboxData
+    include Viewpoint::EWS::WebServiceConstants
 
     # -------------- Item Operations -------------
 

@@ -16,18 +16,17 @@
   limitations under the License.
 =end
 
-module Viewpoint::EWS::SOAP
-  class ExchangeWebService
+module Viewpoint::EWS
+  class WebService
     include Viewpoint::EWS
-    include Viewpoint::EWS::SOAP
+    include Viewpoint::EWS::WebServiceConstants
     include Viewpoint::StringUtils
-    include ExchangeDataServices
+    include Operations::MailboxData
     include ExchangeNotification
     include ExchangeAvailability
     include ExchangeUserConfiguration
     include ExchangeSynchronization
     include ExchangeTimeZones
-
     attr_accessor :server_version, :auto_deepen, :no_auto_deepen_behavior, :connection, :impersonation_type, :impersonation_address
 
     # @param [Viewpoint::EWS::Connection] connection the connection object
@@ -37,7 +36,8 @@ module Viewpoint::EWS::SOAP
     #   VERSION_2010, VERSION_2010_SP1, VERSION_2010_SP2, or VERSION_NONE. The
     #   default is VERSION_2010.
     def initialize(connection, opts = {})
-      super()
+      @log = Logging.logger[self.class.name.to_s.to_sym]
+      @default_ns = NAMESPACES["xmlns:#{NS_EWS_MESSAGES}"]
       @connection = connection
       @server_version = opts[:server_version] ? opts[:server_version] : VERSION_2010
       @auto_deepen    = true
@@ -223,7 +223,7 @@ module Viewpoint::EWS::SOAP
 
 
     private
-    # Private Methods (Builders and Parsers)
+
 
     # Validate or set default values for options parameters.
     # @param [Hash] opts The options parameter passed to an EWS operation
