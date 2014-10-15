@@ -1,8 +1,9 @@
 $: << File.dirname(__FILE__) + '/../lib/'
-require 'viewpoint'
-require 'viewpoint/logging/config'
-require 'ostruct'
+#require 'viewpoint'
+#require 'viewpoint/logging/config'
+#require 'ostruct'
 require_relative 'xml_matcher'
+require "pry"
 
 RSpec.configure do |c|
 end
