@@ -45,17 +45,16 @@ require 'viewpoint/ews/soap/ews_soap_roomlist_response'
 require 'viewpoint/ews/soap/builders/ews_builder'
 require 'viewpoint/ews/soap/parsers/ews_parser'
 require 'viewpoint/ews/soap/parsers/ews_sax_document'
-# Mix-ins for the ExchangeWebService
-require 'viewpoint/ews/soap/exchange_data_services'
+# Mix-ins for the WebService
+require "viewpoint/ews/web_service_constants"
+require 'viewpoint/ews/operations/mailbox_data'
 require 'viewpoint/ews/soap/exchange_notification'
 require 'viewpoint/ews/soap/exchange_synchronization'
 require 'viewpoint/ews/soap/exchange_availability'
 require 'viewpoint/ews/soap/exchange_user_configuration'
 require 'viewpoint/ews/soap/exchange_time_zones'
-require 'viewpoint/ews/soap/exchange_web_service'
+require 'viewpoint/ews/web_service'
 
-require 'viewpoint/ews/errors'
-require 'viewpoint/ews/connection_helper'
 require 'viewpoint/ews/connection'
 
 require 'viewpoint/ews/impersonation'

@@ -35,7 +35,7 @@ module Viewpoint::EWS::SOAP
     # Nokogiri::XML::Builder object.
     # @param [Hash] opts
     # @option opts [String] :server_version The version string that should get
-    #   set in the Header. See ExchangeWebService#initialize
+    #   set in the Header. See EWS::WebService#initialize
     # @option opts [Hash] :time_zone_context TimeZoneDefinition. Format: !{id: time_zone_identifier}
     # @example
     #   xb = EwsBuilder.new

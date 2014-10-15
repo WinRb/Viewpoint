@@ -9,7 +9,7 @@ require 'viewpoint/ews/roomlist_accessors'
 require 'viewpoint/ews/convert_accessors'
 
 # This class is the glue between the Models and the Web Service.
-class Viewpoint::Client
+class Viewpoint::EWS::Client
   include Viewpoint::EWS
   include Viewpoint::EWS::FolderAccessors
   include Viewpoint::EWS::ItemAccessors
@@ -22,10 +22,10 @@ class Viewpoint::Client
   include Viewpoint::EWS::ConvertAccessors
   include Viewpoint::StringUtils
 
-  # The instance of Viewpoint::EWS::SOAP::ExchangeWebService
+  # The instance of Viewpoint::EWS::WebService
   attr_reader :ews, :endpoint, :username
 
-  # Initialize the EWSClient instance.
+  # Initialize the EWS::Client instance.
   # @param [String] endpoint The EWS endpoint we will be connecting to
   # @param [String] user The user to authenticate as. If you are using
   #   NTLM or Negotiate authentication you do not need to pass this parameter.
@@ -34,11 +34,11 @@ class Viewpoint::Client
   # @param [Hash] opts Various options to pass to the backends
   # @option opts [String] :server_version The Exchange server version to
   #   target. See the VERSION_* constants in
-  #   Viewpoint::EWS::SOAP::ExchangeWebService.
+  #   Viewpoint::EWS::WebServiceConstants
   # @option opts [Object] :http_class specify an alternate HTTP connection class.
   # @option opts [Hash] :http_opts options to pass to the connection
   def initialize(endpoint, username, password, opts = {})
-    # dup all. @see ticket https://github.com/zenchild/Viewpoint/issues/68
+    # dup all. @see ticket https://github.com/WinRb/Viewpoint/issues/68
     @endpoint = endpoint.dup
     @username = username.dup
     password  = password.dup
@@ -46,7 +46,7 @@ class Viewpoint::Client
     http_klass = opts[:http_class] || Viewpoint::EWS::Connection
     con = http_klass.new(endpoint, opts[:http_opts] || {})
     con.set_auth @username, password
-    @ews = SOAP::ExchangeWebService.new(con, opts)
+    @ews = WebService.new(con, opts)
   end
 
   # @param deepen [Boolean] true to autodeepen, false otherwise

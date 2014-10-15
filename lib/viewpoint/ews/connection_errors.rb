@@ -16,7 +16,7 @@
   limitations under the License.
 =end
 
-module Viewpoint::EWS::Errors
+module Viewpoint::EWS::ConnectionErrors
   class ResponseError < RuntimeError
     attr_reader :response
 
@@ -34,14 +34,11 @@ module Viewpoint::EWS::Errors
     end
   end
 
-  class UnhandledResponseError < ResponseError
-  end
+  class UnhandledResponseError < ResponseError; end
 
-  class ServerError < ResponseError
-  end
+  class ServerError < ResponseError; end
 
-  class UnauthorizedResponseError < ResponseError
-  end
+  class UnauthorizedResponseError < ResponseError; end
 
   class SoapResponseError < ResponseError
     attr_reader :faultcode,

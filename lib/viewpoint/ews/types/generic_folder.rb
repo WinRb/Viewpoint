@@ -49,7 +49,7 @@ module Viewpoint::EWS::Types
 
     attr_accessor :subscription_id, :watermark, :sync_state
 
-    # @param [SOAP::ExchangeWebService] ews the EWS reference
+    # @param [EWS::WebService] ews the EWS reference
     # @param [Hash] ews_item the EWS parsed response document
     def initialize(ews, ews_item)
       super

@@ -16,9 +16,9 @@
   limitations under the License.
 =end
 require 'httpclient'
+require "viewpoint/ews/connection_errors"
 
 class Viewpoint::EWS::Connection
-  include Viewpoint::EWS::ConnectionHelper
   include Viewpoint::EWS
 
   attr_reader :endpoint
@@ -59,11 +59,10 @@ class Viewpoint::EWS::Connection
   # Every Connection class must have the dispatch method. It is what sends the
   # SOAP request to the server and calls the parser method on the EWS instance.
   #
-  # This was originally in the ExchangeWebService class but it was added here
+  # This was originally in the WebService class but it was added here
   # to make the processing chain easier to modify. For example, it allows the
   # reactor pattern to handle the request with a callback.
-  # @param ews [Viewpoint::EWS::SOAP::ExchangeWebService] used to call
-  #   #parse_soap_response
+  # @param ews [Viewpoint::EWS::WebService] used to call #parse_soap_response
   # @param soapmsg [String]
   # @param opts [Hash] misc opts for handling the Response
   def dispatch(ews, soapmsg, opts)

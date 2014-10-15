@@ -22,7 +22,7 @@ module Viewpoint::EWS
     include Viewpoint::EWS::WebServiceConstants
     include Viewpoint::StringUtils
     include Operations::MailboxData
-    include ExchangeNotification
+    include SOAP::ExchangeNotification
     include ExchangeAvailability
     include ExchangeUserConfiguration
     include ExchangeSynchronization
@@ -260,5 +260,5 @@ module Viewpoint::EWS
       EwsBuilder.new.build!(opts, &block)
     end
 
-  end # class ExchangeWebService
+  end # class WebService
 end # Viewpoint

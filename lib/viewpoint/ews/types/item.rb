@@ -75,7 +75,7 @@ module Viewpoint::EWS::Types
 
     attr_reader :ews_item, :parent
 
-    # @param ews [SOAP::ExchangeWebService] the EWS reference
+    # @param ews [EWS::WebService] the EWS reference
     # @param ews_item [Hash] the EWS parsed response document
     # @param parent [GenericFolder] an optional parent object
     def initialize(ews, ews_item, parent = nil)
