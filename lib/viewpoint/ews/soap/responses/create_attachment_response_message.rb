@@ -36,8 +36,7 @@ module Viewpoint::EWS::SOAP
       att.collect do |a|
         type = a.keys.first
         klass = Viewpoint::EWS::Types.const_get(camel_case(type))
-        item = OpenStruct.new
-        item.ews = nil
+        item = Hashie::Mash[{ews: nil}]
         klass.new(item, a[type])
       end
     end

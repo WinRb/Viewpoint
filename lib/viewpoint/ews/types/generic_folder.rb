@@ -73,7 +73,7 @@ module Viewpoint::EWS::Types
 
     def items(opts = {})
       args = items_args(opts.clone)
-      obj = OpenStruct.new(opts: args, restriction: {})
+      obj = Hashie::Mash.new(opts: args, restriction: {})
       yield obj if block_given?
       merge_restrictions! obj
       resp = ews.find_item(args)

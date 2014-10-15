@@ -169,21 +169,21 @@ module Viewpoint::EWS::Types
     end
 
     def add_file_attachment(file)
-      fa = OpenStruct.new
+      fa = Hashie::Mash.new
       fa.name     = File.basename(file.path)
       fa.content  = Base64.encode64(file.read)
       @new_file_attachments << fa
     end
 
     def add_item_attachment(other_item, name = nil)
-      ia = OpenStruct.new
+      ia = Hashie::Mash.new
       ia.name = (name ? name : other_item.subject)
       ia.item = {id: other_item.id, change_key: other_item.change_key}
       @new_item_attachments << ia
     end
 
     def add_inline_attachment(file)
-      fi = OpenStruct.new
+      fi = Hashie::Mash.new
       fi.name     = File.basename(file.path)
       fi.content  = Base64.encode64(file.read)
       @new_inline_attachments << fi

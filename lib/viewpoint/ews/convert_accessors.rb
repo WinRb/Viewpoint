@@ -28,7 +28,7 @@ module Viewpoint::EWS::ConvertAccessors
 
   def convert_id(id, opts = {})
     args = convert_id_args(id, opts.clone)
-    obj = OpenStruct.new(opts: args)
+    obj = Hashie::Mash.new(opts: args)
     yield obj if block_given?
     resp = ews.convert_id(args)
     convert_id_parser(resp)

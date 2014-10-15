@@ -39,7 +39,7 @@ module Viewpoint::EWS::FolderAccessors
   def folders(opts={})
     opts = opts.clone
     args = find_folders_args(opts)
-    obj = OpenStruct.new(opts: args, restriction: {})
+    obj = Hashie::Mash.new(opts: args, restriction: {})
     yield obj if block_given?
     merge_restrictions! obj
     resp = ews.find_folder( args )

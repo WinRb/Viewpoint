@@ -28,7 +28,7 @@ module Viewpoint::EWS::SOAP
                 id: definition[:time_zone_definition][:attribs][:id],
                 name: definition[:time_zone_definition][:attribs][:name]
             }
-            zones << OpenStruct.new(data)
+            zones << Hashie::Mash[data]
           end
         end
         zones

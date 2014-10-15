@@ -28,7 +28,7 @@ module Viewpoint::EWS::ItemAccessors
   # @todo Add support to fetch an item with a ChangeKey
   def get_item(item_id, opts = {})
     args = get_item_args(item_id, opts.clone)
-    obj = OpenStruct.new(opts: args)
+    obj = Hashie::Mash[{opts: args}]
     yield obj if block_given?
     resp = ews.get_item(args)
     get_item_parser(resp)
@@ -39,7 +39,7 @@ module Viewpoint::EWS::ItemAccessors
   # @see GenericFolder#items
   def find_items(opts = {})
     args = find_items_args(opts.clone)
-    obj = OpenStruct.new(opts: args, restriction: {})
+    obj = Hashie::Mash[{opts: args, restriction: {}}]
     yield obj if block_given?
     merge_restrictions! obj
     resp = ews.find_item(args)
@@ -56,7 +56,7 @@ module Viewpoint::EWS::ItemAccessors
   # @todo Add support to fetch an item with a ChangeKey
   def get_items(item_ids, opts = {})
     args = get_item_args(item_ids, opts.clone)
-    obj = OpenStruct.new(opts: args)
+    obj = Hashie::Mash[{opts: args}]
     yield obj if block_given?
     resp = ews.get_item(args)
     get_items_parser(resp)

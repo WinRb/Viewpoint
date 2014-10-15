@@ -20,8 +20,9 @@ require 'kconv' if(RUBY_VERSION.start_with? '1.9') # bug in rubyntlm with ruby 1
 require 'date'
 require 'base64'
 require 'nokogiri'
-require 'ostruct'
 require 'logging'
+require 'ostruct'
+require 'hashie'
 
 # String utilities
 require 'viewpoint/string_utils'
