@@ -275,6 +275,10 @@ module Viewpoint::EWS::SOAP
         x.parent['ChangeKey'] = id[:change_key] if id[:change_key]
       }
     end
+    
+    def internet_message_id!(id)
+      nbuild[NS_EWS_TYPES].InternetMessageId id
+    end
 
     # @see http://msdn.microsoft.com/en-us/library/ff709503(v=exchg.140).aspx
     def export_item_ids!(item_ids)

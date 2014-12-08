@@ -63,6 +63,8 @@ module Viewpoint::EWS
         bcc_r = bcc_recipients.collect{|r| {mailbox: {email_address: r}}}
         msg[:bcc_recipients] = bcc_r unless bcc_r.empty?
 
+        msg[:internet_message_id] = internet_message_id unless internet_message_id.empty?
+
         msg[:extended_properties] = extended_properties unless extended_properties.empty?
 
         [ews_opts, msg]
