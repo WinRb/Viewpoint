@@ -33,6 +33,10 @@ module Viewpoint::EWS
         self.file_attachments ||= []
         self.item_attachments ||= []
         self.inline_attachments ||= []
+        self.internet_message_id ||= nil
+        self.references ||= []
+        self.in_reply_to ||= nil
+        self.reply_to ||= nil
         self.extended_properties ||= []
       end
 
@@ -63,7 +67,10 @@ module Viewpoint::EWS
         bcc_r = bcc_recipients.collect{|r| {mailbox: {email_address: r}}}
         msg[:bcc_recipients] = bcc_r unless bcc_r.empty?
 
-        msg[:internet_message_id] = internet_message_id unless internet_message_id.empty?
+        msg[:internet_message_id] = internet_message_id if internet_message_id
+        msg[:references] = references unless references.empty?
+        msg[:in_reply_to] = in_reply_to if in_reply_to
+        msg[:reply_to] = reply_to if reply_to
 
         msg[:extended_properties] = extended_properties unless extended_properties.empty?
 

@@ -279,6 +279,14 @@ module Viewpoint::EWS::SOAP
     def internet_message_id!(id)
       nbuild[NS_EWS_TYPES].InternetMessageId id
     end
+    
+    def in_reply_to!(id)
+      nbuild[NS_EWS_TYPES].InReplyTo id
+    end
+    
+    def references!(str)
+      nbuild[NS_EWS_TYPES].References str
+    end
 
     # @see http://msdn.microsoft.com/en-us/library/ff709503(v=exchg.140).aspx
     def export_item_ids!(item_ids)
@@ -940,6 +948,12 @@ module Viewpoint::EWS::SOAP
     def from!(f)
       nbuild[NS_EWS_TYPES].From {
         mailbox! f
+      }
+    end
+    
+    def reply_to!(r)
+      nbuild[NS_EWS_TYPES].ReplyTo {
+        r.each {|mbox| mailbox!(mbox[:mailbox]) }
       }
     end
 
