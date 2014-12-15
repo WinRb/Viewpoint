@@ -182,6 +182,11 @@ module Viewpoint::EWS::SOAP
     def mime_content!(include_mime_content)
       @nbuild[NS_EWS_TYPES].IncludeMimeContent(include_mime_content.to_s.downcase)
     end
+    
+    # mime_content is already taken
+    def _mime_content!(content)
+      @nbuild[NS_EWS_TYPES].MimeContent(Base64.encode64(content))
+    end
 
     def body_type!(body_type)
       body_type = body_type.to_s
