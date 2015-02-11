@@ -258,8 +258,6 @@ module Viewpoint::EWS::Types
     end
 
     def push_subscribe(url, evtypes = [:all], watermark = nil, status_frequency = nil)
-      # Refresh the subscription if already subscribed
-      unsubscribe if subscribed?
 
       event_types = normalize_event_names(evtypes)
       folder = {id: self.id, change_key: self.change_key}
