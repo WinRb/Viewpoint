@@ -44,6 +44,7 @@ require 'ews/soap/ews_soap_roomlist_response'
 require 'ews/soap/builders/ews_builder'
 require 'ews/soap/parsers/ews_parser'
 require 'ews/soap/parsers/ews_sax_document'
+require 'ews/soap/parsers/ews_dom_parser'
 # Mix-ins for the ExchangeWebService
 require 'ews/soap/exchange_data_services'
 require 'ews/soap/exchange_notification'

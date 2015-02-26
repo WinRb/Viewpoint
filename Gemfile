@@ -3,10 +3,11 @@ source 'https://rubygems.org/'
 gemspec
 
 group :development do
-  gem 'rspec', '<3.0'
-  gem 'guard'
+  gem 'awesome_print'
   gem 'guard-rspec'
-  gem 'rb-inotify', :require => false
+  gem 'guard'
+  gem 'pry-nav'
+  gem 'rb-inotify', require: false
+  gem 'rspec', '<3.0'
   gem 'turn'
-  gem "pry-nav"
 end
