@@ -3,15 +3,6 @@ module Viewpoint::EWS::SOAP
     include Viewpoint::EWS
     include Viewpoint::StringUtils
 
-    # For each node:
-    # * Create a hash with the follow format:
-    # {
-    #   node_name: {
-    #     elems: [ children_hash_like_this ],
-    #     attribs: { attr_name1, attr_value1, attr_name2, attr_value2 },
-    #     text: node_value
-    #   }
-    # }
     def self.parse(soap_resp)
       doc = Nokogiri::XML soap_resp
       node_hash doc.root
