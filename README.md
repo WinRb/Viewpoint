@@ -75,7 +75,7 @@ There are also various options you can pass to EWSClient.
 
 If you are testing in an environment using a self-signed certificate you can pass a connection parameter to ignore SSL verification by passing `http_opts: {ssl_verify_mode: 0}`.
 
-If you want to target a specific version of Exchange you can pass `server_version: SOAP::ExchangeWebService::VERSION_2010_SP1`. You really shouldn't have to use this unless you know why.
+If you want to target a specific version of Exchange you can pass `server_version: SOAP::ExchangeWebService::VERSION_2010_SP1`. You really shouldn't have to use this unless you know why. If you are interacting with servers which you do not know the version(s) of, an incorrect version may manifest as a `SoapResponseError` or a HTTP 400 `ResponseError`. Note that different versions are particular; for example, `VERSION_2007` may not work against a `VERSION_2007_SP1` system.
 
 ## Accessors
 
