@@ -37,7 +37,8 @@ module Viewpoint::EWS::SOAP
     # In order to parse correctly we need to remove
     #
     def sanitize_response(resp)
-      resp.gsub "&#x10;", ""
+      # To prevent this issue: https://github.com/WinRb/Viewpoint/issues/116
+      resp.gsub(/&#x[0-1]?[0-9a-eA-E];/, ' ')
     end
 
 
