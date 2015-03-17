@@ -139,6 +139,17 @@ inbox.items_since sd
 sd = Date.iso8601 '2013-01-01'
 ed = Date.iso8601 '2013-02-01'
 inbox.items_between sd, ed
+
+# with paging
+inbox.paging_items 10
+
+# paging with parameters where:
+# first parameter is the maximum number of items returned
+# second parameter is the offset from the starting point
+# and the last parameter is the starting point in the list of items
+# the valid options for this parameter are 'Beginning' and 'End'
+# the default is 'Beginning'
+inbox.paging_items 10, 5, 'End'
 ```
 ### Free/Busy Calendar Accessors
 

@@ -23,21 +23,11 @@ module Viewpoint::EWS::SOAP
     # @param [String] soap_resp
     def initialize(soap_resp)
       @soap_resp  = soap_resp
-      @sax_doc    = EwsSaxDocument.new
     end
 
     def parse(opts = {})
       opts[:response_class] ||= EwsSoapResponse
-      sax_parser.parse(@soap_resp)
-      opts[:response_class].new @sax_doc.struct
+      opts[:response_class].new Viewpoint::EWS::SOAP::EwsDomParser.parse(@soap_resp)
     end
-
-
-    private
-
-    def sax_parser
-      @parser ||= Nokogiri::XML::SAX::Parser.new(@sax_doc)
-    end
-
   end # EwsParser
 end # Viewpoint

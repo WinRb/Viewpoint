@@ -48,14 +48,14 @@ module Viewpoint::EWS::SOAP
       name = ruby_case(name).to_sym
       elem = {}
       unless attributes.empty?
-        elem[:attribs] = attributes.collect{|a|
-          { ruby_case(a.localname).to_sym => a.value}
-        }.inject(&:merge)
+        elem[:attribs] = attributes.collect do |a|
+          { ruby_case(a.localname).to_sym => a.value }
+        end.inject(&:merge)
       end
       @elems << elem
     end
 
-    def end_element_namespace name, prefix=nil, uri=nil
+    def end_element_namespace(name, prefix = nil, uri = nil)
       name = ruby_case(name).to_sym
       elem = @elems.pop
       if @elems.empty?
@@ -65,6 +65,5 @@ module Viewpoint::EWS::SOAP
         @elems.last[:elems] << {name => elem}
       end
     end
-
   end
 end
