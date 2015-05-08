@@ -873,6 +873,22 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].Subject(sub)
     end
 
+    def categories!(cat)
+      nbuild[NS_EWS_TYPES].Categories {
+        cat.each {|categ| category!(categ)}
+      }
+    end
+
+    def category!(cat)
+      nbuild[NS_EWS_TYPES].String(cat)
+    end
+
+    def to_recipients!(r)
+      nbuild[NS_EWS_TYPES].ToRecipients {
+        r.each {|mbox| mailbox!(mbox[:mailbox]) }
+      }
+    end
+
     def importance!(sub)
       nbuild[NS_EWS_TYPES].Importance(sub)
     end
