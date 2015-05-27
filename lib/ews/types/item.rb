@@ -118,10 +118,14 @@ module Viewpoint::EWS::Types
       simplify!
     end
 
-    # Mark an item as read or if you pass false, unread
-    # @param [Boolean] read mark read if true, unread if not.
-    def mark_read!(read = true)
-      resp = update_is_read_status read
+    # Mark an item as read
+    def mark_read!
+      update_is_read_status true
+    end
+
+    # Mark an item as unread
+    def mark_unread!
+      update_is_read_status false
     end
 
     # Move this item to a new folder
