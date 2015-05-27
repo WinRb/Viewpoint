@@ -86,6 +86,7 @@ require 'ews/types/item_attachment'
 require 'ews/types/mailbox_user'
 require 'ews/types/out_of_office'
 require 'ews/types/export_items_response_message'
+require 'ews/types/post_item'
 
 # Events
 require 'ews/types/event'
