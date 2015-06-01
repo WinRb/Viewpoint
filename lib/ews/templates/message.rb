@@ -27,6 +27,7 @@ module Viewpoint::EWS
         self.body_type ||= 'Text'
         self.importance ||= 'Normal'
         self.draft ||= false
+        self.is_read = true if is_read.nil?
         self.to_recipients ||= []
         self.cc_recipients ||= []
         self.bcc_recipients ||= []
@@ -62,6 +63,8 @@ module Viewpoint::EWS
 
         bcc_r = bcc_recipients.collect{|r| {mailbox: {email_address: r}}}
         msg[:bcc_recipients] = bcc_r unless bcc_r.empty?
+
+        msg[:is_read] = is_read
 
         msg[:extended_properties] = extended_properties unless extended_properties.empty?
 

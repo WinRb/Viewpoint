@@ -822,6 +822,10 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def is_read!(read)
+      nbuild[NS_EWS_TYPES].IsRead(read)
+    end
+
     def calendar_item!(item)
       nbuild[NS_EWS_TYPES].CalendarItem {
         item.each_pair {|k,v|
