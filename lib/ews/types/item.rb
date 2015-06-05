@@ -50,6 +50,7 @@ module Viewpoint::EWS::Types
       size:               ->(str){str.to_i},
       date_time_sent:     ->(str){DateTime.parse(str)},
       date_time_created:  ->(str){DateTime.parse(str)},
+      last_modified_time: ->(str){DateTime.parse(str)},
       has_attachments?:   ->(str){str.downcase == 'true'},
       is_associated?:     ->(str){str.downcase == 'true'},
       is_read?:           ->(str){str.downcase == 'true'},
