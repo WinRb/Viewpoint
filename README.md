@@ -1,7 +1,9 @@
-[![Build Status](https://travis-ci.org/WinRb/Viewpoint.svg?branch=master)](https://travis-ci.org/WinRb/Viewpoint)
-
-# Viewpoint for Exchange Web Services 1.0
-http://github.com/zenchild/Viewpoint/wiki
+# Viewpoint for Exchange Web Services
+[![Build Status](https://img.shields.io/travis/WinRb/Viewpoint.svg?branch=master)](https://travis-ci.org/WinRb/Viewpoint)
+[![Gem Version](https://img.shields.io/gem/v/viewpoint.svg)](https://rubygems.org/gems/viewpoint)
+[![License](https://img.shields.io/github/license/WinRb/Viewpoint.svg)](https://github.com/WinRb/Viewpoint/blob/master/LICENSE)
+[![Wiki](https://img.shields.io/badge/docs-wiki-lightgrey.svg)](http://github.com/WinRb/Viewpoint/wiki)
+[![Documentation](https://img.shields.io/badge/docs-rdoc-lightgrey.svg)](http://www.rubydoc.info/github/WinRb/Viewpoint/frames)
 
 Viewpoint for EWS provides a thin Ruby layer on top of Microsoft Exchange
 Web Services(EWS). It also includes a bunch of model classes that add an
@@ -33,22 +35,22 @@ out of the picture this is no longer required. Go crazy ;)
 ## Enhanced in 1.0
 
 * *Delegate access is supported*
-  One thing that was often asked for, but missing from the previous version was delegate access to mailboxes and calendars.  This is now supported via the 'act_as' parameter to the GenericFolder::get_folder method. 
+  One thing that was often asked for, but missing from the previous version was delegate access to mailboxes and calendars.  This is now supported via the `act_as` parameter to the `GenericFolder::get_folder` method.
 
->> Inbox example:
-  ```ofolder = Folder.get_folder(:inbox, opts = {act_as: "user@host.com"})```
+> Inbox example:
+  ```inbox = Folder.get_folder(:inbox, opts = {act_as: "user@host.com"})```
 
->> If your user has delegate access to the Inbox for user@host.com this operation will retrieve their inbox and allow you to manipulate it as you would with your own Inbox.
+> If your user has delegate access to the Inbox for user@host.com this operation will retrieve their inbox and allow you to manipulate it as you would with your own Inbox.
 
->> Calendar example:
-  ```oCalendar = cli.get_folder(:calendar, opts = {act_as: "user@host.com"})```
+> Calendar example:
+  ```calendar = cli.get_folder(:calendar, opts = {act_as: "user@host.com"})```
 
->> If your user has delegate access to the Calendar for user@host.com this operation will retrieve their calendar and allow you to manipulate it as you would with your own Calendar, depending on the permissions the other user has granted you.
+> If your user has delegate access to the Calendar for user@host.com this operation will retrieve their calendar and allow you to manipulate it as you would with your own Calendar, depending on the permissions the other user has granted you.
 
 
 * There is also some support for manipulation of delegate access itself via
-  the methods MailboxUser#add_delegate!, MailboxUser#update_delegate!, and 
-  MailboxUser#get_delegate_info.
+  the methods `MailboxUser#add_delegate!`, `MailboxUser#update_delegate!`, and
+  `MailboxUser#get_delegate_info`.
 
 
 # Using Viewpoint
@@ -79,7 +81,7 @@ If you want to target a specific version of Exchange you can pass `server_versio
 
 ## Accessors
 
-There are some basic accessors available on the Viewpoint::EWSClient instance. In prior versions these were typically class methods off of the models themselves (ex: Folder.get_folder(id)). Now all accessors are available through EWSClient.
+There are some basic accessors available on the `Viewpoint::EWSClient` instance. In prior versions these were typically class methods off of the models themselves (ex: `Folder.get_folder(id)`). Now all accessors are available through `EWSClient`.
 
 ### Folder Accessors
 
@@ -164,8 +166,9 @@ busy_times.each { | event |
 user_free_busy.working_hours
 ```
 
-
 ### Mailbox Accessors
+- No examples yet
+
 ### Message Accessors
 ```ruby
 cli.send_message subject: "Test", body: "Test", to_recipients: ['test@example.com']
@@ -184,18 +187,17 @@ end
 ## Thanks go out to...
 
 * Handl.it for sponsoring a good portion of the development effort.
-** https://www.handle.com/
-* The National Association of REALTORS® for providing a testing account
+  * https://www.handle.com/
+* The National Association of REALTORS&reg; for providing a testing account
   and much appreciated input and support.
 * The Holmes Group Limited for providing Exchange 2013 test accounts.
 
----
-DISCLAIMER:  If you see something that could be done better or would like
+## DISCLAIMER:
+If you see something that could be done better or would like
 to help out in the development of this code please feel free to clone the
 'git' repository and send me patches:
-git clone git://github.com/zenchild/Viewpoint.git
+`git clone git://github.com/zenchild/Viewpoint.git`
 or add an issue on GitHub:
 http://github.com/zenchild/Viewpoint/issues
 
 Cheers!
----
