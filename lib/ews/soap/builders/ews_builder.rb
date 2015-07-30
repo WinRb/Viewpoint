@@ -1299,6 +1299,13 @@ private
       end
     end
 
+    def meeting_time_zone!(mtz)
+      nbuild[NS_EWS_TYPES].MeetingTimeZone do |x|
+        x.parent['TimeZoneName'] = mtz[:time_zone_name] if mtz[:time_zone_name]
+        nbuild[NS_EWS_TYPES].BaseOffset(mtz[:base_offset][:text]) if mtz[:base_offset]
+      end
+    end
+
     # some methods need special naming so they use the '_r' suffix like 'and'
     def normalize_type(type)
       case type
