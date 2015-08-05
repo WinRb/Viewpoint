@@ -11,7 +11,14 @@ module Viewpoint::EWS::Types
       complete_name: [ :complete_name, :elems ],
       company_name: [ :company_name, :text ],
       department: [ :department, :text ],
-      title: [ :job_title, :text ]
+      job_title: [ :job_title, :text ],
+      birthday: [ :birthday, :text ],
+      wedding_anniversary: [ :wedding_anniversary, :text ],
+      business_home_page: [ :business_home_page, :text ],
+      generation: [ :generation, :text ],
+      spouse_name: [ :spouse_name, :text ],
+      surname: [ :surname, :text ]
+
     }
 
     CONTACT_ITEM_KEY_TYPES = {
@@ -23,7 +30,9 @@ module Viewpoint::EWS::Types
           m[o.keys.first] = o.values.first[:text];
           m
         }
-      }
+      },
+      birthday: ->(str){ Date.parse(str) },
+      wedding_anniversary: ->(str){ Date.parse(str) },
     }
 
     private 
