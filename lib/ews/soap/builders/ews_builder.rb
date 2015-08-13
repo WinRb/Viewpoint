@@ -863,6 +863,10 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def is_read!(read)
+      nbuild[NS_EWS_TYPES].IsRead(read)
+    end
+
     def calendar_item!(item)
       nbuild[NS_EWS_TYPES].CalendarItem {
         item.each_pair {|k,v|
@@ -871,9 +875,62 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def calendar_item_type!(type)
+      nbuild[NS_EWS_TYPES].CalendarItemType(type)
+    end
+
+    def recurrence!(item)
+      nbuild[NS_EWS_TYPES].Recurrence {
+        item.each_pair { |k, v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
+    def daily_recurrence!(item)
+      nbuild[NS_EWS_TYPES].DailyRecurrence {
+        item.each_pair { |k, v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
+    def weekly_recurrence!(item)
+      nbuild[NS_EWS_TYPES].WeeklyRecurrence {
+        item.each_pair { |k, v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
+    def interval!(num)
+      nbuild[NS_EWS_TYPES].Interval(num)
+    end
+
+    def no_end_recurrence!(item)
+      nbuild[NS_EWS_TYPES].NoEndRecurrence {
+        item.each_pair { |k, v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
+    def numbered_recurrence!(item)
+      nbuild[NS_EWS_TYPES].NumberedRecurrence {
+        item.each_pair { |k, v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
+    def number_of_occurrences!(count)
+      nbuild[NS_EWS_TYPES].NumberOfOccurrences(count)
+    end
+
+
     def task!(item)
       nbuild[NS_EWS_TYPES].Task {
-        item.each_pair {|k,v|
+        item.each_pair {|k, v|
           self.send("#{k}!", v)
         }
       }
@@ -996,7 +1053,7 @@ module Viewpoint::EWS::SOAP
     end
 
     def start_date!(sd)
-      nbuild[NS_EWS_TYPES].StartDate format_time(sd[:text])
+      nbuild[NS_EWS_TYPES].StartDate sd[:text]
     end
 
     def due_date!(dd)
@@ -1281,6 +1338,13 @@ private
         nbuild[NS_EWS_TYPES].TimeZoneContext do
           time_zone_definition! time_zone_def
         end
+      end
+    end
+
+    def meeting_time_zone!(mtz)
+      nbuild[NS_EWS_TYPES].MeetingTimeZone do |x|
+        x.parent['TimeZoneName'] = mtz[:time_zone_name] if mtz[:time_zone_name]
+        nbuild[NS_EWS_TYPES].BaseOffset(mtz[:base_offset][:text]) if mtz[:base_offset]
       end
     end
 

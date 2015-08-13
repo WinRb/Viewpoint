@@ -27,6 +27,7 @@ module Viewpoint::EWS
         self.body_type ||= 'Text'
         self.importance ||= 'Normal'
         self.draft ||= false
+        self.is_read = true if is_read.nil?
         self.to_recipients ||= []
         self.cc_recipients ||= []
         self.bcc_recipients ||= []
@@ -71,6 +72,7 @@ module Viewpoint::EWS
         msg[:references] = references unless references.empty?
         msg[:in_reply_to] = in_reply_to if in_reply_to
         msg[:reply_to] = reply_to if reply_to
+        msg[:is_read] = is_read
 
         msg[:extended_properties] = extended_properties unless extended_properties.empty?
 
