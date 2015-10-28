@@ -45,7 +45,7 @@ class Viewpoint::EWSClient
     opts      = opts.dup
     http_klass = opts[:http_class] || Viewpoint::EWS::Connection
     con = http_klass.new(endpoint, opts[:http_opts] || {})
-    con.set_auth @username, password
+    con.set_auth(@username, password) if con.respond_to?(:set_auth)
     @ews = SOAP::ExchangeWebService.new(con, opts)
   end
 
