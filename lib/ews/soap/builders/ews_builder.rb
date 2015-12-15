@@ -24,7 +24,7 @@ module Viewpoint::EWS::SOAP
     include Viewpoint::EWS
     include Viewpoint::StringUtils
 
-    RESERVED_ATTRIBUTE_KEYS = %i{text sub_elements xmlns_attribute}.freeze
+    RESERVED_ATTRIBUTE_KEYS = %w{text sub_elements xmlns_attribute}.map(&:to_sym).freeze
 
     attr_reader :nbuild
     def initialize
