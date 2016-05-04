@@ -71,13 +71,18 @@ module Viewpoint::EWS::Types
       end
     end
 
-    def items(opts = {})
+    def items(opts = {}, &block)
+      folder, items = items_with_root_folder(opts, &block)
+      items
+    end
+
+    def items_with_root_folder(opts = {})
       args = items_args(opts.clone)
       obj = OpenStruct.new(opts: args, restriction: {})
       yield obj if block_given?
       merge_restrictions! obj
       resp = ews.find_item(args)
-      items_parser resp
+      items_with_root_folder_parser resp
     end
 
     # Fetch items since a give DateTime
@@ -378,6 +383,11 @@ module Viewpoint::EWS::Types
     end
 
     def items_parser(resp)
+      root_folder, items = items_with_root_folder_parser(resp)
+      items
+    end
+
+    def items_with_root_folder_parser(resp)
       rm = resp.response_messages[0]
       if(rm.status == 'Success')
         items = []
@@ -385,7 +395,7 @@ module Viewpoint::EWS::Types
           type = i.keys.first
           items << class_by_name(type).new(ews, i[type], self)
         end
-        items
+        [rm.root_folder, items]
       else
         raise EwsError, "Could not retrieve folder. #{rm.code}: #{rm.message_text}"
       end

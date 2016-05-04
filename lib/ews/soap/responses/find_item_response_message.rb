@@ -42,6 +42,10 @@ module Viewpoint::EWS::SOAP
       attrib :includes_last_item_in_range
     end
 
+    def includes_last_item_in_range?
+      includes_last_item_in_range == "true"
+    end
+
     def total_items_in_view
       attrib :total_items_in_view
     end
