@@ -28,21 +28,23 @@ module Viewpoint::EWS::SOAP
 
     def parse(opts = {})
       opts[:response_class] ||= EwsSoapResponse
-      sax_parser.parse(sanitize_response(@soap_resp))
+      sax_parser.parse(clean_xml(@soap_resp))
       opts[:response_class].new @sax_doc.struct
     end
 
-    #
-    # We empirically encountered a &#x10; in the wild which is an invalid XML character.
-    # In order to parse correctly we need to remove
-    #
-    def sanitize_response(resp)
-      # To prevent this issue: https://github.com/WinRb/Viewpoint/issues/116
-      resp.gsub(/&#x[0-1]?[0-9a-eA-E];/, ' ')
-    end
-
-
     private
+
+    # Responses from Exchange may contain characters which are invalid
+    # XML (control characters and such), which Microsoft will not fix.
+    # This method will munge the EWS payload  and replace any unicode
+    # characters not in the XML 1.0 specification with a placeholder.
+    # INFO: https://www.w3.org/TR/REC-xml/#charsets
+    # INFO: https://blogs.msdn.microsoft.com/mstehle/2009/02/12/kb-xml-schema-validation-errors-when-exchange-web-service-requests-and-responses-have-invalid-xml-characters/
+    def clean_xml(xml = '')
+      xml = xml.gsub(/[^\u{9 A D}\u{20}-\u{D7FF}\u{E000}-\u{FFFD}\u{10000}-\u{10FFFF}]/, "\uFFFD")
+      # It's also necessary to clean up HTML-encoded control characters.
+      xml.gsub(/&#x[0-1]?[0-9a-eA-E];/, ' ')
+    end
 
     def sax_parser
       @parser ||= Nokogiri::XML::SAX::Parser.new(@sax_doc)
