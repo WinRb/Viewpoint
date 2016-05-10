@@ -66,5 +66,8 @@ module Viewpoint::EWS::SOAP
       end
     end
 
+    def error(message)
+      raise EwsParseError, "Error parsing SAX document: #{message}"
+    end
   end
 end

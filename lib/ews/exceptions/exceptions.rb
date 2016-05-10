@@ -58,4 +58,7 @@ module Viewpoint::EWS
 
   class EwsSendItemError < EwsError; end
 
+  # Failed SOAP envelope parsing
+  class EwsParseError < EwsError; end
+
 end # Viewpoint::EWS
