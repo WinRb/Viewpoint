@@ -29,6 +29,8 @@ class Viewpoint::EWS::Connection
   # @option opts [Fixnum] :receive_timeout override the default receive timeout
   #   seconds
   # @option opts [Array]  :trust_ca an array of hashed dir paths or a file
+  # @option opts [Fixnum] :receive_timeout override the default receive timeout
+  # @option opts [Fixnum] :send_timeout override the default send timeout
   def initialize(endpoint, opts = {})
     @log = Logging.logger[self.class.name.to_s.to_sym]
     @httpcli = HTTPClient.new
@@ -43,6 +45,8 @@ class Viewpoint::EWS::Connection
     # Up the keep-alive so we don't have to do the NTLM dance as often.
     @httpcli.keep_alive_timeout = 60
     @httpcli.receive_timeout = opts[:receive_timeout] if opts[:receive_timeout]
+    @httpcli.send_timeout = opts[:send_timeout] if opts[:send_timeout]
+
     @endpoint = endpoint
   end
 

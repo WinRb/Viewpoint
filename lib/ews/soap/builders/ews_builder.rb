@@ -148,6 +148,30 @@ module Viewpoint::EWS::SOAP
       indexed_page_item_view.each_pair {|k,v| attribs[camel_case(k)] = v.to_s}
       @nbuild[NS_EWS_MESSAGES].IndexedPageItemView(attribs)
     end
+    
+    # Build the SortOrder element
+    # @see http://msdn.microsoft.com/en-us/library/office/aa565191(v=exchg.150).aspx
+    # @todo needs peer check
+    def sort_order!(sort_order)
+      @nbuild[NS_EWS_MESSAGES].SortOrder {
+        sort_order[:field_orders].each { |field_order|
+          field_order!(field_order)
+        }
+      }
+    end
+    
+    # Build the FieldOrder element
+    # @see http://msdn.microsoft.com/en-us/library/office/aa564968(v=exchg.150).aspx
+    # @todo needs peer check
+    def field_order!(field_order)
+      field_order = field_order.dup
+      order = field_order.delete(:order)
+      @nbuild[NS_EWS_TYPES].FieldOrder('Order' => order) {
+        field_order.each_pair { |k, v|
+          dispatch_field_uri!({k => v}, NS_EWS_TYPES)
+        }
+      }
+    end
 
     # Build the BaseShape element
     # @see http://msdn.microsoft.com/en-us/library/aa580545.aspx
@@ -157,6 +181,11 @@ module Viewpoint::EWS::SOAP
 
     def mime_content!(include_mime_content)
       @nbuild[NS_EWS_TYPES].IncludeMimeContent(include_mime_content.to_s.downcase)
+    end
+    
+    # mime_content is already taken
+    def _mime_content!(content)
+      @nbuild[NS_EWS_TYPES].MimeContent(Base64.encode64(content))
     end
 
     def body_type!(body_type)
@@ -250,6 +279,18 @@ module Viewpoint::EWS::SOAP
         x.parent['Id'] = id[:id]
         x.parent['ChangeKey'] = id[:change_key] if id[:change_key]
       }
+    end
+    
+    def internet_message_id!(id)
+      nbuild[NS_EWS_TYPES].InternetMessageId id
+    end
+    
+    def in_reply_to!(id)
+      nbuild[NS_EWS_TYPES].InReplyTo id
+    end
+    
+    def references!(str)
+      nbuild[NS_EWS_TYPES].References str
     end
 
     # @see http://msdn.microsoft.com/en-us/library/ff709503(v=exchg.140).aspx
@@ -969,6 +1010,12 @@ module Viewpoint::EWS::SOAP
     def from!(f)
       nbuild[NS_EWS_TYPES].From {
         mailbox! f
+      }
+    end
+    
+    def reply_to!(r)
+      nbuild[NS_EWS_TYPES].ReplyTo {
+        r.each {|mbox| mailbox!(mbox[:mailbox]) }
       }
     end
 

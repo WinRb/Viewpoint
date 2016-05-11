@@ -219,6 +219,11 @@ module Viewpoint::EWS::SOAP
       raise EwsError, "Can't parse an empty response. Please check your endpoint." if(soapmsg.nil?)
       opts[:response_class] ||= EwsSoapResponse
       EwsParser.new(soapmsg).parse(opts)
+    rescue Exception => e
+      @log.error "Error parsing soap response:"
+      @log.error soapmsg
+      @log.error e
+      raise e
     end
 
 

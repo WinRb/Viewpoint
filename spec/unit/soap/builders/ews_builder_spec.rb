@@ -65,4 +65,16 @@ describe Viewpoint::EWS::SOAP::EwsBuilder do
     end
 
   end
+  
+  describe "#sort_order!" do
+    
+    it 'builds a SortOrder element' do
+      builder.build! do
+        builder.sort_order!(field_orders: [{order: 'Ascending', field_uRI: 'message:DateTimeReceived'}])
+        ndoc = builder.nbuild.doc
+        expect(ndoc.xpath('//m:SortOrder//t:FieldOrder//t:FieldURI')).to_not be_empty
+      end
+    end
+    
+  end
 end

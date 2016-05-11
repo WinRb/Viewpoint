@@ -40,12 +40,12 @@ class Viewpoint::EWSClient
   def initialize(endpoint, username, password, opts = {})
     # dup all. @see ticket https://github.com/zenchild/Viewpoint/issues/68
     @endpoint = endpoint.dup
-    @username = username.dup
-    password  = password.dup
+    @username = username.dup rescue nil
+    password  = password.dup rescue nil
     opts      = opts.dup
     http_klass = opts[:http_class] || Viewpoint::EWS::Connection
     con = http_klass.new(endpoint, opts[:http_opts] || {})
-    con.set_auth @username, password
+    con.set_auth(@username, password) if con.respond_to?(:set_auth)
     @ews = SOAP::ExchangeWebService.new(con, opts)
   end
 
