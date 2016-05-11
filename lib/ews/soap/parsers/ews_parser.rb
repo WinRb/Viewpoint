@@ -43,7 +43,7 @@ module Viewpoint::EWS::SOAP
     def clean_xml(xml = '')
       xml = xml.gsub(/[^\u{9 A D}\u{20}-\u{D7FF}\u{E000}-\u{FFFD}\u{10000}-\u{10FFFF}]/, "\uFFFD")
       # It's also necessary to clean up HTML-encoded control characters.
-      xml.gsub(/&#x[0-1]?[0-9a-eA-E];/, ' ')
+      xml.gsub(/&#x[0-1]?[0-9a-fA-F];/, ' ')
     end
 
     def sax_parser
