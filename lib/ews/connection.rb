@@ -28,6 +28,8 @@ class Viewpoint::EWS::Connection
   # @option opts [Fixnum] :ssl_verify_mode
   # @option opts [Fixnum] :receive_timeout override the default receive timeout
   #   seconds
+  # @option opts [Fixnum] :connect_timeout override the default connect timeout
+  #   seconds
   # @option opts [Array]  :trust_ca an array of hashed dir paths or a file
   def initialize(endpoint, opts = {})
     @log = Logging.logger[self.class.name.to_s.to_sym]
