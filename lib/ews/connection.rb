@@ -43,6 +43,7 @@ class Viewpoint::EWS::Connection
     # Up the keep-alive so we don't have to do the NTLM dance as often.
     @httpcli.keep_alive_timeout = 60
     @httpcli.receive_timeout = opts[:receive_timeout] if opts[:receive_timeout]
+    @httpcli.connect_timeout = opts[:connect_timeout] if opts[:connect_timeout]
     @endpoint = endpoint
   end
 
