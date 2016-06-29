@@ -29,15 +29,22 @@ class Viewpoint::EWS::Connection
   # @option opts [Fixnum] :receive_timeout override the default receive timeout
   #   seconds
   # @option opts [Array]  :trust_ca an array of hashed dir paths or a file
+  # @option opts [String] :user_agent the http user agent to use in all requests
   def initialize(endpoint, opts = {})
     @log = Logging.logger[self.class.name.to_s.to_sym]
-    @httpcli = HTTPClient.new
+    if opts[:user_agent]
+      @httpcli = HTTPClient.new(agent_name: opts[:user_agent])
+    else
+      @httpcli = HTTPClient.new
+    end
+
     if opts[:trust_ca]
       @httpcli.ssl_config.clear_cert_store
       opts[:trust_ca].each do |ca|
         @httpcli.ssl_config.add_trust_ca ca
       end
     end
+
     @httpcli.ssl_config.verify_mode = opts[:ssl_verify_mode] if opts[:ssl_verify_mode]
     @httpcli.ssl_config.ssl_version = opts[:ssl_version] if opts[:ssl_version]
     # Up the keep-alive so we don't have to do the NTLM dance as often.
