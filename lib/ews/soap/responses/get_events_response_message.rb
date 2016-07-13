@@ -50,7 +50,9 @@ module Viewpoint::EWS::SOAP
     end
 
     def events
-      notification[3..-1]
+      if notification
+        notification[3..-1]
+      end
     end
 
   end # GetEventsResponseMessage

@@ -289,10 +289,12 @@ module Viewpoint::EWS::Types
           rmsg = resp.response_messages[0]
           @watermark = rmsg.new_watermark
           # @todo if parms[:more_events] # get more events
-          rmsg.events.collect{|ev|
-            type = ev.keys.first
-            class_by_name(type).new(ews, ev[type])
-          }
+          if rmsg.events
+            rmsg.events.collect{|ev|
+              type = ev.keys.first
+              class_by_name(type).new(ews, ev[type])
+            }
+          end
         else
           raise EwsSubscriptionError, "Folder <#{self.display_name}> not subscribed to. Issue a Folder#subscribe before checking events."
         end
