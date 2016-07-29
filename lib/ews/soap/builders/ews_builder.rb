@@ -1021,6 +1021,10 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].IsAllDayEvent(all_day)
     end
 
+    def is_response_requested!(response_requested)
+      nbuild[NS_EWS_TYPES].IsResponseRequested(response_requested)
+    end
+
     def reminder_is_set!(reminder)
       nbuild[NS_EWS_TYPES].ReminderIsSet reminder
     end
