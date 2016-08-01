@@ -40,6 +40,9 @@ class Viewpoint::EWS::Connection
     end
     @httpcli.ssl_config.verify_mode = opts[:ssl_verify_mode] if opts[:ssl_verify_mode]
     @httpcli.ssl_config.ssl_version = opts[:ssl_version] if opts[:ssl_version]
+    # extend support for client_key and client_cert
+    @httpcli.ssl_config.client_key = opts[:client_key] if opts[:client_key]
+    @httpcli.ssl_config.client_cert = opts[:client_cert] if opts[:client_cert]
     # Up the keep-alive so we don't have to do the NTLM dance as often.
     @httpcli.keep_alive_timeout = 60
     @httpcli.receive_timeout = opts[:receive_timeout] if opts[:receive_timeout]
