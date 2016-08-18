@@ -49,7 +49,12 @@ class Viewpoint::EWS::Connection
   end
 
   def set_auth(user,pass)
+    @httpcli.default_header.delete('Authorization')
     @httpcli.set_auth(@endpoint.to_s, user, pass)
+  end
+
+  def set_oauth_access_token(access_token)
+    @httpcli.default_header['Authorization'] = "Bearer #{access_token}"
   end
 
   # Authenticate to the web service. You don't have to do this because
