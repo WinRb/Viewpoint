@@ -7,7 +7,7 @@ module Viewpoint::EWS::SOAP
     # @param full [Boolean] Request full time zone definition? Returns only name and id if false.
     # @param ids [Array] Returns only the specified time zones instead of all if present
     # @return [Array] Array of Objects responding to #id() and #name()
-    # @example Retrieving server zime zones
+    # @example Retrieving server time zones
     #   ews_client = Viewpoint::EWSClient.new # ...
     #   zones = ews_client.ews.get_time_zones
     # @todo Implement TimeZoneDefinition with sub elements Periods, TransitionsGroups and Transitions
