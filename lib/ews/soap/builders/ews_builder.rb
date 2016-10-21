@@ -24,9 +24,30 @@ module Viewpoint::EWS::SOAP
     include Viewpoint::EWS
     include Viewpoint::StringUtils
 
+    RESERVED_ATTRIBUTE_KEYS = %w{text sub_elements xmlns_attribute}.map(&:to_sym).freeze
+
     attr_reader :nbuild
     def initialize
       @nbuild = Nokogiri::XML::Builder.new
+    end
+
+    def self.camel_case_attributes(input)
+      case input
+      when Hash
+        result = {}
+        input.each do |attrib_key, attrib_value|
+          unless RESERVED_ATTRIBUTE_KEYS.include?(attrib_key)
+            attrib_key = camel_case(attrib_key)
+          end
+
+          result[attrib_key] = camel_case_attributes(attrib_value)
+        end
+        result
+      when Array
+        result = input.map { |value| camel_case_attributes(value) }
+      else
+        input
+      end
     end
 
     # Build the SOAP envelope and yield this object so subelements can be built. Once
@@ -997,6 +1018,10 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def uid!(uid)
+      nbuild[NS_EWS_TYPES].UID(uid)
+    end
+
     def start!(st)
       nbuild[NS_EWS_TYPES].Start(st[:text])
     end
@@ -1186,10 +1211,9 @@ module Viewpoint::EWS::SOAP
       when :item_id
         item_id!(item)
       when :occurrence_item_id
-        occurrence_item_id!(
-          item[:recurring_master_id], item[:change_key], item[:instance_index])
+        occurrence_item_id!(item)
       when :recurring_master_item_id
-        recurring_master_item_id!(item[:occurrence_id], item[:change_key])
+        recurring_master_item_id!(item)
       else
         raise EwsBadArgumentError, "Bad ItemId type. #{type}"
       end
@@ -1218,6 +1242,7 @@ module Viewpoint::EWS::SOAP
     def dispatch_field_uri!(uri, ns=NS_EWS_MESSAGES)
       type = uri.keys.first
       vals = uri[type].is_a?(Array) ? uri[type] : [uri[type]]
+
       case type
       when :field_uRI, :field_uri
         vals.each do |val|

@@ -71,6 +71,5 @@ module Viewpoint
       duration += match_data[:minutes].to_i * 60
       duration += match_data[:seconds].to_i
     end
-
   end # StringUtils
 end # Viewpoint
