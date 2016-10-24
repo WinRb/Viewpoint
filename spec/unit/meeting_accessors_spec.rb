@@ -19,7 +19,7 @@ describe Viewpoint::EWS::MeetingAccessors do
     <Items>
       <t:AcceptItem>
         <t:ReferenceItemId Id=\"foo-id\" ChangeKey=\"change-key\"/>
-        <t:Body>example text</t:Body>
+        <t:Body BodyType=\"Text\">example text</t:Body>
         <t:Sensitivity>Private</t:Sensitivity>
       </t:AcceptItem>
     </Items>
@@ -45,7 +45,7 @@ describe Viewpoint::EWS::MeetingAccessors do
     <Items>
       <t:DeclineItem>
         <t:ReferenceItemId Id=\"foo-id\" ChangeKey=\"change-key\"/>
-        <t:Body>example text</t:Body>
+        <t:Body BodyType=\"Text\">example text</t:Body>
         <t:Sensitivity>Private</t:Sensitivity>
       </t:DeclineItem>
     </Items>
@@ -71,7 +71,7 @@ describe Viewpoint::EWS::MeetingAccessors do
     <Items>
       <t:TentativelyAcceptItem>
         <t:ReferenceItemId Id=\"foo-id\" ChangeKey=\"change-key\"/>
-        <t:Body>example text</t:Body>
+        <t:Body BodyType=\"Text\">example text</t:Body>
         <t:Sensitivity>Private</t:Sensitivity>
       </t:TentativelyAcceptItem>
     </Items>
