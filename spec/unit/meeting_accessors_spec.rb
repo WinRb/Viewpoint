@@ -18,9 +18,9 @@ describe Viewpoint::EWS::MeetingAccessors do
   <CreateItem xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\" MessageDisposition=\"SendOnly\">
     <Items>
       <t:AcceptItem>
-        <t:ReferenceItemId Id=\"foo-id\" ChangeKey=\"change-key\"/>
-        <t:Body BodyType=\"Text\">example text</t:Body>
         <t:Sensitivity>Private</t:Sensitivity>
+        <t:Body BodyType=\"Text\">example text</t:Body>
+        <t:ReferenceItemId Id=\"foo-id\" ChangeKey=\"change-key\"/>
       </t:AcceptItem>
     </Items>
   </CreateItem>
@@ -44,9 +44,9 @@ describe Viewpoint::EWS::MeetingAccessors do
   <CreateItem xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\" MessageDisposition=\"SendOnly\">
     <Items>
       <t:DeclineItem>
-        <t:ReferenceItemId Id=\"foo-id\" ChangeKey=\"change-key\"/>
-        <t:Body BodyType=\"Text\">example text</t:Body>
         <t:Sensitivity>Private</t:Sensitivity>
+        <t:Body BodyType=\"Text\">example text</t:Body>
+        <t:ReferenceItemId Id=\"foo-id\" ChangeKey=\"change-key\"/>
       </t:DeclineItem>
     </Items>
   </CreateItem>
@@ -70,9 +70,9 @@ describe Viewpoint::EWS::MeetingAccessors do
   <CreateItem xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\" MessageDisposition=\"SendOnly\">
     <Items>
       <t:TentativelyAcceptItem>
-        <t:ReferenceItemId Id=\"foo-id\" ChangeKey=\"change-key\"/>
-        <t:Body BodyType=\"Text\">example text</t:Body>
         <t:Sensitivity>Private</t:Sensitivity>
+        <t:Body BodyType=\"Text\">example text</t:Body>
+        <t:ReferenceItemId Id=\"foo-id\" ChangeKey=\"change-key\"/>
       </t:TentativelyAcceptItem>
     </Items>
   </CreateItem>
