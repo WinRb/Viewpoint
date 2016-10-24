@@ -25,11 +25,15 @@ module Viewpoint::EWS::MeetingAccessors
   private
 
   def opts_to_item(opts)
-    {
+    hash = {
       id: opts[:id],
       change_key: opts[:change_key],
-      text: opts[:text],
       sensitivity: opts[:sensitivity]
     }
+
+    hash[:text] = opts[:text] if opts[:text]
+    hash[:body_type] = (opts[:body_type] || 'Text') if opts[:text]
+
+    hash
   end
 end
