@@ -46,7 +46,7 @@ describe Viewpoint::EWS::FolderAccessors do
         @ecli.stub(:class_by_name) { cbn }
       end
       it '#get_folder should return a Folder' do
-        @ecli.get_folder(:inbox).should be_instance_of(RSpec::Mocks::Mock)
+        @ecli.get_folder(:inbox).should be_instance_of(RSpec::Mocks::Double)
       end
     end
   end
