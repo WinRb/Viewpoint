@@ -1265,25 +1265,25 @@ module Viewpoint::EWS::SOAP
 
     def accept_item!(opts)
       @nbuild[NS_EWS_TYPES].AcceptItem {
-        reference_item_id!(opts)
-        body!(opts) if opts[:text]
         sensitivity!(opts)
+        body!(opts) if opts[:text]
+        reference_item_id!(opts)
       }
     end
 
     def tentatively_accept_item!(opts)
       @nbuild[NS_EWS_TYPES].TentativelyAcceptItem {
-        reference_item_id!(opts)
-        body!(opts) if opts[:text]
         sensitivity!(opts)
+        body!(opts) if opts[:text]
+        reference_item_id!(opts)
       }
     end
 
     def decline_item!(opts)
       @nbuild[NS_EWS_TYPES].DeclineItem {
-        reference_item_id!(opts)
-        body!(opts) if opts[:text]
         sensitivity!(opts)
+        body!(opts) if opts[:text]
+        reference_item_id!(opts)
       }
     end
 
