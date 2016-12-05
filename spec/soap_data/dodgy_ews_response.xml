@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+  <s:Header>
+    <h:ServerVersionInfo xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types" xmlns="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" MajorVersion="15" MinorVersion="1" MajorBuildNumber="761" MinorBuildNumber="16" Version="V2016_10_10"/>
+  </s:Header>
+  <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <m:GetItemResponse xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types">
+      <m:ResponseMessages>
+        <m:GetItemResponseMessage ResponseClass="Success">
+          <m:ResponseCode>NoError</m:ResponseCode>
+          <m:Items>
+            <t:CalendarItem>
+              <t:ItemId Id="" ChangeKey=""/>
+              <t:ParentFolderId Id="" ChangeKey=""/>
+              <t:ItemClass>IPM.Appointment</t:ItemClass>
+              <t:Subject>Invalid character</t:Subject>
+              <t:Sensitivity>Normal</t:Sensitivity>
+              <t:Body BodyType="Text"> Invalid character: &#x1A;</t:Body>
+              <t:DateTimeReceived>2016-01-01T00:00:00Z</t:DateTimeReceived>
+              <t:Size>42</t:Size>
+              <t:Importance>Normal</t:Importance>
+              <t:IsSubmitted>false</t:IsSubmitted>
+              <t:IsDraft>false</t:IsDraft>
+              <t:IsFromMe>false</t:IsFromMe>
+              <t:IsResend>false</t:IsResend>
+              <t:IsUnmodified>false</t:IsUnmodified>
+              <t:DateTimeSent>2016-01-01T00:00:00Z</t:DateTimeSent>
+              <t:DateTimeCreated>2016-01-01T00:00:00Z</t:DateTimeCreated>
+              <t:ResponseObjects>
+                <t:AcceptItem/>
+                <t:TentativelyAcceptItem/>
+                <t:DeclineItem/>
+                <t:ReplyToItem/>
+                <t:ReplyAllToItem/>
+                <t:ForwardItem/>
+              </t:ResponseObjects>
+              <t:ReminderDueBy>2016-01-01T00:00:00Z</t:ReminderDueBy>
+              <t:ReminderIsSet>false</t:ReminderIsSet>
+              <t:ReminderMinutesBeforeStart>15</t:ReminderMinutesBeforeStart>
+              <t:DisplayCc/>
+              <t:DisplayTo>Example</t:DisplayTo>
+              <t:HasAttachments>false</t:HasAttachments>
+              <t:Culture>en-US</t:Culture>
+              <t:EffectiveRights>
+                <t:CreateAssociated>false</t:CreateAssociated>
+                <t:CreateContents>false</t:CreateContents>
+                <t:CreateHierarchy>false</t:CreateHierarchy>
+                <t:Delete>true</t:Delete>
+                <t:Modify>true</t:Modify>
+                <t:Read>true</t:Read>
+              </t:EffectiveRights>
+              <t:LastModifiedName>Example</t:LastModifiedName>
+              <t:LastModifiedTime>2016-01-01T00:00:00Z</t:LastModifiedTime>
+              <t:UID>1234567890</t:UID>
+              <t:DateTimeStamp>2016-01-01T00:00:00Z</t:DateTimeStamp>
+              <t:Start>2016-01-01T00:00:00Z</t:Start>
+              <t:End>2016-01-01T00:00:00Z</t:End>
+              <t:IsAllDayEvent>false</t:IsAllDayEvent>
+              <t:LegacyFreeBusyStatus>Busy</t:LegacyFreeBusyStatus>
+              <t:Location>Example</t:Location>
+              <t:IsMeeting>true</t:IsMeeting>
+              <t:IsCancelled>false</t:IsCancelled>
+              <t:IsRecurring>false</t:IsRecurring>
+              <t:MeetingRequestWasSent>false</t:MeetingRequestWasSent>
+              <t:IsResponseRequested>true</t:IsResponseRequested>
+              <t:CalendarItemType>Single</t:CalendarItemType>
+              <t:MyResponseType>Accept</t:MyResponseType>
+              <t:Organizer>
+                <t:Mailbox>
+                  <t:Name>Example</t:Name>
+                  <t:EmailAddress>example@example.com</t:EmailAddress>
+                  <t:RoutingType>SMTP</t:RoutingType>
+                </t:Mailbox>
+              </t:Organizer>
+              <t:RequiredAttendees />
+              <t:Duration>PT30M</t:Duration>
+              <t:TimeZone>(UTC+00:00) Monrovia, Reykjavik</t:TimeZone>
+              <t:AppointmentReplyTime>2016-01-01T00:00:00Z</t:AppointmentReplyTime>
+              <t:AppointmentSequenceNumber>0</t:AppointmentSequenceNumber>
+              <t:AppointmentState>3</t:AppointmentState>
+              <t:AllowNewTimeProposal>true</t:AllowNewTimeProposal>
+              <t:IsOnlineMeeting>false</t:IsOnlineMeeting>
+            </t:CalendarItem>
+          </m:Items>
+        </m:GetItemResponseMessage>
+      </m:ResponseMessages>
+    </m:GetItemResponse>
+  </s:Body>
+</s:Envelope>
