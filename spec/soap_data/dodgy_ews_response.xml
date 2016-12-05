@@ -15,7 +15,7 @@
               <t:ItemClass>IPM.Appointment</t:ItemClass>
               <t:Subject>Invalid character</t:Subject>
               <t:Sensitivity>Normal</t:Sensitivity>
-              <t:Body BodyType="Text"> Invalid character: &#x1A;</t:Body>
+              <t:Body BodyType="Text">Invalid characters: &#x0; &#x1; &#x2; &#x3; &#x4; &#x5; &#x6; &#x7; &#x8; &#xb; &#xc; &#xe; &#xf; &#x10; &#x11; &#x12; &#x13; &#x14; &#x15; &#x16; &#x17; &#x18; &#x19; &#x1A; &#x1B; &#x1C; &#x1D; &#x1E; &#x1F; </t:Body>
               <t:DateTimeReceived>2016-01-01T00:00:00Z</t:DateTimeReceived>
               <t:Size>42</t:Size>
               <t:Importance>Normal</t:Importance>
