@@ -8,7 +8,7 @@ module Viewpoint::EWS
       PARAMETERS = %w{mime_content item_id parent_folder_id item_class subject sensitivity body attachments
         date_time_received size categories in_reply_to is_submitted is_draft is_from_me is_resend is_unmodified
         internet_message_headers date_time_sent date_time_created response_objects reminder_due_by reminder_is_set
-        reminder_minutes_before_start display_cc display_to has_attachments extended_property culture start end
+        reminder_minutes_before_start display_cc display_to has_attachments extended_property culture uid start end
         original_start is_all_day_event legacy_free_busy_status location when is_meeting is_cancelled is_recurring
         meeting_request_was_sent is_response_requested calendar_item_type my_response_type organizer
         required_attendees optional_attendees resources conflicting_meeting_count adjacent_meeting_count

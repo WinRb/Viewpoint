@@ -51,13 +51,20 @@ class Viewpoint::EWS::Connection
     @httpcli.ssl_config.ssl_version = opts[:ssl_version] if opts[:ssl_version]
     # Up the keep-alive so we don't have to do the NTLM dance as often.
     @httpcli.keep_alive_timeout = 60
+    @httpcli.connect_timeout = opts[:connect_timeout] if opts[:connect_timeout]
+    @httpcli.send_timeout = opts[:send_timeout] if opts[:send_timeout]
     @httpcli.receive_timeout = opts[:receive_timeout] if opts[:receive_timeout]
     @httpcli.connect_timeout = opts[:connect_timeout] if opts[:connect_timeout]
     @endpoint = endpoint
   end
 
   def set_auth(user,pass)
+    @httpcli.default_header.delete('Authorization')
     @httpcli.set_auth(@endpoint.to_s, user, pass)
+  end
+
+  def set_oauth_access_token(access_token)
+    @httpcli.default_header['Authorization'] = "Bearer #{access_token}"
   end
 
   # Authenticate to the web service. You don't have to do this because
@@ -78,6 +85,11 @@ class Viewpoint::EWS::Connection
   # @param soapmsg [String]
   # @param opts [Hash] misc opts for handling the Response
   def dispatch(ews, soapmsg, opts)
+    if log.debug?
+      log.debug { "REQUEST =============" }
+      log.debug soapmsg
+    end
+
     respmsg = post(soapmsg)
     @log.debug <<-EOF.gsub(/^ {6}/, '')
       Received SOAP Response:
@@ -85,6 +97,12 @@ class Viewpoint::EWS::Connection
       #{Nokogiri::XML(respmsg).to_xml}
       ----------------
     EOF
+
+    if log.debug?
+      log.debug { "RESPONSE =============" }
+      log.debug Nokogiri::XML(respmsg).to_xml
+    end
+
     opts[:raw_response] ? respmsg : ews.parse_soap_response(respmsg, opts)
   end
 
@@ -118,7 +136,7 @@ class Viewpoint::EWS::Connection
     when 500
       if resp.headers['Content-Type'] =~ /xml/
         err_string, err_code = parse_soap_error(resp.body)
-        raise Errors::SoapResponseError.new("SOAP Error: Message: #{err_string}  Code: #{err_code}", resp, err_code, err_string)
+        raise Errors::SoapResponseError.new("SOAP Error: Message: #{err_string}  Code: #{err_code} - #{resp.body}", resp, err_code, err_string)
       else
         raise Errors::ServerError.new("Internal Server Error. Message: #{resp.body}", resp)
       end
