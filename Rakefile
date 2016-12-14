@@ -1,6 +1,8 @@
 require 'rubygems'
-require 'date'
+require 'bundler'
 
+require 'bundler/gem_tasks'
+require 'date'
 
 task :default => [:gem]
 
