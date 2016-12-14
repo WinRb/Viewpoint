@@ -752,8 +752,13 @@ module Viewpoint::EWS::SOAP
 
     # @see http://msdn.microsoft.com/en-us/library/aa563599(v=EXCHG.140).aspx
     def push_subscription_request(subopts)
-      subscribe_all = subopts[:subscribe_to_all_folders] ? 'true' : 'false'
-      @nbuild.PushSubscriptionRequest('SubscribeToAllFolders' => subscribe_all) {
+      attributes = {}
+      if subopts[:subscribe_to_all_folders]
+        subscribe_all = subopts[:subscribe_to_all_folders] ? 'true' : 'false'
+        attributes['SubscribeToAllFolders'] = subscribe_all
+      end
+
+      @nbuild.PushSubscriptionRequest(attributes) {
         folder_ids!(subopts[:folder_ids]) if subopts[:folder_ids]
         event_types!(subopts[:event_types]) if subopts[:event_types]
         watermark!(subopts[:watermark]) if subopts[:watermark]
