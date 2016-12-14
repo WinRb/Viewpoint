@@ -84,6 +84,33 @@ module Viewpoint::EWS::Types
           end
 
           item_updates << {set_item_field: field.merge(calendar_item: {sub_elements: item_attributes})}
+        elsif attribute == :extended_property
+          if value[:value] == :delete
+            # Deleting property
+            item_updates << { delete_item_field: { extended_field_uri: value[:extended_field_uri] } }
+          else
+            # Updating property
+            item_attributes = {
+              "ExtendedProperty" => {
+                sub_elements: [
+                  {
+                    "ExtendedFieldURI" => {
+                      "DistinguishedPropertySetId" => value[:extended_field_uri][:distinguished_property_set_id],
+                      "PropertyName" => value[:extended_field_uri][:property_name],
+                      "PropertyType" => value[:extended_field_uri][:property_type],
+                    },
+                  },
+                  {
+                    "Value" => {
+                      text: value[:value],
+                    },
+                  },
+                ]
+              }
+            }
+
+            item_updates << { set_item_field: { extended_field_uri: value[:extended_field_uri], calendar_item: { sub_elements: item_attributes } } }
+          end
         else
           # Ignore unknown attribute
         end
