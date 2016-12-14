@@ -1263,6 +1263,33 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_MESSAGES].GetRoomLists
     end
 
+    def accept_item!(opts)
+      @nbuild[NS_EWS_TYPES].AcceptItem {
+        sensitivity!(opts)
+        body!(opts) if opts[:text]
+        reference_item_id!(opts)
+      }
+    end
+
+    def tentatively_accept_item!(opts)
+      @nbuild[NS_EWS_TYPES].TentativelyAcceptItem {
+        sensitivity!(opts)
+        body!(opts) if opts[:text]
+        reference_item_id!(opts)
+      }
+    end
+
+    def decline_item!(opts)
+      @nbuild[NS_EWS_TYPES].DeclineItem {
+        sensitivity!(opts)
+        body!(opts) if opts[:text]
+        reference_item_id!(opts)
+      }
+    end
+
+    def sensitivity!(value)
+      nbuild[NS_EWS_TYPES].Sensitivity(value[:sensitivity])
+    end
 
 private
 

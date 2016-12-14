@@ -5,7 +5,10 @@ require 'ostruct'
 require 'turn/autorun'
 require_relative 'xml_matcher'
 
-RSpec.configure do |c|
+RSpec.configure do |rspec|
+  rspec.mock_with :rspec do |mocks|
+    mocks.yield_receiver_to_any_instance_implementation_blocks = false
+  end
 end
 
 Turn.config.format = :outline
