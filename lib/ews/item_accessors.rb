@@ -115,9 +115,20 @@ private
     }
     default_args[:item_ids] = case item_id
     when Hash
-      [{:item_id => item_id}]
+      if item_id.keys.index(:id)
+        [{:item_id => item_id}]
+      else
+        [item_id]
+      end
     when Array
-      item_id.map{|i| {:item_id => {:id => i}}}
+      item_id.map do |i|
+        case i
+        when Hash
+          i
+        else
+          {:item_id => {:id => i}}
+        end
+      end
     else
       [{:item_id => {:id => item_id}}]
     end
