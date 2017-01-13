@@ -47,6 +47,7 @@ module Viewpoint::EWS::MailboxAccessors
   # @param [Hash] opts
   # @option opts [DateTime] :start_time
   # @option opts [DateTime] :end_time
+  # @option opts [Integer] :merged_free_busy_interval_in_minutes
   # @option opts [Symbol] :requested_view :merged_only/:free_busy/
   #   :free_busy_merged/:detailed/:detailed_merged
   # @option opts [Hash] :time_zone The TimeZone data
@@ -76,7 +77,8 @@ private
           start_time: opts[:start_time],
           end_time: opts[:end_time]
         },
-        requested_view: { :requested_free_busy_view => opts[:requested_view] },
+        merged_free_busy_interval_in_minutes: opts.fetch(:merged_free_busy_interval_in_minutes, 30),
+        requested_view: { :requested_free_busy_view => opts[:requested_view] }
       }
     }
   end

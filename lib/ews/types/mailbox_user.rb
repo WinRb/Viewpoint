@@ -60,13 +60,15 @@ module Viewpoint::EWS::Types
     # @param [String] email_address The email address of the person to find availability for.
     # @param [DateTime] start_time The start of the time range to check as an xs:dateTime.
     # @param [DateTime] end_time The end of the time range to check as an xs:dateTime.
+    # @param [Integer] merged_free_busy_interval_in_minutes Minimum interval for MergedFreeBusy lookups
     # @see http://msdn.microsoft.com/en-us/library/aa563800(v=exchg.140)
-    def get_user_availability(email_address, start_time, end_time)
+    def get_user_availability(email_address, start_time, end_time, merged_free_busy_interval_in_minutes)
       opts = {
         mailbox_data: [ :email =>{:address => email_address} ],
         free_busy_view_options: {
-        time_window: {start_time: start_time, end_time: end_time},
-      }
+          time_window: {start_time: start_time, end_time: end_time},
+          merged_free_busy_interval_in_minutes: merged_free_busy_interval_in_minutes
+        }
       }
       resp = (Viewpoint::EWS::EWS.instance).ews.get_user_availability(opts)
       if(resp.status == 'Success')
