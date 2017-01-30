@@ -24,9 +24,30 @@ module Viewpoint::EWS::SOAP
     include Viewpoint::EWS
     include Viewpoint::StringUtils
 
+    RESERVED_ATTRIBUTE_KEYS = %w{text sub_elements xmlns_attribute}.map(&:to_sym).freeze
+
     attr_reader :nbuild
     def initialize
       @nbuild = Nokogiri::XML::Builder.new
+    end
+
+    def self.camel_case_attributes(input)
+      case input
+      when Hash
+        result = {}
+        input.each do |attrib_key, attrib_value|
+          unless RESERVED_ATTRIBUTE_KEYS.include?(attrib_key)
+            attrib_key = camel_case(attrib_key)
+          end
+
+          result[attrib_key] = camel_case_attributes(attrib_value)
+        end
+        result
+      when Array
+        result = input.map { |value| camel_case_attributes(value) }
+      else
+        input
+      end
     end
 
     # Build the SOAP envelope and yield this object so subelements can be built. Once
@@ -752,8 +773,13 @@ module Viewpoint::EWS::SOAP
 
     # @see http://msdn.microsoft.com/en-us/library/aa563599(v=EXCHG.140).aspx
     def push_subscription_request(subopts)
-      subscribe_all = subopts[:subscribe_to_all_folders] ? 'true' : 'false'
-      @nbuild.PushSubscriptionRequest('SubscribeToAllFolders' => subscribe_all) {
+      attributes = {}
+      if subopts.key?(:subscribe_to_all_folders)
+        subscribe_all = subopts[:subscribe_to_all_folders] ? 'true' : 'false'
+        attributes['SubscribeToAllFolders'] = subscribe_all
+      end
+
+      @nbuild.PushSubscriptionRequest(attributes) {
         folder_ids!(subopts[:folder_ids]) if subopts[:folder_ids]
         event_types!(subopts[:event_types]) if subopts[:event_types]
         watermark!(subopts[:watermark]) if subopts[:watermark]
@@ -997,6 +1023,10 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def uid!(uid)
+      nbuild[NS_EWS_TYPES].UID(uid)
+    end
+
     def start!(st)
       nbuild[NS_EWS_TYPES].Start(st[:text])
     end
@@ -1217,6 +1247,7 @@ module Viewpoint::EWS::SOAP
     def dispatch_field_uri!(uri, ns=NS_EWS_MESSAGES)
       type = uri.keys.first
       vals = uri[type].is_a?(Array) ? uri[type] : [uri[type]]
+
       case type
       when :field_uRI, :field_uri
         vals.each do |val|
