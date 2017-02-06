@@ -988,6 +988,10 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].ReminderDueBy format_time(date)
     end
 
+    def sensitivity!(sensitivity)
+      nbuild[NS_EWS_TYPES].Sensitivity(sensitivity)
+    end
+
     def reminder_minutes_before_start!(minutes)
       nbuild[NS_EWS_TYPES].ReminderMinutesBeforeStart minutes
     end
@@ -1233,14 +1237,14 @@ private
     end
 
     def set_impersonation!(type, address)
-	    if type && type != ""
-	      nbuild[NS_EWS_TYPES].ExchangeImpersonation {
-		      nbuild[NS_EWS_TYPES].ConnectingSID {
-		        nbuild[NS_EWS_TYPES].method_missing type, address
-		      }
+      if type && type != ""
+        nbuild[NS_EWS_TYPES].ExchangeImpersonation {
+          nbuild[NS_EWS_TYPES].ConnectingSID {
+            nbuild[NS_EWS_TYPES].method_missing type, address
+          }
         }
       end
-	  end
+    end
 
     # Set TimeZoneContext Header
     # @param time_zone_def [Hash] !{id: time_zone_identifier, name: time_zone_name}
