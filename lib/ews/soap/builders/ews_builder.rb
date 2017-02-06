@@ -988,6 +988,10 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].ReminderDueBy format_time(date)
     end
 
+    def sensitivity!(sensitivity)
+      nbuild[NS_EWS_TYPES].Sensitivity(sensitivity)
+    end
+
     def reminder_minutes_before_start!(minutes)
       nbuild[NS_EWS_TYPES].ReminderMinutesBeforeStart minutes
     end
