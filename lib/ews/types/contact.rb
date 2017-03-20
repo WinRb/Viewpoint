@@ -22,7 +22,8 @@ module Viewpoint::EWS::Types
 
     CONTACT_KEY_TYPES = {
       email_addresses:    :build_email_addresses,
-      physical_addresses: :build_physical_addresses
+      physical_addresses: :build_physical_addresses,
+      phone_numbers:      :build_phone_numbers
     }
 
     CONTACT_KEY_ALIAS = {
@@ -32,7 +33,7 @@ module Viewpoint::EWS::Types
       yomi_last_name:  :yomi_surname,
       emails:          :email_addresses,
       addresses:       :physical_addresses,
-      job:             :job_title,
+      title:           :job_title,
       company:         :company_name,
       office:          :office_location,
     }
@@ -40,6 +41,15 @@ module Viewpoint::EWS::Types
 
     private
 
+
+    def build_phone_number(phone_number)
+      Types::PhoneNumber.new(ews, phone_number)
+    end
+
+    def build_phone_numbers(phone_numbers)
+      return [] if phone_numbers.nil?
+      phone_numbers.collect { |pn| build_phone_number(pn[:entry]) }
+    end
 
     def build_email_address(email)
       Types::EmailAddress.new(ews, email)
