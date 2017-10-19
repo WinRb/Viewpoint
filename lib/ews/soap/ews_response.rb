@@ -40,18 +40,20 @@ module Viewpoint::EWS::SOAP
     end
 
     def response
-      body[0]
+      body && body[0]
     end
 
     def response_messages
       return @response_messages if @response_messages
 
       @response_messages = []
-      response_type = response.keys.first
-      response[response_type][:elems][0][:response_messages][:elems].each do |rm|
-        response_message_type = rm.keys[0]
-        rm_klass = class_by_name(response_message_type)
-        @response_messages << rm_klass.new(rm)
+      unless response.nil?
+        response_type = response.keys.first
+        response[response_type][:elems][0][:response_messages][:elems].each do |rm|
+          response_message_type = rm.keys[0]
+          rm_klass = class_by_name(response_message_type)
+          @response_messages << rm_klass.new(rm)
+        end
       end
       @response_messages
     end
@@ -61,6 +63,7 @@ module Viewpoint::EWS::SOAP
 
 
     def simplify!
+      return if response.nil?
       response_type = response.keys.first
       response[response_type][:elems][0][:response_messages][:elems].each do |rm|
         key = rm.keys.first
