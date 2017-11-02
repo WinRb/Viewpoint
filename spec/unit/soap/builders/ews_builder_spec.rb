@@ -65,9 +65,9 @@ describe Viewpoint::EWS::SOAP::EwsBuilder do
     end
 
   end
-  
+
   describe "#sort_order!" do
-    
+
     it 'builds a SortOrder element' do
       builder.build! do
         builder.sort_order!(field_orders: [{order: 'Ascending', field_uRI: 'message:DateTimeReceived'}])
@@ -75,6 +75,28 @@ describe Viewpoint::EWS::SOAP::EwsBuilder do
         expect(ndoc.xpath('//m:SortOrder//t:FieldOrder//t:FieldURI')).to_not be_empty
       end
     end
-    
+
+  end
+
+  describe "#search_parameters!" do
+
+    it 'builds a SearchParameters element' do
+      builder.build! do
+        builder.search_parameters!(
+          traversal: "Deep",
+          t_restriction: {
+            is_greater_than: [
+              { field_uRI: { field_uRI: "item:DateTimeCreated"} },
+              { field_uRI_or_constant: { constant: { value: "2017-10-11T01:49:37Z" } } }
+            ]
+          },
+          base_folder_ids: [{id: :msgfolderroot}]
+        )
+        ndoc = builder.nbuild.doc
+        expect(ndoc.xpath('//t:SearchParameters/t:Restriction/t:IsGreaterThan/t:FieldURIOrConstant')).to_not be_empty
+        expect(ndoc.xpath('//t:SearchParameters/t:BaseFolderIds')).to_not be_empty
+      end
+    end
+
   end
 end

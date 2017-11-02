@@ -148,7 +148,7 @@ module Viewpoint::EWS::SOAP
       indexed_page_item_view.each_pair {|k,v| attribs[camel_case(k)] = v.to_s}
       @nbuild[NS_EWS_MESSAGES].IndexedPageItemView(attribs)
     end
-    
+
     # Build the SortOrder element
     # @see http://msdn.microsoft.com/en-us/library/office/aa565191(v=exchg.150).aspx
     # @todo needs peer check
@@ -159,7 +159,7 @@ module Viewpoint::EWS::SOAP
         }
       }
     end
-    
+
     # Build the FieldOrder element
     # @see http://msdn.microsoft.com/en-us/library/office/aa564968(v=exchg.150).aspx
     # @todo needs peer check
@@ -182,7 +182,7 @@ module Viewpoint::EWS::SOAP
     def mime_content!(include_mime_content)
       @nbuild[NS_EWS_TYPES].IncludeMimeContent(include_mime_content.to_s.downcase)
     end
-    
+
     # mime_content is already taken
     def _mime_content!(content)
       @nbuild[NS_EWS_TYPES].MimeContent(Base64.encode64(content))
@@ -280,15 +280,15 @@ module Viewpoint::EWS::SOAP
         x.parent['ChangeKey'] = id[:change_key] if id[:change_key]
       }
     end
-    
+
     def internet_message_id!(id)
       nbuild[NS_EWS_TYPES].InternetMessageId id
     end
-    
+
     def in_reply_to!(id)
       nbuild[NS_EWS_TYPES].InReplyTo id
     end
-    
+
     def references!(str)
       nbuild[NS_EWS_TYPES].References str
     end
@@ -1012,7 +1012,7 @@ module Viewpoint::EWS::SOAP
         mailbox! f
       }
     end
-    
+
     def reply_to!(r)
       nbuild[NS_EWS_TYPES].ReplyTo {
         r.each {|mbox| mailbox!(mbox[:mailbox]) }
@@ -1203,6 +1203,54 @@ module Viewpoint::EWS::SOAP
 
     def user_configuration_properties!(cfg_prop)
       @nbuild[NS_EWS_MESSAGES].UserConfigurationProperties(cfg_prop)
+    end
+
+    # Build the SearchParameters element.
+    #  Example parameter `opts`:
+    #  {
+    #    traversal: "Deep",
+    #    t_restriction: (see `t_restriction!`),
+    #    base_folder_ids: (see `base_folder_ids!`)
+    #  }
+    def search_parameters!(opts)
+      mode = opts.delete(:traversal)
+
+      @nbuild[NS_EWS_TYPES].SearchParameters(Traversal: mode) do
+        opts.each_pair do |k, v|
+          ftype = "#{k}!".to_sym
+          if self.respond_to?(ftype)
+            self.send ftype, v
+          else
+            raise Viewpoint::EWS::EwsNotImplemented, "#{ftype} not implemented as a builder."
+          end
+        end
+      end
+    end
+
+    # Build the BaseFolderIds element.
+    #  Example parameter `folder_ids`:
+    #  [{ id: :msgfolderroot, act_as: 'someone@else.com'}]
+    def base_folder_ids!(folder_ids)
+      @nbuild[NS_EWS_TYPES].BaseFolderIds do
+        folder_ids.each { |fid| dispatch_folder_id!(fid) }
+      end
+    end
+
+    # Build the (type) Restriction element. Note that although it looks similar
+    #  to the other Restriction in (message) namespace, they are not interchangable!
+    #  Example parameter `restriction`:
+    #  {
+    #    is_greater_than: [
+    #      { field_uRI: { field_uRI: "item:DateTimeCreated"} },
+    #      { field_uRI_or_constant: { constant: { value: "2017-10-11T01:49:37Z" } } }
+    #    ]
+    #  }
+    def t_restriction!(restriction)
+      @nbuild[NS_EWS_TYPES].Restriction {
+        restriction.each_pair do |k,v|
+          self.send normalize_type(k), v
+        end
+      }
     end
 
     # ---------------------- Helpers -------------------- #
