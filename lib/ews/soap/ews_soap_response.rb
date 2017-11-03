@@ -40,26 +40,28 @@ module Viewpoint::EWS::SOAP
     end
 
     def response
-      body[0]
+      body && body[0]
     end
 
     def response_messages
+      return [] if response.nil?
       key = response.keys.first
       response[key][:elems].find{|e| e.keys.include? :response_messages }[:response_messages][:elems]
     end
 
     def response_message
+      return {} if response_messages.empty?
       key = response_messages[0].keys.first
       response_messages[0][key]
     end
 
     def response_class
-      response_message[:attribs][:response_class]
+      guard_hash response_message[:attribs], [:response_class]
     end
     alias :status :response_class
 
     def response_code
-      response_message[:elems][:response_code][:text]
+      guard_hash response_message[:elems], [:response_code, :text]
     end
     alias :code :response_code
 
