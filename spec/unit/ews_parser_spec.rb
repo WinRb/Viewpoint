@@ -38,4 +38,12 @@ describe "Exchange Response Parser Functionality" do
     expect(resp.envelope).to_not be_empty
   end
 
+  it 'parses an empty body' do
+    soap_resp = load_soap 'empty_body', :response
+    resp = Viewpoint::EWS::SOAP::EwsParser.new(soap_resp).parse
+    expect(resp).to_not be_success
+    expect(resp.response_code).to be nil
+    expect(resp.response_message_text).to be nil
+  end
+
 end
