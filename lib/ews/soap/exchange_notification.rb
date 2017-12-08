@@ -141,6 +141,24 @@ module Viewpoint::EWS::SOAP
       subscribe([{push_subscription_request: psr}])
     end
 
+    # Copied from #pull_subscribe_folder above and changed the request type to streaming_subscription_request
+    #
+    # Create a streaming subscription to a single folder
+    # @param folder [Hash] a hash with the folder :id and :change_key
+    # @param evtypes [Array] the events you would like to subscribe to.
+    # @param timeout [Fixnum] http://msdn.microsoft.com/en-us/library/aa565201.aspx
+    # @param watermark [String] http://msdn.microsoft.com/en-us/library/aa565886.aspx
+    def stream_subscribe_folder(folder, evtypes, timeout = nil, watermark = nil)
+      timeout ||= 30 # Streaming default timeout 30 mins
+      psr = {
+        :subscribe_to_all_folders => false,
+        :folder_ids => [ {:id => folder[:id], :change_key => folder[:change_key]} ],
+        :event_types=> evtypes,
+        :timeout    => timeout
+      }
+      psr[:watermark] = watermark if watermark
+      subscribe([{streaming_subscription_request: psr}])
+    end
 
   end #ExchangeNotification
 end

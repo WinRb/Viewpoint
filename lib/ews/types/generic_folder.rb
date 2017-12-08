@@ -259,6 +259,36 @@ module Viewpoint::EWS::Types
       end
     end
 
+    # Copied from #subscribe above but calling stream_subscribe_folder instead
+    #
+    # Subscribe this folder to events.  This method initiates an Exchange streaming_subscribe
+    # type subscription.
+    #
+    # @param event_types [Array] Which event types to subscribe to. By default
+    #   we subscribe to all Exchange event types: :all, :copied, :created,
+    #   :deleted, :modified, :moved, :new_mail, :free_busy_changed
+    # @param watermark [String] pass a watermark if you wish to start the
+    #   subscription at a specific point.
+    # @param timeout [Fixnum] the time in minutes that the subscription can
+    #   remain idle between calls to #get_events. default: 240 minutes
+    # @return [Boolean] Did the subscription happen successfully?
+    def streaming_subscribe(evtypes = [:all], watermark = nil, timeout = 30)
+      # Refresh the subscription if already subscribed
+      unsubscribe if subscribed?
+
+      event_types = normalize_event_names(evtypes)
+      folder = {id: self.id, change_key: self.change_key}
+      resp = ews.stream_subscribe_folder(folder, event_types, timeout, watermark)
+      rmsg = resp.response_messages.first
+      if rmsg.success?
+        @subscription_id = rmsg.subscription_id
+        @watermark = rmsg.watermark
+        true
+      else
+        raise EwsSubscriptionError, "Could not subscribe: #{rmsg.code}: #{rmsg.message_text}"
+      end
+    end
+
     # Check if there is a subscription for this folder.
     # @return [Boolean] Are we subscribed to this folder?
     def subscribed?
