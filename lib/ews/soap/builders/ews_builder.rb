@@ -724,6 +724,11 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_TYPES].Timeout(tout)
     end
 
+    # @see https://msdn.microsoft.com/en-us/library/ff406137(v=exchg.140).aspx
+    def connection_timeout!(tout)
+      @nbuild[NS_EWS_MESSAGES].ConnectionTimeout(tout)
+    end
+
     # @see http://msdn.microsoft.com/en-us/library/aa564048(v=EXCHG.140).aspx
     def status_frequency!(freq)
       @nbuild[NS_EWS_TYPES].StatusFrequency(freq)
@@ -732,6 +737,15 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa566309(v=EXCHG.140).aspx
     def uRL!(url)
       @nbuild[NS_EWS_TYPES].URL(url)
+    end
+
+    # @see https://msdn.microsoft.com/en-us/library/dn440607(v=exchg.150).aspx
+    def subscription_ids!(subids)
+      @nbuild[NS_EWS_MESSAGES].SubscriptionIds do
+        subids.each do |subid|
+          @nbuild[NS_EWS_TYPES].SubscriptionId(subid)
+        end
+      end
     end
 
     # @see http://msdn.microsoft.com/en-us/library/aa563790(v=EXCHG.140).aspx

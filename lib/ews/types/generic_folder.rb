@@ -282,7 +282,7 @@ module Viewpoint::EWS::Types
       rmsg = resp.response_messages.first
       if rmsg.success?
         @subscription_id = rmsg.subscription_id
-        @watermark = rmsg.watermark
+        @watermark = rmsg.watermark # This returns always nil for streaming subscription
         true
       else
         raise EwsSubscriptionError, "Could not subscribe: #{rmsg.code}: #{rmsg.message_text}"
@@ -293,6 +293,13 @@ module Viewpoint::EWS::Types
     # @return [Boolean] Are we subscribed to this folder?
     def subscribed?
       ( @subscription_id.nil? or @watermark.nil? )? false : true
+    end
+
+    # Check if there is a streaming subscription for this folder.
+    # @return [Boolean] Are we subscribed to this folder?
+    def streaming_subscribed?
+      # watermark is always nil for streaming subscription as not required
+     @watermark.nil? and not @subscription_id.nil?
     end
 
     # Unsubscribe this folder from further Exchange events.
@@ -328,6 +335,45 @@ module Viewpoint::EWS::Types
         end
       rescue EwsSubscriptionTimeout => e
         @subscription_id, @watermark = nil, nil
+        raise e
+      end
+    end
+
+    # Copied from #get_events above but calling #get_streaming_events
+    #
+    # Create a streaming connection for sending/receiving data
+    # @return [HTTPClient::Connection] HTTPClient::Connection
+    def get_streaming_events(timeout = 30)
+      begin
+        if streaming_subscribed?
+          streaming_connection = ews.get_streaming_events([@subscription_id], timeout)
+
+          io = streaming_connection.pop.content
+          buffered_string = ""
+          event_size = 0
+          begin
+            while str = io.readpartial(512)
+              buffered_string << str
+
+              xml_string = buffered_string.slice!(/<Envelope.*<\/Envelope>/m)
+
+              if xml_string
+                event_size +=1
+                p "=====XML===="
+                p xml_string
+                p "=====XML==== event_size #{event_size}"
+                soap_response = ews.parse_soap_response(xml_string, response_class: Viewpoint::EWS::SOAP::GetEventsResponseMessage)
+                p soap_response.notification
+              end
+            end
+          rescue EOFError
+            p "Connection closed - total #{event_size} XMLs"
+          end
+        else
+          raise EwsSubscriptionError, "Folder <#{self.display_name}> not subscribed to. Issue a Folder#subscribe before checking events."
+        end
+      rescue EwsSubscriptionTimeout => e
+        @subscription_id = nil
         raise e
       end
     end
