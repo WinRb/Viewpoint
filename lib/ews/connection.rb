@@ -103,7 +103,8 @@ class Viewpoint::EWS::Connection
     if opts[:raw_response]
       streaming_connection # Returns the HTTPClient::Connection instance as a result
     else
-      raise "Need to parse_streaming_back"
+      # TODO: Make do_soap_request_async returns another IO pipe if raw_response is false
+      raise "Not yet supporting"
       # @log.debug <<-EOF.gsub(/^ {6}/, '')
       #   Received SOAP Response:
       #   ----------------

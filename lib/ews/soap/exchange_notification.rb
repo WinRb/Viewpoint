@@ -119,6 +119,7 @@ module Viewpoint::EWS::SOAP
         end
       end
 
+      # TODO: Once do_soap_request_async support raw_response, returns GetStreamingEventResponse results
       do_soap_request_async(req, raw_response: true)
     end
 

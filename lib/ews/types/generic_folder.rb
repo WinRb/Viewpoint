@@ -346,31 +346,10 @@ module Viewpoint::EWS::Types
     def get_streaming_events(timeout = 30)
       begin
         if streaming_subscribed?
-          streaming_connection = ews.get_streaming_events([@subscription_id], timeout)
-
-          io = streaming_connection.pop.content
-          buffered_string = ""
-          event_size = 0
-          begin
-            while str = io.readpartial(512)
-              buffered_string << str
-
-              xml_string = buffered_string.slice!(/<Envelope.*<\/Envelope>/m)
-
-              if xml_string
-                event_size +=1
-                p "=====XML===="
-                p xml_string
-                p "=====XML==== event_size #{event_size}"
-                soap_response = ews.parse_soap_response(xml_string, response_class: Viewpoint::EWS::SOAP::GetEventsResponseMessage)
-                p soap_response.notification
-              end
-            end
-          rescue EOFError
-            p "Connection closed - total #{event_size} XMLs"
-          end
+          # TODO: Once do_soap_request_async support raw_response, returns GetStreamingEventResponse results
+          ews.get_streaming_events([@subscription_id], timeout)
         else
-          raise EwsSubscriptionError, "Folder <#{self.display_name}> not subscribed to. Issue a Folder#subscribe before checking events."
+          raise EwsSubscriptionError, "Folder <#{self.display_name}> not subscribed to. Issue a Folder#streaming_subscribed before checking events."
         end
       rescue EwsSubscriptionTimeout => e
         @subscription_id = nil
