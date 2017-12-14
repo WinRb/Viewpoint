@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/WinRb/Viewpoint.svg?branch=master)](https://travis-ci.org/WinRb/Viewpoint)
 
-# Viewpoint for Exchange Web Services 1.0
+# Viewpoint for Exchange Web Services 1.1.0
 http://github.com/zenchild/Viewpoint/wiki
 
 Viewpoint for EWS provides a thin Ruby layer on top of Microsoft Exchange
@@ -15,6 +15,22 @@ Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
 Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
+
+## New in 1.1.0
+
+* Partially supporting Streaming Notification
+
+```ruby
+# Creates a EWS client
+ews_client = Viewpoint::EWSClient.new(params["endpoint"], params["username"], params["password"], server_version: params["server_version"])
+
+# Get the folder to streaming_subscribe
+folder = ews_client.get_folder(:calendar)
+folder.streaming_subscribe
+
+# Creates a streaming connection (HTTPClient::Connection) for receiving data
+folder.get_streaming_events(30)
+```
 
 ## New in 1.0
 

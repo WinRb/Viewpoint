@@ -259,10 +259,47 @@ module Viewpoint::EWS::Types
       end
     end
 
+    # Copied from #subscribe above but calling stream_subscribe_folder instead
+    #
+    # Subscribe this folder to events.  This method initiates an Exchange streaming_subscribe
+    # type subscription.
+    #
+    # @param event_types [Array] Which event types to subscribe to. By default
+    #   we subscribe to all Exchange event types: :all, :copied, :created,
+    #   :deleted, :modified, :moved, :new_mail, :free_busy_changed
+    # @param watermark [String] pass a watermark if you wish to start the
+    #   subscription at a specific point.
+    # @param timeout [Fixnum] the time in minutes that the subscription can
+    #   remain idle between calls to #get_events. default: 240 minutes
+    # @return [Boolean] Did the subscription happen successfully?
+    def streaming_subscribe(evtypes = [:all], watermark = nil, timeout = 30)
+      # Refresh the subscription if already subscribed
+      unsubscribe if subscribed?
+
+      event_types = normalize_event_names(evtypes)
+      folder = {id: self.id, change_key: self.change_key}
+      resp = ews.stream_subscribe_folder(folder, event_types, timeout, watermark)
+      rmsg = resp.response_messages.first
+      if rmsg.success?
+        @subscription_id = rmsg.subscription_id
+        @watermark = rmsg.watermark # This returns always nil for streaming subscription
+        true
+      else
+        raise EwsSubscriptionError, "Could not subscribe: #{rmsg.code}: #{rmsg.message_text}"
+      end
+    end
+
     # Check if there is a subscription for this folder.
     # @return [Boolean] Are we subscribed to this folder?
     def subscribed?
       ( @subscription_id.nil? or @watermark.nil? )? false : true
+    end
+
+    # Check if there is a streaming subscription for this folder.
+    # @return [Boolean] Are we subscribed to this folder?
+    def streaming_subscribed?
+      # watermark is always nil for streaming subscription as not required
+     @watermark.nil? and not @subscription_id.nil?
     end
 
     # Unsubscribe this folder from further Exchange events.
@@ -298,6 +335,24 @@ module Viewpoint::EWS::Types
         end
       rescue EwsSubscriptionTimeout => e
         @subscription_id, @watermark = nil, nil
+        raise e
+      end
+    end
+
+    # Copied from #get_events above but calling #get_streaming_events
+    #
+    # Create a streaming connection for sending/receiving data
+    # @return [HTTPClient::Connection] HTTPClient::Connection
+    def get_streaming_events(timeout = 30)
+      begin
+        if streaming_subscribed?
+          # TODO: Once do_soap_request_async support raw_response, returns GetStreamingEventResponse results
+          ews.get_streaming_events([@subscription_id], timeout)
+        else
+          raise EwsSubscriptionError, "Folder <#{self.display_name}> not subscribed to. Issue a Folder#streaming_subscribed before checking events."
+        end
+      rescue EwsSubscriptionTimeout => e
+        @subscription_id = nil
         raise e
       end
     end

@@ -212,6 +212,23 @@ module Viewpoint::EWS::SOAP
       connection.dispatch(self, soapmsg, opts)
     end
 
+    # Copied from #do_soap_request above
+    #
+    # Send the SOAP asynchronous request to the endpoint
+    # @param [String] soapmsg an XML formatted string
+    # @todo make this work for Viewpoint (imported from SPWS)
+    # @param [Hash] opts misc options
+    # @option opts [Boolean] :raw_response if true do not parse and return the raw connection
+    def do_soap_request_async(soapmsg, opts = {})
+      @log.debug <<-EOF.gsub(/^ {8}/, '')
+        Sending SOAP Request:
+        ----------------
+        #{soapmsg}
+        ----------------
+      EOF
+      connection.dispatch_async(self, soapmsg, opts)
+    end
+
     # @param [String] response the SOAP response string
     # @param [Hash] opts misc options to send to the parser
     # @option opts [Class] :response_class the response class

@@ -102,6 +102,27 @@ module Viewpoint::EWS::SOAP
       do_soap_request(req, response_class: EwsResponse)
     end
 
+    # Used by stream subscription clients to create connection to the Client Access server
+    # @see https://msdn.microsoft.com/en-us/library/office/ff406172(v=exchg.150).aspx GetStreamingEvents on MSDN
+    #      https://msdn.microsoft.com/en-us/library/ff406172(v=exchg.140).aspx
+    #
+    # @param [Array] subscription_ids Subscription identifiers
+    # @param [Integer] timeout For streaming connection
+    def get_streaming_events(subscription_ids, timeout)
+      req = build_soap! do |type, builder|
+        if(type == :header)
+        else
+          builder.nbuild[NS_EWS_MESSAGES].GetStreamingEvents do
+            builder.subscription_ids!(subscription_ids)
+            builder.connection_timeout!(timeout)
+          end
+        end
+      end
+
+      # TODO: Once do_soap_request_async support raw_response, returns GetStreamingEventResponse results
+      do_soap_request_async(req, raw_response: true)
+    end
+
 
     # ------- convenience methods ------- #
 
@@ -141,6 +162,24 @@ module Viewpoint::EWS::SOAP
       subscribe([{push_subscription_request: psr}])
     end
 
+    # Copied from #pull_subscribe_folder above and changed the request type to streaming_subscription_request
+    #
+    # Create a streaming subscription to a single folder
+    # @param folder [Hash] a hash with the folder :id and :change_key
+    # @param evtypes [Array] the events you would like to subscribe to.
+    # @param timeout [Fixnum] http://msdn.microsoft.com/en-us/library/aa565201.aspx
+    # @param watermark [String] http://msdn.microsoft.com/en-us/library/aa565886.aspx
+    def stream_subscribe_folder(folder, evtypes, timeout = nil, watermark = nil)
+      timeout ||= 30 # Streaming default timeout 30 mins
+      psr = {
+        :subscribe_to_all_folders => false,
+        :folder_ids => [ {:id => folder[:id], :change_key => folder[:change_key]} ],
+        :event_types=> evtypes,
+        :timeout    => timeout
+      }
+      psr[:watermark] = watermark if watermark
+      subscribe([{streaming_subscription_request: psr}])
+    end
 
   end #ExchangeNotification
 end

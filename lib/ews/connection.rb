@@ -85,6 +85,35 @@ class Viewpoint::EWS::Connection
     opts[:raw_response] ? respmsg : ews.parse_soap_response(respmsg, opts)
   end
 
+  # Copied from #dispatch above
+  #
+  # Every Connection class must have the dispatch method. It is what sends the
+  # SOAP request to the server and calls the parser method on the EWS instance.
+  #
+  # This was originally in the ExchangeWebService class but it was added here
+  # to make the processing chain easier to modify. For example, it allows the
+  # reactor pattern to handle the request with a callback.
+  # @param ews [Viewpoint::EWS::SOAP::ExchangeWebService] used to call
+  #   #parse_soap_response
+  # @param soapmsg [String]
+  # @param opts [Hash] misc opts for handling the Response
+  def dispatch_async(ews, soapmsg, opts)
+    streaming_connection = post_async(soapmsg)
+
+    if opts[:raw_response]
+      streaming_connection # Returns the HTTPClient::Connection instance as a result
+    else
+      # TODO: Make do_soap_request_async returns another IO pipe if raw_response is false
+      raise "Not yet supporting"
+      # @log.debug <<-EOF.gsub(/^ {6}/, '')
+      #   Received SOAP Response:
+      #   ----------------
+      #   #{Nokogiri::XML(respmsg).to_xml}
+      #   ----------------
+      # EOF
+    end
+  end
+
   # Send a GET to the web service
   # @return [String] If the request is successful (200) it returns the body of
   #   the response.
@@ -98,6 +127,16 @@ class Viewpoint::EWS::Connection
   def post(xmldoc)
     headers = {'Content-Type' => 'text/xml'}
     check_response( @httpcli.post(@endpoint, xmldoc, headers) )
+  end
+
+  # Copied from #post above but make a HTTP::Client#post_async request,
+  #   which returns a HTTPClient::Connection instance as a result.
+  #
+  # Send a asynchronous POST to the web service which creates a connection for sending/receiving data
+  # @return [HTTPClient::Connection] HTTPClient::Connection
+  def post_async(xmldoc)
+    headers = {'Content-Type' => 'text/xml'}
+    @httpcli.post_async(@endpoint, xmldoc, headers)
   end
 
 
