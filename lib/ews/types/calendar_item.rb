@@ -55,39 +55,7 @@ module Viewpoint::EWS::Types
     # @see http://msdn.microsoft.com/en-us/library/exchange/aa580254.aspx
     # @todo AppendToItemField updates not implemented
     def update_item!(updates, options = {})
-      item_updates = []
-      updates.each do |attribute, value|
-        item_field = FIELD_URIS[attribute][:text] if FIELD_URIS.include? attribute
-        field = {field_uRI: {field_uRI: item_field}}
-
-        if value.nil? && item_field
-          # Build DeleteItemField Change
-          item_updates << {delete_item_field: field}
-        elsif item_field
-          # Build SetItemField Change
-          item = Viewpoint::EWS::Template::CalendarItem.new(attribute => value)
-
-          # Remap attributes because ews_builder #dispatch_field_item! uses #build_xml!
-          item_attributes = item.to_ews_item.map do |name, value|
-            if value.is_a? String
-              {name => {text: value}}
-            elsif value.is_a? Hash
-              node = {name => {}}
-              value.each do |attrib_key, attrib_value|
-                attrib_key = camel_case(attrib_key) unless attrib_key == :text
-                node[name][attrib_key] = attrib_value
-              end
-              node
-            else
-              {name => value}
-            end
-          end
-
-          item_updates << {set_item_field: field.merge(calendar_item: {sub_elements: item_attributes})}
-        else
-          # Ignore unknown attribute
-        end
-      end
+      item_updates = derive_item_updates(updates)
 
       if item_updates.any?
         data = {}
@@ -102,16 +70,34 @@ module Viewpoint::EWS::Types
           raise EwsCreateItemError, "Could not update calendar item. #{rm.code}: #{rm.message_text}" unless rm
         end
       end
-
     end
 
     def duration_in_seconds
       iso8601_duration_to_seconds(duration)
     end
 
+    def derive_item_updates(updates)
+      item_updates = []
+      updates.each do |attribute, value|
+        item_field = FIELD_URIS[attribute][:text] if FIELD_URIS.include? attribute
+        field = {field_uRI: {field_uRI: item_field}}
+
+        if item_field.nil?
+          # Ignore unknown attribute
+        elsif value.nil?
+          # Build DeleteItemField Change
+          item_updates << {delete_item_field: field}
+        else
+          # Build SetItemField Change
+          item = Viewpoint::EWS::Template::CalendarItem.new(attribute => value)
+          item_updates << {set_item_field: field.merge(calendar_item: item.to_ews_item)}
+        end
+      end
+
+      item_updates
+    end
 
     private
-
 
     def key_paths
       super.merge(CALENDAR_ITEM_KEY_PATHS)
