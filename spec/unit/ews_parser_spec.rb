@@ -38,12 +38,33 @@ describe "Exchange Response Parser Functionality" do
     expect(resp.envelope).to_not be_empty
   end
 
+  it 'parses with EwsResponse' do
+    soap_resp = load_soap 'get_item_bad_character', :response
+    resp = Viewpoint::EWS::SOAP::EwsParser.new(soap_resp).parse(response_class: Viewpoint::EWS::SOAP::EwsResponse)
+    expect(resp.response_messages[0].items).to_not be_empty
+  end
+
   it 'parses an empty body' do
     soap_resp = load_soap 'empty_body', :response
     resp = Viewpoint::EWS::SOAP::EwsParser.new(soap_resp).parse
     expect(resp).to_not be_success
     expect(resp.response_code).to be nil
     expect(resp.response_message_text).to be nil
+  end
+
+  it 'parses fault without header' do
+    soap_resp = load_soap 'fault_no_header', :response
+    resp = Viewpoint::EWS::SOAP::EwsParser.new(soap_resp).parse
+    expect(resp).to_not be_success
+    expect(resp.header).to be nil
+    expect(resp.response_messages).to be_empty
+  end
+
+  it 'parses fault without header using EwsResponse' do
+    soap_resp = load_soap 'fault_no_header', :response
+    resp = Viewpoint::EWS::SOAP::EwsParser.new(soap_resp).parse(response_class: Viewpoint::EWS::SOAP::EwsResponse)
+    expect(resp.header).to be nil
+    expect(resp.response_messages).to be_empty
   end
 
 end

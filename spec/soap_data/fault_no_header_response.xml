@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+  <s:Body>
+    <s:Fault>
+      <faultcode xmlns:a="http://schemas.microsoft.com/exchange/services/2006/types">a:ErrorExceededConnectionCount</faultcode>
+      <faultstring xml:lang="en-US">You have exceeded the available concurrent connections for your account.  Try again once your other requests have completed.</faultstring>
+      <detail>
+        <e:ResponseCode xmlns:e="http://schemas.microsoft.com/exchange/services/2006/errors">ErrorExceededConnectionCount</e:ResponseCode>
+        <e:Message xmlns:e="http://schemas.microsoft.com/exchange/services/2006/errors">You have exceeded the available concurrent connections for your account.  Try again once your other requests have completed.</e:Message>
+      </detail>
+    </s:Fault>
+  </s:Body>
+</s:Envelope>
