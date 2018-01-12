@@ -32,11 +32,13 @@ module Viewpoint::EWS::SOAP
     end
 
     def header
-      envelope[0][:header][:elems]
+      header_entry = envelope.find { |e| e.key?(:header) }
+      header_entry[:header][:elems] if header_entry
     end
 
     def body
-      envelope[1][:body][:elems]
+      body_entry = envelope.find { |e| e.key?(:body) }
+      body_entry[:body][:elems] if body_entry
     end
 
     def response
@@ -49,10 +51,13 @@ module Viewpoint::EWS::SOAP
       @response_messages = []
       unless response.nil?
         response_type = response.keys.first
-        response[response_type][:elems][0][:response_messages][:elems].each do |rm|
-          response_message_type = rm.keys[0]
-          rm_klass = class_by_name(response_message_type)
-          @response_messages << rm_klass.new(rm)
+        response_messages_entry = response[response_type][:elems].find{ |e| e.key?(:response_messages) }
+        if response_messages_entry
+          response_messages_entry[:response_messages][:elems].each do |rm|
+            response_message_type = rm.keys[0]
+            rm_klass = class_by_name(response_message_type)
+            @response_messages << rm_klass.new(rm)
+          end
         end
       end
       @response_messages
@@ -65,9 +70,12 @@ module Viewpoint::EWS::SOAP
     def simplify!
       return if response.nil?
       response_type = response.keys.first
-      response[response_type][:elems][0][:response_messages][:elems].each do |rm|
-        key = rm.keys.first
-        rm[key][:elems] = rm[key][:elems].inject(&:merge)
+      response_messages_entry = response[response_type][:elems].find{ |e| e.key?(:response_messages) }
+      if response_messages_entry
+        response_messages_entry[:response_messages][:elems].each do |rm|
+          key = rm.keys.first
+          rm[key][:elems] = rm[key][:elems].inject(&:merge)
+        end
       end
     end
 
