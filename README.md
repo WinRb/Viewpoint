@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/WinRb/Viewpoint.svg?branch=master)](https://travis-ci.org/WinRb/Viewpoint)
 
-# Viewpoint for Exchange Web Services 1.1.0
+# Viewpoint for Exchange Web Services 1.1.1
 http://github.com/zenchild/Viewpoint/wiki
 
 Viewpoint for EWS provides a thin Ruby layer on top of Microsoft Exchange
@@ -16,6 +16,16 @@ Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
 
+## Version 1.1.1
+Mostly minor bug fix and enhancements
+
+#### Enhancements
+1. Make the streaming subscription default timeout to 240 minutes  (same with pull subscription)
+2. Use `#streaming_subscribed?` for checking if a streaming subscription is set up
+
+#### Bug fixed
+1. `CalendarFolder#items_between` and `GenericFolder#items_between` now truly support option params
+ 
 ## New in 1.1.0
 
 * Partially supporting Streaming Notification
