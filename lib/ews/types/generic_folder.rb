@@ -272,7 +272,7 @@ module Viewpoint::EWS::Types
     # @param timeout [Fixnum] the time in minutes that the subscription can
     #   remain idle between calls to #get_events. default: 240 minutes
     # @return [Boolean] Did the subscription happen successfully?
-    def streaming_subscribe(evtypes = [:all], watermark = nil, timeout = 30)
+    def streaming_subscribe(evtypes = [:all], watermark = nil, timeout = 240)
       # Refresh the subscription if already subscribed
       unsubscribe if subscribed?
 
