@@ -274,7 +274,7 @@ module Viewpoint::EWS::Types
     # @return [Boolean] Did the subscription happen successfully?
     def streaming_subscribe(evtypes = [:all], watermark = nil, timeout = 240)
       # Refresh the subscription if already subscribed
-      unsubscribe if subscribed?
+      unsubscribe if streaming_subscribed?
 
       event_types = normalize_event_names(evtypes)
       folder = {id: self.id, change_key: self.change_key}
