@@ -104,7 +104,7 @@ module Viewpoint::EWS::Types
     # @param [DateTime] start_date the time to start fetching Items from
     # @param [DateTime] end_date the time to stop fetching Items from
     def items_between(start_date, end_date, opts={})
-      items do |obj|
+      items(opts) do |obj|
         obj.restriction = { :and =>
           [
             {:is_greater_than_or_equal_to =>
@@ -272,9 +272,9 @@ module Viewpoint::EWS::Types
     # @param timeout [Fixnum] the time in minutes that the subscription can
     #   remain idle between calls to #get_events. default: 240 minutes
     # @return [Boolean] Did the subscription happen successfully?
-    def streaming_subscribe(evtypes = [:all], watermark = nil, timeout = 30)
+    def streaming_subscribe(evtypes = [:all], watermark = nil, timeout = 240)
       # Refresh the subscription if already subscribed
-      unsubscribe if subscribed?
+      unsubscribe if streaming_subscribed?
 
       event_types = normalize_event_names(evtypes)
       folder = {id: self.id, change_key: self.change_key}
