@@ -36,5 +36,15 @@ module Viewpoint::EWS::SOAP
       notification_events[0][:subscription_id][:text]
     end
 
+    def error_subscription_ids
+      ids = guard_hash(response_message[:elems], [:error_subscription_ids, :elems])
+
+      if ids
+        ids.map { |id| id[:subscription_id][:text] }
+      else
+        []
+      end
+    end
+
   end # END class EwsSoapGetStreamingEventsResponse < EwsSoapResponse
 end # Viewpoint::EWS::SOAP
