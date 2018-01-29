@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/WinRb/Viewpoint.svg?branch=master)](https://travis-ci.org/WinRb/Viewpoint)
 
-# Viewpoint for Exchange Web Services 1.1.1
+# Viewpoint for Exchange Web Services 1.1.2
 http://github.com/zenchild/Viewpoint/wiki
 
 Viewpoint for EWS provides a thin Ruby layer on top of Microsoft Exchange
@@ -15,6 +15,9 @@ Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
 Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
+
+## Version 1.1.2
+1. Enhance `EwsSoapGetStreamingEventsResponse#error_subscription_ids` to return error_subscription_ids array if any
 
 ## Version 1.1.1
 Mostly minor bug fix and enhancements

@@ -82,6 +82,10 @@ EOS
           <m:MessageText>Some Error</m:MessageText>
           <m:DescriptiveLinkKey>0</m:DescriptiveLinkKey>
           <m:ResponseCode>ErrorInvalidSubscription</m:ResponseCode>
+          <m:ErrorSubscriptionIds>
+            <m:SubscriptionId>SomeErrorSubscriptionId_1</m:SubscriptionId>
+            <m:SubscriptionId>SomeErrorSubscriptionId_2</m:SubscriptionId>
+          </m:ErrorSubscriptionIds>
           <m:ConnectionStatus>Closed</m:ConnectionStatus>
         </m:GetStreamingEventsResponseMessage>
       </m:ResponseMessages>
@@ -97,6 +101,10 @@ EOS
 
     it "response should be error" do
       expect(resp.response_message_text).to eq("Some Error")
+    end
+
+    it "includes ErrorSubscriptionIds" do
+      expect(resp.error_subscription_ids).to match_array(["SomeErrorSubscriptionId_1", "SomeErrorSubscriptionId_2"])
     end
   end # context "When invalid GetStreamingEventsResponseMessage"
 
