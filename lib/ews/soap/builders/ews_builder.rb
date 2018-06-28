@@ -47,7 +47,8 @@ module Viewpoint::EWS::SOAP
     #     end
     #   end
     def build!(opts = {}, &block)
-      @nbuild.Envelope(NAMESPACES) do |node|
+      namespaces = opts[:namespaces] ? opts[:namespaces] : NAMESPACES
+      @nbuild.Envelope(namespaces) do |node|
         node.parent.namespace = parent_namespace(node)
         node.Header {
           set_version_header! opts[:server_version]
@@ -471,6 +472,36 @@ module Viewpoint::EWS::SOAP
           nbuild[NS_EWS_TYPES].DayOfWeek(zone[:daylight_time][:day_of_week])
         }
       }
+    end
+
+    def build_get_user_settings_soap(opts)
+      soap_opts = { namespaces: AUTODISCOVER_NAMESPACES }
+
+      build!(soap_opts) do |type, builder|
+        if (type == :header)
+          builder.nbuild[NS_AUTODISCOVER].RequestedServerVersion(opts[:server_version])
+          builder.nbuild[NS_ADDRESING].Action(GET_USER_SETTINGS_ACTION_URL)
+          builder.nbuild[NS_ADDRESING].To(opts[:autodiscover_address])
+        else
+          builder.nbuild[NS_AUTODISCOVER].GetUserSettingsRequestMessage do
+            builder.nbuild[NS_AUTODISCOVER].Request do
+              builder.nbuild[NS_AUTODISCOVER].Users do
+                opts[:users].each do |user|
+                  builder.nbuild[NS_AUTODISCOVER].User do
+                    builder.nbuild[NS_AUTODISCOVER].Mailbox(user)
+                  end
+                end
+              end
+
+              builder.nbuild[NS_AUTODISCOVER].RequestedSettings do
+                opts[:requested_settings].each do |setting|
+                  builder.nbuild[NS_AUTODISCOVER].Setting(setting)
+                end
+              end
+            end
+          end
+        end
+      end
     end
 
     # Request all known time_zones from server

@@ -168,6 +168,17 @@ module Viewpoint::EWS::SOAP
       do_soap_request(req, response_class: EwsSoapFreeBusyResponse)
     end
 
+    def get_user_settings(opts)
+      opts.merge!({
+          server_version: server_version,
+          autodiscover_address: autodiscover_address
+        }
+      )
+
+      req = EwsBuilder.new.build_get_user_settings_soap(opts)
+      do_soap_request(req, response_class: EwsSoapGetUserSettingsResponse)
+    end
+
     # Gets the rooms that are in the specified room distribution list
     # @see http://msdn.microsoft.com/en-us/library/aa563465.aspx
     # @param [string] roomDistributionList
@@ -275,6 +286,10 @@ module Viewpoint::EWS::SOAP
       opts = { :server_version => server_version, :impersonation_type => impersonation_type, :impersonation_mail => impersonation_address }
       opts[:time_zone_context] = @time_zone_context if @time_zone_context
       EwsBuilder.new.build!(opts, &block)
+    end
+
+    def autodiscover_address
+      "https://#{connection.hostname}/autodiscover/autodiscover.svc"
     end
 
   end # class ExchangeWebService

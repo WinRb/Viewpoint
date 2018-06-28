@@ -27,11 +27,21 @@ module Viewpoint
       NS_SOAP         = 'soap'.freeze
       NS_EWS_TYPES    = 't'.freeze
       NS_EWS_MESSAGES = 'm'.freeze
+      NS_AUTODISCOVER = 'a'.freeze
+      NS_ADDRESING    = 'wsa'.freeze
+      NS_SCHEMA       = 'xsi'.freeze
       NAMESPACES = {
         "xmlns:#{NS_SOAP}"         => 'http://schemas.xmlsoap.org/soap/envelope/',
         "xmlns:#{NS_EWS_TYPES}"    => 'http://schemas.microsoft.com/exchange/services/2006/types',
         "xmlns:#{NS_EWS_MESSAGES}" => 'http://schemas.microsoft.com/exchange/services/2006/messages',
       }.freeze
+      AUTODISCOVER_NAMESPACES = {
+        "xmlns:#{NS_AUTODISCOVER}"  => 'http://schemas.microsoft.com/exchange/2010/Autodiscover',
+        "xmlns:#{NS_ADDRESING}"     => 'http://www.w3.org/2005/08/addressing',
+        "xmlns:#{NS_SCHEMA}"        => 'http://www.w3.org/2001/XMLSchema-instance',
+        "xmlns:#{NS_SOAP}"          => 'http://schemas.xmlsoap.org/soap/envelope/'
+      }.freeze
+      GET_USER_SETTINGS_ACTION_URL = "http://schemas.microsoft.com/exchange/2010/Autodiscover/Autodiscover/GetUserSettings".freeze
 
       # used in ResolveNames to determine where names are resolved
       ActiveDirectory         = 'ActiveDirectory'
