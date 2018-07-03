@@ -47,6 +47,12 @@ module Viewpoint::EWS::SOAP
     #       }},
     #       ]
     def subscribe(subscriptions)
+      byebug
+      # subscriptions.map[:]
+      # request_options: {
+      #   headers: subscriptions[:]
+      # }
+
       req = build_soap! do |type, builder|
         if(type == :header)
         else
@@ -63,7 +69,7 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      do_soap_request(req, response_class: EwsResponse, options: request_options)
     end
 
     # End a pull notification subscription.
@@ -169,9 +175,13 @@ module Viewpoint::EWS::SOAP
     # @param evtypes [Array] the events you would like to subscribe to.
     # @param timeout [Fixnum] http://msdn.microsoft.com/en-us/library/aa565201.aspx
     # @param watermark [String] http://msdn.microsoft.com/en-us/library/aa565886.aspx
-    def stream_subscribe_folder(folder, evtypes, timeout = nil, watermark = nil)
+    # @param options [Hash]
+    def stream_subscribe_folder(folder, evtypes, timeout = nil, watermark = nil, options: {})
       timeout ||= 30 # Streaming default timeout 30 mins
       psr = {
+        :anchor_mailbox => options[:anchor_mailbox],
+        :prefer_server_affinity => options[:prefer_server_affinity] || false,
+        :backend_override_cookie => options[:backend_override_cookie],
         :subscribe_to_all_folders => false,
         :folder_ids => [ {:id => folder[:id], :change_key => folder[:change_key]} ],
         :event_types=> evtypes,
