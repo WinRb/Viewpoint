@@ -3,7 +3,6 @@ require 'viewpoint'
 require 'viewpoint/logging/config'
 require 'ostruct'
 require 'turn/autorun'
-require 'byebug'
 require_relative 'xml_matcher'
 
 RSpec.configure do |c|
