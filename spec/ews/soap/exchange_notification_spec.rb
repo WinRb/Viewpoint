@@ -6,67 +6,53 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
   end
 
   let(:test_instance) { TestIncludeExchangeNotification.new }
-  let(:folder) { { id: "some_id", change_key: "some_change_key" } }
-  let(:anchor_mailbox) { "mailbox@example.com" }
-  let(:prefer_server_affinity) { true }
-  let(:backend_override_cookie) { "cookie" }
-  let(:evtypes) { double(:evtypes) }
-  let(:subscriptions) {
-    {
-      anchor_mailbox: anchor_mailbox,
-      prefer_server_affinity: prefer_server_affinity,
-      backend_override_cookie: backend_override_cookie,
-      subscribe_to_all_folders: false,
-      folder_ids: [ { id: folder[:id], change_key: folder[:change_key] } ],
-      event_types: evtypes,
-      timeout: 30
-    }
-  }
 
-  describe "#stream_subscribe_folder" do
-    let(:options) {
-      {
-        anchor_mailbox: anchor_mailbox,
-        prefer_server_affinity: prefer_server_affinity,
-        backend_override_cookie: backend_override_cookie
-      }
-    }
+  describe "#subscribe" do
+    let(:options) { { anchor_mailbox: "mailbox@example.com"} }
+    let(:req_double) { double(:request) }
+    let(:subscriptions) { double(:subscriptions) }
 
-    subject { test_instance.stream_subscribe_folder(folder, evtypes, options: options) }
+    subject { test_instance.subscribe(subscriptions, options: options) }
 
-    context "when options are passed in" do
-      it "includes anchor_mailbox, prefer_server_affinity and backend_override_cookie when calling the subscribe method" do
-        expect(test_instance).to receive(:subscribe).with([{streaming_subscription_request: subscriptions}])
-
-        subject
-      end
+    it "passes the request options to the do_soap_request method" do
+      expect(test_instance).to receive(:get_request_options).with(options) { options }
+      allow(test_instance).to receive(:build_soap!) { req_double }
+      expect(test_instance).to receive(:do_soap_request).with(
+        req_double, { response_class: Viewpoint::EWS::SOAP::EwsResponse, request_options: options }
+      )
+      subject
     end
   end
 
-  describe "#subscribe" do
+  describe "#get_request_options" do
 
-    subject { test_instance.subscribe(subscriptions) }
+    subject { test_instance.get_request_options(options) }
 
-    context "when anchor_mailbox is passed in" do
+    context "when a supported HTTP header is passed in" do
+      let(:anchor_mailbox) { "mailbox@example.com" }
+      let(:prefer_server_affinity) { true }
+      let(:options) {
+        {
+          anchor_mailbox: anchor_mailbox,
+          prefer_server_affinity: prefer_server_affinity
+        }
+      }
 
-      it "sets the anchor_mailbox header" do
+      it "includes the HTTP header" do
+        result = subject
 
+        expect(result[:anchor_mailbox]).to eq(anchor_mailbox)
+        expect(result[:prefer_server_affinity]).to eq(prefer_server_affinity)
       end
     end
 
-    context "when anchor_mailbox is not passed in" do
+    context "when a supported HTTP cookie is passed in" do
+      let(:backend_override_cookie) { "cookie" }
+      let(:options) { { backend_override_cookie: backend_override_cookie } }
 
-      it "doesn't set the anchor_mailbox header" do
-        
+      it "includes the HTTP cookie" do
+        expect(subject[:backend_override_cookie]).to eq(backend_override_cookie)
       end
-    end
-
-    context "when the prefer_server_affinity is passed in" do
-
-    end
-
-    context "when backend_override_cookie is passed in" do
-
     end
   end
 end
