@@ -46,12 +46,8 @@ module Viewpoint::EWS::SOAP
     #         :event_types=> %w{NewMailEvent DeletedEvent},
     #       }},
     #       ]
-    def subscribe(subscriptions)
-      byebug
-      # subscriptions.map[:]
-      # request_options: {
-      #   headers: subscriptions[:]
-      # }
+    def subscribe(subscriptions, options: {})
+      request_options = get_request_options(options)
 
       req = build_soap! do |type, builder|
         if(type == :header)
@@ -69,7 +65,16 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse, options: request_options)
+      do_soap_request(req, response_class: EwsResponse, request_options: request_options)
+    end
+
+    def get_request_options(options)
+      options.inject({}) do |result, (option, value)|
+        if CUSTOMISABLE_HTTP_HEADERS.include?(option) || CUSTOMISABLE_HTTP_COOKIES.include?(option)
+          result[option] = value
+        end
+        result
+      end
     end
 
     # End a pull notification subscription.
@@ -178,17 +183,15 @@ module Viewpoint::EWS::SOAP
     # @param options [Hash]
     def stream_subscribe_folder(folder, evtypes, timeout = nil, watermark = nil, options: {})
       timeout ||= 30 # Streaming default timeout 30 mins
+
       psr = {
-        :anchor_mailbox => options[:anchor_mailbox],
-        :prefer_server_affinity => options[:prefer_server_affinity] || false,
-        :backend_override_cookie => options[:backend_override_cookie],
         :subscribe_to_all_folders => false,
         :folder_ids => [ {:id => folder[:id], :change_key => folder[:change_key]} ],
         :event_types=> evtypes,
         :timeout    => timeout
       }
       psr[:watermark] = watermark if watermark
-      subscribe([{streaming_subscription_request: psr}])
+      subscribe([{streaming_subscription_request: psr}], options: options)
     end
 
   end #ExchangeNotification

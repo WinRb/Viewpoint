@@ -52,7 +52,6 @@ module Viewpoint::EWS::Types
     # @param [SOAP::ExchangeWebService] ews the EWS reference
     # @param [Hash] ews_item the EWS parsed response document
     def initialize(ews, ews_item)
-      byebug
       super
       simplify!
       @sync_state = nil
@@ -274,7 +273,6 @@ module Viewpoint::EWS::Types
     #   remain idle between calls to #get_events. default: 240 minutes
     # @return [Boolean] Did the subscription happen successfully?
     def streaming_subscribe(evtypes = [:all], watermark = nil, timeout = 240, options: {})
-      byebug
       # Refresh the subscription if already subscribed
       unsubscribe if streaming_subscribed?
 
