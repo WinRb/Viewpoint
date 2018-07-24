@@ -47,7 +47,10 @@ module Viewpoint::EWS::SOAP
     #       }},
     #       ]
     def subscribe(subscriptions, options: {})
-      request_options = get_request_options(options)
+      options = {
+        customisable_headers: get_customisable_headers(options) || {},
+        customisable_cookies: get_customisable_cookies(options || {})
+      }
 
       req = build_soap! do |type, builder|
         if(type == :header)
@@ -65,15 +68,18 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse, request_options: request_options)
+      do_soap_request(req, response_class: EwsResponse, options: options)
     end
 
-    def get_request_options(options)
-      options.inject({}) do |result, (option, value)|
-        if CUSTOMISABLE_HTTP_HEADERS.include?(option) || CUSTOMISABLE_HTTP_COOKIES.include?(option)
-          result[option] = value
-        end
-        result
+    def get_customisable_headers(options)
+      options.reject do |option, _|
+        !CUSTOMISABLE_HTTP_HEADERS.include?(option)
+      end
+    end
+
+    def get_customisable_cookies(options)
+      options.reject do |option, _|
+        !CUSTOMISABLE_HTTP_COOKIES.include?(option)
       end
     end
 
