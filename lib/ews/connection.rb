@@ -129,21 +129,20 @@ class Viewpoint::EWS::Connection
   # @return [String] If the request is successful (200) it returns the body of
   #   the response.
   def post(xmldoc, options: {})
-    @http_headers = {'Content-Type' => 'text/xml'}
-    if options[:request_options]
-      set_custom_http_headers(options[:request_options])
-      set_custom_http_cookies(options[:request_options])
-    end
+    headers = {'Content-Type' => 'text/xml'}
+    headers.merge!(custom_http_headers(options[:request_options])) if options[:customisable_headers]
+    set_custom_http_cookies(options[:request_options]) if options[:customisable_cookies]
 
-    check_response( @httpcli.post(@endpoint, xmldoc, @http_headers ) )
+    check_response( @httpcli.post(@endpoint, xmldoc, headers) )
   end
 
-  def set_custom_http_headers(request_options)
-    Viewpoint::EWS::SOAP::CUSTOMISABLE_HTTP_HEADERS.each do |header_key, header_name|
+  def custom_http_headers(request_options)
+    Viewpoint::EWS::SOAP::CUSTOMISABLE_HTTP_HEADERS.inject({}) do |header_hash, header_key, header_name|
       if request_options.include?(header_key)
-        @http_headers.merge!({header_name => request_options[header_key]})
+        header_hash[header_name] = request_options[header_key]
+        header_hash
       end
-    end
+    end # check for nil (e.g. when no CUSTOMISABLE_HTTP_HEADERS exist)
   end
 
   def set_custom_http_cookies(request_options)
