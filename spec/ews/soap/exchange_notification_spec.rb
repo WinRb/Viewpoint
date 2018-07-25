@@ -5,6 +5,14 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
     include Viewpoint::EWS::SOAP::ExchangeNotification
   end
 
+  shared_examples "empty options" do
+    context "when an empty has is passed in" do
+      let(:options) { {} }
+
+      it { is_expected.to eq({}) }
+    end
+  end
+
   let(:test_instance) { TestIncludeExchangeNotification.new }
 
   describe "#subscribe" do
@@ -28,52 +36,95 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
       )
       subject
     end
-  end
 
-  describe "#get_customisable_cookies" do
-    subject { test_instance.get_customisable_cookies(options) }
+    context "when get_customisable_headers and get_customisable_cookies return nil" do
+      it "passes empty headers and cookies hashes to the do_soap_request method" do
+        expect(test_instance).to receive(:get_customisable_headers).with(options) { nil }
+        expect(test_instance).to receive(:get_customisable_cookies).with(options) { nil }
+        allow(test_instance).to receive(:build_soap!) { req_double }
+        expect(test_instance).to receive(:do_soap_request).with(
+          req_double, {
+            response_class: Viewpoint::EWS::SOAP::EwsResponse,
+            options: { customisable_headers: {}, customisable_cookies: {} }
+          }
+        )
+        subject
+      end
+    end
   end
 
   describe "#get_customisable_headers" do
-      subject { test_instance.get_customisable_headers(options) }
+    let(:anchor_mailbox) { "mailbox@example.com" }
+    let(:prefer_server_affinity) { true }
+
+    subject { test_instance.get_customisable_headers(options) }
+
+    context "when a supported HTTP header is passed in" do
+      let(:options) {
+        {
+          anchor_mailbox: anchor_mailbox,
+          prefer_server_affinity: prefer_server_affinity
+        }
+      }
+
+      it "includes the HTTP header" do
+        result = subject
+
+        expect(result[:anchor_mailbox]).to eq(anchor_mailbox)
+        expect(result[:prefer_server_affinity]).to eq(prefer_server_affinity)
+      end
+    end
+
+    context "when extra options are passed in" do
+      let(:options) {
+        {
+          some_other_header: "some_value",
+          anchor_mailbox: anchor_mailbox,
+          prefer_server_affinity: prefer_server_affinity
+        }
+      }
+
+      it "excludes the extra options" do
+        result = subject
+
+        expect(result[:anchor_mailbox]).to eq(anchor_mailbox)
+        expect(result[:prefer_server_affinity]).to eq(prefer_server_affinity)
+        expect(result[:some_other_header]).to be_nil
+      end
+    end
+
+    include_examples "empty options"
   end
 
-  # describe "#get_request_options" do
-  #
-  #   subject { test_instance.get_request_options(options) }
-  #
-  #   context "when a supported HTTP header is passed in" do
-  #     let(:anchor_mailbox) { "mailbox@example.com" }
-  #     let(:prefer_server_affinity) { true }
-  #     let(:options) {
-  #       {
-  #         anchor_mailbox: anchor_mailbox,
-  #         prefer_server_affinity: prefer_server_affinity
-  #       }
-  #     }
-  #
-  #     it "includes the HTTP header" do
-  #       result = subject
-  #
-  #       expect(result[:anchor_mailbox]).to eq(anchor_mailbox)
-  #       expect(result[:prefer_server_affinity]).to eq(prefer_server_affinity)
-  #     end
-  #   end
-  #
-  #   context "when extra options are passed in" do
-  #     it "excludes the extra options" do
-  #
-  #     end
-  #   end
+  describe "#get_customisable_cookies" do
+    let(:backend_override_cookie) { "cookie" }
 
-    # context "when a supported HTTP cookie is passed in" do
-    #   let(:backend_override_cookie) { "cookie" }
-    #   let(:options) { { backend_override_cookie: backend_override_cookie } }
-    #
-    #   it "includes the HTTP cookie" do
-    #     expect(subject[:backend_override_cookie]).to eq(backend_override_cookie)
-    #   end
-    # end
+    subject { test_instance.get_customisable_cookies(options) }
 
-  # end
+    context "when a supported HTTP cookie is passed in" do
+      let(:options) { { backend_override_cookie: backend_override_cookie } }
+
+      it "includes the HTTP cookie" do
+        expect(subject[:backend_override_cookie]).to eq(backend_override_cookie)
+      end
+    end
+
+    context "when extra options are passed in" do
+      let(:options) {
+        {
+          some_other_cookie: "some_value",
+          backend_override_cookie: backend_override_cookie
+        }
+      }
+
+      it "excludes the extra options" do
+        result = subject
+
+        expect(result[:backend_override_cookie]).to eq(backend_override_cookie)
+        expect(result[:some_other_cookie]).to be_nil
+      end
+    end
+
+    include_examples "empty options"
+  end
 end
