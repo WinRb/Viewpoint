@@ -130,27 +130,29 @@ class Viewpoint::EWS::Connection
   #   the response.
   def post(xmldoc, options: {})
     headers = {'Content-Type' => 'text/xml'}
-    headers.merge!(custom_http_headers(options[:request_options])) if options[:customisable_headers]
-    set_custom_http_cookies(options[:request_options]) if options[:customisable_cookies]
+    headers.merge!(custom_http_headers(options[:customisable_headers])) if options[:customisable_headers]
+    set_custom_http_cookies(options[:customisable_cookies]) if options[:customisable_cookies]
 
     check_response( @httpcli.post(@endpoint, xmldoc, headers) )
   end
 
-  def custom_http_headers(request_options)
-    Viewpoint::EWS::SOAP::CUSTOMISABLE_HTTP_HEADERS.inject({}) do |header_hash, header_key, header_name|
-      if request_options.include?(header_key)
-        header_hash[header_name] = request_options[header_key]
-        header_hash
+  def custom_http_headers(headers)
+    custom_headers = Viewpoint::EWS::SOAP::CUSTOMISABLE_HTTP_HEADERS.inject({}) do |header_hash, (header_key, header_name)|
+      if headers.include?(header_key)
+        header_hash[header_name] = headers[header_key]
       end
-    end # check for nil (e.g. when no CUSTOMISABLE_HTTP_HEADERS exist)
+      header_hash
+    end
+
+    custom_headers || {}
   end
 
-  def set_custom_http_cookies(request_options)
+  def set_custom_http_cookies(cookies)
     Viewpoint::EWS::SOAP::CUSTOMISABLE_HTTP_COOKIES.each do |cookie_key, cookie_name|
-      if request_options.include?(cookie_key)
+      if cookies.include?(cookie_key)
         cookie = WebAgent::Cookie.new
         cookie.name = cookie_name
-        cookie.value = request_options[cookie_key]
+        cookie.value = cookies[cookie_key]
         cookie.url = URI(endpoint)
         @httpcli.cookie_manager.add(cookie)
       end
