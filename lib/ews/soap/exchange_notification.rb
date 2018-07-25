@@ -49,7 +49,7 @@ module Viewpoint::EWS::SOAP
     def subscribe(subscriptions, options: {})
       options = {
         customisable_headers: get_customisable_headers(options) || {},
-        customisable_cookies: get_customisable_cookies(options || {})
+        customisable_cookies: get_customisable_cookies(options) || {}
       }
 
       req = build_soap! do |type, builder|
@@ -72,15 +72,11 @@ module Viewpoint::EWS::SOAP
     end
 
     def get_customisable_headers(options)
-      options.reject do |option, _|
-        !CUSTOMISABLE_HTTP_HEADERS.include?(option)
-      end
+      options.reject { |option, _| !CUSTOMISABLE_HTTP_HEADERS.include?(option) }
     end
 
     def get_customisable_cookies(options)
-      options.reject do |option, _|
-        !CUSTOMISABLE_HTTP_COOKIES.include?(option)
-      end
+      options.reject { |option, _| !CUSTOMISABLE_HTTP_COOKIES.include?(option) }
     end
 
     # End a pull notification subscription.
