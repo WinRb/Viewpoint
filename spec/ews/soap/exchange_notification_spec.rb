@@ -31,7 +31,8 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
       expect(test_instance).to receive(:do_soap_request).with(
         req_double, {
           response_class: Viewpoint::EWS::SOAP::EwsResponse,
-          options: { customisable_headers: customisable_headers, customisable_cookies: customisable_cookies }
+          customisable_headers: customisable_headers,
+          customisable_cookies: customisable_cookies
         }
       )
       subject
@@ -45,7 +46,8 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
         expect(test_instance).to receive(:do_soap_request).with(
           req_double, {
             response_class: Viewpoint::EWS::SOAP::EwsResponse,
-            options: { customisable_headers: {}, customisable_cookies: {} }
+            customisable_headers: {},
+            customisable_cookies: {}
           }
         )
         subject
