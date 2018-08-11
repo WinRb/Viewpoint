@@ -6,6 +6,7 @@ require 'ews/push_subscription_accessors'
 require 'ews/calendar_accessors'
 require 'ews/room_accessors'
 require 'ews/roomlist_accessors'
+require 'ews/resolve_names_accessors'
 require 'ews/convert_accessors'
 require 'ews/meeting_accessors'
 
@@ -20,6 +21,7 @@ class Viewpoint::EWSClient
   include Viewpoint::EWS::CalendarAccessors
   include Viewpoint::EWS::RoomAccessors
   include Viewpoint::EWS::RoomlistAccessors
+  include Viewpoint::EWS::ResolveNamesAccessors
   include Viewpoint::EWS::ConvertAccessors
   include Viewpoint::EWS::MeetingAccessors
   include Viewpoint::StringUtils

@@ -1262,6 +1262,12 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_MESSAGES].GetRoomLists
     end
 
+    def resolve_names!(name, full_contact_data)
+      @nbuild[NS_EWS_MESSAGES].ResolveNames('ReturnFullContactData' => full_contact_data) {
+        @nbuild[NS_EWS_MESSAGES].UnresolvedEntry(name)
+      }
+    end
+
     def accept_item!(opts)
       @nbuild[NS_EWS_TYPES].AcceptItem {
         sensitivity!(opts)
