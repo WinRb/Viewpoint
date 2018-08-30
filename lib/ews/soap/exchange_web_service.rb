@@ -171,7 +171,7 @@ module Viewpoint::EWS::SOAP
     def get_user_settings(opts)
       opts.merge!({
           server_version: server_version,
-          autodiscover_address: autodiscover_address
+          autodiscover_address: @connection.endpoint # you need to se the endpoint as the autodiscover address anyway
         }
       )
 
@@ -286,10 +286,6 @@ module Viewpoint::EWS::SOAP
       opts = { :server_version => server_version, :impersonation_type => impersonation_type, :impersonation_mail => impersonation_address }
       opts[:time_zone_context] = @time_zone_context if @time_zone_context
       EwsBuilder.new.build!(opts, &block)
-    end
-
-    def autodiscover_address
-      "https://#{connection.hostname}/autodiscover/autodiscover.svc"
     end
 
   end # class ExchangeWebService

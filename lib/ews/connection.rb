@@ -24,7 +24,7 @@ class Viewpoint::EWS::Connection
   attr_reader :endpoint, :hostname
   # @param [String] endpoint the URL of the web service.
   #   @example https://<site>/ews/Exchange.asmx
-  # @param [Hash] opts Misc config options (mostly for developement)
+  # @param [Hash] opts Misc config options (mostly for development)
   # @option opts [Fixnum] :ssl_verify_mode
   # @option opts [Fixnum] :receive_timeout override the default receive timeout
   #   seconds
