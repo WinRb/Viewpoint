@@ -147,6 +147,9 @@ class Viewpoint::EWS::Connection
   private
 
   def check_response(resp)
+    @log.debug("Got HTTP response with headers: #{resp.headers}")
+    @log.debug("Got HTTP response with body: #{resp.body}") if resp.body
+
     case resp.status
     when 200
       resp.body
