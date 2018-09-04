@@ -21,7 +21,7 @@ class Viewpoint::EWS::Connection
   include Viewpoint::EWS::ConnectionHelper
   include Viewpoint::EWS
 
-  attr_reader :endpoint
+  attr_reader :endpoint, :hostname
   # @param [String] endpoint the URL of the web service.
   #   @example https://<site>/ews/Exchange.asmx
   # @param [Hash] opts Misc config options (mostly for developement)
@@ -62,6 +62,10 @@ class Viewpoint::EWS::Connection
   # @return [Boolean] true if authentication is successful, false otherwise
   def authenticate
     self.get && true
+  end
+
+  def hostname
+    @hostname ||= URI(endpoint).hostname
   end
 
   # Every Connection class must have the dispatch method. It is what sends the
@@ -143,6 +147,9 @@ class Viewpoint::EWS::Connection
   private
 
   def check_response(resp)
+    @log.debug("Got HTTP response with headers: #{resp.headers}")
+    @log.debug("Got HTTP response with body: #{resp.body}") if resp.body
+
     case resp.status
     when 200
       resp.body

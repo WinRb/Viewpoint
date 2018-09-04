@@ -61,6 +61,27 @@ module Viewpoint::EWS::MailboxAccessors
     get_user_availability_parser(resp)
   end
 
+  # GetUserSettings request
+  # @see https://msdn.microsoft.com/en-us/library/ee625087(v=exchg.80).aspx
+  # @param [Array<String>] email_addresses A list of emails you want to retrieve the settings for
+  # @param [Array<String>] requested_settings A list of settings you want to retrieve
+  # @param [Hash] opts
+  #   Example: {:email_addresses => ["user_1@exchange.com"],
+  #            {:requested_settings => ["GroupingInformation"]}
+  def get_user_settings(email_addresses:, requested_settings:, opts: {})
+    opts.merge!({
+      users: email_addresses,
+      requested_settings: requested_settings
+    })
+    resp = ews.get_user_settings(opts)
+
+    if(resp.status == 'Success')
+      return resp.items
+    else
+      raise EwsError, "GetUserSettings produced an error: #{resp.code}: #{resp.message}"
+    end
+  end
+
 
 private
 
