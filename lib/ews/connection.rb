@@ -21,6 +21,9 @@ class Viewpoint::EWS::Connection
   include Viewpoint::EWS::ConnectionHelper
   include Viewpoint::EWS
 
+  # This class returns both raw http response which is used to get cookies for grouping subscription
+  EWSHttpResponse = Struct.new(:http_status, :raw_http_response, :viewpoint_response)
+
   attr_reader :endpoint, :hostname
   # @param [String] endpoint the URL of the web service.
   #   @example https://<site>/ews/Exchange.asmx
@@ -86,7 +89,17 @@ class Viewpoint::EWS::Connection
       #{Nokogiri::XML(respmsg).to_xml}
       ----------------
     EOF
-    opts[:raw_response] ? respmsg : ews.parse_soap_response(respmsg, opts)
+
+    # Returning raw http response in order to get Exchange cookie in header
+    if opts[:raw_http_response]
+      EWSHttpResponse.new(
+        http_status: respmsg.status,
+        raw_http_response: respmsg,
+        viewpoint_response: ews.parse_soap_response(respmsg, opts)
+      )
+    else
+      opts[:raw_response] ? respmsg : ews.parse_soap_response(respmsg, opts)
+    end
   end
 
   # Copied from #dispatch above
@@ -133,7 +146,14 @@ class Viewpoint::EWS::Connection
     headers.merge!(custom_http_headers(options[:customisable_headers])) if options[:customisable_headers]
     set_custom_http_cookies(options[:customisable_cookies]) if options[:customisable_cookies]
 
-    check_response( @httpcli.post(@endpoint, xmldoc, headers) )
+    raw_http_response = @httpcli.post(@endpoint, xmldoc, headers)
+
+    # Returning raw http response in order to get Exchange cookie in header
+    if options[:raw_http_response]
+      raw_http_response
+    else
+      check_response(raw_http_response)
+    end
   end
 
   def custom_http_headers(headers)

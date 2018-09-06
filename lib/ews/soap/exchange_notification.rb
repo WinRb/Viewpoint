@@ -66,11 +66,14 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req,
+
+      opts = options.merge({
         response_class: EwsResponse,
         customisable_headers: customisable_headers,
         customisable_cookies: customisable_cookies
-      )
+      })
+
+      do_soap_request(req, opts)
     end
 
     def get_customisable_headers(options)
