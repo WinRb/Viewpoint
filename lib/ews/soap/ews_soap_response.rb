@@ -120,13 +120,7 @@ module Viewpoint::EWS::SOAP
       elems.each do |elem|
         elem.each do |subelem_key, subelem_value|
           if guard_hash(subelem_value, [:attribs, :type]) == "StringSetting"
-
-            elems1 = subelem_value[:elems]
-
-            key = elems1.select { |el| el.has_key?(:name) }.first[:name][:text]
-            value = elems1.select { |el| el.has_key?(:value) }.first[:value][:text]
-
-            hash[key] = value
+            hash[guard_hash(subelem_value, [:elems, :name, :text])] = guard_hash(subelem_value, [:elems, :value, :text])
           end
         end
       end
