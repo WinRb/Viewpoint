@@ -64,6 +64,14 @@ module Viewpoint
       SOFT_DELETE = 'SoftDelete'
       MOVE_TO_DELETED_ITEMS = 'MoveToDeletedItems'
 
+      CUSTOMISABLE_HTTP_HEADERS = {
+        anchor_mailbox: "X-AnchorMailbox",
+        prefer_server_affinity: "X-PreferServerAffinity"
+      }.freeze
+      CUSTOMISABLE_HTTP_COOKIES = {
+        backend_override_cookie: "X-BackEndOverrideCookie"
+      }.freeze
+
       def initialize
         @log = Logging.logger[self.class.name.to_s.to_sym]
         @default_ns = NAMESPACES["xmlns:#{NS_EWS_MESSAGES}"]

@@ -79,7 +79,7 @@ class Viewpoint::EWS::Connection
   # @param soapmsg [String]
   # @param opts [Hash] misc opts for handling the Response
   def dispatch(ews, soapmsg, opts)
-    respmsg = post(soapmsg)
+    respmsg = post(soapmsg, options: opts)
     @log.debug <<-EOF.gsub(/^ {6}/, '')
       Received SOAP Response:
       ----------------
@@ -128,9 +128,35 @@ class Viewpoint::EWS::Connection
   # Send a POST to the web service
   # @return [String] If the request is successful (200) it returns the body of
   #   the response.
-  def post(xmldoc)
+  def post(xmldoc, options: {})
     headers = {'Content-Type' => 'text/xml'}
+    headers.merge!(custom_http_headers(options[:customisable_headers])) if options[:customisable_headers]
+    set_custom_http_cookies(options[:customisable_cookies]) if options[:customisable_cookies]
+
     check_response( @httpcli.post(@endpoint, xmldoc, headers) )
+  end
+
+  def custom_http_headers(headers)
+    custom_headers = Viewpoint::EWS::SOAP::CUSTOMISABLE_HTTP_HEADERS.inject({}) do |header_hash, (header_key, header_name)|
+      if headers.include?(header_key)
+        header_hash[header_name] = headers[header_key]
+      end
+      header_hash
+    end
+
+    custom_headers || {}
+  end
+
+  def set_custom_http_cookies(cookies)
+    Viewpoint::EWS::SOAP::CUSTOMISABLE_HTTP_COOKIES.each do |cookie_key, cookie_name|
+      if cookies.include?(cookie_key)
+        cookie = WebAgent::Cookie.new
+        cookie.name = cookie_name
+        cookie.value = cookies[cookie_key]
+        cookie.url = URI(endpoint)
+        @httpcli.cookie_manager.add(cookie)
+      end
+    end
   end
 
   # Copied from #post above but make a HTTP::Client#post_async request,
