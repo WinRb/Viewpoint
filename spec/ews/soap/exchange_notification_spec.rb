@@ -30,6 +30,7 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
       allow(test_instance).to receive(:build_soap!) { req_double }
       expect(test_instance).to receive(:do_soap_request).with(
         req_double, {
+          anchor_mailbox: "mailbox@example.com",
           response_class: Viewpoint::EWS::SOAP::EwsResponse,
           customisable_headers: customisable_headers,
           customisable_cookies: customisable_cookies
@@ -45,6 +46,7 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
         allow(test_instance).to receive(:build_soap!) { req_double }
         expect(test_instance).to receive(:do_soap_request).with(
           req_double, {
+            anchor_mailbox: "mailbox@example.com",
             response_class: Viewpoint::EWS::SOAP::EwsResponse,
             customisable_headers: {},
             customisable_cookies: {}
