@@ -83,19 +83,55 @@ module Viewpoint::EWS::SOAP
       end
     end
 
+    # this is basically the same as Hash#dig in Ruby >= 2.3
+    # If the keys don't exist in the Hash return nil
+    # @param[Hash, Array, Object] hsh or array which contains an array with the hash we need
+    # @param[Array<Symbol,String>] keys keys to follow in the array
+    # @return [Object, nil]
+    def self.guard_hash(hsh, keys)
+      return hsh if keys.empty? # alt the recursion
+
+      key = keys.shift
+
+      # for arrays, search a Hash element which has the key we're looking for
+      if hsh.class == Array
+        hsh = hsh.select { |h| h.key?(key) }.first
+      end
+
+      return nil unless hsh.is_a?(Hash) && hsh.key?(key)
+
+      return guard_hash hsh[key], keys
+    end
+
+    # for backward compatibility, also have the same method as an instance method
     # If the keys don't exist in the Hash return nil
     # @param[Hash] hsh
     # @param[Array<Symbol,String>] keys keys to follow in the array
     # @return [Object, nil]
     def guard_hash(hsh, keys)
-      key = keys.shift
-      return nil unless hsh.is_a?(Hash) && hsh.has_key?(key)
+      self.class.guard_hash(hsh, keys)
+    end
 
-      if keys.empty?
-        hsh[key]
-      else
-        guard_hash hsh[key], keys
+    # @param elems [Array[Hash]] in the form >[{:user_setting=>{:attribs=>{:type=>"StringSetting"}, :elems=>[{:name=>{:text=>"GroupingInformation"}}, {:value=>{:text=>"Default-First-Site-Name"}}]}}, {:user_setting=>{:attribs=>{:type=>"StringSetting"}, :elems=>[{:name=>{:text=>"ExternalEwsUrl"}}, {:value=>{:text=>"https://exchange.example.com/ews/exchange.asmx"}}]}
+    # @return [Hash] in the form {'GroupingInformation' => 'Default-First-Site-Name', 'ExternalEwsUrl' => 'https://exchange.example.com/ews/exchange.asmx"'}
+    def self.string_attribs_array_to_hash(elems)
+      hash = {}
+
+      elems.each do |elem|
+        elem.each do |subelem_key, subelem_value|
+          if guard_hash(subelem_value, [:attribs, :type]) == "StringSetting"
+
+            elems1 = subelem_value[:elems]
+
+            key = elems1.select { |el| el.has_key?(:name) }.first[:name][:text]
+            value = elems1.select { |el| el.has_key?(:value) }.first[:value][:text]
+
+            hash[key] = value
+          end
+        end
       end
+
+      return hash
     end
 
   end # EwsSoapResponse
