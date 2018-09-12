@@ -22,7 +22,7 @@ class Viewpoint::EWS::Connection
   include Viewpoint::EWS
 
   # This class returns both raw http response which is used to get cookies for grouping subscription
-  EWSHttpResponse = Struct.new(:http_status, :raw_http_response, :viewpoint_response)
+  EWSHttpResponse = Struct.new(:headers, :viewpoint_response)
 
   attr_reader :endpoint, :hostname
   # @param [String] endpoint the URL of the web service.
@@ -83,6 +83,9 @@ class Viewpoint::EWS::Connection
   # @param opts [Hash] misc opts for handling the Response
   def dispatch(ews, soapmsg, opts)
     respmsg = post(soapmsg, options: opts)
+
+    respmsg, resp_headers = respmsg if respmsg.is_a?(Array)
+
     @log.debug <<-EOF.gsub(/^ {6}/, '')
       Received SOAP Response:
       ----------------
@@ -91,12 +94,8 @@ class Viewpoint::EWS::Connection
     EOF
 
     # Returning raw http response in order to get Exchange cookie in header
-    if opts[:raw_http_response]
-      EWSHttpResponse.new(
-        http_status: respmsg.status,
-        raw_http_response: respmsg,
-        viewpoint_response: ews.parse_soap_response(respmsg, opts)
-      )
+    if opts[:include_http_headers]
+      EWSHttpResponse.new(resp_headers, ews.parse_soap_response(respmsg, opts))
     else
       opts[:raw_response] ? respmsg : ews.parse_soap_response(respmsg, opts)
     end
@@ -148,12 +147,7 @@ class Viewpoint::EWS::Connection
 
     raw_http_response = @httpcli.post(@endpoint, xmldoc, headers)
 
-    # Returning raw http response in order to get Exchange cookie in header
-    if options[:raw_http_response]
-      raw_http_response
-    else
-      check_response(raw_http_response)
-    end
+    check_response(raw_http_response, options[:include_http_headers])
   end
 
   def custom_http_headers(headers)
@@ -192,13 +186,17 @@ class Viewpoint::EWS::Connection
 
   private
 
-  def check_response(resp)
+  def check_response(resp, include_include_http_headers = false)
     @log.debug("Got HTTP response with headers: #{resp.headers}")
     @log.debug("Got HTTP response with body: #{resp.body}") if resp.body
 
     case resp.status
     when 200
-      resp.body
+      if include_include_http_headers
+        return resp.body, resp.headers
+      else
+        return resp.body
+      end
     when 302
       # @todo redirect
       raise Errors::UnhandledResponseError.new("Unhandled HTTP Redirect", resp)

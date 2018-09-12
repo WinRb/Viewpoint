@@ -219,6 +219,8 @@ module Viewpoint::EWS::SOAP
         ----------------
         #{soapmsg}
         ----------------
+        #{opts}
+        ----------------
       EOF
       connection.dispatch(self, soapmsg, opts)
     end
@@ -235,6 +237,8 @@ module Viewpoint::EWS::SOAP
         Sending SOAP Request:
         ----------------
         #{soapmsg}
+        ----------------
+        #{opts}
         ----------------
       EOF
       connection.dispatch_async(self, soapmsg, opts)
