@@ -66,8 +66,10 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
     context "when a supported HTTP header is passed in" do
       let(:options) {
         {
-          anchor_mailbox: anchor_mailbox,
-          prefer_server_affinity: prefer_server_affinity
+          customisable_headers: {
+            anchor_mailbox: anchor_mailbox,
+            prefer_server_affinity: prefer_server_affinity
+          }
         }
       }
 
@@ -82,9 +84,11 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
     context "when extra options are passed in" do
       let(:options) {
         {
-          some_other_header: "some_value",
-          anchor_mailbox: anchor_mailbox,
-          prefer_server_affinity: prefer_server_affinity
+          customisable_headers: {
+            some_other_header: "some_value",
+            anchor_mailbox: anchor_mailbox,
+            prefer_server_affinity: prefer_server_affinity
+          }
         }
       }
 
@@ -106,7 +110,10 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
     subject { test_instance.get_customisable_cookies(options) }
 
     context "when a supported HTTP cookie is passed in" do
-      let(:options) { { backend_override_cookie: backend_override_cookie } }
+      let(:options) do  {
+        customisable_cookies: { backend_override_cookie: backend_override_cookie }
+      }
+      end
 
       it "includes the HTTP cookie" do
         expect(subject[:backend_override_cookie]).to eq(backend_override_cookie)
@@ -116,8 +123,10 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
     context "when extra options are passed in" do
       let(:options) {
         {
-          some_other_cookie: "some_value",
-          backend_override_cookie: backend_override_cookie
+          customisable_cookies: {
+            some_other_cookie: "some_value",
+            backend_override_cookie: backend_override_cookie
+          }
         }
       }
 
