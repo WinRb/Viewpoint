@@ -147,7 +147,7 @@ class Viewpoint::EWS::Connection
 
     raw_http_response = @httpcli.post(@endpoint, xmldoc, headers)
 
-    check_response(raw_http_response, options[:include_http_headers])
+    check_response(raw_http_response, include_http_headers: options[:include_http_headers])
   end
 
   def custom_http_headers(headers)
@@ -186,13 +186,13 @@ class Viewpoint::EWS::Connection
 
   private
 
-  def check_response(resp, include_include_http_headers = false)
+  def check_response(resp, include_http_headers: false)
     @log.debug("Got HTTP response with headers: #{resp.headers}")
     @log.debug("Got HTTP response with body: #{resp.body}") if resp.body
 
     case resp.status
     when 200
-      if include_include_http_headers
+      if include_http_headers
         return resp.body, resp.headers
       else
         return resp.body
