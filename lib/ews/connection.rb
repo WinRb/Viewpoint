@@ -21,6 +21,9 @@ class Viewpoint::EWS::Connection
   include Viewpoint::EWS::ConnectionHelper
   include Viewpoint::EWS
 
+  # This class returns both raw http response which is used to get cookies for grouping subscription
+  EWSHttpResponse = Struct.new(:headers, :viewpoint_response)
+
   attr_reader :endpoint, :hostname
   # @param [String] endpoint the URL of the web service.
   #   @example https://<site>/ews/Exchange.asmx
@@ -80,13 +83,22 @@ class Viewpoint::EWS::Connection
   # @param opts [Hash] misc opts for handling the Response
   def dispatch(ews, soapmsg, opts)
     respmsg = post(soapmsg, options: opts)
+
+    respmsg, resp_headers = respmsg if respmsg.is_a?(Array)
+
     @log.debug <<-EOF.gsub(/^ {6}/, '')
       Received SOAP Response:
       ----------------
       #{Nokogiri::XML(respmsg).to_xml}
       ----------------
     EOF
-    opts[:raw_response] ? respmsg : ews.parse_soap_response(respmsg, opts)
+
+    # Returning raw http response in order to get Exchange cookie in header
+    if opts[:include_http_headers]
+      EWSHttpResponse.new(resp_headers, ews.parse_soap_response(respmsg, opts))
+    else
+      opts[:raw_response] ? respmsg : ews.parse_soap_response(respmsg, opts)
+    end
   end
 
   # Copied from #dispatch above
@@ -133,7 +145,32 @@ class Viewpoint::EWS::Connection
     headers.merge!(custom_http_headers(options[:customisable_headers])) if options[:customisable_headers]
     set_custom_http_cookies(options[:customisable_cookies]) if options[:customisable_cookies]
 
-    check_response( @httpcli.post(@endpoint, xmldoc, headers) )
+    raw_http_response = @httpcli.post(@endpoint, xmldoc, headers)
+
+    check_response(raw_http_response, include_http_headers: options[:include_http_headers])
+  end
+
+  def custom_http_headers(headers)
+    custom_headers = Viewpoint::EWS::SOAP::CUSTOMISABLE_HTTP_HEADERS.inject({}) do |header_hash, (header_key, header_name)|
+      if headers.include?(header_key)
+        header_hash[header_name] = headers[header_key]
+      end
+      header_hash
+    end
+
+    custom_headers || {}
+  end
+
+  def set_custom_http_cookies(cookies)
+    Viewpoint::EWS::SOAP::CUSTOMISABLE_HTTP_COOKIES.each do |cookie_key, cookie_name|
+      if cookies.include?(cookie_key)
+        cookie = WebAgent::Cookie.new
+        cookie.name = cookie_name
+        cookie.value = cookies[cookie_key]
+        cookie.url = URI(endpoint)
+        @httpcli.cookie_manager.add(cookie)
+      end
+    end
   end
 
   def custom_http_headers(headers)
@@ -172,13 +209,17 @@ class Viewpoint::EWS::Connection
 
   private
 
-  def check_response(resp)
+  def check_response(resp, include_http_headers: false)
     @log.debug("Got HTTP response with headers: #{resp.headers}")
     @log.debug("Got HTTP response with body: #{resp.body}") if resp.body
 
     case resp.status
     when 200
-      resp.body
+      if include_http_headers
+        return resp.body, resp.headers
+      else
+        return resp.body
+      end
     when 302
       # @todo redirect
       raise Errors::UnhandledResponseError.new("Unhandled HTTP Redirect", resp)

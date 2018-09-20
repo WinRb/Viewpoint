@@ -66,19 +66,22 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req,
+
+      opts = options.merge({
         response_class: EwsResponse,
         customisable_headers: customisable_headers,
         customisable_cookies: customisable_cookies
-      )
+      })
+
+      do_soap_request(req, opts)
     end
 
     def get_customisable_headers(options)
-      options.reject { |option, _| !CUSTOMISABLE_HTTP_HEADERS.include?(option) }
+      (options[:customisable_headers]||{}).reject { |option, _| !CUSTOMISABLE_HTTP_HEADERS.include?(option) }
     end
 
     def get_customisable_cookies(options)
-      options.reject { |option, _| !CUSTOMISABLE_HTTP_COOKIES.include?(option) }
+      (options[:customisable_cookies]||{}).reject { |option, _| !CUSTOMISABLE_HTTP_COOKIES.include?(option) }
     end
 
     # End a pull notification subscription.
@@ -195,6 +198,7 @@ module Viewpoint::EWS::SOAP
         :timeout    => timeout
       }
       psr[:watermark] = watermark if watermark
+
       subscribe([{streaming_subscription_request: psr}], options: options)
     end
 
