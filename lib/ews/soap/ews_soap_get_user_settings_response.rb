@@ -38,6 +38,10 @@ module Viewpoint::EWS::SOAP
       body[0].keys.first
     end
 
+    def user_settings_string_values
+      self.class.user_settings_string_values_from_response(response)
+    end
+
     private
 
     def simplify!
@@ -46,5 +50,10 @@ module Viewpoint::EWS::SOAP
       response_message[:elems] = response_message[:elems].inject(:merge)
     end
 
+    # @param response [Hash] the response as a SOAP Hash
+    # @return [Hash] settings as simple Hash
+    def self.user_settings_string_values_from_response(response)
+      string_attribs_array_to_hash(guard_hash(response, [:response, :elems, :user_responses, :elems, :user_response, :elems, :user_settings, :elems]))
+    end
   end
 end

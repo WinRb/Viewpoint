@@ -46,7 +46,10 @@ module Viewpoint::EWS::SOAP
     #         :event_types=> %w{NewMailEvent DeletedEvent},
     #       }},
     #       ]
-    def subscribe(subscriptions)
+    def subscribe(subscriptions, options: {})
+      customisable_headers = get_customisable_headers(options) || {}
+      customisable_cookies = get_customisable_cookies(options) || {}
+
       req = build_soap! do |type, builder|
         if(type == :header)
         else
@@ -63,7 +66,22 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+
+      opts = options.merge({
+        response_class: EwsResponse,
+        customisable_headers: customisable_headers,
+        customisable_cookies: customisable_cookies
+      })
+
+      do_soap_request(req, opts)
+    end
+
+    def get_customisable_headers(options)
+      (options[:customisable_headers]||{}).reject { |option, _| !CUSTOMISABLE_HTTP_HEADERS.include?(option) }
+    end
+
+    def get_customisable_cookies(options)
+      (options[:customisable_cookies]||{}).reject { |option, _| !CUSTOMISABLE_HTTP_COOKIES.include?(option) }
     end
 
     # End a pull notification subscription.
@@ -169,8 +187,10 @@ module Viewpoint::EWS::SOAP
     # @param evtypes [Array] the events you would like to subscribe to.
     # @param timeout [Fixnum] http://msdn.microsoft.com/en-us/library/aa565201.aspx
     # @param watermark [String] http://msdn.microsoft.com/en-us/library/aa565886.aspx
-    def stream_subscribe_folder(folder, evtypes, timeout = nil, watermark = nil)
+    # @param options [Hash]
+    def stream_subscribe_folder(folder, evtypes, timeout = nil, watermark = nil, options: {})
       timeout ||= 30 # Streaming default timeout 30 mins
+
       psr = {
         :subscribe_to_all_folders => false,
         :folder_ids => [ {:id => folder[:id], :change_key => folder[:change_key]} ],
@@ -178,7 +198,8 @@ module Viewpoint::EWS::SOAP
         :timeout    => timeout
       }
       psr[:watermark] = watermark if watermark
-      subscribe([{streaming_subscription_request: psr}])
+
+      subscribe([{streaming_subscription_request: psr}], options: options)
     end
 
   end #ExchangeNotification

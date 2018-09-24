@@ -47,7 +47,7 @@ module Viewpoint::EWS::Types
       :ckey   => :change_key,
     }
 
-    attr_accessor :subscription_id, :watermark, :sync_state
+    attr_accessor :subscription_id, :watermark, :sync_state, :x_back_end_override_cookie
 
     # @param [SOAP::ExchangeWebService] ews the EWS reference
     # @param [Hash] ews_item the EWS parsed response document
@@ -271,18 +271,26 @@ module Viewpoint::EWS::Types
     #   subscription at a specific point.
     # @param timeout [Fixnum] the time in minutes that the subscription can
     #   remain idle between calls to #get_events. default: 240 minutes
+    # @param options [Hash]
     # @return [Boolean] Did the subscription happen successfully?
-    def streaming_subscribe(evtypes = [:all], watermark = nil, timeout = 240)
+    def streaming_subscribe(evtypes = [:all], watermark = nil, timeout = 240, options: {})
       # Refresh the subscription if already subscribed
       unsubscribe if streaming_subscribed?
 
       event_types = normalize_event_names(evtypes)
       folder = {id: self.id, change_key: self.change_key}
-      resp = ews.stream_subscribe_folder(folder, event_types, timeout, watermark)
+
+      full_response = ews.stream_subscribe_folder(folder, event_types, timeout, watermark, options: options.merge({include_http_headers: true}))
+      resp = full_response.viewpoint_response
+      headers = full_response.headers
+
       rmsg = resp.response_messages.first
+
       if rmsg.success?
         @subscription_id = rmsg.subscription_id
         @watermark = rmsg.watermark # This returns always nil for streaming subscription
+        @x_back_end_override_cookie = headers['Set-Cookie'].split(';').select {|str| str.include?('X-BackEndOverrideCookie') }.first&.split('=')&.last
+
         true
       else
         raise EwsSubscriptionError, "Could not subscribe: #{rmsg.code}: #{rmsg.message_text}"
