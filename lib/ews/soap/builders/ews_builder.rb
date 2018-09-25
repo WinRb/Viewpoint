@@ -498,7 +498,7 @@ module Viewpoint::EWS::SOAP
                   builder.nbuild[NS_AUTODISCOVER].Setting(setting)
                 end
               end
-              builder.nbuild[NS_AUTODISCOVER].RequestedServerVersion(opts[:server_version])
+              builder.nbuild[NS_AUTODISCOVER].RequestedVersion(opts[:server_version])
             end
           end
         end
