@@ -289,7 +289,9 @@ module Viewpoint::EWS::Types
       if rmsg.success?
         @subscription_id = rmsg.subscription_id
         @watermark = rmsg.watermark # This returns always nil for streaming subscription
-        @x_back_end_override_cookie = headers['Set-Cookie'].split(';').select {|str| str.include?('X-BackEndOverrideCookie') }.first&.split('=')&.last
+
+        # FIXME: This raises an error on 2010 NoMethodError: undefined method `split' for nil:NilClass
+        # @x_back_end_override_cookie = headers['Set-Cookie'].split(';').select {|str| str.include?('X-BackEndOverrideCookie') }.first&.split('=')&.last
 
         true
       else
