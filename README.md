@@ -16,6 +16,9 @@ Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
 
+## Version 1.1.7 
+1. Bug fixed for #streaming_subscribe
+
 ## Version 1.1.6 
 1. Fix typo
 
