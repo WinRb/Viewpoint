@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/WinRb/Viewpoint.svg?branch=master)](https://travis-ci.org/WinRb/Viewpoint)
 
-# Viewpoint for Exchange Web Services 1.1.4
+# Viewpoint for Exchange Web Services 1.1.5
 http://github.com/zenchild/Viewpoint/wiki
 
 Viewpoint for EWS provides a thin Ruby layer on top of Microsoft Exchange
@@ -15,6 +15,9 @@ Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
 Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
+
+## Version 1.1.5 
+1. Adding RequestedServerVersion to AutoDiscover #get_user_settings request
 
 ## Version 1.1.4 
 1. Supports [Exchange Server Affinity](https://docs.microsoft.com/en-us/exchange/client-developer/exchange-web-services/how-to-maintain-affinity-between-group-of-subscriptions-and-mailbox-server#how-do-i-maintain-affinity-by-using-the-ews-managed-api-or-ews)
