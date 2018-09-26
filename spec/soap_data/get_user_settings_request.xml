@@ -20,6 +20,7 @@
           <a:Setting>GroupingInformation</a:Setting>
           <a:Setting>ExternalEwsUrl</a:Setting>
         </a:RequestedSettings>
+        <a:RequestedVersion>Exchange2010</a:RequestedVersion>
       </a:Request>
     </a:GetUserSettingsRequestMessage>
   </soap:Body>
