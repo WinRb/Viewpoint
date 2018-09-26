@@ -47,7 +47,7 @@ module Viewpoint::EWS::Types
       :ckey   => :change_key,
     }
 
-    attr_accessor :subscription_id, :watermark, :sync_state, :x_back_end_override_cookie
+    attr_accessor :subscription_id, :watermark, :sync_state, :last_request_return_headers
 
     # @param [SOAP::ExchangeWebService] ews the EWS reference
     # @param [Hash] ews_item the EWS parsed response document
@@ -289,9 +289,7 @@ module Viewpoint::EWS::Types
       if rmsg.success?
         @subscription_id = rmsg.subscription_id
         @watermark = rmsg.watermark # This returns always nil for streaming subscription
-
-        # FIXME: This raises an error on 2010 NoMethodError: undefined method `split' for nil:NilClass
-        # @x_back_end_override_cookie = headers['Set-Cookie'].split(';').select {|str| str.include?('X-BackEndOverrideCookie') }.first&.split('=')&.last
+        @last_request_return_headers = headers
 
         true
       else
