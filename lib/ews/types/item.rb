@@ -97,11 +97,22 @@ module Viewpoint::EWS::Types
       @body_type = body_type
     end
 
-    def delete!(deltype = :hard, opts = {})
+    def delete!(deltype: :hard, instance_index: nil, opts: {})
       opts = {
         :delete_type => delete_type(deltype),
-        :item_ids => [{:item_id => {:id => id}}]
+        :item_ids => [{
+          :item_id => {
+            :id => id
+          }
+        }]
       }.merge(opts)
+
+      opts[:item_ids] = [{
+        occurrence_item_id: {
+          recurring_master_id: opts[:item_ids].first[:item_id][:id],
+          instance_index: instance_index
+        }
+      }] if instance_index # TODO: should be able to take array of indices
 
       resp = @ews.delete_item(opts)
       rmsg = resp.response_messages[0]

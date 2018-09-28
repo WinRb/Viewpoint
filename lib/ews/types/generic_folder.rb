@@ -103,7 +103,7 @@ module Viewpoint::EWS::Types
     # Fetch items between a given time period
     # @param [DateTime] start_date the time to start fetching Items from
     # @param [DateTime] end_date the time to stop fetching Items from
-    def items_between(start_date, end_date, opts={})
+    def items_between(start_date, end_date)
       items do |obj|
         obj.restriction = { :and =>
           [
@@ -124,30 +124,53 @@ module Viewpoint::EWS::Types
       end
     end
 
+    def contains_clause(field, value)
+      {
+        contains: {
+          containment_mode: 'Substring',
+          containment_comparison: 'IgnoreCase',
+          field_uRI: { field_uRI: "item:#{field.camelcase}" },
+          constant: { value: value }
+        }
+      }
+    end
+
+    #not sure if it's possible to search by all day status or recurrence
+    def search_for_event(subject, start_date, end_date, location)
+      items do |query|
+        query.restriction =
+          { and: [
+            comparison_clause('is_equal_to', 'item:Subject', subject),
+            comparison_clause('is_greater_than_or_equal_to', 'calendar:Start', start_date - 1.minute),
+            comparison_clause('is_less_than_or_equal_to', 'calendar:Start', end_date + 1.minute),
+            comparison_clause('is_equal_to', 'calendar:Location', location)
+          ].compact }
+      end
+    end
+
+    def comparison_clause(operator, field, value)
+      return unless value.present?
+
+      {
+        "#{operator}": [
+          { field_uRI: { field_uRI: field } },
+          { field_uRI_or_constant: { constant: { value: value } } }
+        ]
+      }
+    end
+
     # Search on the item subject
     # @param [String] match_str A simple string paramater to match against the
     #   subject.  The search ignores case and does not accept regexes... only strings.
     # @param [String,nil] exclude_str A string to exclude from matches against
     #   the subject.  This is optional.
     def search_by_subject(match_str, exclude_str = nil)
+      field = 'Subject'
       items do |obj|
-        match = {:contains => {
-          :containment_mode => 'Substring',
-          :containment_comparison => 'IgnoreCase',
-          :field_uRI => {:field_uRI=>'item:Subject'},
-          :constant => {:value =>match_str}
-        }}
+        match = contains_clause(field, match_str)
         unless exclude_str.nil?
-          excl = {:not =>
-            {:contains => {
-              :containment_mode => 'Substring',
-              :containment_comparison => 'IgnoreCase',
-              :field_uRI => {:field_uRI=>'item:Subject'},
-              :constant => {:value =>exclude_str}
-            }}
-          }
-
-          match[:and] = [{:contains => match.delete(:contains)}, excl]
+          excl = { not: contains_clause(field, exclude_str) }
+          match[:and] = [{ contains: match.delete(:contains) }, excl]
         end
         obj.restriction = match
       end

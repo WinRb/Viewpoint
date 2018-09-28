@@ -66,18 +66,14 @@ module Viewpoint::EWS::Types
         elsif item_field
           # Build SetItemField Change
           item = Viewpoint::EWS::Template::CalendarItem.new(attribute => value)
+          item.body_type = options[:body_type] if attribute == :body
 
           # Remap attributes because ews_builder #dispatch_field_item! uses #build_xml!
           item_attributes = item.to_ews_item.map do |name, value|
             if value.is_a? String
               {name => {text: value}}
             elsif value.is_a? Hash
-              node = {name => {}}
-              value.each do |attrib_key, attrib_value|
-                attrib_key = camel_case(attrib_key) unless attrib_key == :text
-                node[name][attrib_key] = attrib_value
-              end
-              node
+              {name => Viewpoint::EWS::SOAP::EwsBuilder.camel_case_attributes(value)}
             else
               {name => value}
             end
@@ -99,7 +95,7 @@ module Viewpoint::EWS::Types
           self.get_all_properties!
           self
         else
-          raise EwsCreateItemError, "Could not update calendar item. #{rm.code}: #{rm.message_text}" unless rm
+          raise EwsCreateItemError, "Could not update calendar item. #{rm.code}: #{rm.message_text}" if rm
         end
       end
 

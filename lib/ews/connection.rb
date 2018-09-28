@@ -15,6 +15,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 =end
+require 'httparty'
 require 'httpclient'
 
 class Viewpoint::EWS::Connection
@@ -32,13 +33,20 @@ class Viewpoint::EWS::Connection
   #   seconds
   # @option opts [Array]  :trust_ca an array of hashed dir paths or a file
   # @option opts [String] :user_agent the http user agent to use in all requests
-  def initialize(endpoint, opts = {})
+  def initialize(endpoint, username, credentials, opts = {})
     @log = Logging.logger[self.class.name.to_s.to_sym]
-    if opts[:user_agent]
-      @httpcli = HTTPClient.new(agent_name: opts[:user_agent])
-    else
-      @httpcli = HTTPClient.new
-    end
+    @endpoint = endpoint
+    @username = username
+    @credentials = credentials
+    oauth? ? init_oauth_http_client : init_ntlm_http_client(opts)
+  end
+
+  def oauth?
+    @credentials[:type] == :oauth
+  end
+
+  def init_ntlm_http_client(opts)
+    @httpcli = opts[:user_agent] ? HTTPClient.new(agent_name: opts[:user_agent]) : HTTPClient.new
 
     if opts[:trust_ca]
       @httpcli.ssl_config.clear_cert_store
@@ -53,11 +61,17 @@ class Viewpoint::EWS::Connection
     @httpcli.keep_alive_timeout = 60
     @httpcli.receive_timeout = opts[:receive_timeout] if opts[:receive_timeout]
     @httpcli.connect_timeout = opts[:connect_timeout] if opts[:connect_timeout]
-    @endpoint = endpoint
+    set_auth
   end
 
-  def set_auth(user,pass)
-    @httpcli.set_auth(@endpoint.to_s, user, pass)
+  def set_auth
+    @httpcli.set_auth(@endpoint.to_s, @username, @credentials[:password])
+  end
+
+  def init_oauth_http_client
+    @auth_header = { 'Authorization' => 'Bearer ' + @credentials[:access_token] }
+    #see if i can get that other fancy stuff
+    @httpcli = HTTParty
   end
 
   # Authenticate to the web service. You don't have to do this because
@@ -92,22 +106,26 @@ class Viewpoint::EWS::Connection
   # @return [String] If the request is successful (200) it returns the body of
   #   the response.
   def get
-    check_response( @httpcli.get(@endpoint) )
+    headers = oauth? ? [headers: @auth_header] : []
+    response = @httpcli.get(@endpoint, *headers)
+    check_response(response)
   end
 
   # Send a POST to the web service
   # @return [String] If the request is successful (200) it returns the body of
   #   the response.
   def post(xmldoc)
-    headers = {'Content-Type' => 'text/xml'}
-    check_response( @httpcli.post(@endpoint, xmldoc, headers) )
+    headers = { 'Content-Type' => 'text/xml' }
+    payload = oauth? ? [{ headers: headers.merge(@auth_header), body: xmldoc.to_s }] : [xmldoc, headers] 
+    check_response(@httpcli.post(@endpoint, *payload))
   end
 
 
   private
 
   def check_response(resp)
-    case resp.status
+    status = oauth? ? resp.code : resp.status
+    case status
     when 200
       resp.body
     when 302
