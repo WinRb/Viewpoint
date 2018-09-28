@@ -141,7 +141,7 @@ class Viewpoint::EWS::Connection
   # @return [String] If the request is successful (200) it returns the body of
   #   the response.
   def post(xmldoc, options: {})
-    headers = {'Content-Type' => 'text/xml'}
+    headers = {'Content-Type' => 'text/xml', 'Return-Client-Request-Id' => 'true', 'Send-Client-Latencies' => 'true'}
     headers.merge!(custom_http_headers(options[:customisable_headers])) if options[:customisable_headers]
     set_custom_http_cookies(options[:customisable_cookies]) if options[:customisable_cookies]
 
@@ -202,7 +202,7 @@ class Viewpoint::EWS::Connection
   # Send a asynchronous POST to the web service which creates a connection for sending/receiving data
   # @return [HTTPClient::Connection] HTTPClient::Connection
   def post_async(xmldoc)
-    headers = {'Content-Type' => 'text/xml'}
+    headers = {'Content-Type' => 'text/xml', 'Return-Client-Request-Id' => 'true', 'Send-Client-Latencies' => 'true'}
     @httpcli.post_async(@endpoint, xmldoc, headers)
   end
 
