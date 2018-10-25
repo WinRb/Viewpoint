@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/WinRb/Viewpoint.svg?branch=master)](https://travis-ci.org/WinRb/Viewpoint)
 
-# Viewpoint for Exchange Web Services 1.1.8
+# Viewpoint for Exchange Web Services 1.2.0
 http://github.com/zenchild/Viewpoint/wiki
 
 Viewpoint for EWS provides a thin Ruby layer on top of Microsoft Exchange
@@ -15,6 +15,12 @@ Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
 Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
+
+## Version 1.2.0
+1. Bug fixed: Use correct body_type when updating a calendar item
+
+## Version 1.1.9 
+1. Add SendClientLatencies and ReturnClientRequestId headers
 
 ## Version 1.1.8 
 1. Support raw HTTP header return from #streaming_subscribe
