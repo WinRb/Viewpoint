@@ -57,6 +57,7 @@ module Viewpoint::EWS::Types
     def update_item!(updates, options = {})
       item_updates = []
       updates.each do |attribute, value|
+        next if options[:instance_index] && attribute == :recurrence
         item_field = FIELD_URIS[attribute][:text] if FIELD_URIS.include? attribute
         field = {field_uRI: {field_uRI: item_field}}
 
@@ -89,7 +90,7 @@ module Viewpoint::EWS::Types
         data = {}
         data[:conflict_resolution] = options[:conflict_resolution] || 'AutoResolve'
         data[:send_meeting_invitations_or_cancellations] = options[:send_meeting_invitations_or_cancellations] || 'SendToNone'
-        data[:item_changes] = [{item_id: self.item_id, updates: item_updates}]
+        data[:item_changes] = [{ updates: item_updates }.merge(get_item_id(options))]
         rm = ews.update_item(data).response_messages.first
         if rm && rm.success?
           self.get_all_properties!
@@ -98,7 +99,20 @@ module Viewpoint::EWS::Types
           raise EwsCreateItemError, "Could not update calendar item. #{rm.code}: #{rm.message_text}" if rm
         end
       end
+    end
 
+    def get_item_id(options)
+      if options[:instance_index]
+        {
+          occurrence_item_id: {
+            recurring_master_id: self.item_id[:id],
+            change_key: self.item_id[:change_key],
+            instance_index: options[:instance_index]
+          }
+        }
+      else
+        { item_id: self.item_id }
+      end
     end
 
     def duration_in_seconds
