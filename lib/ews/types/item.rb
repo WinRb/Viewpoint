@@ -356,6 +356,7 @@ module Viewpoint::EWS::Types
           elems = a[:occurrence][:elems]
 
           h[DateTime.parse(elems.find{|e| e[:original_start]}[:original_start][:text])] = {
+            item_id: elems.find{|e| e[:item_id]}[:item_id][:attribs][:id],
             start: elems.find{|e| e[:start]}[:start][:text],
             end: elems.find{|e| e[:end]}[:end][:text]
           }
