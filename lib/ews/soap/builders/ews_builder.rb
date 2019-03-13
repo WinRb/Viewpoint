@@ -96,9 +96,15 @@ module Viewpoint::EWS::SOAP
         txt = vals.delete(:text)
         xmlns_attribute = vals.delete(:xmlns_attribute)
 
-        node = @nbuild.send(camel_case(keys.first), txt, vals) {|x|
-          build_xml!(se) if se
-        }
+        if keys.first == :required_attendees
+          node = required_attendees!(vals)
+        elsif keys.first == :optional_attendees
+          node = optional_attendees!(vals)
+        else
+          node = @nbuild.send(camel_case(keys.first), txt, vals) {|_|
+            build_xml!(se) if se
+          }
+        end
 
         # Set node level namespace
         node.xmlns = NAMESPACES["xmlns:#{xmlns_attribute}"] if xmlns_attribute
