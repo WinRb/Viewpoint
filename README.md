@@ -17,9 +17,9 @@ Find me on irc.freenode.net in #ruby-lang (zenChild)
 # Features
 
 ## Version 1.2.1
-1. Enhance response for recurring master so we can get ids for all its occurrence item ids
-2. Bug fixed to build proper SOAP request in order to update attendees of a calendar item
-3. Remove unsupported Ruby version from travis.yml      
+1. Enhance response for recurring master so we can get ids for all its occurrence item ids in GetItem response
+2. Bug fixed: Generate correct XML body when updating attendees to build proper SOAP request in order to update attendees of a calendar item
+3. Removed: Unsupported Ruby Versions from Travis CI
 
 ## Version 1.2.0
 1. Bug fixed: Use correct body_type when updating a calendar item
