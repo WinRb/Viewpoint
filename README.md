@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/WinRb/Viewpoint.svg?branch=master)](https://travis-ci.org/WinRb/Viewpoint)
 
-# Viewpoint for Exchange Web Services 1.2.0
+# Viewpoint for Exchange Web Services 1.2.1
 http://github.com/zenchild/Viewpoint/wiki
 
 Viewpoint for EWS provides a thin Ruby layer on top of Microsoft Exchange
@@ -15,6 +15,11 @@ Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
 Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
+
+## Version 1.2.1
+1. Enhance response for recurring master so we can get ids for all its occurrence item ids
+2. Bug fixed to build proper SOAP request in order to update attendees of a calendar item
+3. Remove unsupported Ruby version from travis.yml      
 
 ## Version 1.2.0
 1. Bug fixed: Use correct body_type when updating a calendar item
