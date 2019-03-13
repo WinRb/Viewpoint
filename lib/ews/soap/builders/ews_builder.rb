@@ -96,9 +96,15 @@ module Viewpoint::EWS::SOAP
         txt = vals.delete(:text)
         xmlns_attribute = vals.delete(:xmlns_attribute)
 
-        node = @nbuild.send(camel_case(keys.first), txt, vals) {|x|
-          build_xml!(se) if se
-        }
+        if keys.first == :required_attendees
+          node = required_attendees!(vals)
+        elsif keys.first == :optional_attendees
+          node = optional_attendees!(vals)
+        else
+          node = @nbuild.send(camel_case(keys.first), txt, vals) {|_|
+            build_xml!(se) if se
+          }
+        end
 
         # Set node level namespace
         node.xmlns = NAMESPACES["xmlns:#{xmlns_attribute}"] if xmlns_attribute
@@ -1190,10 +1196,9 @@ module Viewpoint::EWS::SOAP
       when :item_id
         item_id!(item)
       when :occurrence_item_id
-        occurrence_item_id!(
-          item[:recurring_master_id], item[:change_key], item[:instance_index])
+        occurrence_item_id!(item)
       when :recurring_master_item_id
-        recurring_master_item_id!(item[:occurrence_id], item[:change_key])
+        recurring_master_item_id!(item)
       else
         raise EwsBadArgumentError, "Bad ItemId type. #{type}"
       end
