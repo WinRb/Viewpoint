@@ -225,6 +225,8 @@ class Viewpoint::EWS::Connection
       raise Errors::UnhandledResponseError.new("Unhandled HTTP Redirect", resp)
     when 401
       raise Errors::UnauthorizedResponseError.new("Unauthorized request", resp)
+    when 429
+      raise Errors::TooManyRequestsError.new("TooManyRequests", resp)
     when 500
       if resp.headers['Content-Type'] =~ /xml/
         err_string, err_code = parse_soap_error(resp.body)
