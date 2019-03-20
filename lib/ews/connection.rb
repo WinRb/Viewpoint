@@ -173,29 +173,6 @@ class Viewpoint::EWS::Connection
     end
   end
 
-  def custom_http_headers(headers)
-    custom_headers = Viewpoint::EWS::SOAP::CUSTOMISABLE_HTTP_HEADERS.inject({}) do |header_hash, (header_key, header_name)|
-      if headers.include?(header_key)
-        header_hash[header_name] = headers[header_key]
-      end
-      header_hash
-    end
-
-    custom_headers || {}
-  end
-
-  def set_custom_http_cookies(cookies)
-    Viewpoint::EWS::SOAP::CUSTOMISABLE_HTTP_COOKIES.each do |cookie_key, cookie_name|
-      if cookies.include?(cookie_key)
-        cookie = WebAgent::Cookie.new
-        cookie.name = cookie_name
-        cookie.value = cookies[cookie_key]
-        cookie.url = URI(endpoint)
-        @httpcli.cookie_manager.add(cookie)
-      end
-    end
-  end
-
   # Copied from #post above but make a HTTP::Client#post_async request,
   #   which returns a HTTPClient::Connection instance as a result.
   #
@@ -225,6 +202,8 @@ class Viewpoint::EWS::Connection
       raise Errors::UnhandledResponseError.new("Unhandled HTTP Redirect", resp)
     when 401
       raise Errors::UnauthorizedResponseError.new("Unauthorized request", resp)
+    when 429
+      raise Errors::TooManyRequestsError.new("Too many requests", resp)
     when 500
       if resp.headers['Content-Type'] =~ /xml/
         err_string, err_code = parse_soap_error(resp.body)
