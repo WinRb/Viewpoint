@@ -16,6 +16,9 @@ Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
 
+## Version 1.2.2
+1. Raise `TooManyRequestsError` if HTTP response has error code 429
+
 ## Version 1.2.1
 1. Enhance response for recurring master so we can get ids for all its occurrence item ids in GetItem response
 2. Bug fixed: Generate correct XML body when updating attendees to build proper SOAP request in order to update attendees of a calendar item
