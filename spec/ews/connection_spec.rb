@@ -21,7 +21,7 @@ describe Viewpoint::EWS::Connection do
 
     context "when customisable headers are passed in" do
       let(:options) { { customisable_headers: customisable_headers } }
-      let(:expected_headers) { {'Content-Type' => 'text/xml'}.merge!(customisable_headers) }
+      let(:expected_headers) { {'Content-Type' => 'text/xml', 'Return-Client-Request-Id' => 'true', 'Send-Client-Latencies' => 'true'}.merge!(customisable_headers) }
 
       it "merges the custom HTTP headers to the existing headers" do
         expect(connection).to receive(:custom_http_headers) { customisable_headers }
@@ -43,7 +43,7 @@ describe Viewpoint::EWS::Connection do
     end
 
     context "when no customisable cookies are passed in" do
-      let(:expected_headers) { {'Content-Type' => 'text/xml'} }
+      let(:expected_headers) { {'Content-Type' => 'text/xml', 'Return-Client-Request-Id' => 'true', 'Send-Client-Latencies' => 'true'} }
 
       it "sets only the default headers" do
         expect(connection).not_to receive(:custom_http_headers)

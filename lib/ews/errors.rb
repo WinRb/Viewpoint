@@ -43,6 +43,9 @@ module Viewpoint::EWS::Errors
   class UnauthorizedResponseError < ResponseError
   end
 
+  class TooManyRequestsError < ResponseError
+  end
+
   class SoapResponseError < ResponseError
     attr_reader :faultcode,
                 :faultstring
