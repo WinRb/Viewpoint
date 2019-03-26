@@ -16,6 +16,9 @@ Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
 
+## Version 1.2.3
+1. Add support for QueryString
+
 ## Version 1.2.2
 1. Raise `TooManyRequestsError` if HTTP response has error code 429
 
