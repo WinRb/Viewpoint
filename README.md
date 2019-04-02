@@ -17,7 +17,8 @@ Find me on irc.freenode.net in #ruby-lang (zenChild)
 # Features
 
 ## Version 1.2.3
-1. Add support for QueryString
+1. Add support for QueryString (special thank to @Fishy49 https://github.com/Fishy49)
+2. Include request body in all error classes for better error handling
 
 ## Version 1.2.2
 1. Raise `TooManyRequestsError` if HTTP response has error code 429
