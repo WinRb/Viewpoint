@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/WinRb/Viewpoint.svg?branch=master)](https://travis-ci.org/WinRb/Viewpoint)
 
-# Viewpoint for Exchange Web Services 1.2.1
+# Viewpoint for Exchange Web Services 1.2.3
 http://github.com/zenchild/Viewpoint/wiki
 
 Viewpoint for EWS provides a thin Ruby layer on top of Microsoft Exchange
@@ -15,6 +15,9 @@ Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
 Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
+
+## Version 1.2.3
+1. Add support for QueryString
 
 ## Version 1.2.2
 1. Raise `TooManyRequestsError` if HTTP response has error code 429

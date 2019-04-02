@@ -46,6 +46,7 @@ module Viewpoint::EWS::SOAP
             builder.contacts_view!(opts[:contacts_view]) if opts[:contacts_view]
             builder.restriction!(opts[:restriction]) if opts[:restriction]
             builder.parent_folder_ids!(opts[:parent_folder_ids])
+            builder.query_string!(opts[:query_string]) if opts[:query_string]
           }
         end
       end
