@@ -18,11 +18,12 @@
 
 module Viewpoint::EWS::Errors
   class ResponseError < RuntimeError
-    attr_reader :response
+    attr_reader :response, :request_body
 
-    def initialize(message, response)
+    def initialize(message, response, request_body: nil)
       super(message)
       @response = response
+      @request_body = request_body
     end
 
     def status
@@ -32,6 +33,11 @@ module Viewpoint::EWS::Errors
     def body
       response.body
     end
+
+    def headers
+      response.headers
+    end
+
   end
 
   class UnhandledResponseError < ResponseError
@@ -50,8 +56,8 @@ module Viewpoint::EWS::Errors
     attr_reader :faultcode,
                 :faultstring
 
-    def initialize(message, response, faultcode, faultstring)
-      super(message, response)
+    def initialize(message, response, faultcode, faultstring, request_body: nil)
+      super(message, response, request_body: request_body)
       @faultcode = faultcode
       @faultstring = faultstring
     end
