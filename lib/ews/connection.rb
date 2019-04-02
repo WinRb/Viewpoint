@@ -147,7 +147,7 @@ class Viewpoint::EWS::Connection
 
     raw_http_response = @httpcli.post(@endpoint, xmldoc, headers)
 
-    check_response(raw_http_response, include_http_headers: options[:include_http_headers])
+    check_response(raw_http_response, include_http_headers: options[:include_http_headers], request_body: xmldoc)
   end
 
   def custom_http_headers(headers)
@@ -180,13 +180,13 @@ class Viewpoint::EWS::Connection
   # @return [HTTPClient::Connection] HTTPClient::Connection
   def post_async(xmldoc)
     headers = {'Content-Type' => 'text/xml', 'Return-Client-Request-Id' => 'true', 'Send-Client-Latencies' => 'true'}
-    @httpcli.post_async(@endpoint, xmldoc, headers)
+    @httpcli.post_async(@endpoint, xmldoc, headers, request_body: xmldoc)
   end
 
 
   private
 
-  def check_response(resp, include_http_headers: false)
+  def check_response(resp, include_http_headers: false, request_body: nil)
     @log.debug("Got HTTP response with headers: #{resp.headers}")
     @log.debug("Got HTTP response with body: #{resp.body}") if resp.body
 
@@ -199,20 +199,20 @@ class Viewpoint::EWS::Connection
       end
     when 302
       # @todo redirect
-      raise Errors::UnhandledResponseError.new("Unhandled HTTP Redirect", resp)
+      raise Errors::UnhandledResponseError.new("Unhandled HTTP Redirect", resp, request_body: request)
     when 401
-      raise Errors::UnauthorizedResponseError.new("Unauthorized request", resp)
+      raise Errors::UnauthorizedResponseError.new("Unauthorized request", resp, request_body: request)
     when 429
-      raise Errors::TooManyRequestsError.new("Too many requests", resp)
+      raise Errors::TooManyRequestsError.new("Too many requests", resp, request_body: request)
     when 500
       if resp.headers['Content-Type'] =~ /xml/
         err_string, err_code = parse_soap_error(resp.body)
-        raise Errors::SoapResponseError.new("SOAP Error: Message: #{err_string}  Code: #{err_code}", resp, err_code, err_string)
+        raise Errors::SoapResponseError.new("SOAP Error: Message: #{err_string}  Code: #{err_code}", resp, err_code, err_string, request_body: request)
       else
-        raise Errors::ServerError.new("Internal Server Error. Message: #{resp.body}", resp)
+        raise Errors::ServerError.new("Internal Server Error. Message: #{resp.body}", resp, request_body: request)
       end
     else
-      raise Errors::ResponseError.new("HTTP Error Code: #{resp.status}, Msg: #{resp.body}", resp)
+      raise Errors::ResponseError.new("HTTP Error Code: #{resp.status}, Msg: #{resp.body}", resp, request_body: request)
     end
   end
 
