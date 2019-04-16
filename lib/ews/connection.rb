@@ -199,20 +199,20 @@ class Viewpoint::EWS::Connection
       end
     when 302
       # @todo redirect
-      raise Errors::UnhandledResponseError.new("Unhandled HTTP Redirect", resp, request_body: request)
+      raise Errors::UnhandledResponseError.new("Unhandled HTTP Redirect", resp, request_body: request_body)
     when 401
-      raise Errors::UnauthorizedResponseError.new("Unauthorized request", resp, request_body: request)
+      raise Errors::UnauthorizedResponseError.new("Unauthorized request", resp, request_body: request_body)
     when 429
-      raise Errors::TooManyRequestsError.new("Too many requests", resp, request_body: request)
+      raise Errors::TooManyRequestsError.new("Too many requests", resp, request_body: request_body)
     when 500
       if resp.headers['Content-Type'] =~ /xml/
         err_string, err_code = parse_soap_error(resp.body)
-        raise Errors::SoapResponseError.new("SOAP Error: Message: #{err_string}  Code: #{err_code}", resp, err_code, err_string, request_body: request)
+        raise Errors::SoapResponseError.new("SOAP Error: Message: #{err_string}  Code: #{err_code}", resp, err_code, err_string, request_body: request_body)
       else
-        raise Errors::ServerError.new("Internal Server Error. Message: #{resp.body}", resp, request_body: request)
+        raise Errors::ServerError.new("Internal Server Error. Message: #{resp.body}", resp, request_body: request_body)
       end
     else
-      raise Errors::ResponseError.new("HTTP Error Code: #{resp.status}, Msg: #{resp.body}", resp, request_body: request)
+      raise Errors::ResponseError.new("HTTP Error Code: #{resp.status}, Msg: #{resp.body}", resp, request_body: request_body)
     end
   end
 
