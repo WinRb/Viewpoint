@@ -17,12 +17,14 @@
 =end
 
 require 'ews/item_accessors'
+require 'ews/folder_accessors'
 
 module Viewpoint::EWS::Types
   module GenericFolder
     include Viewpoint::EWS
     include Viewpoint::EWS::Types
     include Viewpoint::EWS::ItemAccessors
+    include Viewpoint::EWS::FolderAccessors
     include Viewpoint::StringUtils
 
     GFOLDER_KEY_PATHS = {
@@ -324,7 +326,6 @@ module Viewpoint::EWS::Types
         raise e
       end
     end
-
 
     private
 

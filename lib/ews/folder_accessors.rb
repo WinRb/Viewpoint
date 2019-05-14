@@ -131,7 +131,7 @@ private
 
   # Build up the arguements for #find_folders
   def find_folders_args(opts)
-    opts[:root] = opts[:root] || :msgfolderroot
+    opts[:root] = opts[:root] || (respond_to?(:folder_id) && folder_id[:id]) || :msgfolderroot
     opts[:traversal] = opts[:traversal] || :shallow
     opts[:shape] = opts[:shape] || :default
     folder_id = {:id => opts[:root]}
