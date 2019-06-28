@@ -20,20 +20,39 @@ module Viewpoint::EWS::SOAP
   class EwsSoapGetStreamingEventsResponse < EwsSoapResponse
     include Viewpoint::StringUtils
 
+    Notification = Struct.new(:subscription_id, :events)
+
+    # def subscription_ids
+    #   notifications.map(&:subscription_id)
+    # end
+
     def notifications
+      @notifications ||= []
+      notification_hashes.each do |notification_hash|
+        notification_event_hash = notification_event_hashes(notification_hash: notification_hash)
+        @notifications << notification_hash
+        # @notifications << Notification.new(
+        #   subscription_id: subscription_id(notification_event_hash: notification_event_hash),
+        #   events: events(notification_event_hash: notification_event_hash)
+        # )
+      end
+    end
+
+    def notification_hashes
       guard_hash(response_message[:elems], [:notifications, :elems])
     end
 
-    def notification_events
-      guard_hash(notifications.first, [:notification, :elems])
+    def notification_event_hashes(notification_hash:)
+      guard_hash(notification_hash, [:notification, :elems])
     end
 
-    def events
-      notification_events[1..-1].map { |event| Viewpoint::EWS::SOAP::GetStreamingEventResponse.new(event) }
+    def subscription_id(notification_event_hashes:)
+      # notification_event_hash.first.dig(:subscription_id, :text)
+      notification_event_hashes[0][:subscription_id][:text]
     end
 
-    def subscription_id
-      notification_events[0][:subscription_id][:text]
+    def events(notification_event_hashes:)
+      @events ||= notification_event_hashes[1..-1].map { |event| Viewpoint::EWS::SOAP::GetStreamingEventResponse.new(event) }
     end
 
     def error_subscription_ids

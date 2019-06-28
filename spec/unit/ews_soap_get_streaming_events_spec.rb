@@ -51,20 +51,234 @@ EOS
       expect(resp.status).to eq("Success")
     end
 
+    # describe "#notifications" do
+    #   subject { resp.notifications }
+    #
+    #   it { is_expected.to eq(1) }
+    # end
+
+    describe "#notification_hashes" do
+      let(:notification_hashes) do
+        [{:notification=>
+            {:elems=>
+               [{:subscription_id=>{:text=>"f6bc657d-dde1-4f94-952d-143b95d6483d"}},
+                {:created_event=>
+                   {:elems=>
+                      [{:time_stamp=>{:text=>"2013-09-16T04:31:29Z"}},
+                       {:item_id=>
+                          {:attribs=>
+                             {:id=>
+                                "AAMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwBGAAAAAABSSWVKrmGUTJE+MVIvofglBwDZGACZQpSgSpyNkexYe2b7AAAAAAENAADZGACZQpSgSpyNkexYe2b7AAANGFYwAAA=",
+                              :change_key=>"CQAAAA=="}}},
+                       {:parent_folder_id=>
+                          {:attribs=>
+                             {:id=>
+                                "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgENAAAA",
+                              :change_key=>"AQAAAA=="}}}]}},
+                {:new_mail_event=>
+                   {:elems=>
+                      [{:time_stamp=>{:text=>"2013-09-16T04:31:29Z"}},
+                       {:item_id=>
+                          {:attribs=>
+                             {:id=>
+                                "AAMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwBGAAAAAABSSWVKrmGUTJE+MVIvofglBwDZGACZQpSgSpyNkexYe2b7AAAAAAENAADZGACZQpSgSpyNkexYe2b7AAANGFYwAAA=",
+                              :change_key=>"CQAAAA=="}}},
+                       {:parent_folder_id=>
+                          {:attribs=>
+                             {:id=>
+                                "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgENAAAA",
+                              :change_key=>"AQAAAA=="}}}]}},
+                {:modified_event=>
+                   {:elems=>
+                      [{:time_stamp=>{:text=>"2013-09-16T04:31:29Z"}},
+                       {:folder_id=>
+                          {:attribs=>
+                             {:id=>
+                                "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgENAAAA",
+                              :change_key=>"AQAAAA=="}}},
+                       {:parent_folder_id=>
+                          {:attribs=>
+                             {:id=>
+                                "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgEJAAAA",
+                              :change_key=>"AQAAAA=="}}},
+                       {:unread_count=>{:text=>"1"}}]}}]}}]
+      end
+
+      subject { resp.notification_hashes }
+
+      it { is_expected.to eq(notification_hashes) }
+    end
+
+
+    describe "#notification_event_hashes" do
+      let(:notification_hash) do
+        {:notification=>
+          {:elems=>
+             [{:subscription_id=>{:text=>"f6bc657d-dde1-4f94-952d-143b95d6483d"}},
+              {:created_event=>
+                 {:elems=>
+                    [{:time_stamp=>{:text=>"2013-09-16T04:31:29Z"}},
+                     {:item_id=>
+                        {:attribs=>
+                           {:id=>
+                              "AAMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwBGAAAAAABSSWVKrmGUTJE+MVIvofglBwDZGACZQpSgSpyNkexYe2b7AAAAAAENAADZGACZQpSgSpyNkexYe2b7AAANGFYwAAA=",
+                            :change_key=>"CQAAAA=="}}},
+                     {:parent_folder_id=>
+                        {:attribs=>
+                           {:id=>
+                              "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgENAAAA",
+                            :change_key=>"AQAAAA=="}}}]}},
+              {:new_mail_event=>
+                 {:elems=>
+                    [{:time_stamp=>{:text=>"2013-09-16T04:31:29Z"}},
+                     {:item_id=>
+                        {:attribs=>
+                           {:id=>
+                              "AAMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwBGAAAAAABSSWVKrmGUTJE+MVIvofglBwDZGACZQpSgSpyNkexYe2b7AAAAAAENAADZGACZQpSgSpyNkexYe2b7AAANGFYwAAA=",
+                            :change_key=>"CQAAAA=="}}},
+                     {:parent_folder_id=>
+                        {:attribs=>
+                           {:id=>
+                              "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgENAAAA",
+                            :change_key=>"AQAAAA=="}}}]}},
+              {:modified_event=>
+                 {:elems=>
+                    [{:time_stamp=>{:text=>"2013-09-16T04:31:29Z"}},
+                     {:folder_id=>
+                        {:attribs=>
+                           {:id=>
+                              "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgENAAAA",
+                            :change_key=>"AQAAAA=="}}},
+                     {:parent_folder_id=>
+                        {:attribs=>
+                           {:id=>
+                              "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgEJAAAA",
+                            :change_key=>"AQAAAA=="}}},
+                     {:unread_count=>{:text=>"1"}}]}}]}}
+      end
+
+      subject { resp.notification_event_hashes(notification_hash: notification_hash) }
+
+      it { is_expected.to eq(notification_hash[:notification][:elems]) }
+    end
+
     describe "#subscription_id" do
-      subject { resp.subscription_id }
+      let(:notification_event_hashes) do
+        [{:subscription_id=>{:text=>"f6bc657d-dde1-4f94-952d-143b95d6483d"}},
+         {:created_event=>
+            {:elems=>
+               [{:time_stamp=>{:text=>"2013-09-16T04:31:29Z"}},
+                {:item_id=>
+                   {:attribs=>
+                      {:id=>
+                         "AAMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwBGAAAAAABSSWVKrmGUTJE+MVIvofglBwDZGACZQpSgSpyNkexYe2b7AAAAAAENAADZGACZQpSgSpyNkexYe2b7AAANGFYwAAA=",
+                       :change_key=>"CQAAAA=="}}},
+                {:parent_folder_id=>
+                   {:attribs=>
+                      {:id=>
+                         "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgENAAAA",
+                       :change_key=>"AQAAAA=="}}}]}},
+         {:new_mail_event=>
+            {:elems=>
+               [{:time_stamp=>{:text=>"2013-09-16T04:31:29Z"}},
+                {:item_id=>
+                   {:attribs=>
+                      {:id=>
+                         "AAMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwBGAAAAAABSSWVKrmGUTJE+MVIvofglBwDZGACZQpSgSpyNkexYe2b7AAAAAAENAADZGACZQpSgSpyNkexYe2b7AAANGFYwAAA=",
+                       :change_key=>"CQAAAA=="}}},
+                {:parent_folder_id=>
+                   {:attribs=>
+                      {:id=>
+                         "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgENAAAA",
+                       :change_key=>"AQAAAA=="}}}]}},
+         {:modified_event=>
+            {:elems=>
+               [{:time_stamp=>{:text=>"2013-09-16T04:31:29Z"}},
+                {:folder_id=>
+                   {:attribs=>
+                      {:id=>
+                         "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgENAAAA",
+                       :change_key=>"AQAAAA=="}}},
+                {:parent_folder_id=>
+                   {:attribs=>
+                      {:id=>
+                         "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgEJAAAA",
+                       :change_key=>"AQAAAA=="}}},
+                {:unread_count=>{:text=>"1"}}]}}]
+      end
+
+      subject { resp.subscription_id(notification_event_hashes: notification_event_hashes) }
+
       it { is_expected.to eq("f6bc657d-dde1-4f94-952d-143b95d6483d") }
     end
 
     describe "#events" do
-      subject { resp.events }
-
-      it "returns GetStreamingEventResponse array" do
-        expect(subject.map(&:id) ).to eq(["AAMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwBGAAAAAABSSWVKrmGUTJE+MVIvofglBwDZGACZQpSgSpyNkexYe2b7AAAAAAENAADZGACZQpSgSpyNkexYe2b7AAANGFYwAAA=",
-                                          "AAMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwBGAAAAAABSSWVKrmGUTJE+MVIvofglBwDZGACZQpSgSpyNkexYe2b7AAAAAAENAADZGACZQpSgSpyNkexYe2b7AAANGFYwAAA=",
-                                         nil])
+      let(:notification_event_hashes) do
+        [{:subscription_id=>{:text=>"f6bc657d-dde1-4f94-952d-143b95d6483d"}},
+         {:created_event=>
+            {:elems=>
+               [{:time_stamp=>{:text=>"2013-09-16T04:31:29Z"}},
+                {:item_id=>
+                   {:attribs=>
+                      {:id=>
+                         "AAMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwBGAAAAAABSSWVKrmGUTJE+MVIvofglBwDZGACZQpSgSpyNkexYe2b7AAAAAAENAADZGACZQpSgSpyNkexYe2b7AAANGFYwAAA=",
+                       :change_key=>"CQAAAA=="}}},
+                {:parent_folder_id=>
+                   {:attribs=>
+                      {:id=>
+                         "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgENAAAA",
+                       :change_key=>"AQAAAA=="}}}]}},
+         {:new_mail_event=>
+            {:elems=>
+               [{:time_stamp=>{:text=>"2013-09-16T04:31:29Z"}},
+                {:item_id=>
+                   {:attribs=>
+                      {:id=>
+                         "AAMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwBGAAAAAABSSWVKrmGUTJE+MVIvofglBwDZGACZQpSgSpyNkexYe2b7AAAAAAENAADZGACZQpSgSpyNkexYe2b7AAANGFYwAAA=",
+                       :change_key=>"CQAAAA=="}}},
+                {:parent_folder_id=>
+                   {:attribs=>
+                      {:id=>
+                         "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgENAAAA",
+                       :change_key=>"AQAAAA=="}}}]}},
+         {:modified_event=>
+            {:elems=>
+               [{:time_stamp=>{:text=>"2013-09-16T04:31:29Z"}},
+                {:folder_id=>
+                   {:attribs=>
+                      {:id=>
+                         "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgENAAAA",
+                       :change_key=>"AQAAAA=="}}},
+                {:parent_folder_id=>
+                   {:attribs=>
+                      {:id=>
+                         "AQMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwAuAAADUkllSq5hlEyRPjFSL6H4JQEA2RgAmUKUoEqcjZHsWHtm+wAAAgEJAAAA",
+                       :change_key=>"AQAAAA=="}}},
+                {:unread_count=>{:text=>"1"}}]}}]
       end
+
+      subject { resp.events(notification_event_hashes: notification_event_hashes) }
+
+      # it { expect(subject).to eq([1]) }
+      it { expect(subject.object_id).to eq(notification_event_hashes[1..-1].map { |event| Viewpoint::EWS::SOAP::GetStreamingEventResponse.new(event) }.object_id) }
+      #
+      # it { is_expected.to match_array([]) }
+
+      # it "works" do
+      #   expect(subject[0]).to eq(Viewpoint::EWS::SOAP::GetStreamingEventResponse.new(notification_event_hashes[1]))
+      # end
     end
+
+
+    # describe "#events" do
+    #   subject { resp.events }
+    #
+    #   it "returns GetStreamingEventResponse array" do
+    #     expect(subject.map(&:id) ).to eq(["AAMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwBGAAAAAABSSWVKrmGUTJE+MVIvofglBwDZGACZQpSgSpyNkexYe2b7AAAAAAENAADZGACZQpSgSpyNkexYe2b7AAANGFYwAAA=",
+    #                                       "AAMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwBGAAAAAABSSWVKrmGUTJE+MVIvofglBwDZGACZQpSgSpyNkexYe2b7AAAAAAENAADZGACZQpSgSpyNkexYe2b7AAANGFYwAAA=",
+    #                                      nil])
+    #   end
+    # end
   end # context "When valid GetStreamingEventsResponseMessage"
 
   context "When invalid GetStreamingEventsResponseMessage" do
