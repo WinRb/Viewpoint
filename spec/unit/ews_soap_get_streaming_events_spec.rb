@@ -259,26 +259,8 @@ EOS
 
       subject { resp.events(notification_event_hashes: notification_event_hashes) }
 
-      # it { expect(subject).to eq([1]) }
-      it { expect(subject.object_id).to eq(notification_event_hashes[1..-1].map { |event| Viewpoint::EWS::SOAP::GetStreamingEventResponse.new(event) }.object_id) }
-      #
-      # it { is_expected.to match_array([]) }
-
-      # it "works" do
-      #   expect(subject[0]).to eq(Viewpoint::EWS::SOAP::GetStreamingEventResponse.new(notification_event_hashes[1]))
-      # end
+      it { expect(subject).to eq(notification_event_hashes[1..-1].map { |event| Viewpoint::EWS::SOAP::GetStreamingEventResponse.new(event) }) }
     end
-
-
-    # describe "#events" do
-    #   subject { resp.events }
-    #
-    #   it "returns GetStreamingEventResponse array" do
-    #     expect(subject.map(&:id) ).to eq(["AAMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwBGAAAAAABSSWVKrmGUTJE+MVIvofglBwDZGACZQpSgSpyNkexYe2b7AAAAAAENAADZGACZQpSgSpyNkexYe2b7AAANGFYwAAA=",
-    #                                       "AAMkADkzNjJjODUzLWZhMDMtNDVkMS05ZDdjLWVmMDlkYjQ1Zjc4MwBGAAAAAABSSWVKrmGUTJE+MVIvofglBwDZGACZQpSgSpyNkexYe2b7AAAAAAENAADZGACZQpSgSpyNkexYe2b7AAANGFYwAAA=",
-    #                                      nil])
-    #   end
-    # end
   end # context "When valid GetStreamingEventsResponseMessage"
 
   context "When invalid GetStreamingEventsResponseMessage" do
