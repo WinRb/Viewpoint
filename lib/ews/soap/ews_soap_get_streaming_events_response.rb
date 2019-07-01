@@ -22,19 +22,13 @@ module Viewpoint::EWS::SOAP
 
     Notification = Struct.new(:subscription_id, :events)
 
-    # def subscription_ids
-    #   notifications.map(&:subscription_id)
-    # end
-
     def notifications
-      @notifications ||= []
-      notification_hashes.each do |notification_hash|
+      @notifications ||= notification_hashes.map do |notification_hash|
         notification_event_hash = notification_event_hashes(notification_hash: notification_hash)
-        @notifications << notification_hash
-        # @notifications << Notification.new(
-        #   subscription_id: subscription_id(notification_event_hash: notification_event_hash),
-        #   events: events(notification_event_hash: notification_event_hash)
-        # )
+        Notification.new(
+          subscription_id(notification_event_hashes: notification_event_hash),
+          events(notification_event_hashes: notification_event_hash)
+        )
       end
     end
 
@@ -47,7 +41,6 @@ module Viewpoint::EWS::SOAP
     end
 
     def subscription_id(notification_event_hashes:)
-      # notification_event_hash.first.dig(:subscription_id, :text)
       notification_event_hashes[0][:subscription_id][:text]
     end
 

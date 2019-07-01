@@ -51,11 +51,15 @@ EOS
       expect(resp.status).to eq("Success")
     end
 
-    # describe "#notifications" do
-    #   subject { resp.notifications }
-    #
-    #   it { is_expected.to eq(1) }
-    # end
+    describe "#notifications" do
+      subject { resp.notifications }
+
+      it "just works" do
+        notifications = subject
+        expect(notifications.size).to eq(1)
+        expect(notifications.map(&:subscription_id)).to eq(["f6bc657d-dde1-4f94-952d-143b95d6483d"])
+      end
+    end
 
     describe "#notification_hashes" do
       let(:notification_hashes) do
