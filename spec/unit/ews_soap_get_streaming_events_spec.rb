@@ -215,6 +215,55 @@ EOS
     end
   end # context "When valid GetStreamingEventsResponseMessage"
 
+  context "When valid GetStreamingEventsResponseMessage but NO notifications" do
+    let(:response_xml) do
+      <<EOS.gsub(%r{>\s+}, '>')
+<?xml version="1.0" encoding="utf-8" ?>
+<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
+	<soap11:Header xmlns:soap11="http://schemas.xmlsoap.org/soap/envelope/">
+		<ServerVersionInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" MajorVersion="15" MinorVersion="1" MajorBuildNumber="1591" MinorBuildNumber="10" Version="V2017_07_11" xmlns="http://schemas.microsoft.com/exchange/services/2006/types" />
+	</soap11:Header>
+	<soap11:Body xmlns:soap11="http://schemas.xmlsoap.org/soap/envelope/">
+		<m:GetStreamingEventsResponse xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages">
+			<m:ResponseMessages>
+				<m:GetStreamingEventsResponseMessage ResponseClass="Success">
+					<m:ResponseCode>NoError</m:ResponseCode>
+					<m:ConnectionStatus>Closed</m:ConnectionStatus>
+				</m:GetStreamingEventsResponseMessage>
+			</m:ResponseMessages>
+		</m:GetStreamingEventsResponse>
+	</soap11:Body>
+</Envelope>
+EOS
+    end
+
+    it "response should be successful" do
+      expect(resp.status).to eq("Success")
+    end
+
+    describe "#notifications" do
+      subject { resp.notifications }
+
+      it "returns empty array" do
+        expect(subject).to eq([])
+      end
+    end
+
+    describe "#notification_hashes" do
+      subject { resp.notification_hashes }
+
+      it { is_expected.to eq(nil) }
+    end
+
+    describe "#notification_event_hashes" do
+      let(:notification_hash) { {} }
+
+      subject { resp.notification_event_hashes(notification_hash: notification_hash) }
+
+      it { is_expected.to eq(nil) }
+    end
+  end # context "When valid GetStreamingEventsResponseMessage but NO notifications" do
+
   context "When invalid GetStreamingEventsResponseMessage" do
     let(:response_xml) do
 <<EOS.gsub(%r{>\s+}, '>')
