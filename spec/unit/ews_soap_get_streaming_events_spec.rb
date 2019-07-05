@@ -134,7 +134,7 @@ EOS
     end
 
     describe "#notification_hashes" do
-      let(:notification_hashes) do
+      let(:expected_notification_hashes) do
         [
           {:notification=>{:elems=>[
             {:subscription_id=>{:text=>"FwBleGNoMDMuYm9va2luZ2J1Zy5sb2NhbBAAAACRSuDZ7LUVRZRdTUGgj8dRTln61/P61ggQAAAAXGkYiHJpukmWTKXM27pVgQ=="}},
@@ -158,7 +158,7 @@ EOS
 
       subject { resp.notification_hashes }
 
-      it { is_expected.to eq(notification_hashes) }
+      it { is_expected.to eq(expected_notification_hashes) }
     end
 
 
