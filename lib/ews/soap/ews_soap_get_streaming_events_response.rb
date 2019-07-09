@@ -21,19 +21,22 @@ module Viewpoint::EWS::SOAP
     include Viewpoint::StringUtils
 
     def notifications
+      @notifications ||= if notification_hashes
+                           notification_hashes.map do |notification_hash|
+                             notification_event_hash = notification_event_hashes(notification_hash: notification_hash)
+                             EwsSoapGetStreamingEventsNotification.new(notification_event_hashes: notification_event_hash)
+                           end
+                         else
+                           []
+                         end
+    end
+
+    def notification_hashes
       guard_hash(response_message[:elems], [:notifications, :elems])
     end
 
-    def notification_events
-      guard_hash(notifications.first, [:notification, :elems])
-    end
-
-    def events
-      notification_events[1..-1].map { |event| Viewpoint::EWS::SOAP::GetStreamingEventResponse.new(event) }
-    end
-
-    def subscription_id
-      notification_events[0][:subscription_id][:text]
+    def notification_event_hashes(notification_hash:)
+      guard_hash(notification_hash, [:notification, :elems])
     end
 
     def error_subscription_ids
