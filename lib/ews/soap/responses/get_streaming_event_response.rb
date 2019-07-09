@@ -7,6 +7,10 @@ module Viewpoint::EWS::SOAP
       @response = response_hash
     end
 
+    def ==(other)
+      response == other.response
+    end
+
     def type
       response.keys.first
     end

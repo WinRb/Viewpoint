@@ -878,6 +878,10 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def is_read!(read)
+      nbuild[NS_EWS_TYPES].IsRead(read)
+    end
+
     def calendar_item!(item)
       nbuild[NS_EWS_TYPES].CalendarItem {
         item.each_pair {|k,v|
@@ -885,6 +889,67 @@ module Viewpoint::EWS::SOAP
         }
       }
     end
+
+    def calendar_item_type!(type)
+      nbuild[NS_EWS_TYPES].CalendarItemType(type)
+    end
+
+    def recurrence!(item)
+      nbuild[NS_EWS_TYPES].Recurrence {
+        item.each_pair { |k, v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
+    def daily_recurrence!(item)
+      nbuild[NS_EWS_TYPES].DailyRecurrence {
+        item.each_pair { |k, v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
+    def weekly_recurrence!(item)
+      nbuild[NS_EWS_TYPES].WeeklyRecurrence {
+        item.each_pair { |k, v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
+    def days_of_week!(item)
+      nbuild[NS_EWS_TYPES].DaysOfWeek (item)
+    end
+
+    def first_day_of_week!(item)
+      nbuild[NS_EWS_TYPES].FirstDayOfWeek (item)
+    end
+
+    def interval!(num)
+      nbuild[NS_EWS_TYPES].Interval(num)
+    end
+
+    def no_end_recurrence!(item)
+      nbuild[NS_EWS_TYPES].NoEndRecurrence {
+        item.each_pair { |k, v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
+    def numbered_recurrence!(item)
+      nbuild[NS_EWS_TYPES].NumberedRecurrence {
+        item.each_pair { |k, v|
+          self.send("#{k}!", v)
+        }
+      }
+    end
+
+    def number_of_occurrences!(count)
+      nbuild[NS_EWS_TYPES].NumberOfOccurrences(count)
+    end
+
 
     def task!(item)
       nbuild[NS_EWS_TYPES].Task {
@@ -1036,6 +1101,10 @@ module Viewpoint::EWS::SOAP
       nbuild[NS_EWS_TYPES].IsAllDayEvent(all_day)
     end
 
+    def is_response_requested!(response_requested)
+      nbuild[NS_EWS_TYPES].IsResponseRequested(response_requested)
+    end
+
     def reminder_is_set!(reminder)
       nbuild[NS_EWS_TYPES].ReminderIsSet reminder
     end
@@ -1119,6 +1188,7 @@ module Viewpoint::EWS::SOAP
 
     # @see http://msdn.microsoft.com/en-us/library/ff709497(v=exchg.140).aspx
     def return_new_item_ids!(retval)
+      @nbuild.ReturnNewItemIds(retval)
     end
 
     def inline_attachment!(fa)
@@ -1200,9 +1270,10 @@ module Viewpoint::EWS::SOAP
       when :item_id
         item_id!(item)
       when :occurrence_item_id
-        occurrence_item_id!(item)
+        occurrence_item_id!(
+          item[:recurring_master_id], item[:change_key], item[:instance_index])
       when :recurring_master_item_id
-        recurring_master_item_id!(item)
+        recurring_master_item_id!(item[:occurrence_id], item[:change_key])
       else
         raise EwsBadArgumentError, "Bad ItemId type. #{type}"
       end
@@ -1276,6 +1347,33 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_MESSAGES].GetRoomLists
     end
 
+    def accept_item!(opts)
+      @nbuild[NS_EWS_TYPES].AcceptItem {
+        sensitivity!(opts)
+        body!(opts) if opts[:text]
+        reference_item_id!(opts)
+      }
+    end
+
+    def tentatively_accept_item!(opts)
+      @nbuild[NS_EWS_TYPES].TentativelyAcceptItem {
+        sensitivity!(opts)
+        body!(opts) if opts[:text]
+        reference_item_id!(opts)
+      }
+    end
+
+    def decline_item!(opts)
+      @nbuild[NS_EWS_TYPES].DeclineItem {
+        sensitivity!(opts)
+        body!(opts) if opts[:text]
+        reference_item_id!(opts)
+      }
+    end
+
+    def sensitivity!(value)
+      nbuild[NS_EWS_TYPES].Sensitivity(value[:sensitivity])
+    end
 
 private
 
@@ -1292,14 +1390,14 @@ private
     end
 
     def set_impersonation!(type, address)
-      if type && type != ""
-        nbuild[NS_EWS_TYPES].ExchangeImpersonation {
-          nbuild[NS_EWS_TYPES].ConnectingSID {
-            nbuild[NS_EWS_TYPES].method_missing type, address
-          }
+	    if type && type != ""
+	      nbuild[NS_EWS_TYPES].ExchangeImpersonation {
+		      nbuild[NS_EWS_TYPES].ConnectingSID {
+		        nbuild[NS_EWS_TYPES].method_missing type, address
+		      }
         }
       end
-    end
+	  end
 
     # Set TimeZoneContext Header
     # @param time_zone_def [Hash] !{id: time_zone_identifier, name: time_zone_name}
@@ -1308,6 +1406,13 @@ private
         nbuild[NS_EWS_TYPES].TimeZoneContext do
           time_zone_definition! time_zone_def
         end
+      end
+    end
+
+    def meeting_time_zone!(mtz)
+      nbuild[NS_EWS_TYPES].MeetingTimeZone do |x|
+        x.parent['TimeZoneName'] = mtz[:time_zone_name] if mtz[:time_zone_name]
+        nbuild[NS_EWS_TYPES].BaseOffset(mtz[:base_offset][:text]) if mtz[:base_offset]
       end
     end
 
