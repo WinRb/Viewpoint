@@ -15,6 +15,8 @@ Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
 Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
+## Version 1.2.5
+1. Fix an error where the only the first notification in a streaming response's envelope was processed
 
 ## Version 1.2.4
 1. Fix variable name error
