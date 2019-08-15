@@ -1272,7 +1272,7 @@ module Viewpoint::EWS::SOAP
       when :occurrence_item_id
         occurrence_item_id!(item)
       when :recurring_master_item_id
-        recurring_master_item_id!(item[:occurrence_id], item[:change_key])
+        recurring_master_item_id!(item)
       else
         raise EwsBadArgumentError, "Bad ItemId type. #{type}"
       end
