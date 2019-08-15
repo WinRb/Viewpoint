@@ -1270,8 +1270,7 @@ module Viewpoint::EWS::SOAP
       when :item_id
         item_id!(item)
       when :occurrence_item_id
-        occurrence_item_id!(
-          item[:recurring_master_id], item[:change_key], item[:instance_index])
+        occurrence_item_id!(item)
       when :recurring_master_item_id
         recurring_master_item_id!(item[:occurrence_id], item[:change_key])
       else
