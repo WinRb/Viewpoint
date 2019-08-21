@@ -16,6 +16,9 @@ Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
 
+## Version 1.2.8
+1. Fixed an issue with too many arguments being passed to the recurring_master_item_id! method in the ews builder
+
 ## Version 1.2.7
 1. Fixed an issue with too many arguments being passed to the occurrence_item_id! method in the ews builder
 
