@@ -86,18 +86,21 @@ class Viewpoint::EWS::Connection
 
     respmsg, resp_headers = respmsg if respmsg.is_a?(Array)
 
+    # This is kinda hack to use Nokogiri formatting xml to avoid invalid xml element or special characters
+    valid_xml = Nokogiri::XML(respmsg).to_xml
+
     @log.debug <<-EOF.gsub(/^ {6}/, '')
       Received SOAP Response:
       ----------------
-      #{Nokogiri::XML(respmsg).to_xml}
+      #{valid_xml}
       ----------------
     EOF
 
     # Returning raw http response in order to get Exchange cookie in header
     if opts[:include_http_headers]
-      EWSHttpResponse.new(resp_headers, ews.parse_soap_response(respmsg, opts))
+      EWSHttpResponse.new(resp_headers, ews.parse_soap_response(valid_xml, opts))
     else
-      opts[:raw_response] ? respmsg : ews.parse_soap_response(respmsg, opts)
+      opts[:raw_response] ? respmsg : ews.parse_soap_response(valid_xml, opts)
     end
   end
 
