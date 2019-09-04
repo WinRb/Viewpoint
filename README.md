@@ -16,6 +16,9 @@ Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
 
+## Version 1.2.9
+1. Fixed an issue with XML string contains special charter or invalid elements fails the parsing response
+
 ## Version 1.2.8
 1. Fixed an issue with too many arguments being passed to the recurring_master_item_id! method in the ews builder
 
