@@ -382,7 +382,11 @@ module Viewpoint::EWS::Types
       return [] if users.nil?
       users.collect do |u|
         u[:attendee][:elems].collect do |a|
-          build_mailbox_user(a[:mailbox][:elems]) if a[:mailbox]
+          if a[:mailbox]
+            response_type = u[:attendee][:elems].select{|e| e[:response_type ]}.try(:first)
+            a[:mailbox][:elems] << response_type if response_type
+            build_mailbox_user(a[:mailbox][:elems])
+          end
         end
       end.flatten.compact
     end
