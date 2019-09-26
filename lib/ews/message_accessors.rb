@@ -48,19 +48,19 @@ module Viewpoint::EWS::MessageAccessors
       resp = parse_create_item(ews.create_item(msg.to_ews))
       msg.draft = true
       msg.file_attachments.each do |attachment|
-        if attachment.kind_of?(File) || attachment.kind_of?(Tempfile)
-          resp.file_attachment_from_file(attachment)
-        elsif attachment.kind_of?(Hash)
+        if attachment.kind_of?(Hash)
           resp.file_attachment_from_hash(attachment)
+        elsif attachment.kind_of?(File) || attachment.kind_of?(Tempfile)
+          resp.file_attachment_from_file(attachment)
         else
           next
         end
       end
       msg.inline_attachments.each do |attachment|
-        if attachment.kind_of?(File) || attachment.kind_of?(Tempfile)
-          resp.inline_attachment_from_file(attachment)
-        elsif attachment.kind_of?(Hash)
+        if attachment.kind_of?(Hash)
           resp.inline_attachment_from_hash(attachment)
+        elsif attachment.kind_of?(File) || attachment.kind_of?(Tempfile)
+          resp.inline_attachment_from_file(attachment)
         else
           next
         end
