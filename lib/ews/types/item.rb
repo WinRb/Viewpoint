@@ -3,6 +3,7 @@ module Viewpoint::EWS::Types
     include Viewpoint::EWS
     include Viewpoint::EWS::Types
     include ItemFieldUriMap
+    include Viewpoint::EWS::Validators::ParamsValidator
 
     def self.included(klass)
       klass.extend ClassMethods
@@ -174,11 +175,12 @@ module Viewpoint::EWS::Types
       end
     end
 
-    def add_file_attachment(file)
-      fa = OpenStruct.new
-      fa.name     = File.basename(file.path)
-      fa.content  = Base64.encode64(file.read)
-      @new_file_attachments << fa
+    def file_attachment_from_file(file)
+      @new_file_attachments << attachment_object_from_file(file)
+    end
+
+    def file_attachment_from_hash(hash)
+      @new_file_attachments << attachment_object_from_hash(hash)
     end
 
     def add_item_attachment(other_item, name = nil)
@@ -188,11 +190,12 @@ module Viewpoint::EWS::Types
       @new_item_attachments << ia
     end
 
-    def add_inline_attachment(file)
-      fi = OpenStruct.new
-      fi.name     = File.basename(file.path)
-      fi.content  = Base64.encode64(file.read)
-      @new_inline_attachments << fi
+    def inline_attachment_from_file(file)
+      @new_inline_attachments << attachment_object_from_file(file)
+    end
+
+    def inline_attachment_from_hash(hash)
+      attachment_object_from_hash(hash)
     end
 
     def submit!
@@ -260,6 +263,20 @@ module Viewpoint::EWS::Types
 
 
     private
+
+    def attachment_object_from_file(file)
+      attachment_object          = OpenStruct.new
+      attachment_object.name     = File.basename(file.path)
+      attachment_object.content  = Base64.encode64(file.read)
+      attachment_object
+    end
+
+    def attachment_object_from_hash(attachment_hash)
+      [:name, :content].each do |key|
+        validate_param(attachment_hash, key, true)
+      end
+      OpenStruct.new(attachment_hash)
+    end
 
     def key_paths
       super.merge(ITEM_KEY_PATHS)
