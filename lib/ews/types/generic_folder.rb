@@ -444,6 +444,8 @@ module Viewpoint::EWS::Types
           items << class_by_name(type).new(ews, i[type], self)
         end
         items
+      elsif rm.code == "ErrorExceededFindCountLimit"
+        raise ErrorExceededFindCountLimit.new("Could not retrieve items. #{rm.code}: #{rm.message_text}")
       else
         raise EwsError, "Could not retrieve folder. #{rm.code}: #{rm.message_text}"
       end
