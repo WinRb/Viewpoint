@@ -45,8 +45,8 @@ module Viewpoint::EWS::MessageAccessors
     yield msg if block_given?
     if msg.has_attachments?
       draft = msg.draft
-      resp = parse_create_item(ews.create_item(msg.to_ews))
       msg.draft = true
+      resp = parse_create_item(ews.create_item(msg.to_ews))
       msg.file_attachments.each do |attachment|
         if attachment.kind_of?(Hash)
           resp.file_attachment_from_hash(attachment)
