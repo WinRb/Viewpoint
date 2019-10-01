@@ -24,7 +24,7 @@ module Viewpoint::EWS
       def init_defaults!
         self.subject ||= nil
         self.body ||= nil
-        self.body_type ||= 'Text'
+        self.body_type ||= 'HTML'
         self.importance ||= 'Normal'
         self.draft ||= false
         self.is_read = true if is_read.nil?
