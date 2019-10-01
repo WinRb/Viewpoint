@@ -32,6 +32,9 @@ require 'viewpoint/logging'
 # Load the Exception classes
 require 'ews/exceptions/exceptions'
 
+# Validators
+require 'ews/validators/params_validator'
+
 # Load the backend SOAP / EWS infrastructure.
 require 'ews/soap'
 require 'ews/soap/response_message'
