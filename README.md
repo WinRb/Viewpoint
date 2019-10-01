@@ -16,6 +16,9 @@ Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
 
+## Version 1.2.10
+1. Implemented ErrorExceededFindCountLimit to handle an issue with find_items_between returning ErrorExceededFindCountLimit error
+
 ## Version 1.2.9
 1. Fixed an issue with XML string contains special charter or invalid elements fails the parsing response
 
