@@ -45,15 +45,25 @@ module Viewpoint::EWS::MessageAccessors
     yield msg if block_given?
     if msg.has_attachments?
       draft = msg.draft
-      msg.draft = true
       resp = parse_create_item(ews.create_item(msg.to_ews))
-      msg.file_attachments.each do |f|
-        next unless f.kind_of?(File) or f.kind_of?(Tempfile)
-        resp.add_file_attachment(f)
+      msg.draft = true
+      msg.file_attachments.each do |attachment|
+        if attachment.kind_of?(Hash)
+          resp.file_attachment_from_hash(attachment)
+        elsif attachment.kind_of?(File) || attachment.kind_of?(Tempfile)
+          resp.file_attachment_from_file(attachment)
+        else
+          next
+        end
       end
-      msg.inline_attachments.each do |f|
-        next unless f.kind_of?(File) or f.kind_of?(Tempfile)
-        resp.add_inline_attachment(f)
+      msg.inline_attachments.each do |attachment|
+        if attachment.kind_of?(Hash)
+          resp.inline_attachment_from_hash(attachment)
+        elsif attachment.kind_of?(File) || attachment.kind_of?(Tempfile)
+          resp.inline_attachment_from_file(attachment)
+        else
+          next
+        end
       end
       if draft
         resp.submit_attachments!

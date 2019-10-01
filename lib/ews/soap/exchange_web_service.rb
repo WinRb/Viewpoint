@@ -27,6 +27,7 @@ module Viewpoint::EWS::SOAP
     include ExchangeUserConfiguration
     include ExchangeSynchronization
     include ExchangeTimeZones
+    include Viewpoint::EWS::Validators::ParamsValidator
 
     attr_accessor :server_version, :auto_deepen, :no_auto_deepen_behavior, :connection, :impersonation_type, :impersonation_address
 
@@ -224,22 +225,6 @@ module Viewpoint::EWS::SOAP
 
     private
     # Private Methods (Builders and Parsers)
-
-    # Validate or set default values for options parameters.
-    # @param [Hash] opts The options parameter passed to an EWS operation
-    # @param [Symbol] key The key in the Hash we are validating
-    # @param [Boolean] required Whether or not this key is required
-    # @param [Object] default_val If the key is not required use this as a
-    #   default value for the operation.
-    def validate_param(opts, key, required, default_val = nil)
-      if required
-        raise EwsBadArgumentError, "Required parameter(#{key}) not passed." unless opts.has_key?(key)
-        opts[key]
-      else
-        raise EwsBadArgumentError, "Default value not supplied." unless default_val
-        opts.has_key?(key) ? opts[key] : default_val
-      end
-    end
 
     # Some operations only exist for certain versions of Exchange Server.
     # This method should be called with the required version and we'll throw
