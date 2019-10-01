@@ -195,7 +195,7 @@ module Viewpoint::EWS::Types
     end
 
     def inline_attachment_from_hash(hash)
-      attachment_object_from_hash(hash)
+      @new_inline_attachments << attachment_object_from_hash(hash)
     end
 
     def submit!
