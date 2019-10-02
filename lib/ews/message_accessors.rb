@@ -43,37 +43,42 @@ module Viewpoint::EWS::MessageAccessors
   def send_message(opts = {}, &block)
     msg = Template::Message.new opts.clone
     yield msg if block_given?
-    draft = msg.draft
-    msg.draft = true
-    create_item_response = ews.create_item(msg.to_ews)
-    sent_message_id = fetch_message_id_from_response(create_item_response)
-    resp = parse_create_item(create_item_response)
-    msg.file_attachments.each do |attachment|
-      if attachment.kind_of?(Hash)
-        resp.file_attachment_from_hash(attachment)
-      elsif attachment.kind_of?(File) || attachment.kind_of?(Tempfile)
-        resp.file_attachment_from_file(attachment)
-      else
-        next
+    if msg.has_attachments? || opts[:return_message_id]
+      draft = msg.draft
+      msg.draft = true
+      create_item_response = ews.create_item(msg.to_ews)
+      sent_message_id = fetch_message_id_from_response(create_item_response)
+      resp = parse_create_item(create_item_response)
+      msg.file_attachments.each do |attachment|
+        if attachment.kind_of?(Hash)
+          resp.file_attachment_from_hash(attachment)
+        elsif attachment.kind_of?(File) || attachment.kind_of?(Tempfile)
+          resp.file_attachment_from_file(attachment)
+        else
+          next
+        end
       end
-    end
-    msg.inline_attachments.each do |attachment|
-      if attachment.kind_of?(Hash)
-        resp.inline_attachment_from_hash(attachment)
-      elsif attachment.kind_of?(File) || attachment.kind_of?(Tempfile)
-        resp.inline_attachment_from_file(attachment)
-      else
-        next
+      msg.inline_attachments.each do |attachment|
+        if attachment.kind_of?(Hash)
+          resp.inline_attachment_from_hash(attachment)
+        elsif attachment.kind_of?(File) || attachment.kind_of?(Tempfile)
+          resp.inline_attachment_from_file(attachment)
+        else
+          next
+        end
       end
-    end
-    if draft
-      submit_response = resp.submit_attachments!
-      return sent_message_id if opts[:return_message_id] && submit_response
-      resp
+      if draft
+        submit_response = resp.submit_attachments!
+        return sent_message_id if opts[:return_message_id] && submit_response
+        resp
+      else
+        submit_response = resp.submit!
+        return sent_message_id if opts[:return_message_id] && submit_response
+        submit_response
+      end
     else
-      submit_response = resp.submit!
-      return sent_message_id if opts[:return_message_id] && submit_response
-      submit_response
+      resp = ews.create_item(msg.to_ews)
+      resp.response_messages ?  parse_create_item(resp) : false
     end
   end
 
