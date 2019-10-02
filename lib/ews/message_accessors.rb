@@ -43,37 +43,37 @@ module Viewpoint::EWS::MessageAccessors
   def send_message(opts = {}, &block)
     msg = Template::Message.new opts.clone
     yield msg if block_given?
-    if msg.has_attachments?
-      draft = msg.draft
-      msg.draft = true
-      resp = parse_create_item(ews.create_item(msg.to_ews))
-      msg.file_attachments.each do |attachment|
-        if attachment.kind_of?(Hash)
-          resp.file_attachment_from_hash(attachment)
-        elsif attachment.kind_of?(File) || attachment.kind_of?(Tempfile)
-          resp.file_attachment_from_file(attachment)
-        else
-          next
-        end
-      end
-      msg.inline_attachments.each do |attachment|
-        if attachment.kind_of?(Hash)
-          resp.inline_attachment_from_hash(attachment)
-        elsif attachment.kind_of?(File) || attachment.kind_of?(Tempfile)
-          resp.inline_attachment_from_file(attachment)
-        else
-          next
-        end
-      end
-      if draft
-        resp.submit_attachments!
-        resp
+    draft = msg.draft
+    msg.draft = true
+    create_item_response = ews.create_item(msg.to_ews)
+    sent_message_id = fetch_message_id_from_response(create_item_response)
+    resp = parse_create_item(create_item_response)
+    msg.file_attachments.each do |attachment|
+      if attachment.kind_of?(Hash)
+        resp.file_attachment_from_hash(attachment)
+      elsif attachment.kind_of?(File) || attachment.kind_of?(Tempfile)
+        resp.file_attachment_from_file(attachment)
       else
-        resp.submit!
+        next
       end
+    end
+    msg.inline_attachments.each do |attachment|
+      if attachment.kind_of?(Hash)
+        resp.inline_attachment_from_hash(attachment)
+      elsif attachment.kind_of?(File) || attachment.kind_of?(Tempfile)
+        resp.inline_attachment_from_file(attachment)
+      else
+        next
+      end
+    end
+    if draft
+      submit_response = resp.submit_attachments!
+      return sent_message_id if opts[:return_message_id] && submit_response
+      resp
     else
-      resp = ews.create_item(msg.to_ews)
-      resp.response_messages ?  parse_create_item(resp) : false
+      submit_response = resp.submit!
+      return sent_message_id if opts[:return_message_id] && submit_response
+      submit_response
     end
   end
 
@@ -100,4 +100,7 @@ module Viewpoint::EWS::MessageAccessors
     message = class_by_name(mtype).new(ews, msg[mtype])
   end
 
+  def fetch_message_id_from_response(resp)
+    resp.response_messages[0].items.first[:message][:elems].first[:item_id][:attribs][:id]
+  end
 end # Viewpoint::EWS::MessageAccessors
