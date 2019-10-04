@@ -67,6 +67,16 @@ module Viewpoint::EWS
 
         msg[:in_reply_to] = "<#{in_reply_to}>" unless in_reply_to.nil?
 
+        if in_reply_to
+          msg[:in_reply_to] = begin
+            if in_reply_to =~ /<.+>/
+              in_reply_to
+            else
+              "<#{in_reply_to}>"
+            end
+          end
+        end
+
         msg[:is_read] = is_read
 
         msg[:extended_properties] = extended_properties unless extended_properties.empty?
