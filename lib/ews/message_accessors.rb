@@ -43,10 +43,12 @@ module Viewpoint::EWS::MessageAccessors
   def send_message(opts = {}, &block)
     msg = Template::Message.new opts.clone
     yield msg if block_given?
-    if msg.has_attachments?
+    if msg.has_attachments? || opts[:return_message_id]
       draft = msg.draft
       msg.draft = true
-      resp = parse_create_item(ews.create_item(msg.to_ews))
+      create_item_response = ews.create_item(msg.to_ews)
+      sent_message_id = fetch_message_id_from_response(create_item_response)
+      resp = parse_create_item(create_item_response)
       msg.file_attachments.each do |attachment|
         if attachment.kind_of?(Hash)
           resp.file_attachment_from_hash(attachment)
@@ -66,10 +68,13 @@ module Viewpoint::EWS::MessageAccessors
         end
       end
       if draft
-        resp.submit_attachments!
+        submit_response = resp.submit_attachments!
+        return sent_message_id if opts[:return_message_id] && submit_response
         resp
       else
-        resp.submit!
+        submit_response = resp.submit!
+        return sent_message_id if opts[:return_message_id] && submit_response
+        submit_response
       end
     else
       resp = ews.create_item(msg.to_ews)
@@ -100,4 +105,7 @@ module Viewpoint::EWS::MessageAccessors
     message = class_by_name(mtype).new(ews, msg[mtype])
   end
 
+  def fetch_message_id_from_response(resp)
+    resp.response_messages[0].items.first[:message][:elems].first[:item_id][:attribs][:id]
+  end
 end # Viewpoint::EWS::MessageAccessors
