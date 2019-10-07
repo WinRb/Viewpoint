@@ -972,10 +972,6 @@ module Viewpoint::EWS::SOAP
       }
     end
 
-    def in_reply_to!(message_id)
-      nbuild[NS_EWS_TYPES].InReplyTo(message_id)
-    end
-
     def required_attendees!(attendees)
       nbuild[NS_EWS_TYPES].RequiredAttendees {
         attendees.each {|a| attendee!(a[:attendee])}

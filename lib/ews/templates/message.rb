@@ -65,18 +65,6 @@ module Viewpoint::EWS
         bcc_r = bcc_recipients.collect{|r| {mailbox: {email_address: r}}}
         msg[:bcc_recipients] = bcc_r unless bcc_r.empty?
 
-        msg[:in_reply_to] = "<#{in_reply_to}>" unless in_reply_to.nil?
-
-        if in_reply_to
-          msg[:in_reply_to] = begin
-            if in_reply_to =~ /<.+>/
-              in_reply_to
-            else
-              "<#{in_reply_to}>"
-            end
-          end
-        end
-
         msg[:is_read] = is_read
 
         msg[:extended_properties] = extended_properties unless extended_properties.empty?
