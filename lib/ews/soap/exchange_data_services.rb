@@ -50,7 +50,12 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Find Item',
+          uniq_id: SecureRandom.uuid,
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Gets items from the Exchange store
@@ -85,7 +90,12 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Get Item',
+          uniq_id: SecureRandom.uuid,
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Defines a request to create an item in the Exchange store.
@@ -148,7 +158,12 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Create Item',
+          uniq_id: SecureRandom.uuid,
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Used to modify the properties of an existing item in the Exchange store
@@ -201,7 +216,12 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Update Item',
+          uniq_id: SecureRandom.uuid,
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Delete an item from a mailbox in the Exchange store
@@ -242,7 +262,12 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Delete Item',
+          uniq_id: SecureRandom.uuid,
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Used to move one or more items to a single destination folder.
@@ -283,7 +308,12 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Move Item',
+          uniq_id: SecureRandom.uuid,
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Copies items and puts the items in a different folder
@@ -324,7 +354,12 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Copy Item',
+          uniq_id: SecureRandom.uuid,
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Used to send e-mail messages that are located in the Exchange store.
@@ -363,7 +398,12 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Send Item',
+          uniq_id: SecureRandom.uuid,
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Export items as a base64 string
@@ -384,7 +424,12 @@ module Viewpoint::EWS::SOAP
       builder.export_item_ids!(ids[:item_ids])
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Export Items',
+          uniq_id: SecureRandom.uuid,
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # ------------- Folder Operations ------------
@@ -416,7 +461,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Create Folder',
+          uniq_id: SecureRandom.uuid
+      }
+      do_soap_request(req, options)
     end
 
     # Defines a request to copy folders in the Exchange store
@@ -437,7 +486,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Copy Folder',
+          uniq_id: SecureRandom.uuid
+      }
+      do_soap_request(req, options)
     end
 
     # Deletes folders from a mailbox.
@@ -462,7 +515,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Delete Folder',
+          uniq_id: SecureRandom.uuid
+      }
+      do_soap_request(req, options)
     end
 
     # Find subfolders of an identified folder
@@ -501,7 +558,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Find Folder',
+          uniq_id: SecureRandom.uuid
+      }
+      do_soap_request(req, options)
     end
 
     # Gets folders from the Exchange store
@@ -536,7 +597,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Find Folder',
+          uniq_id: SecureRandom.uuid
+      }
+      do_soap_request(req, options)
     end
 
     # Defines a request to move folders in the Exchange store
@@ -557,7 +622,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Move Folder',
+          uniq_id: SecureRandom.uuid
+      }
+      do_soap_request(req, options)
     end
 
     # Update properties for a specified folder
@@ -585,7 +654,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Update Folder',
+          uniq_id: SecureRandom.uuid
+      }
+      do_soap_request(req, options)
     end
 
     # Empties folders in a mailbox.
@@ -615,7 +688,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Empty Folder',
+          uniq_id: SecureRandom.uuid
+      }
+      do_soap_request(req, options)
     end
 
     # ----------- Attachment Operations ----------
@@ -643,7 +720,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Get Attachment',
+          uniq_id: SecureRandom.uuid
+      }
+      do_soap_request(req, options)
     end
 
     # Creates either an item or file attachment and attaches it to the specified item.
@@ -683,7 +764,12 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Create Attachment',
+          uniq_id: SecureRandom.uuid,
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
 
@@ -714,7 +800,11 @@ module Viewpoint::EWS::SOAP
         }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Expand Distribution List',
+          uniq_id: SecureRandom.uuid
+      }
+      do_soap_request(req, options)
     end
 
     # Resolve ambiguous e-mail addresses and display names
@@ -745,7 +835,11 @@ module Viewpoint::EWS::SOAP
         }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Resolve Names',
+          uniq_id: SecureRandom.uuid
+      }
+      do_soap_request(req, options)
     end
 
     # Converts item and folder identifiers between formats.
@@ -774,7 +868,12 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Convert Ids',
+          uniq_id: SecureRandom.uuid,
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
   end #ExchangeDataServices

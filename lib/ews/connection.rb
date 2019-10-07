@@ -24,7 +24,7 @@ class Viewpoint::EWS::Connection
   # This class returns both raw http response which is used to get cookies for grouping subscription
   EWSHttpResponse = Struct.new(:headers, :viewpoint_response)
 
-  attr_reader :endpoint, :hostname
+  attr_reader :endpoint, :hostname, :logger
   # @param [String] endpoint the URL of the web service.
   #   @example https://<site>/ews/Exchange.asmx
   # @param [Hash] opts Misc config options (mostly for development)
@@ -65,6 +65,10 @@ class Viewpoint::EWS::Connection
   # @return [Boolean] true if authentication is successful, false otherwise
   def authenticate
     self.get && true
+  end
+
+  def set_logger(logger:)
+    @logger = logger
   end
 
   def hostname
@@ -117,7 +121,7 @@ class Viewpoint::EWS::Connection
   # @param soapmsg [String]
   # @param opts [Hash] misc opts for handling the Response
   def dispatch_async(ews, soapmsg, opts)
-    streaming_connection = post_async(soapmsg)
+    streaming_connection = post_async(soapmsg, opts: opts)
 
     if opts[:raw_response]
       streaming_connection # Returns the HTTPClient::Connection instance as a result
@@ -144,7 +148,16 @@ class Viewpoint::EWS::Connection
   # @return [String] If the request is successful (200) it returns the body of
   #   the response.
   def post(xmldoc, options: {})
-    headers = {'Content-Type' => 'text/xml', 'Return-Client-Request-Id' => 'true', 'Send-Client-Latencies' => 'true'}
+    log msg: "Making request for **#{options[:request_type]}** with uniq id of: **#{options[:uniq_id]}** with body: #{xmldoc.to_s.squish}"
+
+    headers = {
+        'Content-Type' => 'text/xml',
+        'Return-Client-Request-Id' => 'true',
+        'Send-Client-Latencies' => 'true',
+        'Client-Request-Id' => (options[:uniq_id] || SecureRandom.uuid),
+        'User-Agent' => 'JRNI EWS Integration'
+    }
+
     headers.merge!(custom_http_headers(options[:customisable_headers])) if options[:customisable_headers]
     set_custom_http_cookies(options[:customisable_cookies]) if options[:customisable_cookies]
 
@@ -181,8 +194,15 @@ class Viewpoint::EWS::Connection
   #
   # Send a asynchronous POST to the web service which creates a connection for sending/receiving data
   # @return [HTTPClient::Connection] HTTPClient::Connection
-  def post_async(xmldoc)
-    headers = {'Content-Type' => 'text/xml', 'Return-Client-Request-Id' => 'true', 'Send-Client-Latencies' => 'true'}
+  def post_async(xmldoc, opts: {})
+    log msg: "Making request for #{opts[:request_type]} with uniq id of: #{opts[:uniq_id]}, with body: #{xmldoc.to_s.squish}"
+    headers = {
+        'Content-Type' => 'text/xml',
+        'Return-Client-Request-Id' => 'true',
+        'Send-Client-Latencies' => 'true',
+        'Client-Request-Id' => (opts[:uniq_id] || SecureRandom.uuid),
+        'User-Agent' => 'JRNI EWS Integration'
+    }
     @httpcli.post_async(@endpoint, xmldoc, headers, request_body: xmldoc)
   end
 
@@ -195,19 +215,24 @@ class Viewpoint::EWS::Connection
 
     case resp.status
     when 200
+      log msg: "Recieved a 200 response for request of type: **#{options[:request_type]}** with uniq id: **#{options[:uniq_id]}** and headers of: #{resp.headers}"
       if include_http_headers
         return resp.body, resp.headers
       else
         return resp.body
       end
     when 302
+      log msg: "Recieved a **302** response for request of type: **#{options[:request_type]}** with uniq id: **#{options[:uniq_id]}** which is not yet handled."
       # @todo redirect
       raise Errors::UnhandledResponseError.new("Unhandled HTTP Redirect", resp, request_body: request_body)
     when 401
+      log msg: "Recieved a **401** response for request of type: **#{options[:request_type]}** with uniq id: **#{options[:uniq_id]}**!"
       raise Errors::UnauthorizedResponseError.new("Unauthorized request", resp, request_body: request_body)
     when 429
+      log msg: "Recieved a **429** response for request of type: **#{options[:request_type]}** with uniq id: **#{options[:uniq_id]}** - Too many requests"
       raise Errors::TooManyRequestsError.new("Too many requests", resp, request_body: request_body)
     when 500
+      log msg: "Recieved a **500** response for request of type: **#{options[:request_type]}** with uniq id: **#{options[:uniq_id]}**!!"
       if resp.headers['Content-Type'] =~ /xml/
         err_string, err_code = parse_soap_error(resp.body)
         raise Errors::SoapResponseError.new("SOAP Error: Message: #{err_string}  Code: #{err_code}", resp, err_code, err_string, request_body: request_body)
@@ -215,6 +240,7 @@ class Viewpoint::EWS::Connection
         raise Errors::ServerError.new("Internal Server Error. Message: #{resp.body}", resp, request_body: request_body)
       end
     else
+      log msg: "Recieved a **#{resp.status}** response for request of type: **#{options[:request_type]}** with uniq id: **#{options[:uniq_id]}** with body: #{resp.body}"
       raise Errors::ResponseError.new("HTTP Error Code: #{resp.status}, Msg: #{resp.body}", resp, request_body: request_body)
     end
   end
@@ -227,6 +253,11 @@ class Viewpoint::EWS::Connection
     err_code    = ndoc.xpath("//faultcode",ns).text
     @log.debug "Internal SOAP error. Message: #{err_string}, Code: #{err_code}"
     [err_string, err_code]
+  end
+
+  def log(msg:)
+    return unless @logger
+    @logger.info "VIEWPOINT EWS:: #{msg}"
   end
 
 end

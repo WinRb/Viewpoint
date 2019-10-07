@@ -27,7 +27,12 @@ module Viewpoint::EWS::SOAP
         }
         end
       end
-      do_soap_request(req, response_class: EwsSoapAvailabilityResponse)
+      options = {
+          request_type: 'Get User OOF Settings',
+          uniq_id: SecureRandom.uuid,
+          response_class: EwsSoapAvailabilityResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Sets a mailbox user's Out of Office (OOF) settings and message.
@@ -54,7 +59,12 @@ module Viewpoint::EWS::SOAP
         }
         end
       end
-      do_soap_request(req, response_class: EwsSoapAvailabilityResponse)
+      options = {
+          request_type: 'Set User OOF Settings',
+          uniq_id: SecureRandom.uuid,
+          response_class: EwsSoapAvailabilityResponse
+      }
+      do_soap_request(req, options)
     end
 
   end #ExchangeAvailability
