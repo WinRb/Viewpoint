@@ -38,7 +38,7 @@ module Viewpoint::EWS::SOAP
       #string.strip!
       return if string.empty?
       if @elems.last[:text]
-        @elems.last[:text] << string
+        @elems.last[:text] += string
       else
         @elems.last[:text] = string
       end
