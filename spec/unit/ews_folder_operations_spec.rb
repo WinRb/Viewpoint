@@ -7,11 +7,12 @@ describe "Operations on Exchange Data Services" do
     @ews = Viewpoint::EWS::SOAP::ExchangeWebService.new con,
       {:server_version => Viewpoint::EWS::SOAP::VERSION_2010_SP2}
     @ews.stub(:do_soap_request)
+    allow(SecureRandom).to receive(:uuid) { 'test' }
   end
 
   it "generates CreateFolder XML" do
     @ews.should_receive(:do_soap_request).
-      with(match_xml(load_soap("create_folder", :request)))
+      with(match_xml(load_soap("create_folder", :request)), { request_type: 'Create Folder', uniq_id: 'test'})
 
     fname = "Test Folder"
     opts = {:parent_folder_id => {:id => :msgfolderroot},
@@ -21,7 +22,7 @@ describe "Operations on Exchange Data Services" do
 
   it "generates CopyFolder XML" do
     @ews.should_receive(:do_soap_request).
-      with(match_xml(load_soap("copy_folder", :request)))
+      with(match_xml(load_soap("copy_folder", :request)), { request_type: 'Copy Folder', uniq_id: 'test'})
 
     tofid = {:id => 'dest_folder_id'}
     @ews.copy_folder tofid, [:id => 'src_folder_id']
@@ -29,7 +30,7 @@ describe "Operations on Exchange Data Services" do
 
   it "generates DeleteFolder XML" do
     @ews.should_receive(:do_soap_request).
-      with(match_xml(load_soap("delete_folder", :request)))
+      with(match_xml(load_soap("delete_folder", :request)), { request_type: 'Delete Folder', uniq_id: 'test'})
 
     fid = "test_folder_id"
     opts = {:folder_ids => [id: fid]}
@@ -39,7 +40,7 @@ describe "Operations on Exchange Data Services" do
 
   it "generates FindFolder XML" do
     @ews.should_receive(:do_soap_request).
-      with(match_xml(load_soap("find_folder", :request)))
+      with(match_xml(load_soap("find_folder", :request)),{ request_type: 'Find Folder', uniq_id: 'test'})
 
     fname = "Test Folder"
     opts = {:restriction =>
@@ -66,7 +67,7 @@ describe "Operations on Exchange Data Services" do
 
   it "generates GetFolder XML" do
     @ews.should_receive(:do_soap_request).
-      with(match_xml(load_soap("get_folder", :request)))
+      with(match_xml(load_soap("get_folder", :request)), { request_type: 'Find Folder', uniq_id: 'test'})
 
     opts = { :folder_ids => [{:id => :msgfolderroot}],
       :folder_shape => {:base_shape => 'Default'} }
@@ -92,7 +93,7 @@ describe "Operations on Exchange Data Services" do
 
   it "generates MoveFolder XML" do
     @ews.should_receive(:do_soap_request).
-      with(match_xml(load_soap("move_folder", :request)))
+      with(match_xml(load_soap("move_folder", :request)), { request_type: 'Move Folder', uniq_id: 'test'})
 
     tofid = {:id => 'dest_folder_id'}
     @ews.move_folder tofid, [:id => 'src_folder_id']
@@ -100,7 +101,7 @@ describe "Operations on Exchange Data Services" do
 
   it "generates EmptyFolder XML" do
     @ews.should_receive(:do_soap_request).
-      with(match_xml(load_soap("empty_folder", :request)))
+      with(match_xml(load_soap("empty_folder", :request)), { request_type: 'Empty Folder', uniq_id: 'test'})
 
     fid = "test_folder_id"
     opts = {:folder_ids => [id: fid]}

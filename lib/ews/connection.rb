@@ -16,6 +16,7 @@
   limitations under the License.
 =end
 require 'httpclient'
+require 'securerandom'
 
 class Viewpoint::EWS::Connection
   include Viewpoint::EWS::ConnectionHelper

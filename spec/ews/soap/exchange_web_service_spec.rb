@@ -13,6 +13,7 @@ describe Viewpoint::EWS::SOAP::ExchangeWebService do
     subject { ews_instance.get_user_settings(opts) }
 
     it "makes SOAP request" do
+      expect(SecureRandom).to receive(:uuid) { 'test' }
       expect(Viewpoint::EWS::SOAP::EwsBuilder).to receive(:new) { ews_builder_double }
       expect(ews_builder_double).to receive(:build_get_user_settings_soap).with(
         {
@@ -22,7 +23,9 @@ describe Viewpoint::EWS::SOAP::ExchangeWebService do
         }
       ).and_return(soap_double)
       expect(ews_instance).to receive(:do_soap_request).with(soap_double, {
-        response_class: Viewpoint::EWS::SOAP::EwsSoapGetUserSettingsResponse
+        response_class: Viewpoint::EWS::SOAP::EwsSoapGetUserSettingsResponse,
+        request_type: 'Get User Settings',
+        uniq_id: 'test'
         }
       )
 
