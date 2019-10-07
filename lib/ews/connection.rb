@@ -152,7 +152,7 @@ class Viewpoint::EWS::Connection
   # @return [String] If the request is successful (200) it returns the body of
   #   the response.
   def post(xmldoc, options: {})
-    log msg: "Making request for **#{options[:request_type]}** with uniq id of: **#{options[:uniq_id]}** with body: #{xmldoc.to_s.squish}"
+    log msg: "Making request for **#{options[:request_type]}** with uniq id of: **#{options[:uniq_id]}** with body: #{xmldoc.to_s.gsub(/\s+/, ' ')}"
 
     headers = {
         'Content-Type' => 'text/xml',
@@ -199,7 +199,7 @@ class Viewpoint::EWS::Connection
   # Send a asynchronous POST to the web service which creates a connection for sending/receiving data
   # @return [HTTPClient::Connection] HTTPClient::Connection
   def post_async(xmldoc, opts: {})
-    log msg: "Making request for #{opts[:request_type]} with uniq id of: #{opts[:uniq_id]}, with body: #{xmldoc.to_s.squish}"
+    log msg: "Making request for #{opts[:request_type]} with uniq id of: #{opts[:uniq_id]}, with body: #{xmldoc.to_s.gsub(/\s+/, ' ')}"
     headers = {
         'Content-Type' => 'text/xml',
         'Return-Client-Request-Id' => 'true',
