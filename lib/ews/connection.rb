@@ -24,7 +24,7 @@ class Viewpoint::EWS::Connection
   # This class returns both raw http response which is used to get cookies for grouping subscription
   EWSHttpResponse = Struct.new(:headers, :viewpoint_response)
 
-  attr_reader :endpoint, :hostname, :logger
+  attr_reader :endpoint, :hostname, :logger, :user_agent
   # @param [String] endpoint the URL of the web service.
   #   @example https://<site>/ews/Exchange.asmx
   # @param [Hash] opts Misc config options (mostly for development)
@@ -69,6 +69,10 @@ class Viewpoint::EWS::Connection
 
   def set_logger(logger:)
     @logger = logger
+  end
+
+  def set_user_agent(user_agent:)
+    @user_agent = user_agent
   end
 
   def hostname
@@ -155,7 +159,7 @@ class Viewpoint::EWS::Connection
         'Return-Client-Request-Id' => 'true',
         'Send-Client-Latencies' => 'true',
         'Client-Request-Id' => (options[:uniq_id] || SecureRandom.uuid),
-        'User-Agent' => 'JRNI EWS Integration'
+        'User-Agent' => @user_agent || 'Viewpoint EWS'
     }
 
     headers.merge!(custom_http_headers(options[:customisable_headers])) if options[:customisable_headers]
