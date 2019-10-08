@@ -70,9 +70,9 @@ module Viewpoint::EWS::SOAP
       opts = options.merge({
         response_class: EwsResponse,
         customisable_headers: customisable_headers,
-        customisable_cookies: customisable_cookies
+        customisable_cookies: customisable_cookies,
+        request_type: 'Subscribe'
       })
-
       do_soap_request(req, opts)
     end
 
@@ -98,7 +98,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Unsubscribe',
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Used by pull subscription clients to request notifications from the Client Access server
@@ -117,7 +121,12 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Get Events',
+          uniq_id: SecureRandom.uuid,
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Used by stream subscription clients to create connection to the Client Access server
@@ -138,7 +147,11 @@ module Viewpoint::EWS::SOAP
       end
 
       # TODO: Once do_soap_request_async support raw_response, returns GetStreamingEventResponse results
-      do_soap_request_async(req, raw_response: true)
+      options = {
+          request_type: 'Get Streaming Events',
+          raw_response: true
+      }
+      do_soap_request_async(req, options)
     end
 
 

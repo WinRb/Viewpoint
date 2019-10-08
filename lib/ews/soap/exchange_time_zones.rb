@@ -17,7 +17,11 @@ module Viewpoint::EWS::SOAP
           builder.get_server_time_zones!(full: full, ids: ids)
         end
       end
-      result = do_soap_request req, response_class: EwsSoapResponse
+      options = {
+          request_type: 'Get user Timezones',
+          response_class: EwsSoapResponse
+      }
+      result = do_soap_request(req, options)
 
       if result.success?
         zones = []
