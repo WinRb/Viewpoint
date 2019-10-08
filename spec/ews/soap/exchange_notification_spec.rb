@@ -33,7 +33,8 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
           anchor_mailbox: "mailbox@example.com",
           response_class: Viewpoint::EWS::SOAP::EwsResponse,
           customisable_headers: customisable_headers,
-          customisable_cookies: customisable_cookies
+          customisable_cookies: customisable_cookies,
+          request_type: 'Subscribe'
         }
       )
       subject
@@ -49,7 +50,8 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
             anchor_mailbox: "mailbox@example.com",
             response_class: Viewpoint::EWS::SOAP::EwsResponse,
             customisable_headers: {},
-            customisable_cookies: {}
+            customisable_cookies: {},
+            request_type: 'Subscribe'
           }
         )
         subject

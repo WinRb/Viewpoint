@@ -16,6 +16,11 @@ Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
 
+## Version 1.2.11
+1. Implemented new headers for Exchange 2016
+2. Implemented a way to pass a customer logger when initializing the gem
+3. Added log statements before and after making the request to Exchange with the uniq id of the request
+
 ## Version 1.2.10
 1. Implemented ErrorExceededFindCountLimit to handle an issue with find_items_between returning ErrorExceededFindCountLimit error
 

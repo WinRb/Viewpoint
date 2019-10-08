@@ -16,6 +16,7 @@
   limitations under the License.
 =end
 require 'httpclient'
+require 'securerandom'
 
 class Viewpoint::EWS::Connection
   include Viewpoint::EWS::ConnectionHelper
@@ -24,7 +25,9 @@ class Viewpoint::EWS::Connection
   # This class returns both raw http response which is used to get cookies for grouping subscription
   EWSHttpResponse = Struct.new(:headers, :viewpoint_response)
 
-  attr_reader :endpoint, :hostname
+  attr_accessor :logger, :user_agent
+
+  attr_reader :endpoint, :hostname, :logger, :user_agent
   # @param [String] endpoint the URL of the web service.
   #   @example https://<site>/ews/Exchange.asmx
   # @param [Hash] opts Misc config options (mostly for development)
@@ -117,7 +120,7 @@ class Viewpoint::EWS::Connection
   # @param soapmsg [String]
   # @param opts [Hash] misc opts for handling the Response
   def dispatch_async(ews, soapmsg, opts)
-    streaming_connection = post_async(soapmsg)
+    streaming_connection = post_async(soapmsg, opts: opts)
 
     if opts[:raw_response]
       streaming_connection # Returns the HTTPClient::Connection instance as a result
@@ -144,13 +147,23 @@ class Viewpoint::EWS::Connection
   # @return [String] If the request is successful (200) it returns the body of
   #   the response.
   def post(xmldoc, options: {})
-    headers = {'Content-Type' => 'text/xml', 'Return-Client-Request-Id' => 'true', 'Send-Client-Latencies' => 'true'}
+    options[:uniq_id] = SecureRandom.uuid
+    log msg: "Making request for **#{options[:request_type]}** with uniq id of: **#{options[:uniq_id]}** with body: #{xmldoc.to_s.gsub(/\s+/, ' ')}"
+
+    headers = {
+        'Content-Type' => 'text/xml',
+        'Return-Client-Request-Id' => 'true',
+        'Send-Client-Latencies' => 'true',
+        'Client-Request-Id' => options[:uniq_id],
+        'User-Agent' => @user_agent || 'Viewpoint EWS'
+    }
+
     headers.merge!(custom_http_headers(options[:customisable_headers])) if options[:customisable_headers]
     set_custom_http_cookies(options[:customisable_cookies]) if options[:customisable_cookies]
 
     raw_http_response = @httpcli.post(@endpoint, xmldoc, headers)
 
-    check_response(raw_http_response, include_http_headers: options[:include_http_headers], request_body: xmldoc)
+    check_response(raw_http_response, include_http_headers: options[:include_http_headers], request_body: xmldoc, options: options)
   end
 
   def custom_http_headers(headers)
@@ -181,17 +194,28 @@ class Viewpoint::EWS::Connection
   #
   # Send a asynchronous POST to the web service which creates a connection for sending/receiving data
   # @return [HTTPClient::Connection] HTTPClient::Connection
-  def post_async(xmldoc)
-    headers = {'Content-Type' => 'text/xml', 'Return-Client-Request-Id' => 'true', 'Send-Client-Latencies' => 'true'}
+  def post_async(xmldoc, opts: {})
+    opts[:uniq_id] = SecureRandom.uuid
+    log msg: "Making ASYNC POST request for #{opts[:request_type]} with uniq id of: #{opts[:uniq_id]}, with body: #{xmldoc.to_s.gsub(/\s+/, ' ')}"
+
+    headers = {
+        'Content-Type' => 'text/xml',
+        'Return-Client-Request-Id' => 'true',
+        'Send-Client-Latencies' => 'true',
+        'Client-Request-Id' => opts[:uniq_id],
+        'User-Agent' => @user_agent || 'Viewpoint EWS'
+    }
     @httpcli.post_async(@endpoint, xmldoc, headers, request_body: xmldoc)
   end
 
 
   private
 
-  def check_response(resp, include_http_headers: false, request_body: nil)
+  def check_response(resp, include_http_headers: false, request_body: nil, options: {})
     @log.debug("Got HTTP response with headers: #{resp.headers}")
     @log.debug("Got HTTP response with body: #{resp.body}") if resp.body
+
+    log msg: "Received a **#{resp.status}** response for request of type: **#{options[:request_type]}** with uniq id: **#{options[:uniq_id]}** with body: #{resp.body}"
 
     case resp.status
     when 200
@@ -227,6 +251,11 @@ class Viewpoint::EWS::Connection
     err_code    = ndoc.xpath("//faultcode",ns).text
     @log.debug "Internal SOAP error. Message: #{err_string}, Code: #{err_code}"
     [err_string, err_code]
+  end
+
+  def log(msg:)
+    return unless @logger
+    @logger.info "VIEWPOINT EWS:: #{msg}"
   end
 
 end

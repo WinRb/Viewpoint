@@ -21,9 +21,10 @@ describe Viewpoint::EWS::Connection do
 
     context "when customisable headers are passed in" do
       let(:options) { { customisable_headers: customisable_headers } }
-      let(:expected_headers) { {'Content-Type' => 'text/xml', 'Return-Client-Request-Id' => 'true', 'Send-Client-Latencies' => 'true'}.merge!(customisable_headers) }
+      let(:expected_headers) { {'Content-Type' => 'text/xml', 'Return-Client-Request-Id' => 'true', 'Send-Client-Latencies' => 'true', 'Client-Request-Id' => 'test', 'User-Agent' => 'Viewpoint EWS'}.merge!(customisable_headers) }
 
       it "merges the custom HTTP headers to the existing headers" do
+        expect(SecureRandom).to receive(:uuid).and_return("test")
         expect(connection).to receive(:custom_http_headers) { customisable_headers }
         expect(connection.instance_variable_get(:@httpcli)).to receive(:post)
           .with(endpoint, xmldoc, expected_headers)
@@ -43,10 +44,11 @@ describe Viewpoint::EWS::Connection do
     end
 
     context "when no customisable cookies are passed in" do
-      let(:expected_headers) { {'Content-Type' => 'text/xml', 'Return-Client-Request-Id' => 'true', 'Send-Client-Latencies' => 'true'} }
+      let(:expected_headers) { {'Content-Type' => 'text/xml', 'Return-Client-Request-Id' => 'true', 'Send-Client-Latencies' => 'true','Client-Request-Id' => 'test', 'User-Agent' => 'Viewpoint EWS'} }
 
       it "sets only the default headers" do
         expect(connection).not_to receive(:custom_http_headers)
+        expect(SecureRandom).to receive(:uuid).and_return("test")
         expect(connection.instance_variable_get(:@httpcli)).to receive(:post)
           .with(endpoint, xmldoc, expected_headers)
 
