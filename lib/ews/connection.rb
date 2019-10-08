@@ -206,7 +206,7 @@ class Viewpoint::EWS::Connection
         'Return-Client-Request-Id' => 'true',
         'Send-Client-Latencies' => 'true',
         'Client-Request-Id' => (opts[:uniq_id] || SecureRandom.uuid),
-        'User-Agent' => 'JRNI EWS Integration'
+        'User-Agent' => @user_agent || 'Viewpoint EWS'
     }
     @httpcli.post_async(@endpoint, xmldoc, headers, request_body: xmldoc)
   end
