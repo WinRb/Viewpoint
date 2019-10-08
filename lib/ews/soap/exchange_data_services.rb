@@ -477,8 +477,7 @@ module Viewpoint::EWS::SOAP
         end
       end
       options = {
-          request_type: 'Copy Folder',
-          uniq_id: SecureRandom.uuid
+          request_type: 'Copy Folder'
       }
       do_soap_request(req, options)
     end
