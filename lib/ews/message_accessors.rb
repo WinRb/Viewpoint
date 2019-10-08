@@ -41,7 +41,7 @@ module Viewpoint::EWS::MessageAccessors
   #   with a message stating why the e-mail could not be sent.
   # @todo Finish ItemAttachments
   def send_message(opts = {}, &block)
-    msg = Template::Message.new opts.clone
+    msg = opts[:in_reply_to].present? ? Template::ReplyToItem.new(opts.clone) : Template::Message.new(opts.clone)
     yield msg if block_given?
     if msg.has_attachments? || opts[:return_message_id]
       draft = msg.draft
@@ -87,6 +87,9 @@ module Viewpoint::EWS::MessageAccessors
     send_message opts.merge(draft: true), &block
   end
 
+  def reply_to_message(opts = {}, &block)
+    send_message opts.merge(in_reply_to: true), &block
+  end
 
   private
 

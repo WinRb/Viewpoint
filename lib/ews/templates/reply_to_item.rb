@@ -16,7 +16,7 @@ module Viewpoint::EWS
       def init_defaults!
         super
         self.new_body_content ||= ''
-        self.new_body_type ||= 'Text'
+        self.new_body_type ||= 'HTML'
         self.ews_type = :reply_to_item
       end
 
