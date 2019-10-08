@@ -19,7 +19,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Get user Timezones',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsSoapResponse
       }
       result = do_soap_request(req, options)

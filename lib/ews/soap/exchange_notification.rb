@@ -71,8 +71,7 @@ module Viewpoint::EWS::SOAP
         response_class: EwsResponse,
         customisable_headers: customisable_headers,
         customisable_cookies: customisable_cookies,
-        request_type: 'Subscribe',
-        uniq_id: SecureRandom.uuid,
+        request_type: 'Subscribe'
       })
       do_soap_request(req, opts)
     end
@@ -101,7 +100,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Unsubscribe',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsResponse
       }
       do_soap_request(req, options)
@@ -151,7 +149,6 @@ module Viewpoint::EWS::SOAP
       # TODO: Once do_soap_request_async support raw_response, returns GetStreamingEventResponse results
       options = {
           request_type: 'Get Streaming Events',
-          uniq_id: SecureRandom.uuid,
           raw_response: true
       }
       do_soap_request_async(req, options)

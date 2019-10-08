@@ -47,8 +47,8 @@ class Viewpoint::EWSClient
     http_klass = opts[:http_class] || Viewpoint::EWS::Connection
     con = http_klass.new(endpoint, opts[:http_opts] || {})
     con.set_auth @username, password
-    con.set_logger(logger: opts[:logger_opts][:logger]) if opts.has_key?(:logger_opts)
-    con.set_user_agent(user_agent: options[:user_agent]) if opts.has_key?(:user_agent)
+    con.logger = opts[:logger_opts][:logger] if opts.has_key?(:logger_opts)
+    con.user_agent = opts[:user_agent]  if opts.has_key?(:user_agent)
     @ews = SOAP::ExchangeWebService.new(con, opts)
   end
 

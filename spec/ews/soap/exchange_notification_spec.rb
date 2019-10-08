@@ -25,7 +25,6 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
     subject { test_instance.subscribe(subscriptions, options: options) }
 
     it "passes the customisable_cookies and customisable_headers options to the do_soap_request method" do
-      expect(SecureRandom).to receive(:uuid).and_return('test')
       expect(test_instance).to receive(:get_customisable_headers).with(options) { customisable_headers }
       expect(test_instance).to receive(:get_customisable_cookies).with(options) { customisable_cookies }
       allow(test_instance).to receive(:build_soap!) { req_double }
@@ -35,8 +34,7 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
           response_class: Viewpoint::EWS::SOAP::EwsResponse,
           customisable_headers: customisable_headers,
           customisable_cookies: customisable_cookies,
-          request_type: 'Subscribe',
-          uniq_id: 'test'
+          request_type: 'Subscribe'
         }
       )
       subject
@@ -44,7 +42,6 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
 
     context "when get_customisable_headers and get_customisable_cookies return nil" do
       it "passes empty headers and cookies hashes to the do_soap_request method" do
-        expect(SecureRandom).to receive(:uuid).and_return('test')
         expect(test_instance).to receive(:get_customisable_headers).with(options) { nil }
         expect(test_instance).to receive(:get_customisable_cookies).with(options) { nil }
         allow(test_instance).to receive(:build_soap!) { req_double }
@@ -54,8 +51,7 @@ describe Viewpoint::EWS::SOAP::ExchangeNotification do
             response_class: Viewpoint::EWS::SOAP::EwsResponse,
             customisable_headers: {},
             customisable_cookies: {},
-            request_type: 'Subscribe',
-            uniq_id: 'test'
+            request_type: 'Subscribe'
           }
         )
         subject

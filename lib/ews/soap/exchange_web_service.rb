@@ -167,7 +167,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Get User Availablity',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsSoapFreeBusyResponse
       }
       do_soap_request(req, options)
@@ -183,7 +182,6 @@ module Viewpoint::EWS::SOAP
       req = EwsBuilder.new.build_get_user_settings_soap(opts)
       options = {
           request_type: 'Get User Settings',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsSoapGetUserSettingsResponse
       }
       do_soap_request(req, options)
@@ -204,7 +202,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Get Rooms',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsSoapRoomResponse
       }
       do_soap_request(req, options)
@@ -221,7 +218,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Get Rooms Lists',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsSoapRoomlistResponse
       }
       do_soap_request(req, options)

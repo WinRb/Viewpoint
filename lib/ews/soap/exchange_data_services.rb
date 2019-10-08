@@ -52,7 +52,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Find Item',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsResponse
       }
       do_soap_request(req, options)
@@ -92,7 +91,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Get Item',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsResponse
       }
       do_soap_request(req, options)
@@ -160,7 +158,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Create Item',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsResponse
       }
       do_soap_request(req, options)
@@ -218,7 +215,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Update Item',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsResponse
       }
       do_soap_request(req, options)
@@ -264,7 +260,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Delete Item',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsResponse
       }
       do_soap_request(req, options)
@@ -310,7 +305,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Move Item',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsResponse
       }
       do_soap_request(req, options)
@@ -356,7 +350,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Copy Item',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsResponse
       }
       do_soap_request(req, options)
@@ -400,7 +393,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Send Item',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsResponse
       }
       do_soap_request(req, options)
@@ -426,7 +418,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Export Items',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsResponse
       }
       do_soap_request(req, options)
@@ -462,8 +453,7 @@ module Viewpoint::EWS::SOAP
         end
       end
       options = {
-          request_type: 'Create Folder',
-          uniq_id: SecureRandom.uuid
+          request_type: 'Create Folder'
       }
       do_soap_request(req, options)
     end
@@ -516,8 +506,7 @@ module Viewpoint::EWS::SOAP
         end
       end
       options = {
-          request_type: 'Delete Folder',
-          uniq_id: SecureRandom.uuid
+          request_type: 'Delete Folder'
       }
       do_soap_request(req, options)
     end
@@ -559,8 +548,7 @@ module Viewpoint::EWS::SOAP
         end
       end
       options = {
-          request_type: 'Find Folder',
-          uniq_id: SecureRandom.uuid
+          request_type: 'Find Folder'
       }
       do_soap_request(req, options)
     end
@@ -598,8 +586,7 @@ module Viewpoint::EWS::SOAP
         end
       end
       options = {
-          request_type: 'Find Folder',
-          uniq_id: SecureRandom.uuid
+          request_type: 'Find Folder'
       }
       do_soap_request(req, options)
     end
@@ -623,8 +610,7 @@ module Viewpoint::EWS::SOAP
         end
       end
       options = {
-          request_type: 'Move Folder',
-          uniq_id: SecureRandom.uuid
+          request_type: 'Move Folder'
       }
       do_soap_request(req, options)
     end
@@ -655,8 +641,7 @@ module Viewpoint::EWS::SOAP
         end
       end
       options = {
-          request_type: 'Update Folder',
-          uniq_id: SecureRandom.uuid
+          request_type: 'Update Folder'
       }
       do_soap_request(req, options)
     end
@@ -689,8 +674,7 @@ module Viewpoint::EWS::SOAP
         end
       end
       options = {
-          request_type: 'Empty Folder',
-          uniq_id: SecureRandom.uuid
+          request_type: 'Empty Folder'
       }
       do_soap_request(req, options)
     end
@@ -721,8 +705,7 @@ module Viewpoint::EWS::SOAP
         end
       end
       options = {
-          request_type: 'Get Attachment',
-          uniq_id: SecureRandom.uuid
+          request_type: 'Get Attachment'
       }
       do_soap_request(req, options)
     end
@@ -766,7 +749,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Create Attachment',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsResponse
       }
       do_soap_request(req, options)
@@ -801,8 +783,7 @@ module Viewpoint::EWS::SOAP
         end
       end
       options = {
-          request_type: 'Expand Distribution List',
-          uniq_id: SecureRandom.uuid
+          request_type: 'Expand Distribution List'
       }
       do_soap_request(req, options)
     end
@@ -836,8 +817,7 @@ module Viewpoint::EWS::SOAP
         end
       end
       options = {
-          request_type: 'Resolve Names',
-          uniq_id: SecureRandom.uuid
+          request_type: 'Resolve Names'
       }
       do_soap_request(req, options)
     end
@@ -870,7 +850,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Convert Ids',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsResponse
       }
       do_soap_request(req, options)

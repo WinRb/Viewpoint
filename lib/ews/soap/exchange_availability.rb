@@ -29,7 +29,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Get User OOF Settings',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsSoapAvailabilityResponse
       }
       do_soap_request(req, options)
@@ -61,7 +60,6 @@ module Viewpoint::EWS::SOAP
       end
       options = {
           request_type: 'Set User OOF Settings',
-          uniq_id: SecureRandom.uuid,
           response_class: EwsSoapAvailabilityResponse
       }
       do_soap_request(req, options)
