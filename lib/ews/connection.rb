@@ -205,6 +205,9 @@ class Viewpoint::EWS::Connection
         'Client-Request-Id' => opts[:uniq_id],
         'User-Agent' => @user_agent || 'Viewpoint EWS'
     }
+
+    headers.merge!(custom_http_headers(options[:customisable_headers])) if opts[:customisable_headers]
+
     @httpcli.post_async(@endpoint, xmldoc, headers, request_body: xmldoc)
   end
 

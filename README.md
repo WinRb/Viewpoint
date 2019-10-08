@@ -16,6 +16,9 @@ Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
 
+## Version 1.2.12
+1. Implemented ability to pass custom headers for the get streaming events call
+
 ## Version 1.2.11
 1. Implemented new headers for Exchange 2016
 2. Implemented a way to pass a customer logger when initializing the gem
