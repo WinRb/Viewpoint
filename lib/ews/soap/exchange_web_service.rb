@@ -232,7 +232,6 @@ module Viewpoint::EWS::SOAP
     def do_soap_request(soapmsg, opts = {})
       #  Most of the requests seem to be non async, so we can log here when we are making the request
       # or we can do it inside the connection
-      @logger.info "Making requests to exchange, with options #{opts}"
       @log.debug <<-EOF.gsub(/^ {8}/, '')
         Sending SOAP Request:
         ----------------
