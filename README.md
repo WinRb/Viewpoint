@@ -16,6 +16,9 @@ Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
 
+## Version 1.2.13
+1. Fixed a bug where an erroneous log statement was placed.
+
 ## Version 1.2.12
 1. Implemented ability to pass custom headers for the get streaming events call
 
