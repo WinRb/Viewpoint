@@ -16,6 +16,9 @@ Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
 
+## Version 1.2.14
+1. Fixed a bug where there was an unknown method 
+
 ## Version 1.2.13
 1. Fixed a bug where an erroneous log statement was placed.
 
