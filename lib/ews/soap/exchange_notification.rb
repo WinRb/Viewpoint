@@ -46,7 +46,10 @@ module Viewpoint::EWS::SOAP
     #         :event_types=> %w{NewMailEvent DeletedEvent},
     #       }},
     #       ]
-    def subscribe(subscriptions)
+    def subscribe(subscriptions, options: {})
+      customisable_headers = get_customisable_headers(options) || {}
+      customisable_cookies = get_customisable_cookies(options) || {}
+
       req = build_soap! do |type, builder|
         if(type == :header)
         else
@@ -63,7 +66,22 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+
+      opts = options.merge({
+        response_class: EwsResponse,
+        customisable_headers: customisable_headers,
+        customisable_cookies: customisable_cookies,
+        request_type: 'Subscribe'
+      })
+      do_soap_request(req, opts)
+    end
+
+    def get_customisable_headers(options)
+      (options[:customisable_headers]||{}).reject { |option, _| !CUSTOMISABLE_HTTP_HEADERS.include?(option) }
+    end
+
+    def get_customisable_cookies(options)
+      (options[:customisable_cookies]||{}).reject { |option, _| !CUSTOMISABLE_HTTP_COOKIES.include?(option) }
     end
 
     # End a pull notification subscription.
@@ -80,7 +98,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Unsubscribe',
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Used by pull subscription clients to request notifications from the Client Access server
@@ -99,7 +121,34 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Get Events',
+          uniq_id: SecureRandom.uuid,
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
+    end
+
+    # Used by stream subscription clients to create connection to the Client Access server
+    # @see https://msdn.microsoft.com/en-us/library/office/ff406172(v=exchg.150).aspx GetStreamingEvents on MSDN
+    #      https://msdn.microsoft.com/en-us/library/ff406172(v=exchg.140).aspx
+    #
+    # @param [Array] subscription_ids Subscription identifiers
+    # @param [Integer] timeout For streaming connection
+    def get_streaming_events(subscription_ids, timeout, options: {})
+      req = build_soap! do |type, builder|
+        if(type == :header)
+        else
+          builder.nbuild[NS_EWS_MESSAGES].GetStreamingEvents do
+            builder.subscription_ids!(subscription_ids)
+            builder.connection_timeout!(timeout)
+          end
+        end
+      end
+
+      # TODO: Once do_soap_request_async support raw_response, returns GetStreamingEventResponse results
+      options.merge!({ request_type: 'Get Streaming Events', raw_response: true })
+      do_soap_request_async(req, options)
     end
 
 
@@ -141,6 +190,27 @@ module Viewpoint::EWS::SOAP
       subscribe([{push_subscription_request: psr}])
     end
 
+    # Copied from #pull_subscribe_folder above and changed the request type to streaming_subscription_request
+    #
+    # Create a streaming subscription to a single folder
+    # @param folder [Hash] a hash with the folder :id and :change_key
+    # @param evtypes [Array] the events you would like to subscribe to.
+    # @param timeout [Fixnum] http://msdn.microsoft.com/en-us/library/aa565201.aspx
+    # @param watermark [String] http://msdn.microsoft.com/en-us/library/aa565886.aspx
+    # @param options [Hash]
+    def stream_subscribe_folder(folder, evtypes, timeout = nil, watermark = nil, options: {})
+      timeout ||= 30 # Streaming default timeout 30 mins
+
+      psr = {
+        :subscribe_to_all_folders => false,
+        :folder_ids => [ {:id => folder[:id], :change_key => folder[:change_key]} ],
+        :event_types=> evtypes,
+        :timeout    => timeout
+      }
+      psr[:watermark] = watermark if watermark
+
+      subscribe([{streaming_subscription_request: psr}], options: options)
+    end
 
   end #ExchangeNotification
 end

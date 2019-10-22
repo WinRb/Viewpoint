@@ -9,4 +9,5 @@ group :development do
   gem 'rb-inotify', :require => false
   gem 'turn'
   gem "pry-nav"
+  gem 'byebug'
 end

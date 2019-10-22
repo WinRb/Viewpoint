@@ -45,6 +45,7 @@ module Viewpoint::EWS::SOAP
       @no_auto_deepen_behavior = :raise
       @impersonation_type = ""
       @impersonation_address = ""
+      @logger = opts[:logger]
     end
 
     def delete_attachment
@@ -165,8 +166,26 @@ module Viewpoint::EWS::SOAP
         }
         end
       end
+      options = {
+          request_type: 'Get User Availablity',
+          response_class: EwsSoapFreeBusyResponse
+      }
+      do_soap_request(req, options)
+    end
 
-      do_soap_request(req, response_class: EwsSoapFreeBusyResponse)
+    def get_user_settings(opts)
+      opts.merge!({
+          server_version: server_version,
+          autodiscover_address: @connection.endpoint # you need to se the endpoint as the autodiscover address anyway
+        }
+      )
+
+      req = EwsBuilder.new.build_get_user_settings_soap(opts)
+      options = {
+          request_type: 'Get User Settings',
+          response_class: EwsSoapGetUserSettingsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Gets the rooms that are in the specified room distribution list
@@ -182,7 +201,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsSoapRoomResponse)
+      options = {
+          request_type: 'Get Rooms',
+          response_class: EwsSoapRoomResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Gets the room lists that are available within the Exchange organization.
@@ -194,7 +217,11 @@ module Viewpoint::EWS::SOAP
           builder.room_lists!
         end
       end
-      do_soap_request(req, response_class: EwsSoapRoomlistResponse)
+      options = {
+          request_type: 'Get Rooms Lists',
+          response_class: EwsSoapRoomlistResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Send the SOAP request to the endpoint and parse it.
@@ -204,13 +231,36 @@ module Viewpoint::EWS::SOAP
     # @option opts [Boolean] :raw_response if true do not parse and return
     #   the raw response string.
     def do_soap_request(soapmsg, opts = {})
+      #  Most of the requests seem to be non async, so we can log here when we are making the request
+      # or we can do it inside the connection
       @log.debug <<-EOF.gsub(/^ {8}/, '')
         Sending SOAP Request:
         ----------------
         #{soapmsg}
         ----------------
+        #{opts}
+        ----------------
       EOF
       connection.dispatch(self, soapmsg, opts)
+    end
+
+    # Copied from #do_soap_request above
+    #
+    # Send the SOAP asynchronous request to the endpoint
+    # @param [String] soapmsg an XML formatted string
+    # @todo make this work for Viewpoint (imported from SPWS)
+    # @param [Hash] opts misc options
+    # @option opts [Boolean] :raw_response if true do not parse and return the raw connection
+    def do_soap_request_async(soapmsg, opts = {})
+      @log.debug <<-EOF.gsub(/^ {8}/, '')
+        Sending SOAP Request:
+        ----------------
+        #{soapmsg}
+        ----------------
+        #{opts}
+        ----------------
+      EOF
+      connection.dispatch_async(self, soapmsg, opts)
     end
 
     # @param [String] response the SOAP response string

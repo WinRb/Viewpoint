@@ -46,10 +46,16 @@ module Viewpoint::EWS::SOAP
             builder.contacts_view!(opts[:contacts_view]) if opts[:contacts_view]
             builder.restriction!(opts[:restriction]) if opts[:restriction]
             builder.parent_folder_ids!(opts[:parent_folder_ids])
+            builder.query_string!(opts[:query_string]) if opts[:query_string]
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse, raw_response: opts[:raw_response])
+      options = {
+          request_type: 'Find Item',
+          response_class: EwsResponse,
+          raw_response: opts[:raw_response]
+      }
+      do_soap_request(req, options)
     end
 
     # Gets items from the Exchange store
@@ -84,7 +90,12 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse, raw_response: opts[:raw_response])
+      options = {
+          request_type: 'Get Item',
+          response_class: EwsResponse,
+          raw_response: opts[:raw_response]
+      }
+      do_soap_request(req, options)
     end
 
     # Defines a request to create an item in the Exchange store.
@@ -147,7 +158,12 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse, raw_response: opts[:raw_response])
+      options = {
+          request_type: 'Create Item',
+          response_class: EwsResponse,
+          raw_response: opts[:raw_response]
+      }
+      do_soap_request(req, options)
     end
 
     # Used to modify the properties of an existing item in the Exchange store
@@ -200,7 +216,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Update Item',
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Delete an item from a mailbox in the Exchange store
@@ -241,7 +261,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Delete Item',
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Used to move one or more items to a single destination folder.
@@ -282,7 +306,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Move Item',
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Copies items and puts the items in a different folder
@@ -323,7 +351,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Copy Item',
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Used to send e-mail messages that are located in the Exchange store.
@@ -362,7 +394,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Send Item',
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # Export items as a base64 string
@@ -383,7 +419,11 @@ module Viewpoint::EWS::SOAP
       builder.export_item_ids!(ids[:item_ids])
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Export Items',
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
     # ------------- Folder Operations ------------
@@ -415,7 +455,10 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Create Folder'
+      }
+      do_soap_request(req, options)
     end
 
     # Defines a request to copy folders in the Exchange store
@@ -436,7 +479,10 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Copy Folder'
+      }
+      do_soap_request(req, options)
     end
 
     # Deletes folders from a mailbox.
@@ -461,7 +507,10 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Delete Folder'
+      }
+      do_soap_request(req, options)
     end
 
     # Find subfolders of an identified folder
@@ -500,7 +549,10 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Find Folder'
+      }
+      do_soap_request(req, options)
     end
 
     # Gets folders from the Exchange store
@@ -535,7 +587,10 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Find Folder'
+      }
+      do_soap_request(req, options)
     end
 
     # Defines a request to move folders in the Exchange store
@@ -556,7 +611,10 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Move Folder'
+      }
+      do_soap_request(req, options)
     end
 
     # Update properties for a specified folder
@@ -584,7 +642,10 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Update Folder'
+      }
+      do_soap_request(req, options)
     end
 
     # Empties folders in a mailbox.
@@ -614,7 +675,10 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Empty Folder'
+      }
+      do_soap_request(req, options)
     end
 
     # ----------- Attachment Operations ----------
@@ -642,7 +706,10 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Get Attachment'
+      }
+      do_soap_request(req, options)
     end
 
     # Creates either an item or file attachment and attaches it to the specified item.
@@ -682,7 +749,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Create Attachment',
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
 
@@ -713,7 +784,10 @@ module Viewpoint::EWS::SOAP
         }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Expand Distribution List'
+      }
+      do_soap_request(req, options)
     end
 
     # Resolve ambiguous e-mail addresses and display names
@@ -744,7 +818,10 @@ module Viewpoint::EWS::SOAP
         }
         end
       end
-      do_soap_request(req)
+      options = {
+          request_type: 'Resolve Names'
+      }
+      do_soap_request(req, options)
     end
 
     # Converts item and folder identifiers between formats.
@@ -773,7 +850,11 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
+      options = {
+          request_type: 'Convert Ids',
+          response_class: EwsResponse
+      }
+      do_soap_request(req, options)
     end
 
   end #ExchangeDataServices

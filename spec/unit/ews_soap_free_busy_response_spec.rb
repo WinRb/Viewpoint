@@ -110,7 +110,7 @@ EOS
     end
 
     it "the calendar_event_array should have one element" do
-      resp.calendar_event_array.should have(1).items
+      expect(resp.calendar_event_array.count).to eq 1
     end
   end
 

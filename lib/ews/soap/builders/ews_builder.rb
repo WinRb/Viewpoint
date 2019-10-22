@@ -47,7 +47,8 @@ module Viewpoint::EWS::SOAP
     #     end
     #   end
     def build!(opts = {}, &block)
-      @nbuild.Envelope(NAMESPACES) do |node|
+      namespaces = opts[:namespaces] ? opts[:namespaces] : NAMESPACES
+      @nbuild.Envelope(namespaces) do |node|
         node.parent.namespace = parent_namespace(node)
         node.Header {
           set_version_header! opts[:server_version]
@@ -95,9 +96,15 @@ module Viewpoint::EWS::SOAP
         txt = vals.delete(:text)
         xmlns_attribute = vals.delete(:xmlns_attribute)
 
-        node = @nbuild.send(camel_case(keys.first), txt, vals) {|x|
-          build_xml!(se) if se
-        }
+        if keys.first == :required_attendees
+          node = required_attendees!(vals)
+        elsif keys.first == :optional_attendees
+          node = optional_attendees!(vals)
+        else
+          node = @nbuild.send(camel_case(keys.first), txt, vals) {|_|
+            build_xml!(se) if se
+          }
+        end
 
         # Set node level namespace
         node.xmlns = NAMESPACES["xmlns:#{xmlns_attribute}"] if xmlns_attribute
@@ -473,6 +480,37 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def build_get_user_settings_soap(opts)
+      soap_opts = { namespaces: AUTODISCOVER_NAMESPACES }
+
+      build!(soap_opts) do |type, builder|
+        if (type == :header)
+          builder.nbuild[NS_AUTODISCOVER].RequestedServerVersion(opts[:server_version])
+          builder.nbuild[NS_ADDRESING].Action(GET_USER_SETTINGS_ACTION_URL)
+          builder.nbuild[NS_ADDRESING].To(opts[:autodiscover_address])
+        else
+          builder.nbuild[NS_AUTODISCOVER].GetUserSettingsRequestMessage do
+            builder.nbuild[NS_AUTODISCOVER].Request do
+              builder.nbuild[NS_AUTODISCOVER].Users do
+                opts[:users].each do |user|
+                  builder.nbuild[NS_AUTODISCOVER].User do
+                    builder.nbuild[NS_AUTODISCOVER].Mailbox(user)
+                  end
+                end
+              end
+
+              builder.nbuild[NS_AUTODISCOVER].RequestedSettings do
+                opts[:requested_settings].each do |setting|
+                  builder.nbuild[NS_AUTODISCOVER].Setting(setting)
+                end
+              end
+              builder.nbuild[NS_AUTODISCOVER].RequestedVersion(opts[:server_version])
+            end
+          end
+        end
+      end
+    end
+
     # Request all known time_zones from server
     def get_server_time_zones!(get_time_zone_options)
       nbuild[NS_EWS_MESSAGES].GetServerTimeZones('ReturnFullTimeZoneData' => get_time_zone_options[:full]) do
@@ -530,6 +568,10 @@ module Viewpoint::EWS::SOAP
           self.send normalize_type(k), v
         end
       }
+    end
+
+    def query_string!(query_string)
+      nbuild[NS_EWS_MESSAGES].QueryString(query_string)
     end
 
     def and_r(expr)
@@ -724,6 +766,11 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_TYPES].Timeout(tout)
     end
 
+    # @see https://msdn.microsoft.com/en-us/library/ff406137(v=exchg.140).aspx
+    def connection_timeout!(tout)
+      @nbuild[NS_EWS_MESSAGES].ConnectionTimeout(tout)
+    end
+
     # @see http://msdn.microsoft.com/en-us/library/aa564048(v=EXCHG.140).aspx
     def status_frequency!(freq)
       @nbuild[NS_EWS_TYPES].StatusFrequency(freq)
@@ -732,6 +779,15 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa566309(v=EXCHG.140).aspx
     def uRL!(url)
       @nbuild[NS_EWS_TYPES].URL(url)
+    end
+
+    # @see https://msdn.microsoft.com/en-us/library/dn440607(v=exchg.150).aspx
+    def subscription_ids!(subids)
+      @nbuild[NS_EWS_MESSAGES].SubscriptionIds do
+        subids.each do |subid|
+          @nbuild[NS_EWS_TYPES].SubscriptionId(subid)
+        end
+      end
     end
 
     # @see http://msdn.microsoft.com/en-us/library/aa563790(v=EXCHG.140).aspx
@@ -862,6 +918,14 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def days_of_week!(item)
+      nbuild[NS_EWS_TYPES].DaysOfWeek (item)
+    end
+
+    def first_day_of_week!(item)
+      nbuild[NS_EWS_TYPES].FirstDayOfWeek (item)
+    end
+
     def interval!(num)
       nbuild[NS_EWS_TYPES].Interval(num)
     end
@@ -928,6 +992,22 @@ module Viewpoint::EWS::SOAP
 
     def subject!(sub)
       nbuild[NS_EWS_TYPES].Subject(sub)
+    end
+
+    def categories!(cat)
+      nbuild[NS_EWS_TYPES].Categories {
+        cat.each {|categ| category!(categ)}
+      }
+    end
+
+    def category!(cat)
+      nbuild[NS_EWS_TYPES].String(cat)
+    end
+
+    def to_recipients!(r)
+      nbuild[NS_EWS_TYPES].ToRecipients {
+        r.each {|mbox| mailbox!(mbox[:mailbox]) }
+      }
     end
 
     def importance!(sub)
@@ -1031,6 +1111,10 @@ module Viewpoint::EWS::SOAP
 
     def reminder_due_by!(date)
       nbuild[NS_EWS_TYPES].ReminderDueBy format_time(date)
+    end
+
+    def sensitivity!(sensitivity)
+      nbuild[NS_EWS_TYPES].Sensitivity(sensitivity)
     end
 
     def reminder_minutes_before_start!(minutes)
@@ -1264,7 +1348,7 @@ module Viewpoint::EWS::SOAP
 
     def accept_item!(opts)
       @nbuild[NS_EWS_TYPES].AcceptItem {
-        sensitivity!(opts)
+        sensitivity!(opts[:sensitivity]) if opts[:sensitivity]
         body!(opts) if opts[:text]
         reference_item_id!(opts)
       }
@@ -1272,7 +1356,7 @@ module Viewpoint::EWS::SOAP
 
     def tentatively_accept_item!(opts)
       @nbuild[NS_EWS_TYPES].TentativelyAcceptItem {
-        sensitivity!(opts)
+        sensitivity!(opts[:sensitivity]) if opts[:sensitivity]
         body!(opts) if opts[:text]
         reference_item_id!(opts)
       }
@@ -1280,14 +1364,10 @@ module Viewpoint::EWS::SOAP
 
     def decline_item!(opts)
       @nbuild[NS_EWS_TYPES].DeclineItem {
-        sensitivity!(opts)
+        sensitivity!(opts[:sensitivity]) if opts[:sensitivity]
         body!(opts) if opts[:text]
         reference_item_id!(opts)
       }
-    end
-
-    def sensitivity!(value)
-      nbuild[NS_EWS_TYPES].Sensitivity(value[:sensitivity])
     end
 
 private
