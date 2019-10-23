@@ -1,9 +1,12 @@
 # Viewpoint for Exchange Web Services
-[![Build Status](https://img.shields.io/travis/WinRb/Viewpoint.svg?branch=master)](https://travis-ci.org/WinRb/Viewpoint)
+[![Build Status](https://travis-ci.org/WinRb/Viewpoint.svg?branch=master)](https://travis-ci.org/WinRb/Viewpoint)
 [![Gem Version](https://img.shields.io/gem/v/viewpoint.svg)](https://rubygems.org/gems/viewpoint)
 [![License](https://img.shields.io/github/license/WinRb/Viewpoint.svg)](https://github.com/WinRb/Viewpoint/blob/master/LICENSE)
 [![Wiki](https://img.shields.io/badge/docs-wiki-lightgrey.svg)](http://github.com/WinRb/Viewpoint/wiki)
 [![Documentation](https://img.shields.io/badge/docs-rdoc-lightgrey.svg)](http://www.rubydoc.info/github/WinRb/Viewpoint/frames)
+
+# Viewpoint for Exchange Web Services 1.2.7
+http://github.com/zenchild/Viewpoint/wiki
 
 Viewpoint for EWS provides a thin Ruby layer on top of Microsoft Exchange
 Web Services(EWS). It also includes a bunch of model classes that add an
@@ -17,6 +20,108 @@ Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
 Find me on irc.freenode.net in #ruby-lang (zenChild)
 
 # Features
+
+## Version 1.2.14
+1. Fixed a bug where there was an unknown method 
+
+## Version 1.2.13
+1. Fixed a bug where an erroneous log statement was placed.
+
+## Version 1.2.12
+1. Implemented ability to pass custom headers for the get streaming events call
+
+## Version 1.2.11
+1. Implemented new headers for Exchange 2016
+2. Implemented a way to pass a customer logger when initializing the gem
+3. Added log statements before and after making the request to Exchange with the uniq id of the request
+
+## Version 1.2.10
+1. Implemented ErrorExceededFindCountLimit to handle an issue with find_items_between returning ErrorExceededFindCountLimit error
+
+## Version 1.2.9
+1. Fixed an issue with XML string contains special charter or invalid elements fails the parsing response
+
+## Version 1.2.8
+1. Fixed an issue with too many arguments being passed to the recurring_master_item_id! method in the ews builder
+
+## Version 1.2.7
+1. Fixed an issue with too many arguments being passed to the occurrence_item_id! method in the ews builder
+
+## Version 1.2.6
+1. Fixed an issue where there was a duplication of methods in the soap builder
+
+## Version 1.2.5
+1. Fix an error where the only the first notification in a streaming response's envelope was processed
+
+## Version 1.2.4
+1. Fix variable name error
+
+## Version 1.2.3
+1. Add support for QueryString (special thank to @Fishy49 https://github.com/Fishy49)
+2. Include request body in all error classes for better error handling
+
+## Version 1.2.2
+1. Raise `TooManyRequestsError` if HTTP response has error code 429
+
+## Version 1.2.1
+1. Enhance response for recurring master so we can get ids for all its occurrence item ids in GetItem response
+2. Bug fixed: Generate correct XML body when updating attendees to build proper SOAP request in order to update attendees of a calendar item
+3. Removed: Unsupported Ruby Versions from Travis CI
+
+## Version 1.2.0
+1. Bug fixed: Use correct body_type when updating a calendar item
+
+## Version 1.1.9 
+1. Add SendClientLatencies and ReturnClientRequestId headers
+
+## Version 1.1.8 
+1. Support raw HTTP header return from #streaming_subscribe
+2. Fixed failing rspec
+
+## Version 1.1.7 
+1. Bug fixed for #streaming_subscribe
+
+## Version 1.1.6 
+1. Fix typo
+
+## Version 1.1.5 
+1. Adding RequestedServerVersion to AutoDiscover #get_user_settings request
+
+## Version 1.1.4 
+1. Supports [Exchange Server Affinity](https://docs.microsoft.com/en-us/exchange/client-developer/exchange-web-services/how-to-maintain-affinity-between-group-of-subscriptions-and-mailbox-server#how-do-i-maintain-affinity-by-using-the-ews-managed-api-or-ews)
+
+## Version 1.1.3
+1. Supports standard AutoDiscover endpoint
+2. Supports customisable http header and cookie in order to support Grouping Subscriptions
+
+## Version 1.1.2
+1. Enhance `EwsSoapGetStreamingEventsResponse#error_subscription_ids` to return error_subscription_ids array if any
+
+## Version 1.1.1
+Mostly minor bug fix and enhancements
+
+#### Enhancements
+1. Make the streaming subscription default timeout to 240 minutes  (same with pull subscription)
+2. Use `#streaming_subscribed?` for checking if a streaming subscription is set up
+
+#### Bug fixed
+1. `CalendarFolder#items_between` and `GenericFolder#items_between` now truly support option params
+ 
+## New in 1.1.0
+
+* Partially supporting Streaming Notification
+
+```ruby
+# Creates a EWS client
+ews_client = Viewpoint::EWSClient.new(params["endpoint"], params["username"], params["password"], server_version: params["server_version"])
+
+# Get the folder to streaming_subscribe
+folder = ews_client.get_folder(:calendar)
+folder.streaming_subscribe
+
+# Creates a streaming connection (HTTPClient::Connection) for receiving data
+folder.get_streaming_events(30)
+```
 
 ## New in 1.0
 

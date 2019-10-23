@@ -65,7 +65,15 @@ module Viewpoint::EWS::Types
           item_updates << {delete_item_field: field}
         elsif item_field
           # Build SetItemField Change
-          item = Viewpoint::EWS::Template::CalendarItem.new(attribute => value)
+          hash = { attribute => value }
+
+          # body_type needs to be together with body, so we mix them here if necessary
+          # if no body_type is set, the default is 'Text'
+          if attribute == :body && updates[:body_type]
+            hash[:body_type] = updates[:body_type]
+          end
+
+          item = Viewpoint::EWS::Template::CalendarItem.new(hash)
 
           # Remap attributes because ews_builder #dispatch_field_item! uses #build_xml!
           item_attributes = item.to_ews_item.map do |name, value|

@@ -65,4 +65,76 @@ describe Viewpoint::EWS::SOAP::EwsBuilder do
     end
 
   end
+
+  shared_examples "settings tags" do
+    context "when one requested setting provided" do
+      let(:requested_settings_array) { [setting_1] }
+
+      it "creates a tag for the setting" do
+        expect(delete_characters(subject.to_xml)).to include(setting_1)
+      end
+    end
+
+    context "when multiple requested settings provided" do
+      it "creates a tag for EACH of the settings" do
+        xml = delete_characters(subject.to_xml)
+
+        expect(xml).to include(setting_1)
+        expect(xml).to include(setting_2)
+      end
+    end
+  end
+
+  describe "#build_get_user_settings_soap" do
+    let(:mailbox_1) { "email_1@exchange.com" }
+    let(:mailbox_2) { "email_2@exchange.com" }
+    let(:setting_1) { "GroupingInformation" }
+    let(:setting_2) { "ExternalEwsUrl" }
+    let(:mailboxes_array) { [mailbox_1, mailbox_2] }
+    let(:requested_settings_array) { [setting_1, setting_2] }
+    let(:xml_request) { delete_characters(File.read(File.expand_path("../../../../soap_data/get_user_settings_request.xml", __FILE__))) }
+    let(:opts) {
+      {
+        server_version: "Exchange2010",
+        autodiscover_address: "https://www.example.com/autodiscover/autodiscover.svc",
+        users: mailboxes_array,
+        requested_settings: requested_settings_array
+        }
+      }
+
+    subject { builder.build_get_user_settings_soap(opts) }
+
+    context "when one user mailbox provided" do
+      let(:mailboxes_array) { [mailbox_1] }
+
+      it "creates a tag with the user's mailbox" do
+        expect(delete_characters(subject.to_xml)).to eq(xml_request)
+      end
+
+      include_examples "settings tags"
+    end
+
+    context "when multiple user mailboxes provided" do
+
+      it "includes a tag for each user mailbox" do
+        xml = delete_characters(subject.to_xml)
+
+        expect(xml).to include(mailbox_1)
+        expect(xml).to include(mailbox_2)
+      end
+
+      include_examples "settings tags"
+
+    end
+  end
+
+  private
+
+  def delete_characters(string, characters: ["\n", " "])
+    characters.each do |char|
+      string.delete!(char)
+    end
+
+    string
+  end
 end

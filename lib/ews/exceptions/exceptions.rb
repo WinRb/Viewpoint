@@ -58,4 +58,6 @@ module Viewpoint::EWS
 
   class EwsSendItemError < EwsError; end
 
+  class ErrorExceededFindCountLimit < EwsError; end
+
 end # Viewpoint::EWS

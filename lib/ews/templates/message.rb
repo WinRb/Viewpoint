@@ -36,6 +36,7 @@ module Viewpoint::EWS
         self.inline_attachments ||= []
         self.extended_properties ||= []
         self.in_reply_to ||= nil
+        self.categories ||= nil
       end
 
       def to_ews_basic
