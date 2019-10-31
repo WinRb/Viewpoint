@@ -109,6 +109,6 @@ module Viewpoint::EWS::MessageAccessors
   end
 
   def fetch_message_id_from_response(resp)
-    resp.response_messages[0].items.first[:message][:elems].first[:item_id][:attribs][:id]
+    resp.response_messages[0].items.first[:message][:elems].first[:item_id][:attribs]
   end
 end # Viewpoint::EWS::MessageAccessors
