@@ -33,7 +33,8 @@ class Viewpoint::EWS::Connection
   # @option opts [Fixnum] :send_timeout override the default send timeout
   def initialize(endpoint, opts = {})
     @log = Logging.logger[self.class.name.to_s.to_sym]
-    @httpcli = HTTPClient.new
+    @httpcli = (opts[:httpclient_class] || HTTPClient).new
+
     if opts[:trust_ca]
       @httpcli.ssl_config.clear_cert_store
       opts[:trust_ca].each do |ca|
