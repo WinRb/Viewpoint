@@ -1077,6 +1077,12 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def organizer!(a)
+      nbuild[NS_EWS_TYPES].Organizer {
+        mailbox!(a[:mailbox])
+      }
+    end
+
     def start!(st)
       nbuild[NS_EWS_TYPES].Start(st[:text])
     end
