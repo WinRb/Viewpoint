@@ -64,7 +64,7 @@ module Viewpoint::EWS
               when :start, :end
                 item_parameters[key] = {text: value.respond_to?(:iso8601) ? value.iso8601 : value}
               when :body
-                item_parameters[key] = {body_type: self.body_type || 'Text', text: value.to_s}
+                item_parameters[key] = {body_type: self.body_type || 'HTML', text: value.to_s}
               else
                 item_parameters[key] = value
             end
