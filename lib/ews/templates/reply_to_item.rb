@@ -18,6 +18,7 @@ module Viewpoint::EWS
         self.new_body_content ||= ''
         self.new_body_type ||= 'HTML'
         self.ews_type = :reply_to_item
+        self.importance = nil
       end
 
     end
