@@ -19,6 +19,8 @@ module Viewpoint::EWS
         self.new_body_type ||= 'HTML'
         self.ews_type = :reply_to_item
         self.importance = nil
+        self.is_read = nil
+        self.extended_properties = []
       end
 
     end
