@@ -7,6 +7,7 @@ module Viewpoint::EWS
         ews_opts, msg = to_ews_basic
         msg[:reference_item_id] = reference_item_id
         msg[:new_body_content]  = {text: new_body_content, body_type: new_body_type}
+        msg.delete(:is_read)
         ews_opts.merge({items: [{ews_type => msg}]})
       end
 
@@ -19,7 +20,6 @@ module Viewpoint::EWS
         self.new_body_type ||= 'HTML'
         self.ews_type = :reply_to_item
         self.importance = nil
-        self.is_read = nil
         self.extended_properties = []
       end
 
