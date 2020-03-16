@@ -37,6 +37,9 @@ module Viewpoint::EWS
         self.extended_properties ||= []
         self.in_reply_to ||= nil
         self.categories ||= nil
+        self.from ||= nil
+        self.sender ||= nil
+        self.saved_item_folder_id ||= nil
       end
 
       def to_ews_basic
@@ -67,6 +70,9 @@ module Viewpoint::EWS
         msg[:bcc_recipients] = bcc_r unless bcc_r.empty?
 
         msg[:is_read] = is_read
+
+        msg[:from] = { email_address: from } if from.present?
+        msg[:sender] = { email_address: sender } if sender.present?
 
         msg[:extended_properties] = extended_properties unless extended_properties.empty?
 
