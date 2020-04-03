@@ -48,7 +48,7 @@ module Viewpoint::EWS::MessageAccessors
       msg.draft = true
       create_item_response = ews.create_item(msg.to_ews)
       sent_message_id = fetch_message_id_from_response(create_item_response)
-      resp = parse_create_item(create_item_response)
+      resp = parse_create_item(create_item_response, opts[:in_reply_to])
       msg.file_attachments.each do |attachment|
         if attachment.kind_of?(Hash)
           resp.file_attachment_from_hash(attachment)
@@ -78,7 +78,7 @@ module Viewpoint::EWS::MessageAccessors
       end
     else
       resp = ews.create_item(msg.to_ews)
-      resp.response_messages ?  parse_create_item(resp) : false
+      resp.response_messages ?  parse_create_item(resp, opts[:in_reply_to]) : false
     end
   end
 
@@ -94,12 +94,12 @@ module Viewpoint::EWS::MessageAccessors
   private
 
 
-  def parse_create_item(resp)
+  def parse_create_item(resp, in_reply_to = false)
     rm = resp.response_messages[0]
     if(rm.status == 'Success')
       rm.items.empty? ? true : parse_message(rm.items.first)
     else
-      raise EwsError, "Could not send message. #{rm.code}: #{rm.message_text}"
+      raise EwsError, "Could not send message. #{rm.code}: #{rm.message_text}, in_reply_to: #{in_reply_to}"
     end
   end
 
@@ -110,5 +110,7 @@ module Viewpoint::EWS::MessageAccessors
 
   def fetch_message_id_from_response(resp)
     resp.response_messages[0].items.first[:message][:elems].first[:item_id][:attribs]
+  rescue NoMethodError
+    nil
   end
 end # Viewpoint::EWS::MessageAccessors
