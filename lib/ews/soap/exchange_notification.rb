@@ -1,7 +1,7 @@
 =begin
   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 
-  Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+  Copyright Â© 2011 Dan Wanek <dan.wanek@gmail.com>
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -139,6 +139,20 @@ module Viewpoint::EWS::SOAP
       }
       psr[:watermark] = watermark if watermark
       subscribe([{push_subscription_request: psr}])
+    end
+
+    # Create a pull subscription to a single folder
+    # @param folder [Hash] a hash with the folder :id and :change_key
+    # @param evtypes [Array] the events you would like to subscribe to.
+    # @param timeout [Fixnum] http://msdn.microsoft.com/en-us/library/aa565201.aspx
+    # @param watermark [String] http://msdn.microsoft.com/en-us/library/aa565886.aspx
+    def stream_subscribe_folder(folder, evtypes)
+      ssr = {
+        :subscribe_to_all_folders => false,
+        :folder_ids => [ {:id => folder[:id], :change_key => folder[:change_key]} ],
+        :event_types=> evtypes,
+      }
+      subscribe([{streaming_subscription_request: ssr}])
     end
 
 

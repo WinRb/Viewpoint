@@ -1,7 +1,7 @@
 =begin
   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 
-  Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+  Copyright Â© 2011 Dan Wanek <dan.wanek@gmail.com>
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -278,6 +278,19 @@ module Viewpoint::EWS::Types
       if rmsg.success?
         @subscription_id = rmsg.subscription_id
         @watermark = rmsg.watermark
+        true
+      else
+        raise EwsSubscriptionError, "Could not subscribe: #{rmsg.code}: #{rmsg.message_text}"
+      end
+    end
+
+    def stream_subscribe(evtypes = [:all])
+      event_types = normalize_event_names(evtypes)
+      folder = {id: self.id, change_key: self.change_key}
+      resp = ews.stream_subscribe_folder(folder, event_types)
+      rmsg = resp.response_messages.first
+      if rmsg.success?
+        @subscription_id = rmsg.subscription_id
         true
       else
         raise EwsSubscriptionError, "Could not subscribe: #{rmsg.code}: #{rmsg.message_text}"
