@@ -1,7 +1,7 @@
 =begin
   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 
-  Copyright Â© 2011 Dan Wanek <dan.wanek@gmail.com>
+  Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -96,6 +96,23 @@ module Viewpoint::EWS::SOAP
             builder.nbuild.parent.default_namespace = @default_ns
             builder.subscription_id!(subscription_id)
             builder.watermark!(watermark, NS_EWS_MESSAGES)
+          }
+        end
+      end
+      do_soap_request(req, response_class: EwsResponse)
+    end
+
+    # Used by streaming subscription clients to request notifications from the Client Access server
+    # @see https://docs.microsoft.com/en-us/exchange/client-developer/web-service-reference/getstreamingevents-operation GetStreamingEvents
+    #
+    # @param [String] subscription_id Subscription identifier
+    def get_streaming_events(subscription_id)
+      req = build_soap! do |type, builder|
+        if(type == :header)
+        else
+          builder.nbuild.GetStreamingEvents {
+            builder.nbuild.parent.default_namespace = @default_ns
+            builder.subscription_id!(subscription_id)
           }
         end
       end

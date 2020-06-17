@@ -1,7 +1,7 @@
 =begin
   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 
-  Copyright Â© 2011 Dan Wanek <dan.wanek@gmail.com>
+  Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -326,6 +326,27 @@ module Viewpoint::EWS::Types
           resp = ews.get_events(@subscription_id, @watermark)
           rmsg = resp.response_messages[0]
           @watermark = rmsg.new_watermark
+          # @todo if parms[:more_events] # get more events
+          rmsg.events.collect{|ev|
+            type = ev.keys.first
+            class_by_name(type).new(ews, ev[type])
+          }
+        else
+          raise EwsSubscriptionError, "Folder <#{self.display_name}> not subscribed to. Issue a Folder#subscribe before checking events."
+        end
+      rescue EwsSubscriptionTimeout => e
+        @subscription_id, @watermark = nil, nil
+        raise e
+      end
+    end
+
+    # Checks a subscribed folder for events
+    # @return [Array] An array of Event items
+    def get_streaming_events
+      begin
+        if @subscription_id
+          resp = ews.get_streaming_events(@subscription_id)
+          rmsg = resp.response_messages[0]
           # @todo if parms[:more_events] # get more events
           rmsg.events.collect{|ev|
             type = ev.keys.first
