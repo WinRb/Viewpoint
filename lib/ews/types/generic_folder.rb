@@ -241,6 +241,11 @@ module Viewpoint::EWS::Types
       @synced
     end
 
+    def sync_items_request(sync_state: nil, sync_amount: 256, item_shape: { base_shape: :default })
+      ews.sync_folder_items_request item_shape: item_shape, sync_folder_id: self.folder_id,
+        max_changes_returned: sync_amount, sync_state: (sync_state || @sync_state)
+    end
+
     # Subscribe this folder to events.  This method initiates an Exchange pull
     # type subscription.
     #
@@ -297,6 +302,12 @@ module Viewpoint::EWS::Types
       end
     end
 
+    def stream_subscribe_request(evtypes = [:all])
+      event_types = normalize_event_names(evtypes)
+      folder = { id: self.id, change_key: self.change_key }
+      ews.stream_subscribe_request(folder, event_types)
+    end
+
     # Check if there is a subscription for this folder.
     # @return [Boolean] Are we subscribed to this folder?
     def subscribed?
@@ -342,10 +353,10 @@ module Viewpoint::EWS::Types
 
     # Checks a subscribed folder for events
     # @return [Array] An array of Event items
-    def get_streaming_events
+    def get_streaming_events(connection_timeout = 30)
       begin
         if @subscription_id
-          resp = ews.get_streaming_events(@subscription_id)
+          resp = ews.get_streaming_events(@subscription_id, connection_timeout)
           rmsg = resp.response_messages[0]
           # @todo if parms[:more_events] # get more events
           rmsg.events.collect{|ev|

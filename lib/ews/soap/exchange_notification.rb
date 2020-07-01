@@ -47,7 +47,12 @@ module Viewpoint::EWS::SOAP
     #       }},
     #       ]
     def subscribe(subscriptions)
-      req = build_soap! do |type, builder|
+      req = subscribe_request subscriptions
+      do_soap_request(req, response_class: EwsResponse)
+    end
+
+    def subscribe_request(subscriptions)
+      build_soap! do |type, builder|
         if(type == :header)
         else
           builder.nbuild.Subscribe {
@@ -63,7 +68,6 @@ module Viewpoint::EWS::SOAP
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
     end
 
     # End a pull notification subscription.
@@ -106,17 +110,22 @@ module Viewpoint::EWS::SOAP
     # @see https://docs.microsoft.com/en-us/exchange/client-developer/web-service-reference/getstreamingevents-operation GetStreamingEvents
     #
     # @param [String] subscription_id Subscription identifier
-    def get_streaming_events(subscription_id)
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
+    # @param [Int] connection_timeout Number of minutes to keep the connection open
+    def get_streaming_events(subscription_id, connection_timeout = 30)
+      req = get_streaming_events_request subscription_id, connection_timeout
+      do_soap_request(req, response_class: EwsResponse)
+    end
+
+    def get_streaming_events_request(subscription_id, connection_timeout = 30)
+      build_soap! do |type, builder|
+        if(type != :header)
           builder.nbuild.GetStreamingEvents {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.subscription_id!(subscription_id)
+            builder.connection_timeout!(connection_timeout)
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
     end
 
 
@@ -172,6 +181,13 @@ module Viewpoint::EWS::SOAP
       subscribe([{streaming_subscription_request: ssr}])
     end
 
-
+    def stream_subscribe_request(folder, evtypes)
+      ssr = {
+        :subscribe_to_all_folders => false,
+        :folder_ids => [ {:id => folder[:id], :change_key => folder[:change_key]} ],
+        :event_types=> evtypes,
+      }
+      subscribe_request([{streaming_subscription_request: ssr}])
+    end
   end #ExchangeNotification
 end
