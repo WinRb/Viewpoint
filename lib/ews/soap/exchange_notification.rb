@@ -121,7 +121,9 @@ module Viewpoint::EWS::SOAP
         if(type != :header)
           builder.nbuild.GetStreamingEvents {
             builder.nbuild.parent.default_namespace = @default_ns
-            builder.subscription_id!(subscription_id)
+            builder.nbuild.SubscriptionIds {
+              builder.streaming_subscription_id!(subscription_id)
+            }
             builder.connection_timeout!(connection_timeout)
           }
         end

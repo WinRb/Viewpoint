@@ -759,6 +759,10 @@ module Viewpoint::EWS::SOAP
       @nbuild.SubscriptionId(subid)
     end
 
+    def streaming_subscription_id!(subid)
+      @nbuild[NS_EWS_TYPES].SubscriptionId(subid)
+    end
+
     def connection_timeout!(timeout)
       @nbuild.ConnectionTimeout(timeout)
     end
