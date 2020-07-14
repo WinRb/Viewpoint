@@ -67,7 +67,7 @@ module Viewpoint::EWS::Types
         elsif item_field
           # Build SetItemField Change
           item = Viewpoint::EWS::Template::CalendarItem.new(attribute => value)
-          item.body_type = options[:body_type] if attribute == :body
+          item.body_type = updates[:body_type] if attribute == :body
 
           # Remap attributes because ews_builder #dispatch_field_item! uses #build_xml!
           item_attributes = item.to_ews_item.map do |name, value|
