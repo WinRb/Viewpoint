@@ -55,6 +55,7 @@ class Viewpoint::EWS::Connection
       end
     end
 
+    # @httpcli.debug_dev = $stdout # For debugging requests and responses
     @httpcli.ssl_config.verify_mode = opts[:ssl_verify_mode] if opts[:ssl_verify_mode]
     @httpcli.ssl_config.ssl_version = opts[:ssl_version] if opts[:ssl_version]
     # Up the keep-alive so we don't have to do the NTLM dance as often.
@@ -116,7 +117,7 @@ class Viewpoint::EWS::Connection
   #   the response.
   def post(xmldoc)
     headers = { 'Content-Type' => 'text/xml' }
-    payload = oauth? ? [{ headers: headers.merge(@auth_header), body: xmldoc.to_s }] : [xmldoc, headers] 
+    payload = oauth? ? [{ headers: headers.merge(@auth_header), body: xmldoc.to_s }] : [xmldoc, headers]
     check_response(@httpcli.post(@endpoint, *payload))
   end
 
