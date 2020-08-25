@@ -71,22 +71,24 @@ module Viewpoint::EWS::SOAP
     #     :sync_state => myBase64id,
     #     :max_changes_returned => 256 }
     def sync_folder_items(opts)
-      opts = opts.clone
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
+      req = sync_folder_items_request opts
+      do_soap_request(req, response_class: EwsResponse)
+    end
+
+    def sync_folder_items_request(opts)
+      build_soap! do |type, builder|
+        if type != :header
           builder.nbuild.SyncFolderItems {
             builder.nbuild.parent.default_namespace = @default_ns
-            builder.item_shape!(opts[:item_shape])
+            builder.item_shape!(opts[:item_shape] || { base_shape: :default })
             builder.sync_folder_id!(opts[:sync_folder_id]) if opts[:sync_folder_id]
             builder.sync_state!(opts[:sync_state]) if opts[:sync_state]
             builder.ignore!(opts[:ignore]) if opts[:ignore]
-            builder.max_changes_returned!(opts[:max_changes_returned])
+            builder.max_changes_returned!(opts[:max_changes_returned] || 256)
             builder.sync_scope!(opts[:sync_scope]) if opts[:sync_scope]
           }
         end
       end
-      do_soap_request(req, response_class: EwsResponse)
     end
 
   end #ExchangeSynchronization

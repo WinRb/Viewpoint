@@ -759,6 +759,14 @@ module Viewpoint::EWS::SOAP
       @nbuild.SubscriptionId(subid)
     end
 
+    def streaming_subscription_id!(subid)
+      @nbuild[NS_EWS_TYPES].SubscriptionId(subid)
+    end
+
+    def connection_timeout!(timeout)
+      @nbuild.ConnectionTimeout(timeout)
+    end
+
     # @see http://msdn.microsoft.com/en-us/library/aa563455(v=EXCHG.140).aspx
     def pull_subscription_request(subopts)
       subscribe_all = subopts[:subscribe_to_all_folders] ? 'true' : 'false'
