@@ -108,6 +108,10 @@ module Viewpoint::EWS
       if(cname.instance_of? Symbol)
         cname = camel_case(cname)
       end
+      # Special case: Viewpoint::EWS::Types::Item is a module, not a class.
+      if cname == 'Item'
+        cname = 'GenericItem'
+      end
       Viewpoint::EWS::Types.const_get(cname)
     end
 
