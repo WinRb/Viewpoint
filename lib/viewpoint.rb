@@ -64,13 +64,16 @@ require 'ews/types'
 require 'ews/types/item_field_uri_map'
 require 'ews/types/generic_folder'
 require 'ews/types/item'
+
 # Folders
 require 'ews/types/folder'
 require 'ews/types/calendar_folder'
 require 'ews/types/contacts_folder'
 require 'ews/types/tasks_folder'
 require 'ews/types/search_folder'
+
 # Items
+require 'ews/types/generic_item'
 require 'ews/types/message'
 require 'ews/types/calendar_item'
 require 'ews/types/contact'

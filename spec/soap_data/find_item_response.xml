@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" 
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <soap:Header>
+    <t:ServerVersionInfo MajorVersion="8" MinorVersion="0" MajorBuildNumber="652" MinorBuildNumber="0" 
+                         xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" />
+  </soap:Header>
+  <soap:Body>
+    <FindItemResponse xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" 
+                        xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" 
+                        xmlns="http://schemas.microsoft.com/exchange/services/2006/messages">
+      <m:ResponseMessages>
+        <m:FindItemResponseMessage ResponseClass="Success">
+          <m:ResponseCode>NoError</m:ResponseCode>
+          <m:MessageText>Some text</m:MessageText>
+          <m:MessageXml>Some XML</m:MessageXml>
+          <m:RootFolder TotalItemsInView="1" IncludesLastItemInRange="true">
+            <t:Items>
+              <t:Item>
+                <t:ItemId Id="AQAnAH" ChangeKey="AQAAABY"/>
+		<t:Body>Item body</t:Body>
+              </t:Item>
+              <t:Message>
+                <t:ItemId Id="AQAnAI" ChangeKey="AQAAABZ"/>
+		<t:Body>Mesasge body</t:Body>
+	      </t:Message>
+            </t:Items>
+          </m:RootFolder>
+        </m:FindItemResponseMessage>
+      </m:ResponseMessages>
+    </FindItemResponse>
+  </soap:Body>
+</soap:Envelope>
