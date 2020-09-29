@@ -608,6 +608,14 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def contains_recipients(expr)
+      @nbuild[NS_EWS_TYPES].ContainsRecipientStrings() {
+        expr.delete(:recipients).each do |recipient|
+          nbuild[NS_EWS_TYPES].String recipient
+        end
+      }
+    end
+
     def excludes(expr)
       @nbuild[NS_EWS_TYPES].Excludes {
         b = expr.delete(:bitmask) # remove bitmask 1st for ordering
