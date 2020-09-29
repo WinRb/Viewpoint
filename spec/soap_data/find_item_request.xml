@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages">
+  <soap:Header>
+    <t:RequestServerVersion Version="1.2.3"/>
+    <t:ExchangeImpersonation>
+      <t:ConnectingSID>
+        <t:type>abc@xyz</t:type>
+      </t:ConnectingSID>
+    </t:ExchangeImpersonation>
+  </soap:Header>
+  <soap:Body>
+    <FindItem xmlns="http://schemas.microsoft.com/exchange/services/2006/messages" Traversal="Shalow">
+      <ItemShape>
+        <t:BaseShape>IdOnly</t:BaseShape>
+      </ItemShape>
+      <m:Restriction>
+        <t:Or>
+          <t:Contains ContainmentMode="Substring" ContainmentComparison="IgnoreCase">
+            <t:FieldURI FieldURI="f"/>
+            <t:Constant Value="some-value"/>
+          </t:Contains>
+          <t:ContainsRecipientStrings>
+            <t:String>abc@def.cz</t:String>
+            <t:String>ghi@jkl.ch</t:String>
+          </t:ContainsRecipientStrings>
+        </t:Or>
+      </m:Restriction>
+      <m:ParentFolderIds>
+        <t:FolderId Id="parent-folder-id"/>
+      </m:ParentFolderIds>
+    </FindItem>
+  </soap:Body>
+</soap:Envelope>
