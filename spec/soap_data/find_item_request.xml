@@ -13,7 +13,7 @@
       <ItemShape>
         <t:BaseShape>IdOnly</t:BaseShape>
       </ItemShape>
-      <m:Restriction>
+      <t:Restriction>
         <t:Or>
           <t:Contains ContainmentMode="Substring" ContainmentComparison="IgnoreCase">
             <t:FieldURI FieldURI="f"/>
@@ -24,7 +24,7 @@
             <t:String>ghi@jkl.ch</t:String>
           </t:ContainsRecipientStrings>
         </t:Or>
-      </m:Restriction>
+      </t:Restriction>
       <m:ParentFolderIds>
         <t:FolderId Id="parent-folder-id"/>
       </m:ParentFolderIds>
