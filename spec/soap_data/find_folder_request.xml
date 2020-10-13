@@ -8,14 +8,14 @@
       <FolderShape>
         <t:BaseShape>Default</t:BaseShape>
       </FolderShape>
-      <m:Restriction>
+      <t:Restriction>
         <t:IsEqualTo>
           <t:FieldURI FieldURI="folder:DisplayName"/>
           <t:FieldURIOrConstant>
             <t:Constant Value="Test Folder"/>
           </t:FieldURIOrConstant>
         </t:IsEqualTo>
-      </m:Restriction>
+      </t:Restriction>
       <m:ParentFolderIds>
         <t:DistinguishedFolderId Id="msgfolderroot"/>
       </m:ParentFolderIds>
