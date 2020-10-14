@@ -565,8 +565,26 @@ module Viewpoint::EWS::SOAP
     # Build the Restriction element
     # @see http://msdn.microsoft.com/en-us/library/aa563791.aspx
     # @param [Hash] restriction a well-formatted Hash that can be fed to #build_xml!
+    #  Example parameter `restriction`:
+    #  {
+    #    is_greater_than: [
+    #      { field_uRI: { field_uRI: "item:DateTimeCreated"} },
+    #      { field_uRI_or_constant: { constant: { value: "2017-10-11T01:49:37Z" } } }
+    #    ]
+    #  }
     def restriction!(restriction)
       @nbuild[NS_EWS_TYPES].Restriction {
+        restriction.each_pair do |k,v|
+          self.send normalize_type(k), v
+        end
+      }
+    end
+
+    # Build the Restriction element (with an invalid namespace)
+    # Otherwise is the same as restriction!.
+    # @param [Hash] restriction a well-formatted Hash that can be fed to #build_xml!
+    def m_restriction!(restriction)
+      @nbuild[NS_EWS_MESSAGES].Restriction {
         restriction.each_pair do |k,v|
           self.send normalize_type(k), v
         end
@@ -1242,23 +1260,6 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_TYPES].BaseFolderIds do
         folder_ids.each { |fid| dispatch_folder_id!(fid) }
       end
-    end
-
-    # Build the (type) Restriction element. Note that although it looks similar
-    #  to the other Restriction in (message) namespace, they are not interchangable!
-    #  Example parameter `restriction`:
-    #  {
-    #    is_greater_than: [
-    #      { field_uRI: { field_uRI: "item:DateTimeCreated"} },
-    #      { field_uRI_or_constant: { constant: { value: "2017-10-11T01:49:37Z" } } }
-    #    ]
-    #  }
-    def t_restriction!(restriction)
-      @nbuild[NS_EWS_TYPES].Restriction {
-        restriction.each_pair do |k,v|
-          self.send normalize_type(k), v
-        end
-      }
     end
 
     # ---------------------- Helpers -------------------- #

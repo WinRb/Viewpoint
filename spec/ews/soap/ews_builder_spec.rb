@@ -11,7 +11,7 @@ describe Viewpoint::EWS::SOAP::EwsBuilder do
         :base_shape => :id_only
       }
       parent_folder_ids = [{:id => 'parent-folder-id'}]
-      restriction = {or: [
+      restriction = { or: [
         {
           :contains => {
             :containment_mode => 'Substring',
@@ -25,7 +25,7 @@ describe Viewpoint::EWS::SOAP::EwsBuilder do
             :recipients => ['abc@def.cz', 'ghi@jkl.ch']
           }
         }
-      ]}
+      ] }
 
       req = builder.build!(opts) do |type, builder|
         if(type == :header)
@@ -43,6 +43,5 @@ describe Viewpoint::EWS::SOAP::EwsBuilder do
       expected_response = Nokogiri.XML(expected_response).to_xml
       expect(req.to_xml).to eq(expected_response)
     end
-
   end
 end

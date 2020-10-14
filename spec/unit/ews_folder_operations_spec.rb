@@ -51,6 +51,24 @@ describe "Operations on Exchange Data Services" do
     opts[:parent_folder_ids] = [{id: :msgfolderroot}]
     opts[:traversal] = 'Deep'
     opts[:folder_shape] = {:base_shape => 'Default'}
+    opts[:use_restriction_in_types_ns] = true
+    @ews.find_folder opts
+  end
+
+  it "generates FindFolder XML (legacy)" do
+    @ews.should_receive(:do_soap_request).
+      with(match_xml(load_soap("find_folder_legacy", :request)))
+
+    fname = "Test Folder"
+    opts = {:restriction =>
+      {:is_equal_to => [
+        {:field_uRI => {:field_uRI=>'folder:DisplayName'}},
+        {:field_uRI_or_constant => {:constant => {:value=>fname}}}
+      ]}
+    }
+    opts[:parent_folder_ids] = [{id: :msgfolderroot}]
+    opts[:traversal] = 'Deep'
+    opts[:folder_shape] = {:base_shape => 'Default'}
     @ews.find_folder opts
   end
 

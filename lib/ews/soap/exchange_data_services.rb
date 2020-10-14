@@ -44,7 +44,11 @@ module Viewpoint::EWS::SOAP
             # @todo add FractionalPageFolderView
             builder.calendar_view!(opts[:calendar_view]) if opts[:calendar_view]
             builder.contacts_view!(opts[:contacts_view]) if opts[:contacts_view]
-            builder.restriction!(opts[:restriction]) if opts[:restriction]
+            if opts[:use_restriction_in_types_ns]
+              builder.restriction!(opts[:restriction]) if opts[:restriction]
+            else
+              builder.m_restriction!(opts[:restriction]) if opts[:restriction]
+            end
             builder.sort_order!(opts[:sort_order]) if opts[:sort_order]
             builder.parent_folder_ids!(opts[:parent_folder_ids])
           }
@@ -496,7 +500,11 @@ module Viewpoint::EWS::SOAP
           builder.nbuild.FindFolder(:Traversal => camel_case(opts[:traversal])) {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.folder_shape!(opts[:folder_shape])
-            builder.restriction!(opts[:restriction]) if opts[:restriction]
+            if opts[:use_restriction_in_types_ns]
+              builder.restriction!(opts[:restriction]) if opts[:restriction]
+            else
+              builder.m_restriction!(opts[:restriction]) if opts[:restriction]
+            end
             builder.parent_folder_ids!(opts[:parent_folder_ids])
           }
         end
