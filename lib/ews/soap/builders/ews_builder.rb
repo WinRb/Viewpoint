@@ -566,7 +566,7 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa563791.aspx
     # @param [Hash] restriction a well-formatted Hash that can be fed to #build_xml!
     def restriction!(restriction)
-      @nbuild[NS_EWS_MESSAGES].Restriction {
+      @nbuild[NS_EWS_TYPES].Restriction {
         restriction.each_pair do |k,v|
           self.send normalize_type(k), v
         end
