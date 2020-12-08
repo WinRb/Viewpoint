@@ -32,7 +32,8 @@ module Viewpoint::EWS::Types
       elsif rm
         raise EwsCreateItemError, "Could not create item in folder. #{rm.code}: #{rm.message_text}"
       else
-        raise EwsCreateItemError, "No response from EWS?"
+        raise EwsCreateItemError,
+          "No response from EWS for create: #{template.to_ews_create(to_ews_create_opts).to_json}"
       end
     end
   end
