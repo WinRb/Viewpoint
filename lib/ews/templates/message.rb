@@ -66,7 +66,16 @@ module Viewpoint::EWS
 
         msg[:is_read] = is_read
 
+        is_from_me && msg[:is_from_me] = is_from_me
+
+        from && msg[:from] = {mailbox: {email_address: from}}
+        sender && msg[:sender] = {mailbox: {email_address: sender}}
+
+        mime_content && msg[:mime_content] = mime_content
+
         msg[:extended_properties] = extended_properties unless extended_properties.empty?
+
+        msg[:categories] = categories if categories && !categories.empty?
 
         [ews_opts, msg]
       end

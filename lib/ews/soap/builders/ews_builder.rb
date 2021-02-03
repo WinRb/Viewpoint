@@ -132,7 +132,7 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_MESSAGES].ItemShape {
         @nbuild.parent.default_namespace = @default_ns
         base_shape!(item_shape[:base_shape])
-        mime_content!(item_shape[:include_mime_content]) if item_shape.has_key?(:include_mime_content)
+        include_mime_content!(item_shape[:include_mime_content]) if item_shape.has_key?(:include_mime_content)
         body_type!(item_shape[:body_type]) if item_shape[:body_type]
         if(item_shape[:additional_properties])
           additional_properties!(item_shape[:additional_properties])
@@ -155,7 +155,7 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_TYPES].BaseShape(camel_case(base_shape))
     end
 
-    def mime_content!(include_mime_content)
+    def include_mime_content!(include_mime_content)
       @nbuild[NS_EWS_TYPES].IncludeMimeContent(include_mime_content.to_s.downcase)
     end
 
@@ -822,6 +822,24 @@ module Viewpoint::EWS::SOAP
       }
     end
 
+    def categories!(categories)
+      nbuild[NS_EWS_TYPES].Categories {
+        categories.each do |c|
+          nbuild[NS_EWS_TYPES].String(c)
+        end
+      }
+    end
+
+    def is_from_me!(ans)
+      return unless ans
+
+      nbuild[NS_EWS_TYPES].IsFromMe
+    end
+
+    def mime_content!(mime_content)
+      @nbuild[NS_EWS_TYPES].MimeContent(mime_content)
+    end
+
     def is_read!(read)
       nbuild[NS_EWS_TYPES].IsRead(read)
     end
@@ -968,7 +986,13 @@ module Viewpoint::EWS::SOAP
 
     def from!(f)
       nbuild[NS_EWS_TYPES].From {
-        mailbox! f
+        mailbox! f[:mailbox]
+      }
+    end
+
+    def sender!(f)
+      nbuild[NS_EWS_TYPES].Sender {
+        mailbox! f[:mailbox]
       }
     end
 
