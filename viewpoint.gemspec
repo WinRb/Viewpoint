@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = %w(-x test/ -x examples/)
   s.extra_rdoc_files = %w(README.md)
 
-  s.add_runtime_dependency  'nokogiri'
+  s.add_runtime_dependency  'nokogiri', '!=1.12.3', '!=1.12.2', '!=1.12.1', '!=1.12.0'
   s.add_runtime_dependency  'httpclient'
   s.add_runtime_dependency  'rubyntlm'
   s.add_runtime_dependency  'logging'
