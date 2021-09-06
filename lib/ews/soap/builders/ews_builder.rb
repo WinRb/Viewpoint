@@ -705,6 +705,13 @@ module Viewpoint::EWS::SOAP
       @nbuild[NS_EWS_MESSAGES].ContactsView(attribs)
     end
 
+    # @see https://msdn.microsoft.com/en-us/library/aa565683(v=exchg.140).aspx
+    def categories!(fa)
+      @nbuild[NS_EWS_TYPES].Categories {
+        @nbuild[NS_EWS_TYPES].String(fa)
+      }
+    end
+
     # @see http://msdn.microsoft.com/en-us/library/aa579678(v=EXCHG.140).aspx
     def event_types!(evtypes)
       @nbuild[NS_EWS_TYPES].EventTypes {
