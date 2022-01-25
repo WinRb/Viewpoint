@@ -60,6 +60,10 @@ class Viewpoint::EWS::Connection
     @httpcli.set_auth(@endpoint.to_s, user, pass)
   end
 
+  def set_bearer(token)
+    @bearer_token = token
+  end
+
   # Authenticate to the web service. You don't have to do this because
   # authentication will happen on the first request if you don't do it here.
   # @return [Boolean] true if authentication is successful, false otherwise
@@ -100,6 +104,7 @@ class Viewpoint::EWS::Connection
   #   the response.
   def post(xmldoc)
     headers = {'Content-Type' => 'text/xml'}
+    headers['Authorization'] = "Bearer #{@bearer_token}" if @bearer_token
     check_response( @httpcli.post(@endpoint, xmldoc, headers) )
   end
 

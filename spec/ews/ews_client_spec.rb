@@ -19,7 +19,26 @@ describe Viewpoint::EWSClient do
       expect(client).to receive(:ews).twice {ews}
       client.set_auto_deepen false
     end
-
   end
 
+  describe '#new' do
+    let(:connection)  { instance_double(Viewpoint::EWS::Connection, set_auth: nil, set_bearer: nil) }
+    let(:http_class)  { class_double(Viewpoint::EWS::Connection, new: connection) }
+
+    context 'new with basic auth' do
+      it do
+        described_class.new "http://www.example.com", "username", "password", http_class: http_class
+
+        expect(connection).to have_received(:set_auth).with("username", "password")
+      end
+    end
+
+    context 'new with token auth' do
+      it do
+        described_class.new "http://www.example.com", :bearer, "token", http_class: http_class
+
+        expect(connection).not_to have_received(:set_auth)
+      end
+    end
+  end
 end

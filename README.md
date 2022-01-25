@@ -71,6 +71,11 @@ user = 'username'
 pass = 'password'
 
 cli = Viewpoint::EWSClient.new endpoint, user, pass
+
+
+# if using oauth authentication
+token = get.real.token.through.oauth
+cli = Viewpoint::EWSClient.new endpoint, :bearer, token
 ```
 
 There are also various options you can pass to EWSClient.
