@@ -25,6 +25,10 @@ module Viewpoint::EWS
 
   class EwsSubscriptionError < EwsError; end
 
+  # Raised when a user tries to query a folder subscription with a
+  # invalid watermark.
+  class EwsSubscriptionInvalidWatermark < EwsSubscriptionError; end
+
   # Raised when a user tries to query a folder subscription after the
   # subscription has timed out.
   class EwsSubscriptionTimeout < EwsSubscriptionError; end

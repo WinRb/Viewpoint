@@ -59,7 +59,7 @@ module Viewpoint::EWS::ItemAccessors
     obj = OpenStruct.new(opts: args)
     yield obj if block_given?
     resp = ews.get_item(args)
-    get_items_parser(resp)
+    get_items_parser(resp, opts)
   end
 
   # Copy an array of items to the specified folder
@@ -149,14 +149,16 @@ private
     end
   end
 
-  def get_items_parser(resp)
+  def get_items_parser(resp, opts)
     items = []
 
     resp.response_messages.each do |rm|
       if(rm && rm.status == 'Success')
         rm.items.each do |i|
           type = i.keys.first
-          items << class_by_name(type).new(ews, i[type])
+          item = class_by_name(type).new(ews, i[type])
+          item.mark_deep! if opts[:shape] == :all_properties
+          items << item
         end
       end
     end

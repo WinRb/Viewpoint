@@ -247,8 +247,12 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa580234(v=EXCHG.140).aspx
     def item_id!(id)
       nbuild[NS_EWS_TYPES].ItemId {|x|
-        x.parent['Id'] = id[:id]
-        x.parent['ChangeKey'] = id[:change_key] if id[:change_key]
+        if id.is_a?(Hash)
+          x.parent['Id'] = id[:id]
+          x.parent['ChangeKey'] = id[:change_key] if id[:change_key]
+        else
+          x.parent['Id'] = id
+        end
       }
     end
 

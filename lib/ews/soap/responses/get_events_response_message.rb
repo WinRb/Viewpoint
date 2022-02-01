@@ -32,12 +32,17 @@ module Viewpoint::EWS::SOAP
     end
 
     def new_watermark
-      ev = notification.last
-      if ev
-        type = ev.keys.first
-        ev[type][:elems][0][:watermark][:text]
+      if notification
+        ev = notification.last
+        if ev
+          type = ev.keys.first
+          ev[type][:elems][0][:watermark][:text]
+        else
+          nil
+        end
       else
-        nil
+        raise Viewpoint::EWS::EwsSubscriptionInvalidWatermark, 
+              safe_hash_access(message, [:elems, :message_text, :text]) || "Notification is nil"
       end
     end
 

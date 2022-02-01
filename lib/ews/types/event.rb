@@ -42,6 +42,9 @@ module Viewpoint::EWS::Types
       super(ews, event)
     end
 
+    def on_item?
+      ews_item.key?(:item_id)
+    end
 
     private
 
