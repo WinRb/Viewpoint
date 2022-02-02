@@ -27,6 +27,9 @@ module Viewpoint::EWS::Types
       :watermark  => [:watermark, :text],
     }
 
+    def on_item?
+      false
+    end
 
     private
 
