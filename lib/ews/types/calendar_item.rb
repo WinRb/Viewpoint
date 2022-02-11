@@ -22,7 +22,8 @@ module Viewpoint::EWS::Types
       required_attendees: [:required_attendees, :elems ],
       recurrence: [:recurrence, :elems ],
       deleted_occurrences: [:deleted_occurrences, :elems ],
-      modified_occurrences: [:modified_occurrences, :elems ]
+      modified_occurrences: [:modified_occurrences, :elems ],
+      ical_uid: [:u_i_d, :text]
    }
 
     CALENDAR_ITEM_KEY_TYPES = {
