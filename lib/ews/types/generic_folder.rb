@@ -253,7 +253,7 @@ module Viewpoint::EWS::Types
       if rmsg.success?
         @subscription_id = rmsg.subscription_id
         @watermark = rmsg.watermark
-        true
+        class_by_name(rmsg.type).new(ews, rmsg.message)
       else
         raise EwsSubscriptionError, "Could not subscribe: #{rmsg.code}: #{rmsg.message_text}"
       end
