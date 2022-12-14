@@ -40,6 +40,8 @@ class Viewpoint::EWS::Connection
       @httpcli = HTTPClient.new
     end
 
+    @httpcli.proxy = opts[:proxy] if opts[:proxy]
+
     if opts[:trust_ca]
       @httpcli.ssl_config.clear_cert_store
       opts[:trust_ca].each do |ca|
