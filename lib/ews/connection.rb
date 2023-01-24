@@ -47,6 +47,9 @@ class Viewpoint::EWS::Connection
       opts[:trust_ca].each do |ca|
         @httpcli.ssl_config.add_trust_ca ca
       end
+    else
+      @httpcli.ssl_config.clear_cert_store
+      @httpcli.ssl_config.cert_store.set_default_paths
     end
 
     @httpcli.ssl_config.verify_mode = opts[:ssl_verify_mode] if opts[:ssl_verify_mode]
