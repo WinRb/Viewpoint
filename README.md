@@ -1,5 +1,5 @@
 # Viewpoint for Exchange Web Services
-[![Build Status](https://img.shields.io/travis/WinRb/Viewpoint.svg?branch=master)](https://travis-ci.org/WinRb/Viewpoint)
+[![Ruby](https://github.com/WinRb/Viewpoint/actions/workflows/ruby.yml/badge.svg?branch=main)](https://github.com/WinRb/Viewpoint/actions/workflows/ruby.yml)
 [![Gem Version](https://img.shields.io/gem/v/viewpoint.svg)](https://rubygems.org/gems/viewpoint)
 [![License](https://img.shields.io/github/license/WinRb/Viewpoint.svg)](https://github.com/WinRb/Viewpoint/blob/master/LICENSE)
 [![Wiki](https://img.shields.io/badge/docs-wiki-lightgrey.svg)](http://github.com/WinRb/Viewpoint/wiki)
