@@ -32,10 +32,14 @@ module Viewpoint::EWS::SOAP
     end
 
     def new_watermark
-      ev = notification.last
-      if ev
-        type = ev.keys.first
-        ev[type][:elems][0][:watermark][:text]
+      if notification
+        ev = notification.last
+        if ev
+          type = ev.keys.first
+          ev[type][:elems][0][:watermark][:text]
+        else
+          nil
+        end
       else
         nil
       end
@@ -46,7 +50,9 @@ module Viewpoint::EWS::SOAP
     end
 
     def events
-      notification[3..-1]
+      if notification
+        notification[3..-1]
+      end
     end
 
   end # GetEventsResponseMessage
