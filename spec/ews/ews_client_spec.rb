@@ -3,7 +3,7 @@ require "spec_helper"
 describe Viewpoint::EWSClient do
 
   describe "#set_auto_deepen" do
-    let(:client) { described_class.new "http://www.example.com", "test", "test" }
+    let(:client) { described_class.new({endpoint: "http://www.example.com", type: "basic", user: "test", password: "test"}) }
 
     it "sets autodeepen to true on the web service" do
       ews = double "ews"

@@ -39,16 +39,21 @@ class Viewpoint::EWSClient
   #   Viewpoint::EWS::SOAP::ExchangeWebService.
   # @option opts [Object] :http_class specify an alternate HTTP connection class.
   # @option opts [Hash] :http_opts options to pass to the connection
-  def initialize(endpoint, username, password, opts = {})
-    # dup all. @see ticket https://github.com/zenchild/Viewpoint/issues/68
-    @endpoint = endpoint.dup
-    @username = username.dup
-    password  = password.dup
-    opts      = opts.dup
+  def initialize(auth, opts = {})
+    auth = auth.dup
+
+    @auth_type  = auth[:type]
+    @auth_token = @auth_type == 'oauth' ? auth[:token] : nil
+
+    @endpoint   = auth[:endpoint]
+    @username   = auth[:user]
+    password    = @auth_type == 'basic' ? auth[:password] : nil
+
     http_klass = opts[:http_class] || Viewpoint::EWS::Connection
-    con = http_klass.new(endpoint, opts[:http_opts] || {})
-    con.set_auth @username, password
-    @ews = SOAP::ExchangeWebService.new(con, opts)
+    connection = http_klass.new(auth, opts[:http_opts] || {})
+    connection.set_auth(@username, password) unless password.nil?
+
+    @ews = Viewpoint::EWS::SOAP::ExchangeWebService.new(connection, opts)
   end
 
   # @param deepen [Boolean] true to autodeepen, false otherwise
