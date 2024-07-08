@@ -40,6 +40,18 @@ module Viewpoint::EWS::Types
     }
     CALENDAR_ITEM_KEY_ALIAS = {}
 
+    # Delete this calendar item
+    # @param deltype [Symbol] The delete type; must be :hard, :soft, or :recycle.
+    #   By default EWS will do a  hard delete of this calendar item.  See the=
+    #   MSDN docs for more info: http://msdn.microsoft.com/en-us/library/aa562961.aspx
+    # @param cancel_type [String] 'SendToNone'/'SendOnlyToAll'/'SendToAllAndSaveCopy'
+    #   Default is 'SendOnlyToAll'
+    # @return [Boolean] Whether or not the calendar item was deleted
+    def delete!(deltype = :hard, cancel_type = 'SendOnlyToAll', opts = {})
+      opts = opts.merge(:send_meeting_cancellations => cancel_type)
+      super(deltype, opts)
+    end
+
     # Updates the specified item attributes
     #
     # Uses `SetItemField` if value is present and `DeleteItemField` if value is nil
