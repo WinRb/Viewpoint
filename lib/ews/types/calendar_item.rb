@@ -111,7 +111,11 @@ module Viewpoint::EWS::Types
           self.get_all_properties!
           self
         else
-          raise EwsCreateItemError, "Could not update calendar item. #{rm.code}: #{rm.message_text}" unless rm
+          if rm
+            raise EwsCreateItemError, "Could not update calendar item. #{rm.code}: #{rm.message_text}"
+          else
+            raise EwsCreateItemError, "Could not update calendar item."
+          end
         end
       end
 
