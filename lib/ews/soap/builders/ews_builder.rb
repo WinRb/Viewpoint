@@ -24,9 +24,30 @@ module Viewpoint::EWS::SOAP
     include Viewpoint::EWS
     include Viewpoint::StringUtils
 
+    RESERVED_ATTRIBUTE_KEYS = %w{text sub_elements xmlns_attribute}.map(&:to_sym).freeze
+
     attr_reader :nbuild
     def initialize
       @nbuild = Nokogiri::XML::Builder.new
+    end
+
+    def self.camel_case_attributes(input)
+      case input
+      when Hash
+        result = {}
+        input.each do |attrib_key, attrib_value|
+          unless RESERVED_ATTRIBUTE_KEYS.include?(attrib_key)
+            attrib_key = camel_case(attrib_key)
+          end
+
+          result[attrib_key] = camel_case_attributes(attrib_value)
+        end
+        result
+      when Array
+        result = input.map { |value| camel_case_attributes(value) }
+      else
+        input
+      end
     end
 
     # Build the SOAP envelope and yield this object so subelements can be built. Once
