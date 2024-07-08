@@ -13,8 +13,8 @@ describe Viewpoint::EWS::FolderAccessors do
     ews = double("ews")
     @ecli = double("EWSClient")
     @ecli.extend subject
-    @ecli.stub(:ews) {ews}
-    @ecli.stub(:merge_restrictions!)
+    allow(@ecli).to receive(:ews).and_return ews
+    allow(@ecli).to receive(:merge_restrictions!)
   end
 
   context "ensure FolderAccessors methods are returning good data" do
@@ -24,14 +24,14 @@ describe Viewpoint::EWS::FolderAccessors do
         resp.status = 'Success'
         rhash = {:elems => {:root_folder => {:elems => [{:folders =>{:elems => ResponseObjects.folders}}]}}}
         resp.response_message = rhash
-        @ecli.ews.stub(:find_folder).with(an_instance_of(Hash)) { resp }
+        allow(@ecli.ews).to receive(:find_folder).with(an_instance_of(Hash)).and_return resp
         cbn = double("ClassByName")
-        cbn.stub(:new) { double("FolderMock") }
-        @ecli.stub(:class_by_name) { cbn }
+        allow(cbn).to receive(:new).and_return double("FolderMock")
+        allow(@ecli).to receive(:class_by_name).and_return cbn
       end
 
       it '#find_folders should return folders' do
-        @ecli.folders.should be_instance_of(Array)
+        expect(@ecli.folders).to be_instance_of(Array)
       end
     end
     context "methods utilizing ExchangeWebService#get_folder" do
@@ -40,13 +40,13 @@ describe Viewpoint::EWS::FolderAccessors do
         resp.status = 'Success'
         rhash = {:elems => {:folders =>{:elems => ResponseObjects.folders}}}
         resp.response_message = rhash
-        @ecli.ews.stub(:get_folder).with(an_instance_of(Hash)) { resp }
+        allow(@ecli.ews).to receive(:get_folder).with(an_instance_of(Hash)).and_return resp
         cbn = double("ClassByName")
-        cbn.stub(:new) { double("Folder") }
-        @ecli.stub(:class_by_name) { cbn }
+        allow(cbn).to receive(:new).and_return double("Folder")
+        allow(@ecli).to receive(:class_by_name).and_return cbn
       end
       it '#get_folder should return a Folder' do
-        @ecli.get_folder(:inbox).should be_instance_of(RSpec::Mocks::Mock)
+        expect(@ecli.get_folder(:inbox)).to be_a(RSpec::Mocks::Double)
       end
     end
   end
@@ -55,8 +55,8 @@ describe Viewpoint::EWS::FolderAccessors do
     before do
       resp = OpenStruct.new
       resp.status = 'Failure'
-      @ecli.ews.stub(:find_folder).with(an_instance_of(Hash)) { resp }
-      @ecli.ews.stub(:get_folder).with(an_instance_of(Hash)) { resp }
+      allow(@ecli.ews).to receive(:find_folder).with(an_instance_of(Hash)).and_return resp
+      allow(@ecli.ews).to receive(:get_folder).with(an_instance_of(Hash)).and_return resp
     end
     it '#find_folders should raise an exception' do
       expect {

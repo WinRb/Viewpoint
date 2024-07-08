@@ -27,4 +27,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency  'httpclient'
   s.add_runtime_dependency  'rubyntlm'
   s.add_runtime_dependency  'logging'
+  s.add_runtime_dependency  'syslog'
+  s.add_runtime_dependency  'mutex_m'
 end

@@ -13,7 +13,7 @@ describe Viewpoint::EWS::ItemAccessors do
     ews = double("ews")
     @ecli = double("EWSClient")
     @ecli.extend subject
-    @ecli.stub(:ews) {ews}
+    allow(@ecli).to receive(:ews).and_return(ews)
   end
 
   context "ensure that exceptions are being raised" do
@@ -22,7 +22,7 @@ describe Viewpoint::EWS::ItemAccessors do
       rm = OpenStruct.new
       rm.status = 'Failure'
       resp.response_messages = [rm]
-      @ecli.ews.stub(:get_item).with(an_instance_of(Hash)) { resp }
+      allow(@ecli.ews).to receive(:get_item).with(an_instance_of(Hash)).and_return resp
     end
     it '#get_item should raise an exception' do
       expect {
@@ -42,7 +42,7 @@ describe Viewpoint::EWS::ItemAccessors do
     it "should handle an :occurrence_item_id hash" do
       occurrence_item_id = {:occurrence_item_id => {:recurring_master_id => 'rid1', :change_key => 'ck', :instance_index => 1}}
       result = GetItemArgsAccessor.new.call_get_item_args(occurrence_item_id, {})
-      result[:item_ids].should eq [occurrence_item_id]
+      expect(result[:item_ids]).to eq [occurrence_item_id]
     end
 
     it "should handle an Array of :occurrence_item_id hashes" do
@@ -52,19 +52,19 @@ describe Viewpoint::EWS::ItemAccessors do
           {:occurrence_item_id => {:recurring_master_id => 'rid3', :change_key => 'ck3', :instance_index => 3}},
       ]
       result = GetItemArgsAccessor.new.call_get_item_args(occurrences, {})
-      result[:item_ids].should eq occurrences
+      expect(result[:item_ids]).to eq occurrences
     end
 
     it "should handle an :id hash" do
       id = {:id => 'id1', :change_key => 'ck1'}
       result = GetItemArgsAccessor.new.call_get_item_args(id, {})
-      result[:item_ids].should eq [{:item_id => {:id => 'id1', :change_key => 'ck1'}}]
+      expect(result[:item_ids]).to eq [{:item_id => {:id => 'id1', :change_key => 'ck1'}}]
     end
 
     it "should handle an Array of id strings" do
       ids = ['id1', 'id2', 'id3']
       result = GetItemArgsAccessor.new.call_get_item_args(ids, {})
-      result[:item_ids].should eq [{:item_id=>{:id => 'id1'}},{:item_id=>{:id => 'id2'}},{:item_id=>{:id => 'id3'}}]
+      expect(result[:item_ids]).to eq [{:item_id=>{:id => 'id1'}},{:item_id=>{:id => 'id2'}},{:item_id=>{:id => 'id3'}}]
     end
   end
 

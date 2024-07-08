@@ -34,9 +34,8 @@ describe Viewpoint::EWS::MailboxAccessors do
   context "#get_user_availability" do
 
     it "should care about timezones" do
-      Viewpoint::EWS::SOAP::ExchangeWebService.any_instance.
-        should_receive(:do_soap_request) do |request_document|
-          request_document.at_xpath('//soap:Envelope/soap:Body//t:TimeZone').to_s.should eq timezone_request
+      expect_any_instance_of(Viewpoint::EWS::SOAP::ExchangeWebService).to receive(:do_soap_request) do |request_document|
+          expect(request_document.at_xpath('//soap:Envelope/soap:Body//t:TimeZone').to_s).to eq timezone_request
         end.
         and_return(double(:resp, :status => 'Success'))
 

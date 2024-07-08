@@ -39,7 +39,7 @@ EOS
     let(:resp) { ews.parse_soap_response(ERROR_INVALID_SMTP_ADDRESS, :response_class => described_class) }
 
     it "should deliver the error code" do
-      resp.code.should eq "ErrorInvalidSmtpAddress"
+      expect(resp.code).to eq "ErrorInvalidSmtpAddress"
     end
 
     it "should extract the response message" do
@@ -58,7 +58,7 @@ EOS
           }}
         ]
       }
-      resp.response_message.should == extracted_response_message
+      expect(resp.response_message).to eq extracted_response_message
     end
   end
 
@@ -106,11 +106,11 @@ EOS
     let(:resp) { ews.parse_soap_response(CALENDAR_EVENT_ARRAY, :response_class => described_class) }
 
     it "response should be successful" do
-      resp.status.should eq "Success"
+      expect(resp.status).to eq "Success"
     end
 
     it "the calendar_event_array should have one element" do
-      resp.calendar_event_array.should have(1).items
+      expect(resp.calendar_event_array.length).to eq 1
     end
   end
 
@@ -141,11 +141,11 @@ EOS
     let(:resp) { ews.parse_soap_response(EMPTY_RESPONSE, :response_class => described_class) }
 
     it "response should be success" do
-      resp.status.should eq "Success"
+      expect(resp.status).to eq "Success"
     end
 
     it "the calendar_event_array should be an empty list" do
-      resp.calendar_event_array.should eq []
+      expect(resp.calendar_event_array).to eq []
     end
   end
 

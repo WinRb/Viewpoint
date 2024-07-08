@@ -1,16 +1,14 @@
 require_relative '../spec_helper'
 
 describe "Operations on Exchange Data Services" do
-
   before do
     con = double('Connection')
     @ews = Viewpoint::EWS::SOAP::ExchangeWebService.new con,
       {:server_version => Viewpoint::EWS::SOAP::VERSION_2010_SP2}
-    @ews.stub(:do_soap_request)
   end
 
   it "generates CreateFolder XML" do
-    @ews.should_receive(:do_soap_request).
+    expect(@ews).to receive(:do_soap_request).
       with(match_xml(load_soap("create_folder", :request)))
 
     fname = "Test Folder"
@@ -20,7 +18,7 @@ describe "Operations on Exchange Data Services" do
   end
 
   it "generates CopyFolder XML" do
-    @ews.should_receive(:do_soap_request).
+    expect(@ews).to receive(:do_soap_request).
       with(match_xml(load_soap("copy_folder", :request)))
 
     tofid = {:id => 'dest_folder_id'}
@@ -28,7 +26,7 @@ describe "Operations on Exchange Data Services" do
   end
 
   it "generates DeleteFolder XML" do
-    @ews.should_receive(:do_soap_request).
+    expect(@ews).to receive(:do_soap_request).
       with(match_xml(load_soap("delete_folder", :request)))
 
     fid = "test_folder_id"
@@ -38,7 +36,7 @@ describe "Operations on Exchange Data Services" do
   end
 
   it "generates FindFolder XML" do
-    @ews.should_receive(:do_soap_request).
+    expect(@ews).to receive(:do_soap_request).
       with(match_xml(load_soap("find_folder", :request)))
 
     fname = "Test Folder"
@@ -65,7 +63,7 @@ describe "Operations on Exchange Data Services" do
   end
 
   it "generates GetFolder XML" do
-    @ews.should_receive(:do_soap_request).
+    expect(@ews).to receive(:do_soap_request).
       with(match_xml(load_soap("get_folder", :request)))
 
     opts = { :folder_ids => [{:id => :msgfolderroot}],
@@ -91,7 +89,7 @@ describe "Operations on Exchange Data Services" do
   end
 
   it "generates MoveFolder XML" do
-    @ews.should_receive(:do_soap_request).
+    expect(@ews).to receive(:do_soap_request).
       with(match_xml(load_soap("move_folder", :request)))
 
     tofid = {:id => 'dest_folder_id'}
@@ -99,7 +97,7 @@ describe "Operations on Exchange Data Services" do
   end
 
   it "generates EmptyFolder XML" do
-    @ews.should_receive(:do_soap_request).
+    expect(@ews).to receive(:do_soap_request).
       with(match_xml(load_soap("empty_folder", :request)))
 
     fid = "test_folder_id"

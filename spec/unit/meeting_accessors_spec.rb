@@ -28,9 +28,8 @@ describe Viewpoint::EWS::MeetingAccessors do
     end
 
     it "should form valid accept item request" do
-      Viewpoint::EWS::SOAP::ExchangeWebService.any_instance.
-        should_receive(:do_soap_request) do |request_document|
-        request_document.at_xpath('//soap:Envelope/soap:Body').to_s.should eq create_item_request
+      expect_any_instance_of(Viewpoint::EWS::SOAP::ExchangeWebService).to receive(:do_soap_request) do |request_document|
+        expect(request_document.at_xpath('//soap:Envelope/soap:Body').to_s).to eq create_item_request
       end.
       and_return(double(:resp, :status => 'Success'))
 
@@ -54,9 +53,8 @@ describe Viewpoint::EWS::MeetingAccessors do
     end
 
     it "should form valid accept item request" do
-      Viewpoint::EWS::SOAP::ExchangeWebService.any_instance.
-        should_receive(:do_soap_request) do |request_document|
-        request_document.at_xpath('//soap:Envelope/soap:Body').to_s.should eq create_item_request
+      expect_any_instance_of(Viewpoint::EWS::SOAP::ExchangeWebService).to receive(:do_soap_request) do |request_document|
+        expect(request_document.at_xpath('//soap:Envelope/soap:Body').to_s).to eq create_item_request
       end.
       and_return(double(:resp, :status => 'success'))
 
@@ -80,9 +78,8 @@ describe Viewpoint::EWS::MeetingAccessors do
     end
 
     it "should form valid accept item request" do
-      Viewpoint::EWS::SOAP::ExchangeWebService.any_instance.
-        should_receive(:do_soap_request) do |request_document|
-        request_document.at_xpath('//soap:Envelope/soap:Body').to_s.should eq create_item_request
+      expect_any_instance_of(Viewpoint::EWS::SOAP::ExchangeWebService).to receive(:do_soap_request) do |request_document|
+        expect(request_document.at_xpath('//soap:Envelope/soap:Body').to_s).to eq create_item_request
       end.
       and_return(double(:resp, :status => 'success'))
 
