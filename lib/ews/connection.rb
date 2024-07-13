@@ -30,6 +30,9 @@ class Viewpoint::EWS::Connection
   #   seconds
   # @option opts [Fixnum] :connect_timeout override the default connect timeout
   #   seconds
+  # @option opts [String, URI] :proxy_url the URL of the proxy to use
+  # @option opts [String] :proxy_username the username to use for proxy authentication
+  # @option opts [String] :proxy_password the password to use for proxy authentication
   # @option opts [Array]  :trust_ca an array of hashed dir paths or a file
   # @option opts [String] :user_agent the http user agent to use in all requests
   def initialize(endpoint, opts = {})
@@ -53,11 +56,21 @@ class Viewpoint::EWS::Connection
     @httpcli.keep_alive_timeout = 60
     @httpcli.receive_timeout = opts[:receive_timeout] if opts[:receive_timeout]
     @httpcli.connect_timeout = opts[:connect_timeout] if opts[:connect_timeout]
+    if opts[:proxy_url]
+      @httpcli.proxy = opts[:proxy_url]
+      if opts[:proxy_username]
+        set_proxy_auth(opts[:proxy_username], opts[:proxy_password])
+      end
+    end
     @endpoint = endpoint
   end
 
   def set_auth(user,pass)
     @httpcli.set_auth(@endpoint.to_s, user, pass)
+  end
+
+  def set_proxy_auth(user, pass)
+    @httpcli.set_proxy_auth(user, pass)
   end
 
   # Authenticate to the web service. You don't have to do this because
