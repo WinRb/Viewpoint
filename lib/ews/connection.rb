@@ -30,6 +30,7 @@ class Viewpoint::EWS::Connection
   #   seconds
   # @option opts [Fixnum] :connect_timeout override the default connect timeout
   #   seconds
+  # @option opts [OpenSSL::X509::Store]  :cert_store a custom cert store
   # @option opts [Array]  :trust_ca an array of hashed dir paths or a file
   # @option opts [String] :user_agent the http user agent to use in all requests
   def initialize(endpoint, opts = {})
