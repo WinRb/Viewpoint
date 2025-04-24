@@ -40,7 +40,13 @@ class Viewpoint::EWS::Connection
       @httpcli = HTTPClient.new
     end
 
-    if opts[:trust_ca]
+    if opts[:cert_store].is_a?(OpenSSL::X509::Store)
+      @log.debug 'Applying custom cert_store provided via opts[:cert_store]'
+      # Assign the provided store directly
+      @httpcli.ssl_config.cert_store = opts[:cert_store]
+
+      @log.debug 'Skipping original :trust_ca handling due to provided :cert_store.'
+    elsif opts[:trust_ca]
       @httpcli.ssl_config.clear_cert_store
       opts[:trust_ca].each do |ca|
         @httpcli.ssl_config.add_trust_ca ca
