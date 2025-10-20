@@ -196,8 +196,8 @@ end
 If you see something that could be done better or would like
 to help out in the development of this code please feel free to clone the
 'git' repository and send me patches:
-`git clone git://github.com/zenchild/Viewpoint.git`
+`git clone https://github.com/WinRb/Viewpoint.git`
 or add an issue on GitHub:
-http://github.com/zenchild/Viewpoint/issues
+https://github.com/WinRb/Viewpoint/issues
 
 Cheers!
