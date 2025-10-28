@@ -22,9 +22,11 @@ class Viewpoint::EWS::Connection
   include Viewpoint::EWS
 
   attr_reader :endpoint
+  @@supported_httpclient_opts = %i[agent_name default_header]
+
   # @param [String] endpoint the URL of the web service.
   #   @example https://<site>/ews/Exchange.asmx
-  # @param [Hash] opts Misc config options (mostly for developement)
+  # @param [Hash] opts Misc config options (mostly for development)
   # @option opts [Fixnum] :ssl_verify_mode
   # @option opts [Fixnum] :receive_timeout override the default receive timeout
   #   seconds
@@ -34,11 +36,9 @@ class Viewpoint::EWS::Connection
   # @option opts [String] :user_agent the http user agent to use in all requests
   def initialize(endpoint, opts = {})
     @log = Logging.logger[self.class.name.to_s.to_sym]
-    if opts[:user_agent]
-      @httpcli = HTTPClient.new(agent_name: opts[:user_agent])
-    else
-      @httpcli = HTTPClient.new
-    end
+
+    httpclient_opts = opts.slice(*@@supported_httpclient_opts)
+    @httpcli = HTTPClient.new(**httpclient_opts)
 
     if opts[:trust_ca]
       @httpcli.ssl_config.clear_cert_store
