@@ -32,6 +32,7 @@ class Viewpoint::EWS::Connection
   #   seconds
   # @option opts [Fixnum] :connect_timeout override the default connect timeout
   #   seconds
+  # @option opts [OpenSSL::X509::Store]  :cert_store a custom cert store
   # @option opts [Array]  :trust_ca an array of hashed dir paths or a file
   # @option opts [String] :user_agent the http user agent to use in all requests
   def initialize(endpoint, opts = {})
@@ -40,7 +41,13 @@ class Viewpoint::EWS::Connection
     httpclient_opts = opts.slice(*@@supported_httpclient_opts)
     @httpcli = HTTPClient.new(**httpclient_opts)
 
-    if opts[:trust_ca]
+    if opts[:cert_store].is_a?(OpenSSL::X509::Store)
+      @log.debug 'Applying custom cert_store provided via opts[:cert_store]'
+      # Assign the provided store directly
+      @httpcli.ssl_config.cert_store = opts[:cert_store]
+
+      @log.debug 'Skipping original :trust_ca handling due to provided :cert_store.'
+    elsif opts[:trust_ca]
       @httpcli.ssl_config.clear_cert_store
       opts[:trust_ca].each do |ca|
         @httpcli.ssl_config.add_trust_ca ca
