@@ -1,0 +1,22 @@
+AllCops:
+  TargetRubyVersion: 3.0
+  SuggestExtensions: true
+
+Gemspec/RequireMFA:
+  Enabled: true
+
+Layout/FirstHashElementIndentation:
+  EnforcedStyle: consistent
+
+Layout/HashAlignment:
+  EnforcedHashRocketStyle: table
+
+RSpec/ContextWording:
+  Enabled: false
+
+Style/BlockDelimiters:
+  EnforcedStyle: semantic
+
+Style/HashSyntax:
+  EnforcedStyle: ruby19
+  EnforcedShorthandSyntax: never
