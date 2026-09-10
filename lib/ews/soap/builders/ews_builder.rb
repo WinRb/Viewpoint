@@ -380,7 +380,6 @@ module Viewpoint
         end
 
         def mailbox_type!(type)
-          Standard
           nbuild[NS_EWS_TYPES].MailboxType(type)
         end
 

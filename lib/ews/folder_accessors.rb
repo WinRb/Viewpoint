@@ -153,8 +153,10 @@ module Viewpoint
 
       # @param [Viewpoint::EWS::SOAP::EwsSoapResponse] resp
       def find_folders_parser(resp)
-        raise EwsFolderNotFound,
-              "Could not retrieve folders. #{resp.code}: #{resp.message}" unless resp.status == 'Success'
+        unless resp.status == 'Success'
+          raise EwsFolderNotFound,
+                "Could not retrieve folders. #{resp.code}: #{resp.message}"
+        end
 
         folders = resp.response_message[:elems][:root_folder][:elems][0][:folders][:elems]
         return [] if folders.nil?
@@ -191,8 +193,10 @@ module Viewpoint
 
       # @param [Viewpoint::EWS::SOAP::EwsSoapResponse] resp
       def get_folder_parser(resp)
-        raise EwsFolderNotFound,
-              "Could not retrieve folder. #{resp.code}: #{resp.message}" unless resp.status == 'Success'
+        unless resp.status == 'Success'
+          raise EwsFolderNotFound,
+                "Could not retrieve folder. #{resp.code}: #{resp.message}"
+        end
 
         f = resp.response_message[:elems][:folders][:elems][0]
         ftype = f.keys.first
@@ -216,8 +220,10 @@ module Viewpoint
 
       def sync_folders_parser(resp)
         rmsg = resp.response_messages[0]
-        raise EwsError,
-              "Could not synchronize folders. #{rmsg.response_code}: #{rmsg.message_text}" unless rmsg.success?
+        unless rmsg.success?
+          raise EwsError,
+                "Could not synchronize folders. #{rmsg.response_code}: #{rmsg.message_text}"
+        end
 
         rhash = {}
         rhash[:all_synced] = rmsg.includes_last_folder_in_range?

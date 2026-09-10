@@ -53,8 +53,10 @@ module Viewpoint
         end
 
         def parse_response(resp)
-          raise EwsError,
-                "Could not retrieve #{self.class}. #{resp.code}: #{resp.message}" unless resp.status == 'Success'
+          unless resp.status == 'Success'
+            raise EwsError,
+                  "Could not retrieve #{self.class}. #{resp.code}: #{resp.message}"
+          end
 
           resp.response_message[:elems][:attachments][:elems][0][:file_attachment][:elems].inject(&:merge)
         end

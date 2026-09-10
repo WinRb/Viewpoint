@@ -112,8 +112,10 @@ module Viewpoint
 
           resp = @ews.delete_item(opts)
           rmsg = resp.response_messages[0]
-          raise EwsError,
-                "Could not delete #{self.class}. #{rmsg.response_code}: #{rmsg.message_text}" unless rmsg.success?
+          unless rmsg.success?
+            raise EwsError,
+                  "Could not delete #{self.class}. #{rmsg.response_code}: #{rmsg.message_text}"
+          end
 
           true
         end
@@ -331,8 +333,10 @@ module Viewpoint
 
         def get_item_parser(resp)
           rm = resp.response_messages[0]
-          raise EwsError,
-                "Could not retrieve #{self.class}. #{rm.code}: #{rm.message_text}" unless rm.status == 'Success'
+          unless rm.status == 'Success'
+            raise EwsError,
+                  "Could not retrieve #{self.class}. #{rm.code}: #{rm.message_text}"
+          end
 
           rm.items[0].values.first
         end

@@ -241,7 +241,7 @@ module Viewpoint
         # Check if there is a subscription for this folder.
         # @return [Boolean] Are we subscribed to this folder?
         def subscribed?
-          (@subscription_id.nil? or @watermark.nil?) ? false : true
+          !@subscription_id.nil? && !@watermark.nil?
         end
 
         # Unsubscribe this folder from further Exchange events.

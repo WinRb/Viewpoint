@@ -100,8 +100,6 @@ module Viewpoint
               }
 
               item_updates << { set_item_field: field.merge(calendar_item: { sub_elements: item_attributes }) }
-            else
-              # Ignore unknown attribute
             end
           end
 

@@ -20,10 +20,10 @@ describe 'Room operations on Exchange Data Services' do
   end
 
   it 'generates GetRoomLists XML' do
-    expect(@ews).to receive(:do_soap_request) do |request_document|
+    expect(@ews).to receive(:do_soap_request) { |request_document|
       doc = request_document.to_s.gsub(/>\s+/, '>')
       expect(doc).to eq load_soap('get_room_lists', :request)
-    end.and_return(double(:resp))
+    }.and_return(double(:resp))
     @ews.get_room_lists
   end
 end
