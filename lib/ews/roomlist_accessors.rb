@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2013 Camille Baldock <viewpoint@camillebaldock.co.uk>

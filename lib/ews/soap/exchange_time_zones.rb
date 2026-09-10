@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Viewpoint::EWS::SOAP
   module ExchangeTimeZones
     include Viewpoint::EWS::SOAP

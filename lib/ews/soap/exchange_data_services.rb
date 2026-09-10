@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Viewpoint::EWS::SOAP
   # Exchange Data Service operations as listed in the EWS Documentation.
   # @see http://msdn.microsoft.com/en-us/library/bb409286.aspx

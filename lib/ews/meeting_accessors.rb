@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Viewpoint::EWS::MeetingAccessors
   include Viewpoint::EWS
 

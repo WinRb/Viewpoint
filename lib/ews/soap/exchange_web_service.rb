@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -244,7 +245,7 @@ module Viewpoint::EWS::SOAP
     def validate_version(exchange_version)
       return unless server_version < exchange_version
 
-      msg = 'The operation you are attempting to use is not compatible with'
+      msg = +'The operation you are attempting to use is not compatible with'
       msg << " your configured Exchange Server version(#{server_version})."
       msg << " You must be running at least version (#{exchange_version})."
       raise EwsServerVersionError, msg

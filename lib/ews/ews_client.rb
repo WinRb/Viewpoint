@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'ews/folder_accessors'
 require 'ews/item_accessors'
 require 'ews/message_accessors'

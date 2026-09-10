@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Viewpoint::EWS::Types
   class CalendarFolder
     include Viewpoint::EWS

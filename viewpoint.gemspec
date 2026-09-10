@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'date'
 
 version = File.read(File.expand_path('VERSION', __dir__)).strip

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Viewpoint::EWS::Types
   class Message
     include Viewpoint::EWS
