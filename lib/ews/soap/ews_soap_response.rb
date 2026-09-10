@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,81 +16,85 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::SOAP
-  # A Generic Class for SOAP returns.
-  # @attr_reader [String] :message The text from the EWS element <m:ResponseCode>
-  class EwsSoapResponse
-    def initialize(sax_hash)
-      @resp = sax_hash
-      simplify!
-    end
+module Viewpoint
+  module EWS
+    module SOAP
+      # A Generic Class for SOAP returns.
+      # @attr_reader [String] :message The text from the EWS element <m:ResponseCode>
+      class EwsSoapResponse
+        def initialize(sax_hash)
+          @resp = sax_hash
+          simplify!
+        end
 
-    def envelope
-      @resp[:envelope][:elems]
-    end
+        def envelope
+          @resp[:envelope][:elems]
+        end
 
-    def header
-      envelope[0][:header][:elems]
-    end
+        def header
+          envelope[0][:header][:elems]
+        end
 
-    def body
-      envelope[1][:body][:elems]
-    end
+        def body
+          envelope[1][:body][:elems]
+        end
 
-    def response
-      body[0]
-    end
+        def response
+          body[0]
+        end
 
-    def response_messages
-      key = response.keys.first
-      response[key][:elems].find { |e| e.keys.include? :response_messages }[:response_messages][:elems]
-    end
+        def response_messages
+          key = response.keys.first
+          response[key][:elems].find { |e| e.keys.include? :response_messages }[:response_messages][:elems]
+        end
 
-    def response_message
-      key = response_messages[0].keys.first
-      response_messages[0][key]
-    end
+        def response_message
+          key = response_messages[0].keys.first
+          response_messages[0][key]
+        end
 
-    def response_class
-      response_message[:attribs][:response_class]
-    end
-    alias status response_class
+        def response_class
+          response_message[:attribs][:response_class]
+        end
+        alias status response_class
 
-    def response_code
-      response_message[:elems][:response_code][:text]
-    end
-    alias code response_code
+        def response_code
+          response_message[:elems][:response_code][:text]
+        end
+        alias code response_code
 
-    def response_message_text
-      guard_hash response_message[:elems], %i[message_text text]
-    end
-    alias message response_message_text
+        def response_message_text
+          guard_hash response_message[:elems], %i[message_text text]
+        end
+        alias message response_message_text
 
-    def success?
-      response_class == 'Success'
-    end
+        def success?
+          response_class == 'Success'
+        end
 
-    private
+        private
 
-    def simplify!
-      response_messages.each do |rm|
-        key = rm.keys.first
-        rm[key][:elems] = rm[key][:elems].inject(&:merge)
-      end
-    end
+        def simplify!
+          response_messages.each do |rm|
+            key = rm.keys.first
+            rm[key][:elems] = rm[key][:elems].inject(&:merge)
+          end
+        end
 
-    # If the keys don't exist in the Hash return nil
-    # @param[Hash] hsh
-    # @param[Array<Symbol,String>] keys keys to follow in the array
-    # @return [Object, nil]
-    def guard_hash(hsh, keys)
-      key = keys.shift
-      return nil unless hsh.is_a?(Hash) && hsh.has_key?(key)
+        # If the keys don't exist in the Hash return nil
+        # @param[Hash] hsh
+        # @param[Array<Symbol,String>] keys keys to follow in the array
+        # @return [Object, nil]
+        def guard_hash(hsh, keys)
+          key = keys.shift
+          return nil unless hsh.is_a?(Hash) && hsh.has_key?(key)
 
-      if keys.empty?
-        hsh[key]
-      else
-        guard_hash hsh[key], keys
+          if keys.empty?
+            hsh[key]
+          else
+            guard_hash hsh[key], keys
+          end
+        end
       end
     end
   end

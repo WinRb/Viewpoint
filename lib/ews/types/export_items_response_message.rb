@@ -1,50 +1,55 @@
 # frozen_string_literal: true
-module Viewpoint::EWS::Types
-  class ExportItemsResponseMessage
-    include Viewpoint::EWS
-    include Viewpoint::EWS::Types
-    include Viewpoint::EWS::Types::Item
 
-    BULK_KEY_PATHS = {
-      id: %i[item_id attribs id],
-      change_key: %i[item_id attribs change_key],
-      data: %i[data text]
-    }
+module Viewpoint
+  module EWS
+    module Types
+      class ExportItemsResponseMessage
+        include Viewpoint::EWS
+        include Viewpoint::EWS::Types
+        include Viewpoint::EWS::Types::Item
 
-    BULK_KEY_TYPES = {}
+        BULK_KEY_PATHS = {
+          id: %i[item_id attribs id],
+          change_key: %i[item_id attribs change_key],
+          data: %i[data text]
+        }
 
-    BULK_KEY_ALIAS = {}
+        BULK_KEY_TYPES = {}
 
-    def initialize(ews, bulk_item)
-      super(ews, bulk_item)
-      @item = bulk_item
-      @ews = ews
-    end
+        BULK_KEY_ALIAS = {}
 
-    def id
-      @item[:item_id][:attribs][:id]
-    end
+        def initialize(ews, bulk_item)
+          super(ews, bulk_item)
+          @item = bulk_item
+          @ews = ews
+        end
 
-    def change_key
-      @item[:item_id][:attribs][:change_key]
-    end
+        def id
+          @item[:item_id][:attribs][:id]
+        end
 
-    def data
-      @item[:data][:text]
-    end
+        def change_key
+          @item[:item_id][:attribs][:change_key]
+        end
 
-    private
+        def data
+          @item[:data][:text]
+        end
 
-    def key_paths
-      @key_paths ||= BULK_KEY_PATHS
-    end
+        private
 
-    def key_types
-      @key_types ||= BULK_KEY_TYPES
-    end
+        def key_paths
+          @key_paths ||= BULK_KEY_PATHS
+        end
 
-    def key_alias
-      @key_alias ||= BULK_KEY_ALIAS
+        def key_types
+          @key_types ||= BULK_KEY_TYPES
+        end
+
+        def key_alias
+          @key_alias ||= BULK_KEY_ALIAS
+        end
+      end
     end
   end
 end

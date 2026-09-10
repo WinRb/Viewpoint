@@ -1,8 +1,13 @@
 # frozen_string_literal: true
-module Viewpoint::EWS::Types
-  class PostItem
-    include Viewpoint::EWS
-    include Viewpoint::EWS::Types
-    include Viewpoint::EWS::Types::Item
+
+module Viewpoint
+  module EWS
+    module Types
+      class PostItem
+        include Viewpoint::EWS
+        include Viewpoint::EWS::Types
+        include Viewpoint::EWS::Types::Item
+      end
+    end
   end
 end

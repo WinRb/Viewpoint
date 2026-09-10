@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,19 +16,23 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::SOAP
-  class SyncFolderHierarchyResponseMessage < ResponseMessage
-    def sync_state
-      safe_hash_access message, %i[elems sync_state text]
-    end
+module Viewpoint
+  module EWS
+    module SOAP
+      class SyncFolderHierarchyResponseMessage < ResponseMessage
+        def sync_state
+          safe_hash_access message, %i[elems sync_state text]
+        end
 
-    def includes_last_folder_in_range?
-      ans = safe_hash_access message, %i[elems includes_last_folder_in_range text]
-      ans.downcase == 'true'
-    end
+        def includes_last_folder_in_range?
+          ans = safe_hash_access message, %i[elems includes_last_folder_in_range text]
+          ans.downcase == 'true'
+        end
 
-    def changes
-      safe_hash_access(message, %i[elems changes elems]) || []
+        def changes
+          safe_hash_access(message, %i[elems changes elems]) || []
+        end
+      end
     end
   end
 end

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,74 +16,78 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::SOAP
-  # Exchange Synchronization operations as listed in the EWS Documentation.
-  # @see http://msdn.microsoft.com/en-us/library/bb409286.aspx
-  module ExchangeSynchronization
-    include Viewpoint::EWS::SOAP
+module Viewpoint
+  module EWS
+    module SOAP
+      # Exchange Synchronization operations as listed in the EWS Documentation.
+      # @see http://msdn.microsoft.com/en-us/library/bb409286.aspx
+      module ExchangeSynchronization
+        include Viewpoint::EWS::SOAP
 
-    # Defines a request to synchronize a folder hierarchy on a client
-    # @see http://msdn.microsoft.com/en-us/library/aa580990.aspx
-    # @param [Hash] opts
-    # @option opts [Hash] :folder_shape The folder shape properties
-    #   Ex: {:base_shape => 'Default', :additional_properties => 'bla bla bla'}
-    # @option opts [Hash] :sync_folder_id An optional Hash that represents a FolderId or
-    #   DistinguishedFolderId.
-    #   Ex: {:id => :inbox}
-    # @option opts [Hash] :sync_state The Base64 sync state id. If this is the
-    #   first time syncing this does not need to be passed.
-    def sync_folder_hierarchy(opts)
-      opts = opts.clone
-      req = build_soap! { |type, builder|
-        unless type == :header
-          builder.nbuild.SyncFolderHierarchy {
-            builder.nbuild.parent.default_namespace = @default_ns
-            builder.folder_shape!(opts[:folder_shape])
-            builder.sync_folder_id!(opts[:sync_folder_id]) if opts[:sync_folder_id]
-            builder.sync_state!(opts[:sync_state]) if opts[:sync_state]
+        # Defines a request to synchronize a folder hierarchy on a client
+        # @see http://msdn.microsoft.com/en-us/library/aa580990.aspx
+        # @param [Hash] opts
+        # @option opts [Hash] :folder_shape The folder shape properties
+        #   Ex: {:base_shape => 'Default', :additional_properties => 'bla bla bla'}
+        # @option opts [Hash] :sync_folder_id An optional Hash that represents a FolderId or
+        #   DistinguishedFolderId.
+        #   Ex: {:id => :inbox}
+        # @option opts [Hash] :sync_state The Base64 sync state id. If this is the
+        #   first time syncing this does not need to be passed.
+        def sync_folder_hierarchy(opts)
+          opts = opts.clone
+          req = build_soap! { |type, builder|
+            unless type == :header
+              builder.nbuild.SyncFolderHierarchy {
+                builder.nbuild.parent.default_namespace = @default_ns
+                builder.folder_shape!(opts[:folder_shape])
+                builder.sync_folder_id!(opts[:sync_folder_id]) if opts[:sync_folder_id]
+                builder.sync_state!(opts[:sync_state]) if opts[:sync_state]
+              }
+            end
           }
+          do_soap_request(req, response_class: EwsResponse)
         end
-      }
-      do_soap_request(req, response_class: EwsResponse)
-    end
 
-    # Synchronizes items between the Exchange server and the client
-    # @see http://msdn.microsoft.com/en-us/library/aa563967(v=EXCHG.140).aspx
-    # @param [Hash] opts
-    # @option opts [Hash] :item_shape The item shape properties
-    #   Ex: {:base_shape => 'Default', :additional_properties => 'bla bla bla'}
-    # @option opts [Hash] :sync_folder_id A Hash that represents a FolderId or
-    #   DistinguishedFolderId. [ Ex: {:id => :inbox} ] OPTIONAL
-    # @option opts [String] :sync_state The Base64 sync state id. If this is the
-    #   first time syncing this does not need to be passed. OPTIONAL on first call
-    # @option opts [Array <String>] :ignore An Array of ItemIds for items to ignore
-    #   during the sync process. Ex: [{:id => 'id1', :change_key => 'ck'}, {:id => 'id2'}]
-    #   OPTIONAL
-    # @option opts [Integer] :max_changes_returned ('required') The amount of items to sync per call.
-    # @option opts [String] :sync_scope specifies whether just items or items and folder associated
-    #   information are returned. OPTIONAL
-    #   options: 'NormalItems' or 'NormalAndAssociatedItems'
-    # @example
-    #   { :item_shape => {:base_shape => 'Default'},
-    #     :sync_folder_id => {:id => :inbox},
-    #     :sync_state => myBase64id,
-    #     :max_changes_returned => 256 }
-    def sync_folder_items(opts)
-      opts = opts.clone
-      req = build_soap! { |type, builder|
-        unless type == :header
-          builder.nbuild.SyncFolderItems {
-            builder.nbuild.parent.default_namespace = @default_ns
-            builder.item_shape!(opts[:item_shape])
-            builder.sync_folder_id!(opts[:sync_folder_id]) if opts[:sync_folder_id]
-            builder.sync_state!(opts[:sync_state]) if opts[:sync_state]
-            builder.ignore!(opts[:ignore]) if opts[:ignore]
-            builder.max_changes_returned!(opts[:max_changes_returned])
-            builder.sync_scope!(opts[:sync_scope]) if opts[:sync_scope]
+        # Synchronizes items between the Exchange server and the client
+        # @see http://msdn.microsoft.com/en-us/library/aa563967(v=EXCHG.140).aspx
+        # @param [Hash] opts
+        # @option opts [Hash] :item_shape The item shape properties
+        #   Ex: {:base_shape => 'Default', :additional_properties => 'bla bla bla'}
+        # @option opts [Hash] :sync_folder_id A Hash that represents a FolderId or
+        #   DistinguishedFolderId. [ Ex: {:id => :inbox} ] OPTIONAL
+        # @option opts [String] :sync_state The Base64 sync state id. If this is the
+        #   first time syncing this does not need to be passed. OPTIONAL on first call
+        # @option opts [Array <String>] :ignore An Array of ItemIds for items to ignore
+        #   during the sync process. Ex: [{:id => 'id1', :change_key => 'ck'}, {:id => 'id2'}]
+        #   OPTIONAL
+        # @option opts [Integer] :max_changes_returned ('required') The amount of items to sync per call.
+        # @option opts [String] :sync_scope specifies whether just items or items and folder associated
+        #   information are returned. OPTIONAL
+        #   options: 'NormalItems' or 'NormalAndAssociatedItems'
+        # @example
+        #   { :item_shape => {:base_shape => 'Default'},
+        #     :sync_folder_id => {:id => :inbox},
+        #     :sync_state => myBase64id,
+        #     :max_changes_returned => 256 }
+        def sync_folder_items(opts)
+          opts = opts.clone
+          req = build_soap! { |type, builder|
+            unless type == :header
+              builder.nbuild.SyncFolderItems {
+                builder.nbuild.parent.default_namespace = @default_ns
+                builder.item_shape!(opts[:item_shape])
+                builder.sync_folder_id!(opts[:sync_folder_id]) if opts[:sync_folder_id]
+                builder.sync_state!(opts[:sync_state]) if opts[:sync_state]
+                builder.ignore!(opts[:ignore]) if opts[:ignore]
+                builder.max_changes_returned!(opts[:max_changes_returned])
+                builder.sync_scope!(opts[:sync_scope]) if opts[:sync_scope]
+              }
+            end
           }
+          do_soap_request(req, response_class: EwsResponse)
         end
-      }
-      do_soap_request(req, response_class: EwsResponse)
+      end
     end
   end
 end

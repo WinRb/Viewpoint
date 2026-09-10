@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,20 +16,24 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::Types
-  class StatusEvent
-    include Viewpoint::EWS
-    include Viewpoint::EWS::Types
-    include Viewpoint::EWS::Types::Item
+module Viewpoint
+  module EWS
+    module Types
+      class StatusEvent
+        include Viewpoint::EWS
+        include Viewpoint::EWS::Types
+        include Viewpoint::EWS::Types::Item
 
-    STATUS_EVENT_KEY_PATHS = {
-      watermark: %i[watermark text]
-    }
+        STATUS_EVENT_KEY_PATHS = {
+          watermark: %i[watermark text]
+        }
 
-    private
+        private
 
-    def key_paths
-      @key_paths ||= STATUS_EVENT_KEY_PATHS
+        def key_paths
+          @key_paths ||= STATUS_EVENT_KEY_PATHS
+        end
+      end
     end
   end
 end

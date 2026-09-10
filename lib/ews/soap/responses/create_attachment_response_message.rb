@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,26 +16,30 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::SOAP
-  class CreateAttachmentResponseMessage < ResponseMessage
-    include Viewpoint::StringUtils
+module Viewpoint
+  module EWS
+    module SOAP
+      class CreateAttachmentResponseMessage < ResponseMessage
+        include Viewpoint::StringUtils
 
-    def attachments
-      return @attachments if @attachments
+        def attachments
+          return @attachments if @attachments
 
-      a = safe_hash_access message, %i[elems attachments elems]
-      @attachments = a.nil? ? nil : parse_attachments(a)
-    end
+          a = safe_hash_access message, %i[elems attachments elems]
+          @attachments = a.nil? ? nil : parse_attachments(a)
+        end
 
-    private
+        private
 
-    def parse_attachments(att)
-      att.collect do |a|
-        type = a.keys.first
-        klass = Viewpoint::EWS::Types.const_get(camel_case(type))
-        item = OpenStruct.new
-        item.ews = nil
-        klass.new(item, a[type])
+        def parse_attachments(att)
+          att.collect do |a|
+            type = a.keys.first
+            klass = Viewpoint::EWS::Types.const_get(camel_case(type))
+            item = OpenStruct.new
+            item.ews = nil
+            klass.new(item, a[type])
+          end
+        end
       end
     end
   end

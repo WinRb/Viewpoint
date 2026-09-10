@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,30 +16,34 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::Types
-  class MovedEvent < Event
-    MOVED_EVENT_KEY_PATHS = {
-      old_item_id: %i[old_item_id attribs],
-      old_folder_id: %i[old_folder_id attribs],
-      old_parent_folder_id: %i[old_parent_folder_id attribs]
-    }
+module Viewpoint
+  module EWS
+    module Types
+      class MovedEvent < Event
+        MOVED_EVENT_KEY_PATHS = {
+          old_item_id: %i[old_item_id attribs],
+          old_folder_id: %i[old_folder_id attribs],
+          old_parent_folder_id: %i[old_parent_folder_id attribs]
+        }
 
-    MOVED_EVENT_KEY_TYPES = {}
+        MOVED_EVENT_KEY_TYPES = {}
 
-    MOVED_EVENT_KEY_ALIAS = {}
+        MOVED_EVENT_KEY_ALIAS = {}
 
-    private
+        private
 
-    def key_paths
-      @key_paths ||= super.merge MOVED_EVENT_KEY_PATHS
-    end
+        def key_paths
+          @key_paths ||= super.merge MOVED_EVENT_KEY_PATHS
+        end
 
-    def key_types
-      @key_types ||= super.merge MOVED_EVENT_KEY_TYPES
-    end
+        def key_types
+          @key_types ||= super.merge MOVED_EVENT_KEY_TYPES
+        end
 
-    def key_alias
-      @key_alias ||= super.merge MOVED_EVENT_KEY_ALIAS
+        def key_alias
+          @key_alias ||= super.merge MOVED_EVENT_KEY_ALIAS
+        end
+      end
     end
   end
 end

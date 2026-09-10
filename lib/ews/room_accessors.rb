@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2013 Camille Baldock <viewpoint@camillebaldock.co.uk>
@@ -15,30 +16,34 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::RoomAccessors
-  include Viewpoint::EWS
+module Viewpoint
+  module EWS
+    module RoomAccessors
+      include Viewpoint::EWS
 
-  # Gets the rooms that are available within the specified room distribution list
-  # @see http://msdn.microsoft.com/en-us/library/dd899415.aspx
-  # @param [String] roomDistributionList
-  def get_rooms(roomDistributionList)
-    resp = ews.get_rooms(roomDistributionList)
-    get_rooms_parser(resp)
-  end
+      # Gets the rooms that are available within the specified room distribution list
+      # @see http://msdn.microsoft.com/en-us/library/dd899415.aspx
+      # @param [String] roomDistributionList
+      def get_rooms(roomDistributionList)
+        resp = ews.get_rooms(roomDistributionList)
+        get_rooms_parser(resp)
+      end
 
-  def room_name(room)
-    room[:room][:elems][:id][:elems][0][:name][:text]
-  end
+      def room_name(room)
+        room[:room][:elems][:id][:elems][0][:name][:text]
+      end
 
-  def room_email(room)
-    room[:room][:elems][:id][:elems][1][:email_address][:text]
-  end
+      def room_email(room)
+        room[:room][:elems][:id][:elems][1][:email_address][:text]
+      end
 
-  private
+      private
 
-  def get_rooms_parser(resp)
-    raise EwsError, "GetRooms produced an error: #{resp.code}: #{resp.message}" unless resp.success?
+      def get_rooms_parser(resp)
+        raise EwsError, "GetRooms produced an error: #{resp.code}: #{resp.message}" unless resp.success?
 
-    resp
+        resp
+      end
+    end
   end
 end

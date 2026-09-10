@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is a contribution to Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2013 Camille Baldock <viewpoint@camillebaldock.co.uk>
@@ -15,33 +16,37 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::SOAP
-  # A class for roomlists SOAP returns.
-  # @attr_reader [String] :message The text from the EWS element <m:ResponseCode>
-  class EwsSoapRoomResponse < EwsSoapResponse
-    def response_messages
-      key = response.keys.first
-      subresponse = response[key][:elems][1]
-      response_class = subresponse.keys.first
-      subresponse[response_class][:elems]
-    end
+module Viewpoint
+  module EWS
+    module SOAP
+      # A class for roomlists SOAP returns.
+      # @attr_reader [String] :message The text from the EWS element <m:ResponseCode>
+      class EwsSoapRoomResponse < EwsSoapResponse
+        def response_messages
+          key = response.keys.first
+          subresponse = response[key][:elems][1]
+          response_class = subresponse.keys.first
+          subresponse[response_class][:elems]
+        end
 
-    def roomsArray
-      response[:get_rooms_response][:elems][1][:rooms][:elems]
-    end
+        def roomsArray
+          response[:get_rooms_response][:elems][1][:rooms][:elems]
+        end
 
-    def success?
-      response.first[1][:attribs][:response_class] == 'Success'
-    end
+        def success?
+          response.first[1][:attribs][:response_class] == 'Success'
+        end
 
-    private
+        private
 
-    def simplify!
-      return unless response_messages
+        def simplify!
+          return unless response_messages
 
-      response_messages.each do |rm|
-        key = rm.keys.first
-        rm[key][:elems] = rm[key][:elems].inject(&:merge)
+          response_messages.each do |rm|
+            key = rm.keys.first
+            rm[key][:elems] = rm[key][:elems].inject(&:merge)
+          end
+        end
       end
     end
   end

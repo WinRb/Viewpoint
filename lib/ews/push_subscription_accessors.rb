@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,15 +16,19 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::PushSubscriptionAccessors
-  include Viewpoint::EWS
+module Viewpoint
+  module EWS
+    module PushSubscriptionAccessors
+      include Viewpoint::EWS
 
-  def parse_send_notification(msg)
-    parser = Viewpoint::EWS::SOAP::EwsParser.new(msg)
-    resp = parser.parse response_class: Viewpoint::EWS::SOAP::EwsResponse
-    rmsg = resp.response_messages[0]
-    raise EwsSubscriptionError, "#{rmsg.code}: #{rmsg.message_text}" unless rmsg.success?
+      def parse_send_notification(msg)
+        parser = Viewpoint::EWS::SOAP::EwsParser.new(msg)
+        resp = parser.parse response_class: Viewpoint::EWS::SOAP::EwsResponse
+        rmsg = resp.response_messages[0]
+        raise EwsSubscriptionError, "#{rmsg.code}: #{rmsg.message_text}" unless rmsg.success?
 
-    rmsg
+        rmsg
+      end
+    end
   end
 end

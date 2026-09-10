@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,27 +16,31 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::SOAP
-  class EwsParser
-    include Viewpoint::EWS
+module Viewpoint
+  module EWS
+    module SOAP
+      class EwsParser
+        include Viewpoint::EWS
 
-    # @param [String] soap_resp
-    def initialize(soap_resp)
-      @soap_resp  = soap_resp
-      @sax_doc    = EwsSaxDocument.new
-    end
+        # @param [String] soap_resp
+        def initialize(soap_resp)
+          @soap_resp  = soap_resp
+          @sax_doc    = EwsSaxDocument.new
+        end
 
-    def parse(opts = {})
-      opts[:response_class] ||= EwsSoapResponse
-      @soap_resp.gsub!(/&#x([0-8bcef]|1[0-9a-f]);/i, '')
-      sax_parser.parse(@soap_resp)
-      opts[:response_class].new @sax_doc.struct
-    end
+        def parse(opts = {})
+          opts[:response_class] ||= EwsSoapResponse
+          @soap_resp.gsub!(/&#x([0-8bcef]|1[0-9a-f]);/i, '')
+          sax_parser.parse(@soap_resp)
+          opts[:response_class].new @sax_doc.struct
+        end
 
-    private
+        private
 
-    def sax_parser
-      @parser ||= Nokogiri::XML::SAX::Parser.new(@sax_doc)
+        def sax_parser
+          @parser ||= Nokogiri::XML::SAX::Parser.new(@sax_doc)
+        end
+      end
     end
   end
 end

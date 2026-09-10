@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,7 +16,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::SOAP
-  class CreateItemResponseMessage < ResponseMessage
+module Viewpoint
+  module EWS
+    module SOAP
+      class CreateItemResponseMessage < ResponseMessage
+      end
+    end
   end
 end

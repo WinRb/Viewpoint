@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,44 +16,49 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::Types
-  class FileAttachment < Attachment
-    FILE_ATTACH_KEY_PATHS = {
-      is_contact_photo?: %i[is_contact_photo text],
-      content: %i[content text]
-    }
+module Viewpoint
+  module EWS
+    module Types
+      class FileAttachment < Attachment
+        FILE_ATTACH_KEY_PATHS = {
+          is_contact_photo?: %i[is_contact_photo text],
+          content: %i[content text]
+        }
 
-    FILE_ATTACH_KEY_TYPES = {
-      is_contact_photo?: ->(str) { str.downcase == 'true' }
-    }
+        FILE_ATTACH_KEY_TYPES = {
+          is_contact_photo?: ->(str) { str.downcase == 'true' }
+        }
 
-    FILE_ATTACH_KEY_ALIAS = {
-      file_name: :name
-    }
+        FILE_ATTACH_KEY_ALIAS = {
+          file_name: :name
+        }
 
-    def get_all_properties!
-      resp = ews.get_attachment attachment_ids: [id]
-      @ews_item.merge!(parse_response(resp))
-    end
+        def get_all_properties!
+          resp = ews.get_attachment attachment_ids: [id]
+          @ews_item.merge!(parse_response(resp))
+        end
 
-    private
+        private
 
-    def key_paths
-      super.merge(FILE_ATTACH_KEY_PATHS)
-    end
+        def key_paths
+          super.merge(FILE_ATTACH_KEY_PATHS)
+        end
 
-    def key_types
-      super.merge(FILE_ATTACH_KEY_TYPES)
-    end
+        def key_types
+          super.merge(FILE_ATTACH_KEY_TYPES)
+        end
 
-    def key_alias
-      super.merge(FILE_ATTACH_KEY_ALIAS)
-    end
+        def key_alias
+          super.merge(FILE_ATTACH_KEY_ALIAS)
+        end
 
-    def parse_response(resp)
-      raise EwsError, "Could not retrieve #{self.class}. #{resp.code}: #{resp.message}" unless resp.status == 'Success'
+        def parse_response(resp)
+          raise EwsError,
+                "Could not retrieve #{self.class}. #{resp.code}: #{resp.message}" unless resp.status == 'Success'
 
-      resp.response_message[:elems][:attachments][:elems][0][:file_attachment][:elems].inject(&:merge)
+          resp.response_message[:elems][:attachments][:elems][0][:file_attachment][:elems].inject(&:merge)
+        end
+      end
     end
   end
 end

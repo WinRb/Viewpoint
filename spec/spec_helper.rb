@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 $: << File.dirname(__FILE__) + '/../lib/'
 require 'viewpoint'
 require 'viewpoint/logging/config'

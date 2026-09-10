@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,64 +16,69 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::Types
-  class ItemAttachment < Attachment
-    ITEM_ATTACH_KEY_PATHS = {
-      item: [:item],
-      message: [:message],
-      calendar_item: [:calendar_item],
-      contact: [:contact],
-      task: [:task],
-      meeting_message: [:meeting_message],
-      meeting_request: [:meeting_request],
-      meeting_response: [:meeting_response],
-      meeting_cancellation: [:meeting_cancellation]
-    }
+module Viewpoint
+  module EWS
+    module Types
+      class ItemAttachment < Attachment
+        ITEM_ATTACH_KEY_PATHS = {
+          item: [:item],
+          message: [:message],
+          calendar_item: [:calendar_item],
+          contact: [:contact],
+          task: [:task],
+          meeting_message: [:meeting_message],
+          meeting_request: [:meeting_request],
+          meeting_response: [:meeting_response],
+          meeting_cancellation: [:meeting_cancellation]
+        }
 
-    ITEM_ATTACH_KEY_TYPES = {
-      message: :build_message,
-      calendar_item: :build_calendar_item,
-      contact: :build_contact,
-      task: :build_task,
-      meeting_message: :build_meeting_message,
-      meeting_request: :build_meeting_request,
-      meeting_response: :build_meeting_response,
-      meeting_cancellation: :build_meeting_cancellation
-    }
+        ITEM_ATTACH_KEY_TYPES = {
+          message: :build_message,
+          calendar_item: :build_calendar_item,
+          contact: :build_contact,
+          task: :build_task,
+          meeting_message: :build_meeting_message,
+          meeting_request: :build_meeting_request,
+          meeting_response: :build_meeting_response,
+          meeting_cancellation: :build_meeting_cancellation
+        }
 
-    ITEM_ATTACH_KEY_ALIAS = {}
+        ITEM_ATTACH_KEY_ALIAS = {}
 
-    def get_all_properties!
-      resp = ews.get_attachment attachment_ids: [id]
-      @ews_item.merge!(parse_response(resp))
-    end
+        def get_all_properties!
+          resp = ews.get_attachment attachment_ids: [id]
+          @ews_item.merge!(parse_response(resp))
+        end
 
-    private
+        private
 
-    def self.method_missing(method, *args, &block)
-      if method.to_s =~ /^build_(.+)$/
-        class_by_name(::Regexp.last_match(1)).new(ews, args[0])
-      else
-        super
+        def self.method_missing(method, *args, &block)
+          if method.to_s =~ /^build_(.+)$/
+            class_by_name(::Regexp.last_match(1)).new(ews, args[0])
+          else
+            super
+          end
+        end
+
+        def key_paths
+          super.merge(ITEM_ATTACH_KEY_PATHS)
+        end
+
+        def key_types
+          super.merge(ITEM_ATTACH_KEY_TYPES)
+        end
+
+        def key_alias
+          super.merge(ITEM_ATTACH_KEY_ALIAS)
+        end
+
+        def parse_response(resp)
+          raise EwsError,
+                "Could not retrieve #{self.class}. #{resp.code}: #{resp.message}" unless resp.status == 'Success'
+
+          resp.response_message[:elems][:attachments][:elems][0][:item_attachment][:elems].inject(&:merge)
+        end
       end
-    end
-
-    def key_paths
-      super.merge(ITEM_ATTACH_KEY_PATHS)
-    end
-
-    def key_types
-      super.merge(ITEM_ATTACH_KEY_TYPES)
-    end
-
-    def key_alias
-      super.merge(ITEM_ATTACH_KEY_ALIAS)
-    end
-
-    def parse_response(resp)
-      raise EwsError, "Could not retrieve #{self.class}. #{resp.code}: #{resp.message}" unless resp.status == 'Success'
-
-      resp.response_message[:elems][:attachments][:elems][0][:item_attachment][:elems].inject(&:merge)
     end
   end
 end

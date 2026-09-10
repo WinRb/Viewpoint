@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,18 +16,22 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::SOAP
-  class SubscribeResponseMessage < ResponseMessage
-    def subscription
-      safe_hash_access message, [:elems]
-    end
+module Viewpoint
+  module EWS
+    module SOAP
+      class SubscribeResponseMessage < ResponseMessage
+        def subscription
+          safe_hash_access message, [:elems]
+        end
 
-    def subscription_id
-      safe_hash_access subscription, %i[subscription_id text]
-    end
+        def subscription_id
+          safe_hash_access subscription, %i[subscription_id text]
+        end
 
-    def watermark
-      safe_hash_access subscription, %i[watermark text]
+        def watermark
+          safe_hash_access subscription, %i[watermark text]
+        end
+      end
     end
   end
 end

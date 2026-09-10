@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,43 +16,47 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::Types
-  class Event
-    include Viewpoint::EWS
-    include Viewpoint::EWS::Types
-    include Viewpoint::EWS::Types::Item
+module Viewpoint
+  module EWS
+    module Types
+      class Event
+        include Viewpoint::EWS
+        include Viewpoint::EWS::Types
+        include Viewpoint::EWS::Types::Item
 
-    EVENT_KEY_PATHS = {
-      watermark: %i[watermark text],
-      timestamp: %i[time_stamp text],
-      item_id: %i[item_id attribs],
-      folder_id: %i[folder_id attribs],
-      parent_folder_id: %i[parent_folder_id attribs]
-    }
+        EVENT_KEY_PATHS = {
+          watermark: %i[watermark text],
+          timestamp: %i[time_stamp text],
+          item_id: %i[item_id attribs],
+          folder_id: %i[folder_id attribs],
+          parent_folder_id: %i[parent_folder_id attribs]
+        }
 
-    EVENT_KEY_TYPES = {
-      timestamp: ->(ts) { DateTime.iso8601(ts) }
-    }
+        EVENT_KEY_TYPES = {
+          timestamp: ->(ts) { DateTime.iso8601(ts) }
+        }
 
-    EVENT_KEY_ALIAS = {}
+        EVENT_KEY_ALIAS = {}
 
-    def initialize(ews, event)
-      @ews = ews
-      super(ews, event)
-    end
+        def initialize(ews, event)
+          @ews = ews
+          super(ews, event)
+        end
 
-    private
+        private
 
-    def key_paths
-      @key_paths ||= EVENT_KEY_PATHS
-    end
+        def key_paths
+          @key_paths ||= EVENT_KEY_PATHS
+        end
 
-    def key_types
-      @key_types ||= EVENT_KEY_TYPES
-    end
+        def key_types
+          @key_types ||= EVENT_KEY_TYPES
+        end
 
-    def key_alias
-      @key_alias ||= EVENT_KEY_ALIAS
+        def key_alias
+          @key_alias ||= EVENT_KEY_ALIAS
+        end
+      end
     end
   end
 end

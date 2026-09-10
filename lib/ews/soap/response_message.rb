@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,51 +16,55 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::SOAP
-  class ResponseMessage
-    attr_reader :message, :type
+module Viewpoint
+  module EWS
+    module SOAP
+      class ResponseMessage
+        attr_reader :message, :type
 
-    def initialize(message)
-      @type    = message.keys.first
-      @message = message[@type]
-    end
+        def initialize(message)
+          @type    = message.keys.first
+          @message = message[@type]
+        end
 
-    def response_class
-      message[:attribs][:response_class]
-    end
-    alias status response_class
+        def response_class
+          message[:attribs][:response_class]
+        end
+        alias status response_class
 
-    def success?
-      response_class == 'Success'
-    end
+        def success?
+          response_class == 'Success'
+        end
 
-    def message_text
-      safe_hash_access message, %i[elems message_text text]
-    end
+        def message_text
+          safe_hash_access message, %i[elems message_text text]
+        end
 
-    def response_code
-      safe_hash_access message, %i[elems response_code text]
-    end
-    alias code response_code
+        def response_code
+          safe_hash_access message, %i[elems response_code text]
+        end
+        alias code response_code
 
-    def message_xml
-      safe_hash_access message, %i[elems message_xml text]
-    end
+        def message_xml
+          safe_hash_access message, %i[elems message_xml text]
+        end
 
-    def items
-      safe_hash_access(message, %i[elems items elems]) || []
-    end
+        def items
+          safe_hash_access(message, %i[elems items elems]) || []
+        end
 
-    private
+        private
 
-    def safe_hash_access(hsh, keys)
-      key = keys.shift
-      return nil unless hsh.is_a?(Hash) && hsh.has_key?(key)
+        def safe_hash_access(hsh, keys)
+          key = keys.shift
+          return nil unless hsh.is_a?(Hash) && hsh.has_key?(key)
 
-      if keys.empty?
-        hsh[key]
-      else
-        safe_hash_access hsh[key], keys
+          if keys.empty?
+            hsh[key]
+          else
+            safe_hash_access hsh[key], keys
+          end
+        end
       end
     end
   end

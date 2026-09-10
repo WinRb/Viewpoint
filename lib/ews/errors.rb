@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,41 +16,45 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::Errors
-  class ResponseError < RuntimeError
-    attr_reader :response
+module Viewpoint
+  module EWS
+    module Errors
+      class ResponseError < RuntimeError
+        attr_reader :response
 
-    def initialize(message, response)
-      super(message)
-      @response = response
-    end
+        def initialize(message, response)
+          super(message)
+          @response = response
+        end
 
-    def status
-      response.status
-    end
+        def status
+          response.status
+        end
 
-    def body
-      response.body
-    end
-  end
+        def body
+          response.body
+        end
+      end
 
-  class UnhandledResponseError < ResponseError
-  end
+      class UnhandledResponseError < ResponseError
+      end
 
-  class ServerError < ResponseError
-  end
+      class ServerError < ResponseError
+      end
 
-  class UnauthorizedResponseError < ResponseError
-  end
+      class UnauthorizedResponseError < ResponseError
+      end
 
-  class SoapResponseError < ResponseError
-    attr_reader :faultcode,
-                :faultstring
+      class SoapResponseError < ResponseError
+        attr_reader :faultcode,
+                    :faultstring
 
-    def initialize(message, response, faultcode, faultstring)
-      super(message, response)
-      @faultcode = faultcode
-      @faultstring = faultstring
+        def initialize(message, response, faultcode, faultstring)
+          super(message, response)
+          @faultcode = faultcode
+          @faultstring = faultstring
+        end
+      end
     end
   end
 end

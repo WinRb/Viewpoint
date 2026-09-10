@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,57 +16,61 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::SOAP
-  class RootFolder
-    attr_reader :root
+module Viewpoint
+  module EWS
+    module SOAP
+      class RootFolder
+        attr_reader :root
 
-    def initialize(root)
-      @root = root
-    end
+        def initialize(root)
+          @root = root
+        end
 
-    def indexed_paging_offset
-      attrib :index_paging_offset
-    end
+        def indexed_paging_offset
+          attrib :index_paging_offset
+        end
 
-    def numerator_offset
-      attrib :numerator_offset
-    end
+        def numerator_offset
+          attrib :numerator_offset
+        end
 
-    def absolute_denominator
-      attrib :absolute_denominator
-    end
+        def absolute_denominator
+          attrib :absolute_denominator
+        end
 
-    def includes_last_item_in_range
-      attrib :includes_last_item_in_range
-    end
+        def includes_last_item_in_range
+          attrib :includes_last_item_in_range
+        end
 
-    def total_items_in_view
-      attrib :total_items_in_view
-    end
+        def total_items_in_view
+          attrib :total_items_in_view
+        end
 
-    def items
-      root[:elems][0][:items][:elems] || []
-    end
+        def items
+          root[:elems][0][:items][:elems] || []
+        end
 
-    def groups
-      root[:elems][0][:groups][:elems]
-    end
+        def groups
+          root[:elems][0][:groups][:elems]
+        end
 
-    private
+        private
 
-    def attrib(key)
-      return nil unless root.has_key?(:attribs)
+        def attrib(key)
+          return nil unless root.has_key?(:attribs)
 
-      root[:attribs][key]
-    end
-  end
+          root[:attribs][key]
+        end
+      end
 
-  class FindItemResponseMessage < ResponseMessage
-    def root_folder
-      return @root_folder if @root_folder
+      class FindItemResponseMessage < ResponseMessage
+        def root_folder
+          return @root_folder if @root_folder
 
-      rf = safe_hash_access message, %i[elems root_folder]
-      @root_folder = rf.nil? ? nil : RootFolder.new(rf)
+          rf = safe_hash_access message, %i[elems root_folder]
+          @root_folder = rf.nil? ? nil : RootFolder.new(rf)
+        end
+      end
     end
   end
 end

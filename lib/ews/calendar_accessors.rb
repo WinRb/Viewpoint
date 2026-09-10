@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # This file is a cotribution to Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 # Copyright © 2013 Mark McCahill <mark.mccahill@duke.edu>
@@ -15,18 +16,22 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::CalendarAccessors
-  include Viewpoint::EWS
+module Viewpoint
+  module EWS
+    module CalendarAccessors
+      include Viewpoint::EWS
 
-  def event_busy_type(the_event)
-    the_event[:calendar_event][:elems][2][:busy_type][:text]
-  end
+      def event_busy_type(the_event)
+        the_event[:calendar_event][:elems][2][:busy_type][:text]
+      end
 
-  def event_start_time(the_event)
-    the_event[:calendar_event][:elems][0][:start_time][:text]
-  end
+      def event_start_time(the_event)
+        the_event[:calendar_event][:elems][0][:start_time][:text]
+      end
 
-  def event_end_time(the_event)
-    the_event[:calendar_event][:elems][1][:end_time][:text]
+      def event_end_time(the_event)
+        the_event[:calendar_event][:elems][1][:end_time][:text]
+      end
+    end
   end
 end

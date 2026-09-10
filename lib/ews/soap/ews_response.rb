@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,60 +16,64 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::SOAP
-  # A Generic Class for SOAP returns.
-  class EwsResponse
-    include Viewpoint::StringUtils
+module Viewpoint
+  module EWS
+    module SOAP
+      # A Generic Class for SOAP returns.
+      class EwsResponse
+        include Viewpoint::StringUtils
 
-    def initialize(sax_hash)
-      @resp = sax_hash
-      simplify!
-    end
+        def initialize(sax_hash)
+          @resp = sax_hash
+          simplify!
+        end
 
-    def envelope
-      @resp[:envelope][:elems]
-    end
+        def envelope
+          @resp[:envelope][:elems]
+        end
 
-    def header
-      envelope[0][:header][:elems]
-    end
+        def header
+          envelope[0][:header][:elems]
+        end
 
-    def body
-      envelope[1][:body][:elems]
-    end
+        def body
+          envelope[1][:body][:elems]
+        end
 
-    def response
-      body[0]
-    end
+        def response
+          body[0]
+        end
 
-    def response_messages
-      return @response_messages if @response_messages
+        def response_messages
+          return @response_messages if @response_messages
 
-      @response_messages = []
-      response_type = response.keys.first
-      response[response_type][:elems][0][:response_messages][:elems].each do |rm|
-        response_message_type = rm.keys[0]
-        rm_klass = class_by_name(response_message_type)
-        @response_messages << rm_klass.new(rm)
+          @response_messages = []
+          response_type = response.keys.first
+          response[response_type][:elems][0][:response_messages][:elems].each do |rm|
+            response_message_type = rm.keys[0]
+            rm_klass = class_by_name(response_message_type)
+            @response_messages << rm_klass.new(rm)
+          end
+          @response_messages
+        end
+
+        private
+
+        def simplify!
+          response_type = response.keys.first
+          response[response_type][:elems][0][:response_messages][:elems].each do |rm|
+            key = rm.keys.first
+            rm[key][:elems] = rm[key][:elems].inject(&:merge)
+          end
+        end
+
+        def class_by_name(cname)
+          cname = camel_case(cname) if cname.instance_of? Symbol
+          Viewpoint::EWS::SOAP.const_get(cname)
+        rescue NameError
+          ResponseMessage
+        end
       end
-      @response_messages
-    end
-
-    private
-
-    def simplify!
-      response_type = response.keys.first
-      response[response_type][:elems][0][:response_messages][:elems].each do |rm|
-        key = rm.keys.first
-        rm[key][:elems] = rm[key][:elems].inject(&:merge)
-      end
-    end
-
-    def class_by_name(cname)
-      cname = camel_case(cname) if cname.instance_of? Symbol
-      Viewpoint::EWS::SOAP.const_get(cname)
-    rescue NameError
-      ResponseMessage
     end
   end
 end

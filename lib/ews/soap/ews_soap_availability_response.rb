@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
 #
 #   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
@@ -15,39 +16,43 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-module Viewpoint::EWS::SOAP
-  # This is a speciality response class to handle the idiosynracies of
-  # Availability responses.
-  # @attr_reader [String] :message The text from the EWS element <m:ResponseCode>
-  class EwsSoapAvailabilityResponse < EwsSoapResponse
-    def response_messages
-      nil
-    end
+module Viewpoint
+  module EWS
+    module SOAP
+      # This is a speciality response class to handle the idiosynracies of
+      # Availability responses.
+      # @attr_reader [String] :message The text from the EWS element <m:ResponseCode>
+      class EwsSoapAvailabilityResponse < EwsSoapResponse
+        def response_messages
+          nil
+        end
 
-    def response
-      body[0][response_key]
-    end
+        def response
+          body[0][response_key]
+        end
 
-    def response_message
-      key = response.keys.first
-      response[key]
-    end
+        def response_message
+          key = response.keys.first
+          response[key]
+        end
 
-    def response_code
-      response_message[:elems][:response_code][:text]
-    end
-    alias code response_code
+        def response_code
+          response_message[:elems][:response_code][:text]
+        end
+        alias code response_code
 
-    def response_key
-      body[0].keys.first
-    end
+        def response_key
+          body[0].keys.first
+        end
 
-    private
+        private
 
-    def simplify!
-      key = response_key
-      body[0][key] = body[0][key][:elems].inject(:merge)
-      response_message[:elems] = response_message[:elems].inject(:merge)
+        def simplify!
+          key = response_key
+          body[0][key] = body[0][key][:elems].inject(:merge)
+          response_message[:elems] = response_message[:elems].inject(:merge)
+        end
+      end
     end
   end
 end
