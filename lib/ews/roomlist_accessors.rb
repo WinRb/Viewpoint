@@ -1,47 +1,49 @@
-=begin
-  This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+# frozen_string_literal: true
 
-  Copyright © 2013 Camille Baldock <viewpoint@camillebaldock.co.uk>
+#   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+#
+#   Copyright © 2013 Camille Baldock <viewpoint@camillebaldock.co.uk>
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+module Viewpoint
+  module EWS
+    # Roomlist operations mixed into the EWS client.
+    module RoomlistAccessors
+      include Viewpoint::EWS
 
-    http://www.apache.org/licenses/LICENSE-2.0
+      # Gets the room lists that are available within the Exchange organization.
+      # @see http://msdn.microsoft.com/en-us/library/dd899416.aspx
+      def get_room_lists # rubocop:disable Naming/AccessorMethodName -- public API name
+        resp = ews.get_room_lists
+        get_room_lists_parser(resp)
+      end
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-=end
+      def roomlist_name(roomlist)
+        roomlist[:address][:elems][:name][:text]
+      end
 
-module Viewpoint::EWS::RoomlistAccessors
-  include Viewpoint::EWS
+      def roomlist_email(roomlist)
+        roomlist[:address][:elems][:email_address][:text]
+      end
 
-  # Gets the room lists that are available within the Exchange organization.
-  # @see http://msdn.microsoft.com/en-us/library/dd899416.aspx
-  def get_room_lists
-    resp = ews.get_room_lists
-    get_room_lists_parser(resp)
-  end
+      private
 
-  def roomlist_name( roomlist )
-    roomlist[:address][:elems][:name][:text]
-  end
+      def get_room_lists_parser(resp)
+        raise EwsError, "GetRoomLists produced an error: #{resp.code}: #{resp.message}" unless resp.success?
 
-  def roomlist_email( roomlist )
-    roomlist[:address][:elems][:email_address][:text]
-  end
-
-  private
-
-  def get_room_lists_parser(resp)
-    if resp.success?
-      resp
-    else
-      raise EwsError, "GetRoomLists produced an error: #{resp.code}: #{resp.message}"
+        resp
+      end
     end
   end
-
-end # Viewpoint::EWS::RoomlistAccessors
+end

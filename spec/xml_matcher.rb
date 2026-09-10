@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec::Matchers.define :match_xml do |expected|
   match do |actual|
     compare_xml(actual, expected)

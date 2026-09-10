@@ -1,43 +1,45 @@
-=begin
-  This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+# frozen_string_literal: true
 
-  Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-=end
+#   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+#
+#   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 
 # This module defines some constants and other niceties to make available to
 # the underlying SOAP classes and modules that do the actual work.
 module Viewpoint
   module EWS
+    # SOAP message building, dispatch, and response parsing.
     module SOAP
-
       # CONSTANTS
 
-      NS_SOAP         = 'soap'.freeze
-      NS_EWS_TYPES    = 't'.freeze
-      NS_EWS_MESSAGES = 'm'.freeze
+      NS_SOAP         = 'soap'
+      NS_EWS_TYPES    = 't'
+      NS_EWS_MESSAGES = 'm'
       NAMESPACES = {
         "xmlns:#{NS_SOAP}"         => 'http://schemas.xmlsoap.org/soap/envelope/',
         "xmlns:#{NS_EWS_TYPES}"    => 'http://schemas.microsoft.com/exchange/services/2006/types',
-        "xmlns:#{NS_EWS_MESSAGES}" => 'http://schemas.microsoft.com/exchange/services/2006/messages',
+        "xmlns:#{NS_EWS_MESSAGES}" => 'http://schemas.microsoft.com/exchange/services/2006/messages'
       }.freeze
 
       # used in ResolveNames to determine where names are resolved
+      # rubocop:disable Naming/ConstantName -- public API names
       ActiveDirectory         = 'ActiveDirectory'
       ActiveDirectoryContacts = 'ActiveDirectoryContacts'
       Contacts                = 'Contacts'
       ContactsActiveDirectory = 'ContactsActiveDirectory'
+      # rubocop:enable Naming/ConstantName
 
       # Target specific Exchange Server versions
       # @see http://msdn.microsoft.com/en-us/library/bb891876(v=exchg.140).aspx
@@ -58,7 +60,6 @@ module Viewpoint
         @log = Logging.logger[self.class.name.to_s.to_sym]
         @default_ns = NAMESPACES["xmlns:#{NS_EWS_MESSAGES}"]
       end
-
-    end # SOAP
-  end # EWS
-end # Viewpoint
+    end
+  end
+end

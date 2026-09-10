@@ -1,36 +1,39 @@
-=begin
-  This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+# frozen_string_literal: true
 
-  Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+#   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+#
+#   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+module Viewpoint
+  module EWS
+    module SOAP
+      # Parses the Sync Folder Items operation SOAP response.
+      class SyncFolderItemsResponseMessage < ResponseMessage
+        def sync_state
+          safe_hash_access message, %i[elems sync_state text]
+        end
 
-    http://www.apache.org/licenses/LICENSE-2.0
+        def includes_last_item_in_range?
+          ans = safe_hash_access message, %i[elems includes_last_item_in_range text]
+          ans.downcase == 'true'
+        end
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-=end
-
-module Viewpoint::EWS::SOAP
-  class SyncFolderItemsResponseMessage < ResponseMessage
-
-    def sync_state
-      safe_hash_access message, [:elems, :sync_state, :text]
+        def changes
+          safe_hash_access(message, %i[elems changes elems]) || []
+        end
+      end
     end
-
-    def includes_last_item_in_range?
-      ans = safe_hash_access message, [:elems, :includes_last_item_in_range, :text]
-      ans.downcase == 'true'
-    end
-
-    def changes
-      safe_hash_access(message, [:elems, :changes, :elems]) || []
-    end
-
-  end # SyncFolderItemsResponseMessage
-end # Viewpoint::EWS::SOAP
+  end
+end

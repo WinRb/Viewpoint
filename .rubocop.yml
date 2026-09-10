@@ -5,14 +5,42 @@ AllCops:
 Gemspec/RequireMFA:
   Enabled: true
 
+# Gemspec floors are intentionally low; raising them is a separate breaking-change decision.
+Gemspec/RequiredRubyVersion:
+  Enabled: false
+
+# Legacy codebase predates the default complexity thresholds (giant EWS type
+# tables and SOAP builders); tuned to current maxima. Tightening these is
+# future refactoring work, not a lint-cleanup pass.
+Metrics/MethodLength:
+  Max: 45
+
+Metrics/AbcSize:
+  Max: 70
+
+Metrics/BlockLength:
+  Max: 150
+
+Metrics/ClassLength:
+  Max: 1100
+
+Metrics/CyclomaticComplexity:
+  Max: 20
+
+Metrics/ModuleLength:
+  Max: 400
+
+Metrics/ParameterLists:
+  MaxOptionalParameters: 4
+
+Metrics/PerceivedComplexity:
+  Max: 25
+
 Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent
 
 Layout/HashAlignment:
   EnforcedHashRocketStyle: table
-
-RSpec/ContextWording:
-  Enabled: false
 
 Style/BlockDelimiters:
   EnforcedStyle: semantic

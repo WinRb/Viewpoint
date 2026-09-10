@@ -1,43 +1,47 @@
-=begin
-  This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+# frozen_string_literal: true
 
-  Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+#   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+#
+#   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+module Viewpoint
+  module EWS
+    module SOAP
+      # Parses SOAP responses into Ruby hashes.
+      class EwsParser
+        include Viewpoint::EWS
 
-    http://www.apache.org/licenses/LICENSE-2.0
+        # @param [String] soap_resp
+        def initialize(soap_resp)
+          @soap_resp  = soap_resp
+          @sax_doc    = EwsSaxDocument.new
+        end
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-=end
+        def parse(opts = {})
+          opts[:response_class] ||= EwsSoapResponse
+          @soap_resp.gsub!(/&#x([0-8bcef]|1[0-9a-f]);/i, '')
+          sax_parser.parse(@soap_resp)
+          opts[:response_class].new @sax_doc.struct
+        end
 
-module Viewpoint::EWS::SOAP
-  class EwsParser
-    include Viewpoint::EWS
+        private
 
-    # @param [String] soap_resp
-    def initialize(soap_resp)
-      @soap_resp  = soap_resp
-      @sax_doc    = EwsSaxDocument.new
+        def sax_parser
+          @sax_parser ||= Nokogiri::XML::SAX::Parser.new(@sax_doc)
+        end
+      end
     end
-
-    def parse(opts = {})
-      opts[:response_class] ||= EwsSoapResponse
-      @soap_resp.gsub!(/&#x([0-8bcef]|1[0-9a-f]);/i, '')
-      sax_parser.parse(@soap_resp)
-      opts[:response_class].new @sax_doc.struct
-    end
-
-    private
-
-    def sax_parser
-      @parser ||= Nokogiri::XML::SAX::Parser.new(@sax_doc)
-    end
-
-  end # EwsParser
-end # Viewpoint
+  end
+end

@@ -1,80 +1,78 @@
-=begin
-  This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+# frozen_string_literal: true
 
-  Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+#   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+#
+#   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+module Viewpoint
+  module EWS
+    module SOAP
+      # Root folder reference in FindItem responses.
+      class RootFolder
+        attr_reader :root
 
-    http://www.apache.org/licenses/LICENSE-2.0
+        def initialize(root)
+          @root = root
+        end
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-=end
+        def indexed_paging_offset
+          attrib :index_paging_offset
+        end
 
-module Viewpoint::EWS::SOAP
+        def numerator_offset
+          attrib :numerator_offset
+        end
 
-  class RootFolder
+        def absolute_denominator
+          attrib :absolute_denominator
+        end
 
-    attr_reader :root
+        def includes_last_item_in_range
+          attrib :includes_last_item_in_range
+        end
 
-    def initialize(root)
-      @root = root
+        def total_items_in_view
+          attrib :total_items_in_view
+        end
+
+        def items
+          root[:elems][0][:items][:elems] || []
+        end
+
+        def groups
+          root[:elems][0][:groups][:elems]
+        end
+
+        private
+
+        def attrib(key)
+          return nil unless root.key?(:attribs)
+
+          root[:attribs][key]
+        end
+      end
+
+      # Parses the Find Item operation SOAP response.
+      class FindItemResponseMessage < ResponseMessage
+        def root_folder
+          return @root_folder if @root_folder
+
+          rf = safe_hash_access message, %i[elems root_folder]
+          @root_folder = rf.nil? ? nil : RootFolder.new(rf)
+        end
+      end
     end
-
-    def indexed_paging_offset
-      attrib :index_paging_offset
-    end
-
-    def numerator_offset
-      attrib :numerator_offset
-    end
-
-    def absolute_denominator
-      attrib :absolute_denominator
-    end
-
-    def includes_last_item_in_range
-      attrib :includes_last_item_in_range
-    end
-
-    def total_items_in_view
-      attrib :total_items_in_view
-    end
-
-    def items
-      root[:elems][0][:items][:elems] || []
-    end
-
-    def groups
-      root[:elems][0][:groups][:elems]
-    end
-
-
-    private
-    
-
-    def attrib(key)
-      return nil unless root.has_key?(:attribs)
-      root[:attribs][key]
-    end
-
   end
-
-
-  class FindItemResponseMessage < ResponseMessage
-
-    def root_folder
-      return @root_folder if @root_folder
-
-      rf = safe_hash_access message, [:elems, :root_folder]
-      @root_folder = rf.nil? ? nil : RootFolder.new(rf)
-    end
-
-  end # FindItemResponseMessage
-
-end # Viewpoint::EWS::SOAP
+end

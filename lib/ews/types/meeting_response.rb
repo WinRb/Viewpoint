@@ -1,7 +1,13 @@
-module Viewpoint::EWS::Types
-  class MeetingResponse
-    include Viewpoint::EWS
-    include Viewpoint::EWS::Types
-    include Viewpoint::EWS::Types::Item
+# frozen_string_literal: true
+
+module Viewpoint
+  module EWS
+    module Types
+      class MeetingResponse
+        include Viewpoint::EWS
+        include Viewpoint::EWS::Types
+        include Viewpoint::EWS::Types::Item
+      end
+    end
   end
 end

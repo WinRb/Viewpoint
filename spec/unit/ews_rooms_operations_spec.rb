@@ -1,29 +1,29 @@
+# frozen_string_literal: true
+
 require_relative '../spec_helper'
 
-describe "Room operations on Exchange Data Services" do
-
-  #let(:ecli) { Viewpoint::EWSClient.new('dontcare', 'dontcare', 'dontcare') }
+describe 'Room operations on Exchange Data Services' do
+  # let(:ecli) { Viewpoint::EWSClient.new('dontcare', 'dontcare', 'dontcare') }
   before do
     con = double('Connection')
     @ews = Viewpoint::EWS::SOAP::ExchangeWebService.new con,
-      {:server_version => Viewpoint::EWS::SOAP::VERSION_2010_SP2}
+                                                        { server_version: Viewpoint::EWS::SOAP::VERSION_2010_SP2 }
     allow(@ews).to receive(:do_soap_request)
   end
 
-  it "generates GetRooms XML" do
+  it 'generates GetRooms XML' do
     expect(@ews).to receive(:do_soap_request) do |request_document|
-      doc = request_document.to_s.gsub(%r{>\s+}, '>')
-      expect(doc).to eq load_soap("get_rooms", :request)
+      doc = request_document.to_s.gsub(/>\s+/, '>')
+      expect(doc).to eq load_soap('get_rooms', :request)
     end
     @ews.get_rooms 'TestRoomList@test.microsoft.com'
   end
 
-  it "generates GetRoomLists XML" do
-    expect(@ews).to receive(:do_soap_request) do |request_document|
-      doc = request_document.to_s.gsub(%r{>\s+}, '>')
-      expect(doc).to eq load_soap("get_room_lists", :request)
-    end.and_return(double(:resp))
+  it 'generates GetRoomLists XML' do
+    expect(@ews).to receive(:do_soap_request) { |request_document|
+      doc = request_document.to_s.gsub(/>\s+/, '>')
+      expect(doc).to eq load_soap('get_room_lists', :request)
+    }.and_return(double(:resp))
     @ews.get_room_lists
   end
-
 end
