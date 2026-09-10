@@ -29,6 +29,7 @@ module Viewpoint
         attr_reader :struct
 
         def initialize
+          super
           @struct = {}
           @elems  = []
         end

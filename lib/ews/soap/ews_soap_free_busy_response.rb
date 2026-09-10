@@ -20,11 +20,6 @@ module Viewpoint
   module EWS
     module SOAP
       class EwsSoapFreeBusyResponse < EwsSoapResponse
-        def initialize(sax_hash)
-          @resp = sax_hash
-          simplify!
-        end
-
         def envelope
           @resp[:envelope][:elems]
         end
