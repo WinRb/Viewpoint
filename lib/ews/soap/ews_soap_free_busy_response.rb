@@ -37,10 +37,30 @@ module Viewpoint::EWS::SOAP
       envelope[1][:body][:elems]
     end
 
+    # def get_user_availability_response
+    #   body.first[:get_user_availability_response][:elems].first[:free_busy_response_array][:elems].first[:free_busy_response][:elems]
+    # end
+
     def get_user_availability_response
-      body.first[:get_user_availability_response][:elems].first[:free_busy_response_array][:elems].first[:free_busy_response][:elems]
+      # This method handles multiple calender when an array of mulitple users is passed through cli.get_user_availability
+      events = []
+      body.first[:get_user_availability_response][:elems].first[:free_busy_response_array][:elems].each_with_index do |e, i|
+        e[:free_busy_response][:elems][1][:free_busy_view][:elems][1][:calendar_event_array][:elems].each do |c| 
+      
+          if c[:calendar_event][:elems].select { |element| element.is_a?(Hash) && element.has_key?(:user_position)}.length == 0
+            c[:calendar_event][:elems] << { :user_position => i }  
+          end
+          events << c
+        end
+      end
+
+      result = body.first[:get_user_availability_response][:elems].first[:free_busy_response_array][:elems].first[:free_busy_response][:elems]
+      result[1][:free_busy_view][:elems][1][:calendar_event_array][:elems] = events
+      
+      result
     end
 
+    
     def response
       body
     end
