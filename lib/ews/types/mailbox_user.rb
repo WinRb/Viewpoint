@@ -146,5 +146,5 @@ module Viewpoint::EWS::Types
     def key_alias
       @key_alias ||= super.merge(MAILBOX_KEY_ALIAS)
     end
-  end # MailboxUser
-end # Viewpoint::EWS::Types
+  end
+end

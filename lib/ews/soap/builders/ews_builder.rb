@@ -1365,5 +1365,5 @@ module Viewpoint::EWS::SOAP
         raise EwsBadArgumentError, "Invalid Time argument (#{time})"
       end
     end
-  end # EwsBuilder
-end # Viewpoint::EWS::SOAP
+  end
+end

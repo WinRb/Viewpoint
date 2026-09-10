@@ -139,5 +139,5 @@ module Viewpoint::EWS::Types
       @ews_item[:oof_settings] = oof_settings
       @ews_item[:allow_external_oof] = @ews_item[:allow_external_oof][:text]
     end
-  end # OutOfOffice
+  end
 end

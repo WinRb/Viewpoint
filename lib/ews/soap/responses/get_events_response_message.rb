@@ -44,5 +44,5 @@ module Viewpoint::EWS::SOAP
     def events
       notification[3..-1]
     end
-  end # GetEventsResponseMessage
-end # Viewpoint::EWS::SOAP
+  end
+end

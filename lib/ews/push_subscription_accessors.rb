@@ -26,4 +26,4 @@ module Viewpoint::EWS::PushSubscriptionAccessors
 
     rmsg
   end
-end # Viewpoint::EWS::PushSubscriptionAccessors
+end

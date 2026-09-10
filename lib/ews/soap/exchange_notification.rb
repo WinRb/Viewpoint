@@ -132,5 +132,5 @@ module Viewpoint::EWS::SOAP
       psr[:watermark] = watermark if watermark
       subscribe([{ push_subscription_request: psr }])
     end
-  end # ExchangeNotification
+  end
 end

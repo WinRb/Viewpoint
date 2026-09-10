@@ -20,5 +20,5 @@ module Viewpoint::EWS::Types
   # @see http://msdn.microsoft.com/en-us/library/aa565036.aspx MSDN docs
   # @todo Design a Class method that resolves to an Array of MailboxUsers
   class Attendee < MailboxUser
-  end # Attendee
-end # Viewpoint::EWS::Types
+  end
+end

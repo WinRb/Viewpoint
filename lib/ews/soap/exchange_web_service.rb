@@ -258,5 +258,5 @@ impersonation_mail: impersonation_address }
       opts[:time_zone_context] = @time_zone_context if @time_zone_context
       EwsBuilder.new.build!(opts, &block)
     end
-  end # class ExchangeWebService
-end # Viewpoint
+  end
+end

@@ -49,5 +49,5 @@ module Viewpoint::EWS::SOAP
       body[0][key] = body[0][key][:elems].inject(:merge)
       response_message[:elems] = response_message[:elems].inject(:merge)
     end
-  end # EwsSoapAvailabilityResponse
-end # Viewpoint::EWS::SOAP
+  end
+end

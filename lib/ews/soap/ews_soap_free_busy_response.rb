@@ -110,5 +110,5 @@ module Viewpoint::EWS::SOAP
       result = collection.find { |hsh| hsh.keys.include?(key) }
       result ? result[key] : nil
     end
-  end # EwsSoapFreeBusyResponse
-end # Viewpoint::EWS::SOAP
+  end
+end

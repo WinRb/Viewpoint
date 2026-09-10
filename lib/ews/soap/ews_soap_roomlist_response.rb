@@ -44,5 +44,5 @@ module Viewpoint::EWS::SOAP
         rm[key][:elems] = rm[key][:elems].inject(&:merge)
       end
     end
-  end # EwsSoapRoomlistResponse
-end # Viewpoint::EWS::SOAP
+  end
+end

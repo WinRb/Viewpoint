@@ -29,5 +29,5 @@ module Viewpoint::EWS::SOAP
     def changes
       safe_hash_access(message, %i[elems changes elems]) || []
     end
-  end # SyncFolderItemsResponseMessage
-end # Viewpoint::EWS::SOAP
+  end
+end

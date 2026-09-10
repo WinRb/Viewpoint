@@ -55,4 +55,4 @@ module Viewpoint::EWS
   class EwsCreateItemError < EwsError; end
 
   class EwsSendItemError < EwsError; end
-end # Viewpoint::EWS
+end

@@ -235,4 +235,4 @@ module Viewpoint::EWS::ItemAccessors
     end
     items
   end
-end # Viewpoint::EWS::ItemAccessors
+end

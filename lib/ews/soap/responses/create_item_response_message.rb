@@ -17,5 +17,5 @@
 
 module Viewpoint::EWS::SOAP
   class CreateItemResponseMessage < ResponseMessage
-  end # CreateItemResponseMessage
-end # Viewpoint::EWS::SOAP
+  end
+end

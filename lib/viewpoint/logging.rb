@@ -22,5 +22,5 @@ module Viewpoint
     def self.root_logger
       Logging.logger.root
     end
-  end # EWS
+  end
 end

@@ -29,4 +29,4 @@ module Viewpoint::EWS::CalendarAccessors
   def event_end_time(the_event)
     the_event[:calendar_event][:elems][1][:end_time][:text]
   end
-end # Viewpoint::EWS::CalendarAccessors
+end

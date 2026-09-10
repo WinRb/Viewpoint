@@ -84,5 +84,5 @@ module Viewpoint::EWS::SOAP
       }
       do_soap_request(req, response_class: EwsResponse)
     end
-  end # ExchangeSynchronization
+  end
 end

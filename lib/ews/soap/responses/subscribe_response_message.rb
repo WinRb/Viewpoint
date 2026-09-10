@@ -28,5 +28,5 @@ module Viewpoint::EWS::SOAP
     def watermark
       safe_hash_access subscription, %i[watermark text]
     end
-  end # SubscribeResponseMessage
-end # Viewpoint::EWS::SOAP
+  end
+end

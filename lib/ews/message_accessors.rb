@@ -86,4 +86,4 @@ module Viewpoint::EWS::MessageAccessors
     mtype = msg.keys.first
     class_by_name(mtype).new(ews, msg[mtype])
   end
-end # Viewpoint::EWS::MessageAccessors
+end

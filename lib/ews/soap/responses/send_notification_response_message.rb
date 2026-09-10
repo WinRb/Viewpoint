@@ -51,5 +51,5 @@ module Viewpoint::EWS::SOAP
           klass.new(nil, ev[type])
         }
     end
-  end # SendNotificationResponseMessage
-end # Viewpoint::EWS::SOAP
+  end
+end

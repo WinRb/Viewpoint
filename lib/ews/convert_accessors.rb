@@ -51,4 +51,4 @@ module Viewpoint::EWS::ConvertAccessors
       raise EwsError, "Could not convert id. #{rm.code}: #{rm.message_text}"
     end
   end
-end # Viewpoint::EWS::ItemAccessors
+end

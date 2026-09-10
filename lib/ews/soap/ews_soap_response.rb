@@ -92,5 +92,5 @@ module Viewpoint::EWS::SOAP
         guard_hash hsh[key], keys
       end
     end
-  end # EwsSoapResponse
-end # Viewpoint::EWS::SOAP
+  end
+end

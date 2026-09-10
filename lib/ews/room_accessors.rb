@@ -41,4 +41,4 @@ module Viewpoint::EWS::RoomAccessors
 
     resp
   end
-end # Viewpoint::EWS::RoomAccessors
+end

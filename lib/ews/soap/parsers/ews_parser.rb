@@ -37,5 +37,5 @@ module Viewpoint::EWS::SOAP
     def sax_parser
       @parser ||= Nokogiri::XML::SAX::Parser.new(@sax_doc)
     end
-  end # EwsParser
-end # Viewpoint
+  end
+end

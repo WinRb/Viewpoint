@@ -63,7 +63,7 @@ module Viewpoint::EWS::SOAP
       end
     end
   end
-end # Viewpoint::EWS::SOAP
+end
 
 require_relative './responses/create_item_response_message'
 require_relative './responses/create_attachment_response_message'

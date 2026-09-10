@@ -70,5 +70,5 @@ module Viewpoint::EWS::SOAP
     rescue NameError
       ResponseMessage
     end
-  end # EwsSoapResponse
-end # Viewpoint::EWS::SOAP
+  end
+end

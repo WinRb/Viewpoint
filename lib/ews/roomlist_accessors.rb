@@ -40,4 +40,4 @@ module Viewpoint::EWS::RoomlistAccessors
 
     resp
   end
-end # Viewpoint::EWS::RoomlistAccessors
+end

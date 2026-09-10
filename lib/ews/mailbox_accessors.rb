@@ -86,4 +86,4 @@ module Viewpoint::EWS::MailboxAccessors
 
     resp
   end
-end # Viewpoint::EWS::MailboxAccessors
+end

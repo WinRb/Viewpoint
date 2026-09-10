@@ -67,5 +67,5 @@ module Viewpoint::EWS::SOAP
       rf = safe_hash_access message, %i[elems root_folder]
       @root_folder = rf.nil? ? nil : RootFolder.new(rf)
     end
-  end # FindItemResponseMessage
-end # Viewpoint::EWS::SOAP
+  end
+end

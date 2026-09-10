@@ -37,5 +37,5 @@ module Viewpoint::EWS::SOAP
         klass.new(item, a[type])
       end
     end
-  end # CreateAttachmentResponseMessage
-end # Viewpoint::EWS::SOAP
+  end
+end
