@@ -65,4 +65,82 @@ describe Viewpoint::EWS::SOAP::EwsBuilder do
     end
 
   end
+
+  describe ".camel_case_attributes" do
+    let(:result) do
+      Viewpoint::EWS::SOAP::EwsBuilder.camel_case_attributes(input)
+    end
+
+    context "flat, no special fields" do
+      let(:input) do
+        { foo: 1, bar: "two", baz: "three" }
+      end
+
+      let(:expected) do
+        { "Foo" => 1, "Bar" => "two", "Baz" => "three" }
+      end
+
+      it "produces the expected output" do
+        expect(result).to eq(expected)
+      end
+    end
+
+    context "nested, no special fields" do
+      let(:input) do
+        { foo: 1, bar: "two", baz: { quux: "three" } }
+      end
+
+      let(:expected) do
+        { "Foo" => 1, "Bar" => "two", "Baz" => { "Quux" => "three" } }
+      end
+
+      it "produces the expected output" do
+        expect(result).to eq(expected)
+      end
+    end
+
+    context "special fields" do
+      context "text" do
+        let(:input) do
+          { foo: 1, text: "two" }
+        end
+
+        let(:expected) do
+          { "Foo" => 1, :text => "two" }
+        end
+
+        it "produces the expected output" do
+          expect(result).to eq(expected)
+        end
+      end
+
+      context "sub_elements" do
+        let(:input) do
+          { foo: 1, sub_elements: [ { bar: 2 }, { baz: "three" } ] }
+        end
+
+        let(:expected) do
+          { "Foo" => 1, :sub_elements => [ { "Bar" => 2 }, { "Baz" => "three" } ] }
+        end
+
+        it "produces the expected output" do
+          expect(result).to eq(expected)
+        end
+      end
+
+      context "xmlns_attribute" do
+        let(:input) do
+          { foo: 1, xmlns_attribute: "http://example.com/ns" }
+        end
+
+        let(:expected) do
+          { "Foo" => 1, xmlns_attribute: "http://example.com/ns" }
+        end
+
+        it "produces the expected output" do
+          expect(result).to eq(expected)
+        end
+      end
+    end
+  end
 end
