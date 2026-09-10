@@ -8,17 +8,20 @@ module Viewpoint
       class CalendarItem < OpenStruct
         # Available parameters with the required ordering
         PARAMETERS = %w[mime_content item_id parent_folder_id item_class subject sensitivity body attachments
-                        date_time_received size categories in_reply_to is_submitted is_draft is_from_me is_resend is_unmodified
-                        internet_message_headers date_time_sent date_time_created response_objects reminder_due_by reminder_is_set
-                        reminder_minutes_before_start display_cc display_to has_attachments extended_property culture start end
-                        original_start is_all_day_event legacy_free_busy_status location when is_meeting is_cancelled is_recurring
-                        meeting_request_was_sent is_response_requested calendar_item_type my_response_type organizer
-                        required_attendees optional_attendees resources conflicting_meeting_count adjacent_meeting_count
-                        conflicting_meetings adjacent_meetings duration time_zone appointment_reply_time appointment_sequence_number
-                        appointment_state recurrence first_occurrence last_occurrence modified_occurrences deleted_occurrences
-                        meeting_time_zone start_time_zone end_time_zone conference_type allow_new_time_proposal is_online_meeting
-                        meeting_workspace_url net_show_url effective_rights last_modified_name last_modified_time is_associated
-                        web_client_read_form_query_string web_client_edit_form_query_string conversation_id unique_body].map(&:to_sym).freeze
+                        date_time_received size categories in_reply_to is_submitted is_draft is_from_me
+                        is_resend is_unmodified internet_message_headers date_time_sent date_time_created
+                        response_objects reminder_due_by reminder_is_set reminder_minutes_before_start
+                        display_cc display_to has_attachments extended_property culture start end original_start
+                        is_all_day_event legacy_free_busy_status location when is_meeting is_cancelled
+                        is_recurring meeting_request_was_sent is_response_requested calendar_item_type
+                        my_response_type organizer required_attendees optional_attendees resources
+                        conflicting_meeting_count adjacent_meeting_count conflicting_meetings adjacent_meetings
+                        duration time_zone appointment_reply_time appointment_sequence_number appointment_state
+                        recurrence first_occurrence last_occurrence modified_occurrences deleted_occurrences
+                        meeting_time_zone start_time_zone end_time_zone conference_type allow_new_time_proposal
+                        is_online_meeting meeting_workspace_url net_show_url effective_rights last_modified_name
+                        last_modified_time is_associated web_client_read_form_query_string
+                        web_client_edit_form_query_string conversation_id unique_body].map(&:to_sym).freeze
 
         # Returns a new CalendarItem template
         def initialize(opts = {})

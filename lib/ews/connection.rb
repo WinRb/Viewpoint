@@ -83,12 +83,12 @@ module Viewpoint
       # @param opts [Hash] misc opts for handling the Response
       def dispatch(ews, soapmsg, opts)
         respmsg = post(soapmsg)
-        @log.debug <<-EOF.gsub(/^ {6}/, '')
-      Received SOAP Response:
-      ----------------
-      #{Nokogiri::XML(respmsg).to_xml}
-      ----------------
-        EOF
+        @log.debug <<~LOG
+          Received SOAP Response:
+          ----------------
+          #{Nokogiri::XML(respmsg).to_xml}
+          ----------------
+        LOG
         opts[:raw_response] ? respmsg : ews.parse_soap_response(respmsg, opts)
       end
 

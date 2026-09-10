@@ -85,8 +85,10 @@ module Viewpoint
           opts = opts.clone
           raise EwsBadArgumentError, 'First argument must be a Date or DateTime' unless date_time.is_a?(Date)
 
-          restr = { restriction: { is_greater_than_or_equal_to: [{ field_uRI: { field_uRI: 'item:DateTimeReceived' } },
-                                                                 { field_uRI_or_constant: { constant: { value: date_time.to_datetime } } }] } }
+          restr = { restriction: { is_greater_than_or_equal_to: [
+            { field_uRI: { field_uRI: 'item:DateTimeReceived' } },
+            { field_uRI_or_constant: { constant: { value: date_time.to_datetime } } }
+          ] } }
           items(opts.merge(restr))
         end
 
@@ -154,7 +156,8 @@ module Viewpoint
             user_config_props: 'XmlData'
           }
           ews.get_user_configuration(opts)
-          # txt = resp.response_message[:elems][:get_user_configuration_response_message][:elems][1][:user_configuration][:elems][1][:xml_data][:text]
+          # txt = resp.response_message[:elems][:get_user_configuration_response_message][:elems][1]
+          #   [:user_configuration][:elems][1][:xml_data][:text]
           # Base64.decode64 txt
         end
 
@@ -170,12 +173,13 @@ module Viewpoint
         #   For :deleted and :read_flag_change items a simple hash with :id and
         #   :change_key is returned.
         #   See: http://msdn.microsoft.com/en-us/library/aa565609.aspx
+        # rubocop:disable Style/OptionalBooleanParameter -- public API
         def sync_items!(sync_state = nil, sync_amount = 256, _sync_all = false, opts = {})
           item_shape = opts.key?(:item_shape) ? opts.delete(:item_shape) : { base_shape: :default }
           sync_state ||= @sync_state
 
-          resp = ews.sync_folder_items item_shape: item_shape,
-                                       sync_folder_id: folder_id, max_changes_returned: sync_amount, sync_state: sync_state
+          resp = ews.sync_folder_items item_shape: item_shape, sync_folder_id: folder_id,
+                                       max_changes_returned: sync_amount, sync_state: sync_state
           rmsg = resp.response_messages[0]
 
           raise EwsError, "Could not synchronize: #{rmsg.code}: #{rmsg.message_text}" unless rmsg.success?
@@ -196,6 +200,7 @@ module Viewpoint
           end
           rhash
         end
+        # rubocop:enable Style/OptionalBooleanParameter
 
         def synced?
           @synced
@@ -261,7 +266,7 @@ module Viewpoint
 
         # Checks a subscribed folder for events
         # @return [Array] An array of Event items
-        def get_events
+        def get_events # rubocop:disable Naming/AccessorMethodName -- public API name
           if subscribed?
             resp = ews.get_events(@subscription_id, @watermark)
             rmsg = resp.response_messages[0]

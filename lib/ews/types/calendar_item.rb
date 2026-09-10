@@ -62,8 +62,10 @@ module Viewpoint
         # Uses `SetItemField` if value is present and `DeleteItemField` if value is nil
         # @param updates [Hash] with (:attribute => value)
         # @param options [Hash]
-        # @option options :conflict_resolution [String] one of 'NeverOverwrite', 'AutoResolve' (default) or 'AlwaysOverwrite'
-        # @option options :send_meeting_invitations_or_cancellations [String] one of 'SendToNone' (default), 'SendOnlyToAll',
+        # @option options :conflict_resolution [String] one of 'NeverOverwrite', 'AutoResolve' (default)
+        #   or 'AlwaysOverwrite'
+        # @option options :send_meeting_invitations_or_cancellations [String] one of 'SendToNone' (default),
+        #   'SendOnlyToAll',
         #   'SendOnlyToChanged', 'SendToAllAndSaveCopy' or 'SendToChangedAndSaveCopy'
         # @return [CalendarItem, false]
         # @example Update Subject and Body

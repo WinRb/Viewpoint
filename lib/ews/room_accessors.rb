@@ -24,9 +24,9 @@ module Viewpoint
 
       # Gets the rooms that are available within the specified room distribution list
       # @see http://msdn.microsoft.com/en-us/library/dd899415.aspx
-      # @param [String] roomDistributionList
-      def get_rooms(roomDistributionList)
-        resp = ews.get_rooms(roomDistributionList)
+      # @param [String] room_distribution_list
+      def get_rooms(room_distribution_list)
+        resp = ews.get_rooms(room_distribution_list)
         get_rooms_parser(resp)
       end
 

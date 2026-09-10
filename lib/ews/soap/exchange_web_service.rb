@@ -173,13 +173,13 @@ module Viewpoint
 
         # Gets the rooms that are in the specified room distribution list
         # @see http://msdn.microsoft.com/en-us/library/aa563465.aspx
-        # @param [string] roomDistributionList
-        def get_rooms(roomDistributionList)
+        # @param [string] room_distribution_list
+        def get_rooms(room_distribution_list)
           req = build_soap! { |type, builder|
             unless type == :header
               builder.nbuild.GetRooms { |x|
                 x.parent.default_namespace = @default_ns
-                builder.room_list!(roomDistributionList)
+                builder.room_list!(room_distribution_list)
               }
             end
           }
@@ -188,7 +188,7 @@ module Viewpoint
 
         # Gets the room lists that are available within the Exchange organization.
         # @see http://msdn.microsoft.com/en-us/library/aa563465.aspx
-        def get_room_lists
+        def get_room_lists # rubocop:disable Naming/AccessorMethodName -- public API name
           req = build_soap! { |type, builder|
             builder.room_lists! unless type == :header
           }
@@ -202,12 +202,12 @@ module Viewpoint
         # @option opts [Boolean] :raw_response if true do not parse and return
         #   the raw response string.
         def do_soap_request(soapmsg, opts = {})
-          @log.debug <<-EOF.gsub(/^ {8}/, '')
-        Sending SOAP Request:
-        ----------------
-        #{soapmsg}
-        ----------------
-          EOF
+          @log.debug <<~LOG
+            Sending SOAP Request:
+            ----------------
+            #{soapmsg}
+            ----------------
+          LOG
           connection.dispatch(self, soapmsg, opts)
         end
 

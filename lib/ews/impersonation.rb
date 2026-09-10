@@ -3,12 +3,14 @@
 module Viewpoint
   # Exchange Web Services (EWS) client namespace.
   module EWS
+    # rubocop:disable Naming/ConstantName -- public API name
     ConnectingSID = {
       UPN: 'PrincipalName',
       SID: 'SID',
       PSMTP: 'PrimarySmtpAddress',
       SMTP: 'SmtpAddress'
     }.freeze
+    # rubocop:enable Naming/ConstantName
 
     # @param connecting_type [String] should be one of the ConnectingSID variables
     #   ConnectingSID[:UPN] - use User Principal Name method

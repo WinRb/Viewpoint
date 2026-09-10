@@ -16,7 +16,7 @@ module Viewpoint
           ews_opts.merge({ items: [{ message: msg }] })
         end
 
-        def has_attachments?
+        def has_attachments? # rubocop:disable Naming/PredicatePrefix -- public API name
           !(file_attachments.empty? && item_attachments.empty? && inline_attachments.empty?)
         end
 

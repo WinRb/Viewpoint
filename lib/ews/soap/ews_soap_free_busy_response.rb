@@ -33,8 +33,10 @@ module Viewpoint
           envelope[1][:body][:elems]
         end
 
-        def get_user_availability_response
-          body.first[:get_user_availability_response][:elems].first[:free_busy_response_array][:elems].first[:free_busy_response][:elems]
+        def get_user_availability_response # rubocop:disable Naming/AccessorMethodName -- public API name
+          body.first[:get_user_availability_response][:elems]
+              .first[:free_busy_response_array][:elems]
+              .first[:free_busy_response][:elems]
         end
 
         def response

@@ -6,10 +6,16 @@ describe 'Exchange Response Parser Functionality' do
   let(:success_body) {
     [{ find_folder_response: { elems: [{ response_messages: { elems: [{ find_folder_response_message: {
       attribs: { response_class: 'Success' }, elems: { response_code: { text: 'NoError' },
-                                                       root_folder: { attribs: { total_items_in_view: '1', includes_last_item_in_range: 'true' },
+                                                       root_folder: { attribs: { total_items_in_view: '1',
+                                                                                 includes_last_item_in_range: 'true' },
                                                                       elems: [{ folders: { elems: [{ folder: { elems: [
-                                                                        { folder_id: { attribs: { id: 'AQAnAH',
-                                                                                                  change_key: 'AQAAABY' } } }, { display_name: { text: 'TestFolder' } }, { total_count: { text: '0' } }, { child_folder_count: { text: '0' } }, { unread_count: { text: '0' } }
+                                                                        { folder_id: { attribs: {
+                                                                          id: 'AQAnAH', change_key: 'AQAAABY'
+                                                                        } } },
+                                                                        { display_name: { text: 'TestFolder' } },
+                                                                        { total_count: { text: '0' } },
+                                                                        { child_folder_count: { text: '0' } },
+                                                                        { unread_count: { text: '0' } }
                                                                       ] } }] } }] } }
     } }] } }] } }]
   }

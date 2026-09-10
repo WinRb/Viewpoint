@@ -29,7 +29,7 @@ module Viewpoint
           subresponse[response_class][:elems]
         end
 
-        def roomListsArray
+        def roomListsArray # rubocop:disable Naming/MethodName -- public API name
           response[:get_room_lists_response][:elems][1][:room_lists][:elems]
         end
 

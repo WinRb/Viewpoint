@@ -113,12 +113,13 @@ module Viewpoint
           true
         end
 
-        def get_delegate_info
+        def get_delegate_info # rubocop:disable Naming/AccessorMethodName -- public API name
           Viewpoint::EWS::EWS.instance.ews.get_delegate(email_address)
           # if(resp.status == 'Success')
           #   return true
           # else
-          #   raise EwsError, "Could not update delegate access for user #{delegate_email}: #{resp.code}, #{resp.message}"
+          #   raise EwsError, "Could not update delegate access for user #{delegate_email}: " \
+          #                  "#{resp.code}, #{resp.message}"
           # end
         end
 

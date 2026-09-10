@@ -34,10 +34,12 @@ module Viewpoint
       }.freeze
 
       # used in ResolveNames to determine where names are resolved
+      # rubocop:disable Naming/ConstantName -- public API names
       ActiveDirectory         = 'ActiveDirectory'
       ActiveDirectoryContacts = 'ActiveDirectoryContacts'
       Contacts                = 'Contacts'
       ContactsActiveDirectory = 'ContactsActiveDirectory'
+      # rubocop:enable Naming/ConstantName
 
       # Target specific Exchange Server versions
       # @see http://msdn.microsoft.com/en-us/library/bb891876(v=exchg.140).aspx

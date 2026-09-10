@@ -15,7 +15,7 @@ module Viewpoint
         #   ews_client = Viewpoint::EWSClient.new # ...
         #   zones = ews_client.ews.get_time_zones
         # @todo Implement TimeZoneDefinition with sub elements Periods, TransitionsGroups and Transitions
-        def get_time_zones(full = false, ids = nil)
+        def get_time_zones(full = false, ids = nil) # rubocop:disable Style/OptionalBooleanParameter -- public API
           req = build_soap! { |type, builder|
             builder.get_server_time_zones!(full: full, ids: ids) unless type == :header
           }
@@ -44,7 +44,7 @@ module Viewpoint
         #   ews_client.set_time_zone 'AUS Central Standard Time'
         #   # subsequent request will send the TimeZoneContext header
         # @see EWSClient#set_time_zone
-        def set_time_zone_context(id)
+        def set_time_zone_context(id) # rubocop:disable Naming/AccessorMethodName -- public API name
           @time_zone_context = ({ id: id } if id)
         end
       end

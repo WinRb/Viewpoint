@@ -24,7 +24,7 @@ module Viewpoint
         end
 
         def read_messages
-          items read_unread_restriction(true)
+          items read_unread_restriction(read: true)
         end
 
         def messages_with_attachments
@@ -37,7 +37,7 @@ module Viewpoint
 
         private
 
-        def read_unread_restriction(read = false)
+        def read_unread_restriction(read: false)
           { restriction: { is_equal_to: [
             { field_uRI: { field_uRI: 'message:IsRead' } },
             { field_uRI_or_constant: { constant: { value: read } } }

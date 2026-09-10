@@ -41,7 +41,7 @@ module Viewpoint
         # @option opts [String] :internal_reply
         # @option opts [String] :external_reply
         # @option opts [String,Symbol] :external_audience :none, :known, :all
-        def set_user_oof_settings(opts)
+        def set_user_oof_settings(opts) # rubocop:disable Naming/AccessorMethodName -- public API name
           opts = opts.clone
           %i[mailbox oof_state].each do |k|
             validate_param(opts, k, true)

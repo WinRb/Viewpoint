@@ -76,13 +76,17 @@ module Viewpoint
       alias enlighten! deepen!
 
       # @see http://www.ruby-doc.org/core/classes/Object.html#M000333
+      # rubocop:disable Style/OptionalBooleanParameter -- must match Ruby's core respond_to? signature
       def respond_to?(method_sym, include_private = false)
         method_keys.include?(method_sym) || super
       end
+      # rubocop:enable Style/OptionalBooleanParameter
 
+      # rubocop:disable Style/OptionalBooleanParameter -- must match Ruby's core Object#methods signature
       def methods(include_super = true)
         super + ews_methods
       end
+      # rubocop:enable Style/OptionalBooleanParameter
 
       def ews_methods
         key_paths.keys + key_alias.keys

@@ -2,11 +2,15 @@
 
 require_relative '../spec_helper'
 
-ERROR_INVALID_SMTP_ADDRESS = <<~EOS.gsub(/>\s+/, '>')
+ERROR_INVALID_SMTP_ADDRESS = <<~XML.gsub(/>\s+/, '>')
   <?xml version="1.0" encoding="utf-8"?>
   <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
     <s:Header>
-      <h:ServerVersionInfo xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types" xmlns="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" MajorVersion="8" MinorVersion="0" MajorBuildNumber="652" MinorBuildNumber="0" />
+      <h:ServerVersionInfo xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types"
+                           xmlns="http://schemas.microsoft.com/exchange/services/2006/types"
+                           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                           MajorVersion="8" MinorVersion="0" MajorBuildNumber="652" MinorBuildNumber="0" />
     </s:Header>
     <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
       <GetUserAvailabilityResponse xmlns="http://schemas.microsoft.com/exchange/services/2006/messages">
@@ -17,9 +21,11 @@ ERROR_INVALID_SMTP_ADDRESS = <<~EOS.gsub(/>\s+/, '>')
         <ResponseCode>ErrorInvalidSmtpAddress</ResponseCode>
         <DescriptiveLinkKey>0</DescriptiveLinkKey>
         <MessageXml>
-          <ExceptionType xmlns="http://schemas.microsoft.com/exchange/services/2006/errors">Microsoft.Exchange.InfoWorker.Common.Availability.InvalidSmtpAddressException</ExceptionType>
+          <ExceptionType xmlns="http://schemas.microsoft.com/exchange/services/2006/errors">
+            Microsoft.Exchange.InfoWorker.Common.Availability.InvalidSmtpAddressException</ExceptionType>
           <ExceptionCode xmlns="http://schemas.microsoft.com/exchange/services/2006/errors">5035</ExceptionCode>
-          <ExceptionServerName xmlns="http://schemas.microsoft.com/exchange/services/2006/errors">ANY-SERVER-NAME</ExceptionServerName>
+          <ExceptionServerName xmlns="http://schemas.microsoft.com/exchange/services/2006/errors">
+            ANY-SERVER-NAME</ExceptionServerName>
         </MessageXml>
       </ResponseMessage>
       <FreeBusyView>
@@ -30,13 +36,17 @@ ERROR_INVALID_SMTP_ADDRESS = <<~EOS.gsub(/>\s+/, '>')
       </GetUserAvailabilityResponse>
     </s:Body>
   </s:Envelope>
-EOS
+XML
 
-CALENDAR_EVENT_ARRAY = <<~EOS.gsub(/>\s+/, '>')
+CALENDAR_EVENT_ARRAY = <<~XML.gsub(/>\s+/, '>')
   <?xml version="1.0" encoding="utf-8"?>
   <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
     <s:Header>
-      <h:ServerVersionInfo xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types" xmlns="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" MajorVersion="8" MinorVersion="0" MajorBuildNumber="652" MinorBuildNumber="0" />
+      <h:ServerVersionInfo xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types"
+                           xmlns="http://schemas.microsoft.com/exchange/services/2006/types"
+                           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                           MajorVersion="8" MinorVersion="0" MajorBuildNumber="652" MinorBuildNumber="0" />
     </s:Header>
     <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
       <GetUserAvailabilityResponse xmlns="http://schemas.microsoft.com/exchange/services/2006/messages">
@@ -70,13 +80,17 @@ CALENDAR_EVENT_ARRAY = <<~EOS.gsub(/>\s+/, '>')
       </GetUserAvailabilityResponse>
     </s:Body>
   </s:Envelope>
-EOS
+XML
 
-EMPTY_RESPONSE = <<~EOS.gsub(/>\s+/, '>')
+EMPTY_RESPONSE = <<~XML.gsub(/>\s+/, '>')
   <?xml version="1.0" encoding="utf-8"?>
   <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
     <s:Header>
-      <h:ServerVersionInfo xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types" xmlns="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" MajorVersion="8" MinorVersion="0" MajorBuildNumber="652" MinorBuildNumber="0" />
+      <h:ServerVersionInfo xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types"
+                           xmlns="http://schemas.microsoft.com/exchange/services/2006/types"
+                           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                           MajorVersion="8" MinorVersion="0" MajorBuildNumber="652" MinorBuildNumber="0" />
     </s:Header>
     <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
       <GetUserAvailabilityResponse xmlns="http://schemas.microsoft.com/exchange/services/2006/messages">
@@ -93,7 +107,7 @@ EMPTY_RESPONSE = <<~EOS.gsub(/>\s+/, '>')
       </GetUserAvailabilityResponse>
     </s:Body>
   </s:Envelope>
-EOS
+XML
 
 describe Viewpoint::EWS::SOAP::EwsSoapFreeBusyResponse do
   let(:ews) { Viewpoint::EWS::SOAP::ExchangeWebService.new(double(:connection)) }
@@ -115,7 +129,8 @@ describe Viewpoint::EWS::SOAP::EwsSoapFreeBusyResponse do
           { descriptive_link_key: { text: '0' } },
           { message_xml: {
             elems: [
-              { exception_type: { text: 'Microsoft.Exchange.InfoWorker.Common.Availability.InvalidSmtpAddressException' } },
+              { exception_type: { text: 'Microsoft.Exchange.InfoWorker.Common.Availability.' \
+                                        'InvalidSmtpAddressException' } },
               { exception_code: { text: '5035' } },
               { exception_server_name: { text: 'ANY-SERVER-NAME' } }
             ]

@@ -48,7 +48,7 @@ module Viewpoint
           end
         end
 
-        def start_element_namespace(name, attributes = [], _prefix = nil, _uri = nil, _ns = [])
+        def start_element_namespace(name, attributes = [], _prefix = nil, _uri = nil, _namespaces = [])
           ruby_case(name).to_sym
           elem = {}
           unless attributes.empty?

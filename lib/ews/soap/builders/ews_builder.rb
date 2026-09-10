@@ -408,10 +408,10 @@ module Viewpoint
           }
         end
 
-        def mailbox_data!(md)
+        def mailbox_data!(mailbox_data)
           nbuild[NS_EWS_TYPES].MailboxData {
             nbuild[NS_EWS_TYPES].Email do
-              mbox = md[:email]
+              mbox = mailbox_data[:email]
               name!(mbox[:name]) if mbox[:name]
               address!(mbox[:address]) if mbox[:address] # for Availability query
               routing_type!(mbox[:routing_type]) if mbox[:routing_type]
@@ -586,6 +586,7 @@ module Viewpoint
           @nbuild[NS_EWS_TYPES].Bitmask('Value' => expr[:value])
         end
 
+        # rubocop:disable Naming/PredicatePrefix -- public API name
         def is_equal_to(expr)
           restriction_compare('IsEqualTo', expr)
         end
@@ -609,6 +610,7 @@ module Viewpoint
         def is_not_equal_to(expr)
           restriction_compare('IsNotEqualTo', expr)
         end
+        # rubocop:enable Naming/PredicatePrefix
 
         def restriction_compare(type, expr)
           nbuild[NS_EWS_TYPES].send(type) {
@@ -624,14 +626,14 @@ module Viewpoint
           nbuild[NS_EWS_TYPES]
         end
 
-        def field_uRI(expr)
+        def field_uRI(expr) # rubocop:disable Naming/MethodName -- public API name
           value = expr.is_a?(Hash) ? (expr[:field_uRI] || expr[:field_uri]) : expr
           ews_types_builder.FieldURI('FieldURI' => value)
         end
 
         alias field_uri field_uRI
 
-        def indexed_field_uRI(expr)
+        def indexed_field_uRI(expr) # rubocop:disable Naming/MethodName -- public API name
           nbuild[NS_EWS_TYPES].IndexedFieldURI(
             'FieldURI'   => expr[:field_uRI] || expr[:field_uri],
             'FieldIndex' => expr[:field_index]
@@ -640,7 +642,7 @@ module Viewpoint
 
         alias indexed_field_uri indexed_field_uRI
 
-        def extended_field_uRI(expr)
+        def extended_field_uRI(expr) # rubocop:disable Naming/MethodName -- public API name
           nbuild[NS_EWS_TYPES].ExtendedFieldURI {
             if expr[:distinguished_property_set_id]
               nbuild.parent['DistinguishedPropertySetId'] =
@@ -680,7 +682,7 @@ module Viewpoint
           nbuild[NS_EWS_TYPES].Value(val)
         end
 
-        def field_uRI_or_constant(expr)
+        def field_uRI_or_constant(expr) # rubocop:disable Naming/MethodName -- public API name
           nbuild[NS_EWS_TYPES].FieldURIOrConstant {
             type = expr.keys.first
             send(type, expr[type])
@@ -708,9 +710,9 @@ module Viewpoint
         end
 
         # @see https://msdn.microsoft.com/en-us/library/aa565683(v=exchg.140).aspx
-        def categories!(fa)
+        def categories!(category)
           @nbuild[NS_EWS_TYPES].Categories {
-            @nbuild[NS_EWS_TYPES].String(fa)
+            @nbuild[NS_EWS_TYPES].String(category)
           }
         end
 
@@ -724,8 +726,8 @@ module Viewpoint
         end
 
         # @see http://msdn.microsoft.com/en-us/library/aa565886(v=EXCHG.140).aspx
-        def watermark!(wmark, ns = NS_EWS_TYPES)
-          @nbuild[ns].Watermark(wmark)
+        def watermark!(watermark, namespace = NS_EWS_TYPES)
+          @nbuild[namespace].Watermark(watermark)
         end
 
         # @see http://msdn.microsoft.com/en-us/library/aa565201(v=EXCHG.140).aspx
@@ -739,7 +741,7 @@ module Viewpoint
         end
 
         # @see http://msdn.microsoft.com/en-us/library/aa566309(v=EXCHG.140).aspx
-        def uRL!(url)
+        def uRL!(url) # rubocop:disable Naming/MethodName -- public API name
           @nbuild[NS_EWS_TYPES].URL(url)
         end
 
@@ -829,7 +831,7 @@ module Viewpoint
           }
         end
 
-        def is_read!(read)
+        def is_read!(read) # rubocop:disable Naming/PredicatePrefix -- public API name
           nbuild[NS_EWS_TYPES].IsRead(read)
         end
 
@@ -940,41 +942,41 @@ module Viewpoint
           nbuild[NS_EWS_TYPES].Importance(sub)
         end
 
-        def body!(b)
-          nbuild[NS_EWS_TYPES].Body(b[:text]) { |x|
-            x.parent['BodyType'] = b[:body_type] if b[:body_type]
+        def body!(body)
+          nbuild[NS_EWS_TYPES].Body(body[:text]) { |x|
+            x.parent['BodyType'] = body[:body_type] if body[:body_type]
           }
         end
 
-        def new_body_content!(b)
-          nbuild[NS_EWS_TYPES].NewBodyContent(b[:text]) { |x|
-            x.parent['BodyType'] = b[:body_type] if b[:body_type]
+        def new_body_content!(body)
+          nbuild[NS_EWS_TYPES].NewBodyContent(body[:text]) { |x|
+            x.parent['BodyType'] = body[:body_type] if body[:body_type]
           }
         end
 
         # @see http://msdn.microsoft.com/en-us/library/aa563719(v=exchg.140).aspx
         # @param [Array] r An array of Mailbox type hashes to send to #mailbox!
-        def to_recipients!(r)
+        def to_recipients!(recipients)
           nbuild[NS_EWS_TYPES].ToRecipients {
-            r.each { |mbox| mailbox!(mbox[:mailbox]) }
+            recipients.each { |mbox| mailbox!(mbox[:mailbox]) }
           }
         end
 
-        def cc_recipients!(r)
+        def cc_recipients!(recipients)
           nbuild[NS_EWS_TYPES].CcRecipients {
-            r.each { |mbox| mailbox!(mbox[:mailbox]) }
+            recipients.each { |mbox| mailbox!(mbox[:mailbox]) }
           }
         end
 
-        def bcc_recipients!(r)
+        def bcc_recipients!(recipients)
           nbuild[NS_EWS_TYPES].BccRecipients {
-            r.each { |mbox| mailbox!(mbox[:mailbox]) }
+            recipients.each { |mbox| mailbox!(mbox[:mailbox]) }
           }
         end
 
-        def from!(f)
+        def from!(sender)
           nbuild[NS_EWS_TYPES].From {
-            mailbox! f
+            mailbox! sender
           }
         end
 
@@ -997,37 +999,37 @@ module Viewpoint
         end
 
         # @todo support ResponseType, LastResponseTime: http://msdn.microsoft.com/en-us/library/aa580339.aspx
-        def attendee!(a)
+        def attendee!(attendee)
           nbuild[NS_EWS_TYPES].Attendee {
-            mailbox!(a[:mailbox])
+            mailbox!(attendee[:mailbox])
           }
         end
 
-        def start!(st)
-          nbuild[NS_EWS_TYPES].Start(st[:text])
+        def start!(start_time)
+          nbuild[NS_EWS_TYPES].Start(start_time[:text])
         end
 
-        def end!(et)
-          nbuild[NS_EWS_TYPES].End(et[:text])
+        def end!(end_time)
+          nbuild[NS_EWS_TYPES].End(end_time[:text])
         end
 
-        def start_date!(sd)
-          nbuild[NS_EWS_TYPES].StartDate sd[:text]
+        def start_date!(start_date)
+          nbuild[NS_EWS_TYPES].StartDate start_date[:text]
         end
 
-        def due_date!(dd)
-          nbuild[NS_EWS_TYPES].DueDate format_time(dd[:text])
+        def due_date!(due_date)
+          nbuild[NS_EWS_TYPES].DueDate format_time(due_date[:text])
         end
 
         def location!(loc)
           nbuild[NS_EWS_TYPES].Location(loc)
         end
 
-        def is_all_day_event!(all_day)
+        def is_all_day_event!(all_day) # rubocop:disable Naming/PredicatePrefix -- public API name
           nbuild[NS_EWS_TYPES].IsAllDayEvent(all_day)
         end
 
-        def is_response_requested!(response_requested)
+        def is_response_requested!(response_requested) # rubocop:disable Naming/PredicatePrefix -- public API name
           nbuild[NS_EWS_TYPES].IsResponseRequested(response_requested)
         end
 
@@ -1116,27 +1118,27 @@ module Viewpoint
           @nbuild.ReturnNewItemIds(retval)
         end
 
-        def inline_attachment!(fa)
+        def inline_attachment!(attachment)
           @nbuild[NS_EWS_TYPES].FileAttachment {
-            @nbuild[NS_EWS_TYPES].Name(fa.name)
-            @nbuild[NS_EWS_TYPES].ContentId(fa.name)
+            @nbuild[NS_EWS_TYPES].Name(attachment.name)
+            @nbuild[NS_EWS_TYPES].ContentId(attachment.name)
             @nbuild[NS_EWS_TYPES].IsInline(true)
-            @nbuild[NS_EWS_TYPES].Content(fa.content)
+            @nbuild[NS_EWS_TYPES].Content(attachment.content)
           }
         end
 
-        def file_attachment!(fa)
+        def file_attachment!(attachment)
           @nbuild[NS_EWS_TYPES].FileAttachment {
-            @nbuild[NS_EWS_TYPES].Name(fa.name)
-            @nbuild[NS_EWS_TYPES].Content(fa.content)
+            @nbuild[NS_EWS_TYPES].Name(attachment.name)
+            @nbuild[NS_EWS_TYPES].Content(attachment.content)
           }
         end
 
-        def item_attachment!(ia)
+        def item_attachment!(attachment)
           @nbuild[NS_EWS_TYPES].ItemAttachment {
-            @nbuild[NS_EWS_TYPES].Name(ia.name)
+            @nbuild[NS_EWS_TYPES].Name(attachment.name)
             @nbuild[NS_EWS_TYPES].Item {
-              item_id!(ia.item)
+              item_id!(attachment.item)
             }
           }
         end
@@ -1223,25 +1225,25 @@ module Viewpoint
 
         # A helper to dispatch to a FieldURI, IndexedFieldURI, or an ExtendedFieldURI
         # @todo Implement ExtendedFieldURI
-        def dispatch_field_uri!(uri, ns = NS_EWS_MESSAGES)
+        def dispatch_field_uri!(uri, namespace = NS_EWS_MESSAGES)
           type = uri.keys.first
           vals = uri[type].is_a?(Array) ? uri[type] : [uri[type]]
           case type
           when :field_uRI, :field_uri
             vals.each do |val|
               value = val.is_a?(Hash) ? val[type] : val
-              nbuild[ns].FieldURI('FieldURI' => value)
+              nbuild[namespace].FieldURI('FieldURI' => value)
             end
           when :indexed_field_uRI, :indexed_field_uri
             vals.each do |val|
-              nbuild[ns].IndexedFieldURI(
+              nbuild[namespace].IndexedFieldURI(
                 'FieldURI'   => val[:field_uRI] || val[:field_uri],
                 'FieldIndex' => val[:field_index]
               )
             end
           when :extended_field_uRI, :extended_field_uri
             vals.each do |val|
-              nbuild[ns].ExtendedFieldURI {
+              nbuild[namespace].ExtendedFieldURI {
                 if val[:distinguished_property_set_id]
                   nbuild.parent['DistinguishedPropertySetId'] =
                     val[:distinguished_property_set_id]

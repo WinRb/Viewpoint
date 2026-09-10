@@ -10,7 +10,8 @@ Gem::Specification.new do |s|
   s.version = version
   s.date    = Date.today.to_s
   s.summary = 'A Ruby client access library for Microsoft Exchange Web Services (EWS)'
-  s.description = 'A Ruby client access library for Microsoft Exchange Web Services (EWS).  Examples can be found here: http://distributed-frostbite.blogspot.com'
+  s.description = 'A Ruby client access library for Microsoft Exchange Web Services (EWS).  ' \
+                  'Examples can be found here: http://distributed-frostbite.blogspot.com'
 
   s.required_ruby_version = '>= 1.9.1'
 

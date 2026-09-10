@@ -214,9 +214,8 @@ module Viewpoint
         end
 
         def submit_attachments!
-          unless draft? && !(@new_file_attachments.empty? && @new_item_attachments.empty? && @new_inline_attachments.empty?)
-            return false
-          end
+          new_attachments = @new_file_attachments + @new_item_attachments + @new_inline_attachments
+          return false unless draft? && !new_attachments.empty?
 
           opts = {
             parent_id: { id: id, change_key: change_key },
@@ -400,9 +399,9 @@ module Viewpoint
           end
         end
 
-        def set_change_key(ck)
+        def set_change_key(change_key) # rubocop:disable Naming/AccessorMethodName -- public API name
           p = resolve_key_path(ews_item, key_paths[:change_key][0..-2])
-          p[:change_key] = ck
+          p[:change_key] = change_key
         end
 
         # Handles the CreateItem call for Forward, ReplyTo, and ReplyAllTo
