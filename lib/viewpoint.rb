@@ -87,6 +87,9 @@ require 'ews/types/mailbox_user'
 require 'ews/types/out_of_office'
 require 'ews/types/export_items_response_message'
 require 'ews/types/post_item'
+require 'ews/types/physical_address'
+require 'ews/types/email_address'
+require 'ews/types/phone_number'
 
 # Events
 require 'ews/types/event'
