@@ -1,9 +1,9 @@
 # Viewpoint for Exchange Web Services
-[![Ruby](https://github.com/WinRb/Viewpoint/actions/workflows/ruby.yml/badge.svg?branch=main)](https://github.com/WinRb/Viewpoint/actions/workflows/ruby.yml)
+[![CI](https://github.com/WinRb/Viewpoint/actions/workflows/ci.yml/badge.svg)](https://github.com/WinRb/Viewpoint/actions/workflows/ci.yml)
 [![Gem Version](https://img.shields.io/gem/v/viewpoint.svg)](https://rubygems.org/gems/viewpoint)
-[![License](https://img.shields.io/github/license/WinRb/Viewpoint.svg)](https://github.com/WinRb/Viewpoint/blob/master/LICENSE)
-[![Wiki](https://img.shields.io/badge/docs-wiki-lightgrey.svg)](http://github.com/WinRb/Viewpoint/wiki)
-[![Documentation](https://img.shields.io/badge/docs-rdoc-lightgrey.svg)](http://www.rubydoc.info/github/WinRb/Viewpoint/frames)
+[![License](https://img.shields.io/github/license/WinRb/Viewpoint.svg)](https://github.com/WinRb/Viewpoint/blob/main/LICENSE)
+[![Wiki](https://img.shields.io/badge/docs-wiki-lightgrey.svg)](https://github.com/WinRb/Viewpoint/wiki)
+[![Documentation](https://img.shields.io/badge/docs-rdoc-lightgrey.svg)](https://www.rubydoc.info/github/WinRb/Viewpoint/frames)
 
 Viewpoint for EWS provides a thin Ruby layer on top of Microsoft Exchange
 Web Services(EWS). It also includes a bunch of model classes that add an
@@ -57,7 +57,7 @@ out of the picture this is no longer required. Go crazy ;)
 
 The version 1.0 API is quite a departure from the 0.1.x code base. If you have a lot of legacy code and aren't suffering from performance issues, think twice about upgrading. That said, I hope you'll find the new API much clean and more intuitive than previous versions.
 
-I also try and document the code to the base of my ability. Included in that code are links to the official Microsoft EWS documentation that might be helpful when troubleshooting "interesting" issues. You can either generate the documentation yourself with yard or check it out on [rdoc.info](http://rdoc.info/github/zenchild/Viewpoint/frames).
+I also try and document the code to the base of my ability. Included in that code are links to the official Microsoft EWS documentation that might be helpful when troubleshooting "interesting" issues. You can either generate the documentation yourself with yard or check it out on [rdoc.info](https://www.rubydoc.info/github/WinRb/Viewpoint/frames).
 
 Note the `cli` variable in the setup code directly below. I will use that variable throughout without the setup code.
 
