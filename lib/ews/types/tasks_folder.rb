@@ -21,7 +21,7 @@ module Viewpoint
           template = Viewpoint::EWS::Template::Task.new attributes
           template.saved_item_folder_id = { id: id, change_key: change_key }
           rm = ews.create_item(template.to_ews_create).response_messages.first
-          if rm && rm.success?
+          if rm&.success?
             Task.new ews, rm.items.first[:task][:elems].first
           else
             raise EwsCreateItemError, "Could not create item in folder. #{rm.code}: #{rm.message_text}" if rm

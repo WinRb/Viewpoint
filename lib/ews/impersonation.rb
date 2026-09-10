@@ -17,7 +17,7 @@ module Viewpoint
     #   you can add any other string, it will be converted into xml tag on soap request
     # @param address [String] an address to include to requests for impersonation
     def set_impersonation(connecting_type, address)
-      unless ConnectingSID.has_value? connecting_type or connecting_type.is_a? String
+      unless ConnectingSID.value?(connecting_type) || connecting_type.is_a?(String)
         raise EwsBadArgumentError, "Not a proper connecting method: #{connecting_type.class}"
       end
 

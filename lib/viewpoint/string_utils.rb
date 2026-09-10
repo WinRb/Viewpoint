@@ -17,18 +17,18 @@
 #   limitations under the License.
 
 module Viewpoint
-  class StringFormatException < ::Exception; end
+  class StringFormatException < ::StandardError; end
 
   # Collection of utility methods for working with Strings
   module StringUtils
     DURATION_RE = /
       (?<start>P)
-      ((?<weeks>\d+)W)?
-      ((?<days>\d+)D)?
+      (?:(?<weeks>\d+)W)?
+      (?:(?<days>\d+)D)?
       (?<time>T
-        ((?<hours>\d+)H)?
-        ((?<minutes>\d+)M)?
-        ((?<seconds>\d+)S)?
+        (?:(?<hours>\d+)H)?
+        (?:(?<minutes>\d+)M)?
+        (?:(?<seconds>\d+)S)?
       )?
       /x
 
@@ -49,7 +49,7 @@ module Viewpoint
     # Change a ruby_cased string to CamelCased
     def camel_case(input)
       input.to_s.split(/_/).map { |i|
-        i.sub(/^./) { |s| s.upcase }
+        i.sub(/^./, &:upcase)
       }.join
     end
 

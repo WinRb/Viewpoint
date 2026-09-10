@@ -66,7 +66,7 @@ module Viewpoint
       private
 
       def get_user_availability_args(emails, opts)
-        unless opts.has_key?(:start_time) && opts.has_key?(:end_time) && opts.has_key?(:requested_view)
+        unless opts.key?(:start_time) && opts.key?(:end_time) && opts.key?(:requested_view)
           raise EwsBadArgumentError, 'You must specify a start_time, end_time and requested_view.'
         end
 

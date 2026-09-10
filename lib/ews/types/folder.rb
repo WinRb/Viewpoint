@@ -12,7 +12,7 @@ module Viewpoint
           unread_count: %i[unread_count text]
         }
         FOLDER_KEY_TYPES = {
-          unread_count: ->(str) { str.to_i }
+          unread_count: lambda(&:to_i)
         }
         FOLDER_KEY_ALIAS = {}
 

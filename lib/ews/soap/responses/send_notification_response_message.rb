@@ -48,7 +48,7 @@ module Viewpoint
 
         def events
           @events ||=
-            notification[3..-1].collect { |ev|
+            notification[3..].collect { |ev|
               type = ev.keys.first
               klass = Viewpoint::EWS::Types.const_get(camel_case(type))
               klass.new(nil, ev[type])

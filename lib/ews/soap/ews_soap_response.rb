@@ -87,7 +87,7 @@ module Viewpoint
         # @return [Object, nil]
         def guard_hash(hsh, keys)
           key = keys.shift
-          return nil unless hsh.is_a?(Hash) && hsh.has_key?(key)
+          return nil unless hsh.is_a?(Hash) && hsh.key?(key)
 
           if keys.empty?
             hsh[key]

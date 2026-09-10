@@ -232,13 +232,13 @@ module Viewpoint
         #   default value for the operation.
         def validate_param(opts, key, required, default_val = nil)
           if required
-            raise EwsBadArgumentError, "Required parameter(#{key}) not passed." unless opts.has_key?(key)
+            raise EwsBadArgumentError, "Required parameter(#{key}) not passed." unless opts.key?(key)
 
             opts[key]
           else
             raise EwsBadArgumentError, 'Default value not supplied.' unless default_val
 
-            opts.has_key?(key) ? opts[key] : default_val
+            opts.key?(key) ? opts[key] : default_val
           end
         end
 

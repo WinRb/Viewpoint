@@ -50,12 +50,12 @@ module Viewpoint
           resp = parse_create_item(ews.create_item(msg.to_ews))
           msg.draft = true
           msg.file_attachments.each do |f|
-            next unless f.is_a?(File) or f.is_a?(Tempfile)
+            next unless f.is_a?(File) || f.is_a?(Tempfile)
 
             resp.add_file_attachment(f)
           end
           msg.inline_attachments.each do |f|
-            next unless f.is_a?(File) or f.is_a?(Tempfile)
+            next unless f.is_a?(File) || f.is_a?(Tempfile)
 
             resp.add_inline_attachment(f)
           end

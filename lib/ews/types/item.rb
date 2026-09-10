@@ -52,7 +52,7 @@ module Viewpoint
         }
 
         ITEM_KEY_TYPES = {
-          size: ->(str) { str.to_i },
+          size: lambda(&:to_i),
           date_time_sent: ->(str) { DateTime.parse(str) },
           date_time_created: ->(str) { DateTime.parse(str) },
           last_modified_time: ->(str) { DateTime.parse(str) },
@@ -293,11 +293,11 @@ module Viewpoint
         end
 
         def simplify!
-          return unless @ews_item.has_key?(:elems)
+          return unless @ews_item.key?(:elems)
 
           @ews_item = @ews_item[:elems].each_with_object({}) do |i, o|
             key = i.keys.first
-            if o.has_key?(key)
+            if o.key?(key)
               if o[key].is_a?(Array)
                 o[key] << i[key]
               else

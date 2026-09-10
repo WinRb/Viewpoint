@@ -30,9 +30,7 @@ end
 def up_min_version
   f = File.open('VERSION', 'r+')
   ver = f.readline.chomp
-  v_arr = ver.split(/\./).map { |v|
-    v.to_i
-  }
+  v_arr = ver.split(/\./).map(&:to_i)
   v_arr[2] += 1
   ver = v_arr.join('.')
   f.rewind

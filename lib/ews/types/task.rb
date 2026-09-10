@@ -23,7 +23,7 @@ module Viewpoint
           recurring?: ->(str) { str.downcase == 'true' },
           complete?: ->(str) { str.downcase == 'true' },
           reminder?: ->(str) { str.downcase == 'true' },
-          percent_complete: ->(str) { str.to_i }
+          percent_complete: lambda(&:to_i)
         }
         TASK_KEY_ALIAS = {}
 

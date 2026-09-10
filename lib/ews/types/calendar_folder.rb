@@ -50,7 +50,7 @@ module Viewpoint
           template = Viewpoint::EWS::Template::CalendarItem.new attributes
           template.saved_item_folder_id = { id: id, change_key: change_key }
           rm = ews.create_item(template.to_ews_create(to_ews_create_opts)).response_messages.first
-          if rm && rm.success?
+          if rm&.success?
             CalendarItem.new ews, rm.items.first[:calendar_item][:elems].first
           else
             raise EwsCreateItemError, "Could not create item in folder. #{rm.code}: #{rm.message_text}" if rm

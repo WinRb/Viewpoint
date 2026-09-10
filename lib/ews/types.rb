@@ -139,7 +139,7 @@ module Viewpoint
         k = path.first
         return hsh[k] if path.length == 1
 
-        resolve_key_path(hsh[k], path[1..-1])
+        resolve_key_path(hsh[k], path[1..])
       end
 
       def method_keys

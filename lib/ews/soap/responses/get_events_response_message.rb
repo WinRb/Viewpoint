@@ -45,7 +45,7 @@ module Viewpoint
         end
 
         def events
-          notification[3..-1]
+          notification[3..]
         end
       end
     end

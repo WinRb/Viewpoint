@@ -41,7 +41,7 @@ module Viewpoint
         ATTACH_KEY_TYPES = {
           is_inline?: ->(str) { str.downcase == 'true' },
           last_modified_type: ->(str) { DateTime.parse(str) },
-          size: ->(str) { str.to_i },
+          size: lambda(&:to_i),
           content_id: :fix_content_id
         }
 

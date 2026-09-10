@@ -32,7 +32,7 @@ module Viewpoint
           structure[:message_disposition] = (draft ? 'SaveOnly' : 'SendAndSaveCopy')
           # options
           structure[:send_meeting_invitations] =
-            (opts.has_key?(:send_meeting_invitations) ? opts[:send_meeting_invitations] : 'SendToNone')
+            (opts.key?(:send_meeting_invitations) ? opts[:send_meeting_invitations] : 'SendToNone')
 
           if saved_item_folder_id
             structure[:saved_item_folder_id] = if saved_item_folder_id.is_a?(Hash)

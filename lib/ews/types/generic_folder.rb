@@ -40,8 +40,8 @@ module Viewpoint
         }
 
         GFOLDER_KEY_TYPES = {
-          total_count: ->(str) { str.to_i },
-          child_folder_count: ->(str) { str.to_i }
+          total_count: lambda(&:to_i),
+          child_folder_count: lambda(&:to_i)
         }
 
         GFOLDER_KEY_ALIAS = {
@@ -170,7 +170,7 @@ module Viewpoint
         #   :change_key is returned.
         #   See: http://msdn.microsoft.com/en-us/library/aa565609.aspx
         def sync_items!(sync_state = nil, sync_amount = 256, _sync_all = false, opts = {})
-          item_shape = opts.has_key?(:item_shape) ? opts.delete(:item_shape) : { base_shape: :default }
+          item_shape = opts.key?(:item_shape) ? opts.delete(:item_shape) : { base_shape: :default }
           sync_state ||= @sync_state
 
           resp = ews.sync_folder_items item_shape: item_shape,
@@ -184,7 +184,7 @@ module Viewpoint
           rhash = {}
           rmsg.changes.each do |c|
             ctype = c.keys.first
-            rhash[ctype] = [] unless rhash.has_key?(ctype)
+            rhash[ctype] = [] unless rhash.key?(ctype)
             if %i[delete read_flag_change].include?(ctype)
               rhash[ctype] << c[ctype][:elems][0][:item_id][:attribs]
             else
@@ -297,7 +297,7 @@ module Viewpoint
         def simplify!
           @ews_item = @ews_item[:elems].each_with_object({}) do |i, o|
             key = i.keys.first
-            if o.has_key?(key)
+            if o.key?(key)
               if o[key].is_a?(Array)
                 o[key] << i[key]
               else

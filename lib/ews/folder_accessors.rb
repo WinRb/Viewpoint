@@ -230,7 +230,7 @@ module Viewpoint
         rhash[:sync_state] = rmsg.sync_state
         rmsg.changes.each do |c|
           ctype = c.keys.first
-          rhash[ctype] = [] unless rhash.has_key?(ctype)
+          rhash[ctype] = [] unless rhash.key?(ctype)
           if ctype == :delete
             rhash[ctype] << c[ctype][:elems][0][:folder_id][:attribs]
           else

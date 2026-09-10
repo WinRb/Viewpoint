@@ -57,7 +57,7 @@ module Viewpoint
         private
 
         def attrib(key)
-          return nil unless root.has_key?(:attribs)
+          return nil unless root.key?(:attribs)
 
           root[:attribs][key]
         end

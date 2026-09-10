@@ -714,7 +714,7 @@ module Viewpoint
         #   @see http://msdn.microsoft.com/en-us/library/aa565998.aspx
         def resolve_names(opts)
           opts = opts.clone
-          fcd = opts.has_key?(:full_contact_data) ? opts[:full_contact_data] : true
+          fcd = opts.key?(:full_contact_data) ? opts[:full_contact_data] : true
           req = build_soap! { |type, builder|
             unless type == :header
               builder.nbuild.ResolveNames { |x|

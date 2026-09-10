@@ -131,7 +131,7 @@ module Viewpoint
           @nbuild[NS_EWS_MESSAGES].ItemShape {
             @nbuild.parent.default_namespace = @default_ns
             base_shape!(item_shape[:base_shape])
-            mime_content!(item_shape[:include_mime_content]) if item_shape.has_key?(:include_mime_content)
+            mime_content!(item_shape[:include_mime_content]) if item_shape.key?(:include_mime_content)
             body_type!(item_shape[:body_type]) if item_shape[:body_type]
             additional_properties!(item_shape[:additional_properties]) if item_shape[:additional_properties]
           }
@@ -474,7 +474,7 @@ module Viewpoint
         # Request all known time_zones from server
         def get_server_time_zones!(get_time_zone_options)
           nbuild[NS_EWS_MESSAGES].GetServerTimeZones('ReturnFullTimeZoneData' => get_time_zone_options[:full]) do
-            if get_time_zone_options[:ids] && get_time_zone_options[:ids].any?
+            if get_time_zone_options[:ids]&.any?
               nbuild[NS_EWS_MESSAGES].Ids do
                 get_time_zone_options[:ids].each do |id|
                   nbuild[NS_EWS_TYPES].Id id
@@ -1309,7 +1309,7 @@ module Viewpoint
         end
 
         def set_version_header!(version)
-          return unless version && !(version == 'none')
+          return unless version && version != 'none'
 
           nbuild[NS_EWS_TYPES].RequestServerVersion { |x|
             x.parent['Version'] = version

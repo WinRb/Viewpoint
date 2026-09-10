@@ -57,7 +57,7 @@ module Viewpoint
 
         def safe_hash_access(hsh, keys)
           key = keys.shift
-          return nil unless hsh.is_a?(Hash) && hsh.has_key?(key)
+          return nil unless hsh.is_a?(Hash) && hsh.key?(key)
 
           if keys.empty?
             hsh[key]

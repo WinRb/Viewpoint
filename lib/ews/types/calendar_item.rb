@@ -111,7 +111,7 @@ module Viewpoint
             options[:send_meeting_invitations_or_cancellations] || 'SendToNone'
           data[:item_changes] = [{ item_id: item_id, updates: item_updates }]
           rm = ews.update_item(data).response_messages.first
-          if rm && rm.success?
+          if rm&.success?
             get_all_properties!
             self
           else
