@@ -6,32 +6,32 @@ module Viewpoint::EWS::Types
     include Viewpoint::StringUtils
 
     CALENDAR_ITEM_KEY_PATHS = {
-      recurring?:   [:is_recurring, :text],
-      meeting?:     [:is_meeting, :text],
-      cancelled?:   [:is_cancelled, :text],
-      duration:     [:duration, :text],
-      time_zone:    [:time_zone, :text],
-      start:        [:start, :text],
-      end:          [:end, :text],
-      location:     [:location, :text],
-      all_day?:     [:is_all_day_event, :text],
-      legacy_free_busy_status: [:legacy_free_busy_status, :text],
-      my_response_type:   [:my_response_type, :text],
+      recurring?: %i[is_recurring text],
+      meeting?: %i[is_meeting text],
+      cancelled?: %i[is_cancelled text],
+      duration: %i[duration text],
+      time_zone: %i[time_zone text],
+      start: %i[start text],
+      end: %i[end text],
+      location: %i[location text],
+      all_day?: %i[is_all_day_event text],
+      legacy_free_busy_status: %i[legacy_free_busy_status text],
+      my_response_type: %i[my_response_type text],
       organizer: [:organizer, :elems, 0, :mailbox, :elems],
-      optional_attendees: [:optional_attendees, :elems ],
-      required_attendees: [:required_attendees, :elems ],
-      recurrence: [:recurrence, :elems ],
-      deleted_occurrences: [:deleted_occurrences, :elems ],
-      modified_occurrences: [:modified_occurrences, :elems ]
-   }
+      optional_attendees: %i[optional_attendees elems],
+      required_attendees: %i[required_attendees elems],
+      recurrence: %i[recurrence elems],
+      deleted_occurrences: %i[deleted_occurrences elems],
+      modified_occurrences: %i[modified_occurrences elems]
+    }
 
     CALENDAR_ITEM_KEY_TYPES = {
-      start:        ->(str){DateTime.parse(str)},
-      end:          ->(str){DateTime.parse(str)},
-      recurring?:   ->(str){str.downcase == 'true'},
-      meeting?:     ->(str){str.downcase == 'true'},
-      cancelled?:   ->(str){str.downcase == 'true'},
-      all_day?:     ->(str){str.downcase == 'true'},
+      start: ->(str) { DateTime.parse(str) },
+      end: ->(str) { DateTime.parse(str) },
+      recurring?: ->(str) { str.downcase == 'true' },
+      meeting?: ->(str) { str.downcase == 'true' },
+      cancelled?: ->(str) { str.downcase == 'true' },
+      all_day?: ->(str) { str.downcase == 'true' },
       organizer: :build_mailbox_user,
       optional_attendees: :build_attendees_users,
       required_attendees: :build_attendees_users,
@@ -48,7 +48,7 @@ module Viewpoint::EWS::Types
     #   Default is 'SendOnlyToAll'
     # @return [Boolean] Whether or not the calendar item was deleted
     def delete!(deltype = :hard, cancel_type = 'SendOnlyToAll', opts = {})
-      opts = opts.merge(:send_meeting_cancellations => cancel_type)
+      opts = opts.merge(send_meeting_cancellations: cancel_type)
       super(deltype, opts)
     end
 
@@ -70,64 +70,61 @@ module Viewpoint::EWS::Types
       item_updates = []
       updates.each do |attribute, value|
         item_field = FIELD_URIS[attribute][:text] if FIELD_URIS.include? attribute
-        field = {field_uRI: {field_uRI: item_field}}
+        field = { field_uRI: { field_uRI: item_field } }
 
         if value.nil? && item_field
           # Build DeleteItemField Change
-          item_updates << {delete_item_field: field}
+          item_updates << { delete_item_field: field }
         elsif item_field
           # Build SetItemField Change
           item = Viewpoint::EWS::Template::CalendarItem.new(attribute => value)
 
           # Remap attributes because ews_builder #dispatch_field_item! uses #build_xml!
-          item_attributes = item.to_ews_item.map do |name, value|
+          item_attributes = item.to_ews_item.map { |name, value|
             if value.is_a? String
-              {name => {text: value}}
+              { name => { text: value } }
             elsif value.is_a? Hash
-              node = {name => {}}
+              node = { name => {} }
               value.each do |attrib_key, attrib_value|
                 attrib_key = camel_case(attrib_key) unless attrib_key == :text
                 node[name][attrib_key] = attrib_value
               end
               node
             else
-              {name => value}
+              { name => value }
             end
-          end
+          }
 
-          item_updates << {set_item_field: field.merge(calendar_item: {sub_elements: item_attributes})}
+          item_updates << { set_item_field: field.merge(calendar_item: { sub_elements: item_attributes }) }
         else
           # Ignore unknown attribute
         end
       end
 
-      if item_updates.any?
-        data = {}
-        data[:conflict_resolution] = options[:conflict_resolution] || 'AutoResolve'
-        data[:send_meeting_invitations_or_cancellations] = options[:send_meeting_invitations_or_cancellations] || 'SendToNone'
-        data[:item_changes] = [{item_id: self.item_id, updates: item_updates}]
-        rm = ews.update_item(data).response_messages.first
-        if rm && rm.success?
-          self.get_all_properties!
-          self
-        else
-          if rm
-            raise EwsCreateItemError, "Could not update calendar item. #{rm.code}: #{rm.message_text}"
-          else
-            raise EwsCreateItemError, "Could not update calendar item."
-          end
-        end
-      end
+      return unless item_updates.any?
 
+      data = {}
+      data[:conflict_resolution] = options[:conflict_resolution] || 'AutoResolve'
+      data[:send_meeting_invitations_or_cancellations] =
+        options[:send_meeting_invitations_or_cancellations] || 'SendToNone'
+      data[:item_changes] = [{ item_id: item_id, updates: item_updates }]
+      rm = ews.update_item(data).response_messages.first
+      if rm && rm.success?
+        get_all_properties!
+        self
+      else
+        raise EwsCreateItemError, "Could not update calendar item. #{rm.code}: #{rm.message_text}" if rm
+
+        raise EwsCreateItemError, 'Could not update calendar item.'
+
+      end
     end
 
     def duration_in_seconds
       iso8601_duration_to_seconds(duration)
     end
 
-
     private
-
 
     def key_paths
       super.merge(CALENDAR_ITEM_KEY_PATHS)
@@ -140,7 +137,5 @@ module Viewpoint::EWS::Types
     def key_alias
       super.merge(CALENDAR_ITEM_KEY_ALIAS)
     end
-
-
   end
 end

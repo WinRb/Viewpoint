@@ -1,23 +1,20 @@
-=begin
-  This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
-
-  Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-=end
+#   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+#
+#   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 
 module Viewpoint::EWS::SOAP
-
   # Exchange Notification operations as listed in the EWS Documentation.
   # @see http://msdn.microsoft.com/en-us/library/bb409286.aspx
   module ExchangeNotification
@@ -47,22 +44,19 @@ module Viewpoint::EWS::SOAP
     #       }},
     #       ]
     def subscribe(subscriptions)
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
+      req = build_soap! { |type, builder|
+        unless type == :header
           builder.nbuild.Subscribe {
             builder.nbuild.parent.default_namespace = @default_ns
             subscriptions.each do |sub|
               subtype = sub.keys.first
-              if(builder.respond_to?(subtype))
-                builder.send subtype, sub[subtype]
-              else
-                raise EwsBadArgumentError, "Bad subscription type. #{subtype}"
-              end
+              raise EwsBadArgumentError, "Bad subscription type. #{subtype}" unless builder.respond_to?(subtype)
+
+              builder.send subtype, sub[subtype]
             end
           }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsResponse)
     end
 
@@ -71,15 +65,14 @@ module Viewpoint::EWS::SOAP
     #
     # @param [String] subscription_id The Id of the subscription
     def unsubscribe(subscription_id)
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
+      req = build_soap! { |type, builder|
+        unless type == :header
           builder.nbuild.Unsubscribe {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.subscription_id!(subscription_id)
           }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsResponse)
     end
 
@@ -89,19 +82,17 @@ module Viewpoint::EWS::SOAP
     # @param [String] subscription_id Subscription identifier
     # @param [String] watermark Event bookmark in the events queue
     def get_events(subscription_id, watermark)
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
+      req = build_soap! { |type, builder|
+        unless type == :header
           builder.nbuild.GetEvents {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.subscription_id!(subscription_id)
             builder.watermark!(watermark, NS_EWS_MESSAGES)
           }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsResponse)
     end
-
 
     # ------- convenience methods ------- #
 
@@ -113,13 +104,13 @@ module Viewpoint::EWS::SOAP
     def pull_subscribe_folder(folder, evtypes, timeout = nil, watermark = nil)
       timeout ||= 240 # 4 hour default timeout
       psr = {
-        :subscribe_to_all_folders => false,
-        :folder_ids => [ {:id => folder[:id], :change_key => folder[:change_key]} ],
-        :event_types=> evtypes,
-        :timeout    => timeout
+        subscribe_to_all_folders: false,
+        folder_ids: [{ id: folder[:id], change_key: folder[:change_key] }],
+        event_types: evtypes,
+        timeout: timeout
       }
       psr[:watermark] = watermark if watermark
-      subscribe([{pull_subscription_request: psr}])
+      subscribe([{ pull_subscription_request: psr }])
     end
 
     # Create a push subscription to a single folder
@@ -131,16 +122,14 @@ module Viewpoint::EWS::SOAP
     def push_subscribe_folder(folder, evtypes, url, status_frequency = nil, watermark = nil)
       status_frequency ||= 30
       psr = {
-        :subscribe_to_all_folders => false,
-        :folder_ids => [ {:id => folder[:id], :change_key => folder[:change_key]} ],
-        :event_types=> evtypes,
-        :status_frequency => status_frequency,
-        :uRL => url.to_s
+        subscribe_to_all_folders: false,
+        folder_ids: [{ id: folder[:id], change_key: folder[:change_key] }],
+        event_types: evtypes,
+        status_frequency: status_frequency,
+        uRL: url.to_s
       }
       psr[:watermark] = watermark if watermark
-      subscribe([{push_subscription_request: psr}])
+      subscribe([{ push_subscription_request: psr }])
     end
-
-
-  end #ExchangeNotification
+  end # ExchangeNotification
 end

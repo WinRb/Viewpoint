@@ -1,25 +1,21 @@
-=begin
-  This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
-
-  Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-=end
+#   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+#
+#   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 
 module Viewpoint::EWS::SOAP
-
   class RootFolder
-
     attr_reader :root
 
     def initialize(root)
@@ -54,27 +50,21 @@ module Viewpoint::EWS::SOAP
       root[:elems][0][:groups][:elems]
     end
 
-
     private
-    
 
     def attrib(key)
       return nil unless root.has_key?(:attribs)
+
       root[:attribs][key]
     end
-
   end
 
-
   class FindItemResponseMessage < ResponseMessage
-
     def root_folder
       return @root_folder if @root_folder
 
-      rf = safe_hash_access message, [:elems, :root_folder]
+      rf = safe_hash_access message, %i[elems root_folder]
       @root_folder = rf.nil? ? nil : RootFolder.new(rf)
     end
-
   end # FindItemResponseMessage
-
 end # Viewpoint::EWS::SOAP

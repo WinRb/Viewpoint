@@ -59,7 +59,7 @@ class Viewpoint::EWSClient
     if deepen
       ews.auto_deepen = true
     else
-      behavior = [:raise, :nil].include?(behavior) ? behavior : :raise
+      behavior = %i[raise nil].include?(behavior) ? behavior : :raise
       ews.no_auto_deepen_behavior = behavior
       ews.auto_deepen = false
     end
@@ -78,13 +78,10 @@ class Viewpoint::EWSClient
 
   private
 
-
   # This method also exists in EWS::Types, but there is a lot of other stuff
   # in there that I didn't want to include directly in this class.
   def class_by_name(cname)
-    if(cname.instance_of? Symbol)
-      cname = camel_case(cname)
-    end
+    cname = camel_case(cname) if cname.instance_of? Symbol
     Viewpoint::EWS::Types.const_get(cname)
   end
 
@@ -101,5 +98,4 @@ class Viewpoint::EWSClient
       obj.opts[:restriction] = obj.restriction
     end
   end
-
 end

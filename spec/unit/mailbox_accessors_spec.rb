@@ -4,7 +4,7 @@ describe Viewpoint::EWS::MailboxAccessors do
   let(:ecli) { Viewpoint::EWSClient.new('dontcare', 'dontcare', 'dontcare') }
   let(:recipients) { ['anyrecipient'] }
   let(:timezone_request) do
-"<t:TimeZone>
+    "<t:TimeZone>
   <t:Bias>0</t:Bias>
   <t:StandardTime>
     <t:Bias>0</t:Bias>
@@ -25,32 +25,29 @@ describe Viewpoint::EWS::MailboxAccessors do
 
   let(:default_parameters) do
     {
-      :start_time => (Time.now - 1).iso8601,
-      :end_time => Time.now.iso8601,
-      :requested_view => :detailed
+      start_time: (Time.now - 1).iso8601,
+      end_time: Time.now.iso8601,
+      requested_view: :detailed
     }
   end
 
-  context "#get_user_availability" do
-
-    it "should care about timezones" do
+  context '#get_user_availability' do
+    it 'should care about timezones' do
       expect_any_instance_of(Viewpoint::EWS::SOAP::ExchangeWebService).to receive(:do_soap_request) do |request_document|
-          expect(request_document.at_xpath('//soap:Envelope/soap:Body//t:TimeZone').to_s).to eq timezone_request
-        end.
-        and_return(double(:resp, :status => 'Success'))
+        expect(request_document.at_xpath('//soap:Envelope/soap:Body//t:TimeZone').to_s).to eq timezone_request
+      end
+        .and_return(double(:resp, status: 'Success'))
 
       ecli.get_user_availability(
         recipients,
         default_parameters.merge(
-          :time_zone => {
-            :bias => 0,
-            :standard_time => {:bias => 0},
-            :daylight_time => {:bias => 0}
+          time_zone: {
+            bias: 0,
+            standard_time: { bias: 0 },
+            daylight_time: { bias: 0 }
           }
         )
       )
     end
-
   end
-
 end

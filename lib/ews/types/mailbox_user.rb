@@ -1,23 +1,20 @@
-=begin
-  This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
-
-  Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-=end
+#   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+#
+#   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 
 module Viewpoint::EWS::Types
-
   # This represents a Mailbox object in the Exchange data store
   # @see http://msdn.microsoft.com/en-us/library/aa565036.aspx MSDN docs
   # @todo Design a Class method that resolves to an Array of MailboxUsers
@@ -27,11 +24,11 @@ module Viewpoint::EWS::Types
 
     MAILBOX_KEY_PATHS = {
       name: [:name],
-      email_address: [:email_address],
+      email_address: [:email_address]
     }
     MAILBOX_KEY_TYPES = {}
     MAILBOX_KEY_ALIAS = {
-      email: :email_address,
+      email: :email_address
     }
 
     def initialize(ews, mbox_user)
@@ -41,11 +38,11 @@ module Viewpoint::EWS::Types
     end
 
     def out_of_office_settings
-      mailbox = {:address => self.email_address}
+      mailbox = { address: email_address }
       resp = @ews.get_user_oof_settings(mailbox)
       ewsi = resp.response.clone
       ewsi.delete(:response_message)
-      return OutOfOffice.new(self,ewsi)
+      return OutOfOffice.new(self, ewsi)
       s = resp[:oof_settings]
       @oof_state = s[:oof_state][:text]
       @oof_ext_audience = s[:external_audience][:text]
@@ -63,17 +60,17 @@ module Viewpoint::EWS::Types
     # @see http://msdn.microsoft.com/en-us/library/aa563800(v=exchg.140)
     def get_user_availability(email_address, start_time, end_time)
       opts = {
-        mailbox_data: [ :email =>{:address => email_address} ],
+        mailbox_data: [{ email: { address: email_address } }],
         free_busy_view_options: {
-        time_window: {start_time: start_time, end_time: end_time},
+          time_window: { start_time: start_time, end_time: end_time }
+        }
       }
-      }
-      resp = (Viewpoint::EWS::EWS.instance).ews.get_user_availability(opts)
-      if(resp.status == 'Success')
-        return resp.items
-      else
+      resp = Viewpoint::EWS::EWS.instance.ews.get_user_availability(opts)
+      unless resp.status == 'Success'
         raise EwsError, "GetUserAvailability produced an error: #{resp.code}: #{resp.message}"
       end
+
+      resp.items
     end
 
     # Adds one or more delegates to a principal's mailbox and sets specific access permissions
@@ -93,35 +90,35 @@ module Viewpoint::EWS::Types
       # Thanks to Markus Roberts for pointing this out.
       formatted_perms = {}
       # Modify permissions so we can pass it to the builders
-      permissions.each_pair do |k,v|
-        formatted_perms[k] = {:text => v}
+      permissions.each_pair do |k, v|
+        formatted_perms[k] = { text: v }
       end
 
-      resp = (Viewpoint::EWS::EWS.instance).ews.add_delegate(self.email_address, delegate_email, formatted_perms)
-      if(resp.status == 'Success')
-        return true
-      else
+      resp = Viewpoint::EWS::EWS.instance.ews.add_delegate(email_address, delegate_email, formatted_perms)
+      unless resp.status == 'Success'
         raise EwsError, "Could not add delegate access for user #{delegate_email}: #{resp.code}, #{resp.message}"
       end
+
+      true
     end
 
     def update_delegate!(delegate_email, permissions)
       # Modify permissions so we can pass it to the builders
       formatted_perms = {}
-      permissions.each_pair do |k,v|
-        formatted_perms[k] = {:text => v}
+      permissions.each_pair do |k, v|
+        formatted_perms[k] = { text: v }
       end
 
-      resp = (Viewpoint::EWS::EWS.instance).ews.update_delegate(self.email_address, delegate_email, formatted_perms)
-      if(resp.status == 'Success')
-        return true
-      else
+      resp = Viewpoint::EWS::EWS.instance.ews.update_delegate(email_address, delegate_email, formatted_perms)
+      unless resp.status == 'Success'
         raise EwsError, "Could not update delegate access for user #{delegate_email}: #{resp.code}, #{resp.message}"
       end
+
+      true
     end
 
-    def get_delegate_info()
-      resp = (Viewpoint::EWS::EWS.instance).ews.get_delegate(self.email_address)
+    def get_delegate_info
+      Viewpoint::EWS::EWS.instance.ews.get_delegate(email_address)
       # if(resp.status == 'Success')
       #   return true
       # else
@@ -129,14 +126,11 @@ module Viewpoint::EWS::Types
       # end
     end
 
-
     private
 
-
     def simplify!
-      @ews_item = @ews_item.inject({}){|m,o|
-        m[o.keys.first] = o.values.first[:text];
-        m
+      @ews_item = @ews_item.each_with_object({}) { |o, m|
+        m[o.keys.first] = o.values.first[:text]
       }
     end
 
@@ -151,6 +145,5 @@ module Viewpoint::EWS::Types
     def key_alias
       @key_alias ||= super.merge(MAILBOX_KEY_ALIAS)
     end
-
   end # MailboxUser
 end # Viewpoint::EWS::Types

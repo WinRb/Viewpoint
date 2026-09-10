@@ -1,20 +1,18 @@
-=begin
-  This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
-
-  Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-=end
+#   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+#
+#   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 
 module Viewpoint::EWS::SOAP
   class ExchangeWebService
@@ -28,7 +26,8 @@ module Viewpoint::EWS::SOAP
     include ExchangeSynchronization
     include ExchangeTimeZones
 
-    attr_accessor :server_version, :auto_deepen, :no_auto_deepen_behavior, :connection, :impersonation_type, :impersonation_address
+    attr_accessor :server_version, :auto_deepen, :no_auto_deepen_behavior, :connection, :impersonation_type,
+                  :impersonation_address
 
     # @param [Viewpoint::EWS::Connection] connection the connection object
     # @param [Hash] opts additional options to the web service
@@ -39,26 +38,26 @@ module Viewpoint::EWS::SOAP
     def initialize(connection, opts = {})
       super()
       @connection = connection
-      @server_version = opts[:server_version] ? opts[:server_version] : VERSION_2010
+      @server_version = opts[:server_version] || VERSION_2010
       @auto_deepen    = true
       @no_auto_deepen_behavior = :raise
-      @impersonation_type = ""
-      @impersonation_address = ""
+      @impersonation_type = ''
+      @impersonation_address = ''
     end
 
     def delete_attachment
       action = "#{SOAP_ACTION_PREFIX}/DeleteAttachment"
-      resp = invoke("#{NS_EWS_MESSAGES}:DeleteAttachment", action) do |delete_attachment|
+      resp = invoke("#{NS_EWS_MESSAGES}:DeleteAttachment", action) { |delete_attachment|
         build_delete_attachment!(delete_attachment)
-      end
+      }
       parse_delete_attachment(resp)
     end
 
     def create_managed_folder
       action = "#{SOAP_ACTION_PREFIX}/CreateManagedFolder"
-      resp = invoke("#{NS_EWS_MESSAGES}:CreateManagedFolder", action) do |create_managed_folder|
+      resp = invoke("#{NS_EWS_MESSAGES}:CreateManagedFolder", action) { |create_managed_folder|
         build_create_managed_folder!(create_managed_folder)
-      end
+      }
       parse_create_managed_folder(resp)
     end
 
@@ -68,12 +67,12 @@ module Viewpoint::EWS::SOAP
     # @param [String] owner The user that is delegating permissions
     def get_delegate(owner)
       action = "#{SOAP_ACTION_PREFIX}/GetDelegate"
-      resp = invoke("#{NS_EWS_MESSAGES}:GetDelegate", action) do |root|
+      resp = invoke("#{NS_EWS_MESSAGES}:GetDelegate", action) { |root|
         root.set_attr('IncludePermissions', 'true')
         build!(root) do
-          mailbox!(root, {:email_address => {:text => owner}})
+          mailbox!(root, { email_address: { text: owner } })
         end
-      end
+      }
       parse_soap_response(resp)
     end
 
@@ -86,11 +85,11 @@ module Viewpoint::EWS::SOAP
     #   This Hash will eventually be passed to add_hierarchy! in the builder so it is in that format.
     def add_delegate(owner, delegate, permissions)
       action = "#{SOAP_ACTION_PREFIX}/AddDelegate"
-      resp = invoke("#{NS_EWS_MESSAGES}:AddDelegate", action) do |root|
+      resp = invoke("#{NS_EWS_MESSAGES}:AddDelegate", action) { |root|
         build!(root) do
           add_delegate!(owner, delegate, permissions)
         end
-      end
+      }
       parse_soap_response(resp)
     end
 
@@ -101,11 +100,11 @@ module Viewpoint::EWS::SOAP
     # @param [String] delegate The user that is being given delegate permission
     def remove_delegate(owner, delegate)
       action = "#{SOAP_ACTION_PREFIX}/RemoveDelegate"
-      resp = invoke("#{NS_EWS_MESSAGES}:RemoveDelegate", action) do |root|
+      resp = invoke("#{NS_EWS_MESSAGES}:RemoveDelegate", action) { |root|
         build!(root) do
           remove_delegate!(owner, delegate)
         end
-      end
+      }
       parse_soap_response(resp)
     end
 
@@ -118,11 +117,11 @@ module Viewpoint::EWS::SOAP
     #   This Hash will eventually be passed to add_hierarchy! in the builder so it is in that format.
     def update_delegate(owner, delegate, permissions)
       action = "#{SOAP_ACTION_PREFIX}/UpdateDelegate"
-      resp = invoke("#{NS_EWS_MESSAGES}:UpdateDelegate", action) do |root|
+      resp = invoke("#{NS_EWS_MESSAGES}:UpdateDelegate", action) { |root|
         build!(root) do
           add_delegate!(owner, delegate, permissions)
         end
-      end
+      }
       parse_soap_response(resp)
     end
 
@@ -148,22 +147,21 @@ module Viewpoint::EWS::SOAP
     # @todo Finish out :suggestions_view_options
     def get_user_availability(opts)
       opts = opts.clone
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-        builder.nbuild.GetUserAvailabilityRequest {|x|
-          x.parent.default_namespace = @default_ns
-          builder.time_zone!(opts[:time_zone])
-          builder.nbuild.MailboxDataArray {
-          opts[:mailbox_data].each do |mbd|
-            builder.mailbox_data!(mbd)
-          end
+      req = build_soap! { |type, builder|
+        unless type == :header
+          builder.nbuild.GetUserAvailabilityRequest { |x|
+            x.parent.default_namespace = @default_ns
+            builder.time_zone!(opts[:time_zone])
+            builder.nbuild.MailboxDataArray do
+              opts[:mailbox_data].each do |mbd|
+                builder.mailbox_data!(mbd)
+              end
+            end
+            builder.free_busy_view_options!(opts[:free_busy_view_options])
+            builder.suggestions_view_options!(opts[:suggestions_view_options])
           }
-          builder.free_busy_view_options!(opts[:free_busy_view_options])
-          builder.suggestions_view_options!(opts[:suggestions_view_options])
-        }
         end
-      end
+      }
 
       do_soap_request(req, response_class: EwsSoapFreeBusyResponse)
     end
@@ -172,27 +170,23 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa563465.aspx
     # @param [string] roomDistributionList
     def get_rooms(roomDistributionList)
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-          builder.nbuild.GetRooms {|x|
+      req = build_soap! { |type, builder|
+        unless type == :header
+          builder.nbuild.GetRooms { |x|
             x.parent.default_namespace = @default_ns
             builder.room_list!(roomDistributionList)
           }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsSoapRoomResponse)
     end
 
     # Gets the room lists that are available within the Exchange organization.
     # @see http://msdn.microsoft.com/en-us/library/aa563465.aspx
     def get_room_lists
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-          builder.room_lists!
-        end
-      end
+      req = build_soap! { |type, builder|
+        builder.room_lists! unless type == :header
+      }
       do_soap_request(req, response_class: EwsSoapRoomlistResponse)
     end
 
@@ -216,13 +210,14 @@ module Viewpoint::EWS::SOAP
     # @param [Hash] opts misc options to send to the parser
     # @option opts [Class] :response_class the response class
     def parse_soap_response(soapmsg, opts = {})
-      raise EwsError, "Can't parse an empty response. Please check your endpoint." if(soapmsg.nil?)
+      raise EwsError, "Can't parse an empty response. Please check your endpoint." if soapmsg.nil?
+
       opts[:response_class] ||= EwsSoapResponse
       EwsParser.new(soapmsg).parse(opts)
     end
 
-
     private
+
     # Private Methods (Builders and Parsers)
 
     # Validate or set default values for options parameters.
@@ -234,9 +229,11 @@ module Viewpoint::EWS::SOAP
     def validate_param(opts, key, required, default_val = nil)
       if required
         raise EwsBadArgumentError, "Required parameter(#{key}) not passed." unless opts.has_key?(key)
+
         opts[key]
       else
-        raise EwsBadArgumentError, "Default value not supplied." unless default_val
+        raise EwsBadArgumentError, 'Default value not supplied.' unless default_val
+
         opts.has_key?(key) ? opts[key] : default_val
       end
     end
@@ -245,20 +242,20 @@ module Viewpoint::EWS::SOAP
     # This method should be called with the required version and we'll throw
     # an exception of the currently set @server_version does not comply.
     def validate_version(exchange_version)
-      if server_version < exchange_version
-        msg = 'The operation you are attempting to use is not compatible with'
-        msg << " your configured Exchange Server version(#{server_version})."
-        msg << " You must be running at least version (#{exchange_version})."
-        raise EwsServerVersionError, msg
-      end
+      return unless server_version < exchange_version
+
+      msg = 'The operation you are attempting to use is not compatible with'
+      msg << " your configured Exchange Server version(#{server_version})."
+      msg << " You must be running at least version (#{exchange_version})."
+      raise EwsServerVersionError, msg
     end
 
     # Build the common elements in the SOAP message and yield to any custom elements.
     def build_soap!(&block)
-      opts = { :server_version => server_version, :impersonation_type => impersonation_type, :impersonation_mail => impersonation_address }
+      opts = { server_version: server_version, impersonation_type: impersonation_type,
+impersonation_mail: impersonation_address }
       opts[:time_zone_context] = @time_zone_context if @time_zone_context
       EwsBuilder.new.build!(opts, &block)
     end
-
   end # class ExchangeWebService
 end # Viewpoint

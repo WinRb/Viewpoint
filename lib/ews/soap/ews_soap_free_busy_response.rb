@@ -1,25 +1,21 @@
-=begin
-  This file is a cotribution to Viewpoint; the Ruby library for Microsoft Exchange Web Services.
-
-  Copyright © 2013 Mark McCahill <mark.mccahill@duke.edu>
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-=end
+#   This file is a cotribution to Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+#
+#   Copyright © 2013 Mark McCahill <mark.mccahill@duke.edu>
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 
 module Viewpoint::EWS::SOAP
-
-  class EwsSoapFreeBusyResponse  < EwsSoapResponse
-
+  class EwsSoapFreeBusyResponse < EwsSoapResponse
     def initialize(sax_hash)
       @resp = sax_hash
       simplify!
@@ -61,33 +57,33 @@ module Viewpoint::EWS::SOAP
     def response_class
       response_message[:attribs][:response_class]
     end
-    alias :status :response_class
+    alias status response_class
 
     def response_code
       result = find_in_hash_list(response_message[:elems], :response_code)
       result ? result[:text] : nil
     end
-    alias :code :response_code
+    alias code response_code
 
     def response_message_text
-      guard_hash response_message[:elems], [:message_text, :text]
+      guard_hash response_message[:elems], %i[message_text text]
     end
-    alias :message :response_message_text
+    alias message response_message_text
 
     def response_key
       response_message[:elems]
     end
 
     def success?
-      response_class == "Success"
+      response_class == 'Success'
     end
 
     private
 
     def simplify!
-#     key = response_key
-#     body[0][key] = body[0][key][:elems].inject(:merge)
-#     response_message[:elems] = response_message[:elems].inject(:merge)
+      #     key = response_key
+      #     body[0][key] = body[0][key][:elems].inject(:merge)
+      #     response_message[:elems] = response_message[:elems].inject(:merge)
     end
 
     # If the keys don't exist in the Hash return nil
@@ -113,7 +109,5 @@ module Viewpoint::EWS::SOAP
       result = collection.find { |hsh| hsh.keys.include?(key) }
       result ? result[key] : nil
     end
-
   end # EwsSoapFreeBusyResponse
-
 end # Viewpoint::EWS::SOAP

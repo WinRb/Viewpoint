@@ -1,19 +1,18 @@
 module Viewpoint::EWS::Types
-  
   class ExportItemsResponseMessage
     include Viewpoint::EWS
     include Viewpoint::EWS::Types
     include Viewpoint::EWS::Types::Item
 
     BULK_KEY_PATHS = {
-      :id          => [:item_id, :attribs, :id],
-      :change_key  => [:item_id, :attribs, :change_key],
-      :data        => [:data, :text]
+      id: %i[item_id attribs id],
+      change_key: %i[item_id attribs change_key],
+      data: %i[data text]
     }
 
-    BULK_KEY_TYPES = { }
+    BULK_KEY_TYPES = {}
 
-    BULK_KEY_ALIAS = { }
+    BULK_KEY_ALIAS = {}
 
     def initialize(ews, bulk_item)
       super(ews, bulk_item)
@@ -33,7 +32,6 @@ module Viewpoint::EWS::Types
       @item[:data][:text]
     end
 
-
     private
 
     def key_paths
@@ -47,6 +45,5 @@ module Viewpoint::EWS::Types
     def key_alias
       @key_alias ||= BULK_KEY_ALIAS
     end
-
   end
 end

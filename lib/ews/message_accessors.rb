@@ -1,20 +1,18 @@
-=begin
-  This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
-
-  Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-=end
+#   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+#
+#   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 module Viewpoint::EWS::MessageAccessors
   include Viewpoint::EWS
 
@@ -48,11 +46,13 @@ module Viewpoint::EWS::MessageAccessors
       resp = parse_create_item(ews.create_item(msg.to_ews))
       msg.draft = true
       msg.file_attachments.each do |f|
-        next unless f.kind_of?(File) or f.kind_of?(Tempfile)
+        next unless f.is_a?(File) or f.is_a?(Tempfile)
+
         resp.add_file_attachment(f)
       end
       msg.inline_attachments.each do |f|
-        next unless f.kind_of?(File) or f.kind_of?(Tempfile)
+        next unless f.is_a?(File) or f.is_a?(Tempfile)
+
         resp.add_inline_attachment(f)
       end
       if draft
@@ -63,7 +63,7 @@ module Viewpoint::EWS::MessageAccessors
       end
     else
       resp = ews.create_item(msg.to_ews)
-      resp.response_messages ?  parse_create_item(resp) : false
+      resp.response_messages ? parse_create_item(resp) : false
     end
   end
 
@@ -72,22 +72,17 @@ module Viewpoint::EWS::MessageAccessors
     send_message opts.merge(draft: true), &block
   end
 
-
   private
-
 
   def parse_create_item(resp)
     rm = resp.response_messages[0]
-    if(rm.status == 'Success')
-      rm.items.empty? ? true : parse_message(rm.items.first)
-    else
-      raise EwsError, "Could not send message. #{rm.code}: #{rm.message_text}"
-    end
+    raise EwsError, "Could not send message. #{rm.code}: #{rm.message_text}" unless rm.status == 'Success'
+
+    rm.items.empty? || parse_message(rm.items.first)
   end
 
   def parse_message(msg)
     mtype = msg.keys.first
-    message = class_by_name(mtype).new(ews, msg[mtype])
+    class_by_name(mtype).new(ews, msg[mtype])
   end
-
 end # Viewpoint::EWS::MessageAccessors

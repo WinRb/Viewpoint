@@ -10,69 +10,72 @@ module Viewpoint::EWS::Types
 
     module ClassMethods
       def init_simple_item(ews, id, change_key = nil, parent = nil)
-        ews_item = {item_id: {attribs: {id: id, change_key: change_key}}}
-        self.new ews, ews_item, parent
+        ews_item = { item_id: { attribs: { id: id, change_key: change_key } } }
+        new ews, ews_item, parent
       end
     end
 
     ITEM_KEY_PATHS = {
-      item_id:        [:item_id, :attribs],
-      id:             [:item_id, :attribs, :id],
-      change_key:     [:item_id, :attribs, :change_key],
-      subject:        [:subject, :text],
-      sensitivity:    [:sensitivity, :text],
-      size:           [:size, :text],
-      date_time_sent: [:date_time_sent, :text],
-      date_time_created: [:date_time_created, :text],
-      last_modified_time: [:last_modified_time, :text],
-      mime_content: [:mime_content, :text],
-      has_attachments?:[:has_attachments, :text],
-      is_associated?: [:is_associated, :text],
-      is_read?:       [:is_read, :text],
-      is_draft?:      [:is_draft, :text],
-      is_submitted?:  [:is_submitted, :text],
-      conversation_id:[:conversation_id, :attribs, :id],
-      categories:     [:categories, :elems],
-      internet_message_id:[:internet_message_id, :text],
-      internet_message_headers:[:internet_message_headers, :elems],
-      sender:         [:sender, :elems, 0, :mailbox, :elems],
-      from:           [:from, :elems, 0, :mailbox, :elems],
-      to_recipients:  [:to_recipients, :elems],
-      cc_recipients:  [:cc_recipients, :elems],
-      attachments:    [:attachments, :elems],
-      importance:     [:importance, :text],
-      conversation_index:     [:conversation_index, :text],
-      conversation_topic:     [:conversation_topic, :text],
-      body_type: [:body, :attribs, :body_type],
-      body: [:body, :text]
+      item_id: %i[item_id attribs],
+      id: %i[item_id attribs id],
+      change_key: %i[item_id attribs change_key],
+      subject: %i[subject text],
+      sensitivity: %i[sensitivity text],
+      size: %i[size text],
+      date_time_sent: %i[date_time_sent text],
+      date_time_created: %i[date_time_created text],
+      last_modified_time: %i[last_modified_time text],
+      mime_content: %i[mime_content text],
+      has_attachments?: %i[has_attachments text],
+      is_associated?: %i[is_associated text],
+      is_read?: %i[is_read text],
+      is_draft?: %i[is_draft text],
+      is_submitted?: %i[is_submitted text],
+      conversation_id: %i[conversation_id attribs id],
+      categories: %i[categories elems],
+      internet_message_id: %i[internet_message_id text],
+      internet_message_headers: %i[internet_message_headers elems],
+      sender: [:sender, :elems, 0, :mailbox, :elems],
+      from: [:from, :elems, 0, :mailbox, :elems],
+      to_recipients: %i[to_recipients elems],
+      cc_recipients: %i[cc_recipients elems],
+      attachments: %i[attachments elems],
+      importance: %i[importance text],
+      conversation_index: %i[conversation_index text],
+      conversation_topic: %i[conversation_topic text],
+      body_type: %i[body attribs body_type],
+      body: %i[body text]
     }
 
     ITEM_KEY_TYPES = {
-      size:               ->(str){str.to_i},
-      date_time_sent:     ->(str){DateTime.parse(str)},
-      date_time_created:  ->(str){DateTime.parse(str)},
-      last_modified_time: ->(str){DateTime.parse(str)},
-      has_attachments?:   ->(str){str.downcase == 'true'},
-      is_associated?:     ->(str){str.downcase == 'true'},
-      is_read?:           ->(str){str.downcase == 'true'},
-      is_draft?:          ->(str){str.downcase == 'true'},
-      is_submitted?:      ->(str){str.downcase == 'true'},
-      categories:         ->(obj){obj.collect{|s| s[:string][:text]}},
-      internet_message_headers: ->(obj){obj.collect{|h|
-          {h[:internet_message_header][:attribs][:header_name] =>
-            h[:internet_message_header][:text]} } },
+      size: ->(str) { str.to_i },
+      date_time_sent: ->(str) { DateTime.parse(str) },
+      date_time_created: ->(str) { DateTime.parse(str) },
+      last_modified_time: ->(str) { DateTime.parse(str) },
+      has_attachments?: ->(str) { str.downcase == 'true' },
+      is_associated?: ->(str) { str.downcase == 'true' },
+      is_read?: ->(str) { str.downcase == 'true' },
+      is_draft?: ->(str) { str.downcase == 'true' },
+      is_submitted?: ->(str) { str.downcase == 'true' },
+      categories: ->(obj) { obj.collect { |s| s[:string][:text] } },
+      internet_message_headers: lambda { |obj|
+        obj.collect { |h|
+          { h[:internet_message_header][:attribs][:header_name] =>
+            h[:internet_message_header][:text] }
+        }
+      },
       sender: :build_mailbox_user,
-      from:   :build_mailbox_user,
-      to_recipients:   :build_mailbox_users,
-      cc_recipients:   :build_mailbox_users,
-      attachments: :build_attachments,
+      from: :build_mailbox_user,
+      to_recipients: :build_mailbox_users,
+      cc_recipients: :build_mailbox_users,
+      attachments: :build_attachments
     }
 
     ITEM_KEY_ALIAS = {
-      :read?        => :is_read?,
-      :draft?       => :is_draft?,
-      :submitted?   => :is_submitted?,
-      :associated?  => :is_associated?,
+      read?: :is_read?,
+      draft?: :is_draft?,
+      submitted?: :is_submitted?,
+      associated?: :is_associated?
     }
 
     attr_reader :ews_item, :parent
@@ -99,15 +102,14 @@ module Viewpoint::EWS::Types
 
     def delete!(deltype = :hard, opts = {})
       opts = {
-        :delete_type => delete_type(deltype),
-        :item_ids => [{:item_id => {:id => id}}]
+        delete_type: delete_type(deltype),
+        item_ids: [{ item_id: { id: id } }]
       }.merge(opts)
 
       resp = @ews.delete_item(opts)
       rmsg = resp.response_messages[0]
-      unless rmsg.success?
-        raise EwsError, "Could not delete #{self.class}. #{rmsg.response_code}: #{rmsg.message_text}"
-      end
+      raise EwsError, "Could not delete #{self.class}. #{rmsg.response_code}: #{rmsg.message_text}" unless rmsg.success?
+
       true
     end
 
@@ -135,21 +137,19 @@ module Viewpoint::EWS::Types
     #   be a subclass of GenericFolder, a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
     # @return [String] the new Id of the moved item
     def move!(new_folder)
-      new_folder = new_folder.id if new_folder.kind_of?(GenericFolder)
+      new_folder = new_folder.id if new_folder.is_a?(GenericFolder)
       move_opts = {
-        :to_folder_id => {:id => new_folder},
-        :item_ids => [{:item_id => {:id => self.id}}]
+        to_folder_id: { id: new_folder },
+        item_ids: [{ item_id: { id: id } }]
       }
       resp = @ews.move_item(move_opts)
       rmsg = resp.response_messages[0]
 
-      if rmsg.success?
-        obj = rmsg.items.first
-        itype = obj.keys.first
-        obj[itype][:elems][0][:item_id][:attribs][:id]
-      else
-        raise EwsError, "Could not move item. #{resp.code}: #{resp.message}"
-      end
+      raise EwsError, "Could not move item. #{resp.code}: #{resp.message}" unless rmsg.success?
+
+      obj = rmsg.items.first
+      itype = obj.keys.first
+      obj[itype][:elems][0][:item_id][:attribs][:id]
     end
 
     # Copy this item to a new folder
@@ -157,21 +157,19 @@ module Viewpoint::EWS::Types
     #   be a subclass of GenericFolder, a DistinguishedFolderId (must me a Symbol) or a FolderId (String)
     # @return [String] the new Id of the copied item
     def copy(new_folder)
-      new_folder = new_folder.id if new_folder.kind_of?(GenericFolder)
+      new_folder = new_folder.id if new_folder.is_a?(GenericFolder)
       copy_opts = {
-        :to_folder_id => {:id => new_folder},
-        :item_ids => [{:item_id => {:id => self.id}}]
+        to_folder_id: { id: new_folder },
+        item_ids: [{ item_id: { id: id } }]
       }
       resp = @ews.copy_item(copy_opts)
       rmsg = resp.response_messages[0]
 
-      if rmsg.success?
-        obj = rmsg.items.first
-        itype = obj.keys.first
-        obj[itype][:elems][0][:item_id][:attribs][:id]
-      else
-        raise EwsError, "Could not copy item. #{rmsg.response_code}: #{rmsg.message_text}"
-      end
+      raise EwsError, "Could not copy item. #{rmsg.response_code}: #{rmsg.message_text}" unless rmsg.success?
+
+      obj = rmsg.items.first
+      itype = obj.keys.first
+      obj[itype][:elems][0][:item_id][:attribs][:id]
     end
 
     def add_file_attachment(file)
@@ -183,8 +181,8 @@ module Viewpoint::EWS::Types
 
     def add_item_attachment(other_item, name = nil)
       ia = OpenStruct.new
-      ia.name = (name ? name : other_item.subject)
-      ia.item = {id: other_item.id, change_key: other_item.change_key}
+      ia.name = (name || other_item.subject)
+      ia.item = { id: other_item.id, change_key: other_item.change_key }
       @new_item_attachments << ia
     end
 
@@ -198,23 +196,21 @@ module Viewpoint::EWS::Types
     def submit!
       if draft?
         submit_attachments!
-        resp = ews.send_item(item_ids: [{item_id: {id: self.id, change_key: self.change_key}}])
+        resp = ews.send_item(item_ids: [{ item_id: { id: id, change_key: change_key } }])
         rm = resp.response_messages[0]
-        if rm.success?
-          true
-        else
-          raise EwsSendItemError, "#{rm.code}: #{rm.message_text}"
-        end
+        rm.success? || raise(EwsSendItemError, "#{rm.code}: #{rm.message_text}")
       else
         false
       end
     end
 
     def submit_attachments!
-      return false unless draft? && !(@new_file_attachments.empty? && @new_item_attachments.empty? && @new_inline_attachments.empty?)
+      unless draft? && !(@new_file_attachments.empty? && @new_item_attachments.empty? && @new_inline_attachments.empty?)
+        return false
+      end
 
       opts = {
-        parent_id: {id: self.id, change_key: self.change_key},
+        parent_id: { id: id, change_key: change_key },
         files: @new_file_attachments,
         items: @new_item_attachments,
         inline_files: @new_inline_attachments
@@ -239,25 +235,24 @@ module Viewpoint::EWS::Types
     def forward(opts = {})
       msg = Template::ForwardItem.new opts.clone
       yield msg if block_given?
-      msg.reference_item_id = {id: self.id, change_key: self.change_key}
+      msg.reference_item_id = { id: id, change_key: change_key }
       dispatch_create_item! msg
     end
 
     def reply_to(opts = {})
       msg = Template::ReplyToItem.new opts.clone
       yield msg if block_given?
-      msg.reference_item_id = {id: self.id, change_key: self.change_key}
+      msg.reference_item_id = { id: id, change_key: change_key }
       dispatch_create_item! msg
     end
 
     def reply_to_all(opts = {})
       msg = Template::ReplyToItem.new opts.clone
       yield msg if block_given?
-      msg.reference_item_id = {id: self.id, change_key: self.change_key}
+      msg.reference_item_id = { id: id, change_key: change_key }
       msg.ews_type = :reply_all_to_item
       dispatch_create_item! msg
     end
-
 
     private
 
@@ -275,27 +270,25 @@ module Viewpoint::EWS::Types
 
     def update_is_read_status(read)
       field = :is_read
-      opts = {item_changes:
+      opts = { item_changes:
         [
-          { item_id: {id: id, change_key: change_key},
+          { item_id: { id: id, change_key: change_key },
             updates: [
-              {set_item_field: {field_uRI: {field_uRI: FIELD_URIS[field][:text]},
-                message: {sub_elements: [{field => {text: read}}]}}}
-            ]
-          }
-        ]
-      }
-      resp = ews.update_item({conflict_resolution: 'AutoResolve'}.merge(opts))
+              { set_item_field: { field_uRI: { field_uRI: FIELD_URIS[field][:text] },
+                                  message: { sub_elements: [{ field => { text: read } }] } } }
+            ] }
+        ] }
+      resp = ews.update_item({ conflict_resolution: 'AutoResolve' }.merge(opts))
       rmsg = resp.response_messages[0]
-      unless rmsg.success?
-        raise EwsError, "#{rmsg.response_code}: #{rmsg.message_text}"
-      end
+      raise EwsError, "#{rmsg.response_code}: #{rmsg.message_text}" unless rmsg.success?
+
       true
     end
 
     def simplify!
       return unless @ews_item.has_key?(:elems)
-      @ews_item = @ews_item[:elems].inject({}) do |o,i|
+
+      @ews_item = @ews_item[:elems].each_with_object({}) do |i, o|
         key = i.keys.first
         if o.has_key?(key)
           if o[key].is_a?(Array)
@@ -306,7 +299,6 @@ module Viewpoint::EWS::Types
         else
           o[key] = i[key]
         end
-        o
       end
     end
 
@@ -325,8 +317,8 @@ module Viewpoint::EWS::Types
     def get_item_args(opts)
       opts[:base_shape] ||= 'Default'
       default_args = {
-        item_shape: {base_shape: opts[:base_shape]},
-        item_ids:   [{item_id:{id: id, change_key: change_key}}]
+        item_shape: { base_shape: opts[:base_shape] },
+        item_ids: [{ item_id: { id: id, change_key: change_key } }]
       }
       default_args[:item_shape][:body_type] = @body_type if @body_type
       default_args
@@ -334,11 +326,9 @@ module Viewpoint::EWS::Types
 
     def get_item_parser(resp)
       rm = resp.response_messages[0]
-      if(rm.status == 'Success')
-        rm.items[0].values.first
-      else
-        raise EwsError, "Could not retrieve #{self.class}. #{rm.code}: #{rm.message_text}"
-      end
+      raise EwsError, "Could not retrieve #{self.class}. #{rm.code}: #{rm.message_text}" unless rm.status == 'Success'
+
+      rm.items[0].values.first
     end
 
     # Map a delete type to what EWS expects
@@ -353,7 +343,7 @@ module Viewpoint::EWS::Types
     end
 
     def build_deleted_occurrences(occurrences)
-      occurrences.collect{|a| DateTime.parse a[:deleted_occurrence][:elems][0][:start][:text]}
+      occurrences.collect { |a| DateTime.parse a[:deleted_occurrence][:elems][0][:start][:text] }
     end
 
     def build_modified_occurrences(occurrences)
@@ -361,9 +351,9 @@ module Viewpoint::EWS::Types
         occurrences.collect do |a|
           elems = a[:occurrence][:elems]
 
-          h[DateTime.parse(elems.find{|e| e[:original_start]}[:original_start][:text])] = {
-            start: elems.find{|e| e[:start]}[:start][:text],
-            end: elems.find{|e| e[:end]}[:end][:text]
+          h[DateTime.parse(elems.find { |e| e[:original_start] }[:original_start][:text])] = {
+            start: elems.find { |e| e[:start] }[:start][:text],
+            end: elems.find { |e| e[:end] }[:end][:text]
           }
         end
       end
@@ -375,20 +365,23 @@ module Viewpoint::EWS::Types
 
     def build_mailbox_users(users)
       return [] if users.nil?
-      users.collect{|u| build_mailbox_user(u[:mailbox][:elems])}
+
+      users.collect { |u| build_mailbox_user(u[:mailbox][:elems]) }
     end
 
     def build_attendees_users(users)
       return [] if users.nil?
-      users.collect do |u|
+
+      users.collect { |u|
         u[:attendee][:elems].collect do |a|
           build_mailbox_user(a[:mailbox][:elems]) if a[:mailbox]
         end
-      end.flatten.compact
+      }.flatten.compact
     end
 
     def build_attachments(attachments)
       return [] if attachments.nil?
+
       attachments.collect do |att|
         key = att.keys.first
         class_by_name(key).new(self, att[key])
@@ -408,7 +401,8 @@ module Viewpoint::EWS::Types
         msg.draft = true
         resp = validate_created_item(ews.create_item(msg.to_ews))
         msg.file_attachments.each do |f|
-          next unless f.kind_of?(File)
+          next unless f.is_a?(File)
+
           resp.add_file_attachment(f)
         end
         if draft
@@ -431,17 +425,14 @@ module Viewpoint::EWS::Types
     def validate_created_item(response)
       msg = response.response_messages[0]
 
-      if(msg.status == 'Success')
-        msg.items.empty? ? true : parse_created_item(msg.items.first)
-      else
-        raise EwsCreateItemError, "#{msg.code}: #{msg.message_text}"
-      end
+      raise EwsCreateItemError, "#{msg.code}: #{msg.message_text}" unless msg.status == 'Success'
+
+      msg.items.empty? || parse_created_item(msg.items.first)
     end
 
     def parse_created_item(msg)
       mtype = msg.keys.first
-      message = class_by_name(mtype).new(ews, msg[mtype])
+      class_by_name(mtype).new(ews, msg[mtype])
     end
-
   end
 end

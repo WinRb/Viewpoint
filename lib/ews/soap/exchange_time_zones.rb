@@ -1,5 +1,4 @@
 module Viewpoint::EWS::SOAP
-
   module ExchangeTimeZones
     include Viewpoint::EWS::SOAP
 
@@ -12,29 +11,25 @@ module Viewpoint::EWS::SOAP
     #   zones = ews_client.ews.get_time_zones
     # @todo Implement TimeZoneDefinition with sub elements Periods, TransitionsGroups and Transitions
     def get_time_zones(full = false, ids = nil)
-      req = build_soap! do |type, builder|
-        unless type == :header
-          builder.get_server_time_zones!(full: full, ids: ids)
-        end
-      end
+      req = build_soap! { |type, builder|
+        builder.get_server_time_zones!(full: full, ids: ids) unless type == :header
+      }
       result = do_soap_request req, response_class: EwsSoapResponse
 
-      if result.success?
-        zones = []
-        result.response_messages.each do |message|
-          elements = message[:get_server_time_zones_response_message][:elems][:time_zone_definitions][:elems]
-          elements.each do |definition|
-            data = {
-                id: definition[:time_zone_definition][:attribs][:id],
-                name: definition[:time_zone_definition][:attribs][:name]
-            }
-            zones << OpenStruct.new(data)
-          end
+      raise EwsError, 'Could not get time zones' unless result.success?
+
+      zones = []
+      result.response_messages.each do |message|
+        elements = message[:get_server_time_zones_response_message][:elems][:time_zone_definitions][:elems]
+        elements.each do |definition|
+          data = {
+            id: definition[:time_zone_definition][:attribs][:id],
+            name: definition[:time_zone_definition][:attribs][:name]
+          }
+          zones << OpenStruct.new(data)
         end
-        zones
-      else
-        raise EwsError, "Could not get time zones"
       end
+      zones
     end
 
     # Sets the time zone context header
@@ -45,12 +40,7 @@ module Viewpoint::EWS::SOAP
     #   # subsequent request will send the TimeZoneContext header
     # @see EWSClient#set_time_zone
     def set_time_zone_context(id)
-      if id
-        @time_zone_context = {id: id}
-      else
-        @time_zone_context = nil
-      end
+      @time_zone_context = ({ id: id } if id)
     end
-
   end
 end

@@ -1,5 +1,4 @@
 module Viewpoint::EWS::SOAP
-
   # Exchange Data Service operations as listed in the EWS Documentation.
   # @see http://msdn.microsoft.com/en-us/library/bb409286.aspx
   module ExchangeDataServices
@@ -31,13 +30,12 @@ module Viewpoint::EWS::SOAP
     #     :item_shape  => {:base_shape => 'Default'} }
     def find_item(opts)
       opts = opts.clone
-      [:parent_folder_ids, :traversal, :item_shape].each do |k|
+      %i[parent_folder_ids traversal item_shape].each do |k|
         validate_param(opts, k, true)
       end
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-          builder.nbuild.FindItem(:Traversal => camel_case(opts[:traversal])) {
+      req = build_soap! { |type, builder|
+        unless type == :header
+          builder.nbuild.FindItem(Traversal: camel_case(opts[:traversal])) {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.item_shape!(opts[:item_shape])
             builder.indexed_page_item_view!(opts[:indexed_page_item_view]) if opts[:indexed_page_item_view]
@@ -48,7 +46,7 @@ module Viewpoint::EWS::SOAP
             builder.parent_folder_ids!(opts[:parent_folder_ids])
           }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsResponse)
     end
 
@@ -71,19 +69,18 @@ module Viewpoint::EWS::SOAP
     #       ]}
     def get_item(opts)
       opts = opts.clone
-      [:item_shape, :item_ids].each do |k|
+      %i[item_shape item_ids].each do |k|
         validate_param(opts, k, true)
       end
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
+      req = build_soap! { |type, builder|
+        unless type == :header
           builder.nbuild.GetItem {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.item_shape!(opts[:item_shape])
             builder.item_ids!(opts[:item_ids])
           }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsResponse)
     end
 
@@ -127,26 +124,25 @@ module Viewpoint::EWS::SOAP
       [:items].each do |k|
         validate_param(opts, k, true)
       end
-      req = build_soap! do |type, builder|
+      req = build_soap! { |type, builder|
         attribs = {}
         attribs['MessageDisposition'] = opts[:message_disposition] if opts[:message_disposition]
         attribs['SendMeetingInvitations'] = opts[:send_meeting_invitations] if opts[:send_meeting_invitations]
-        if(type == :header)
-        else
+        unless type == :header
           builder.nbuild.CreateItem(attribs) {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.saved_item_folder_id!(opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
             builder.nbuild.Items {
-              opts[:items].each {|i|
+              opts[:items].each { |i|
                 # The key can be any number of item types like :message,
                 #   :calendar, etc
                 ikey = i.keys.first
-                builder.send("#{ikey}!",i[ikey])
+                builder.send("#{ikey}!", i[ikey])
               }
             }
           }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsResponse)
     end
 
@@ -186,20 +182,22 @@ module Viewpoint::EWS::SOAP
       [:item_changes].each do |k|
         validate_param(opts, k, true)
       end
-      req = build_soap! do |type, builder|
+      req = build_soap! { |type, builder|
         attribs = {}
         attribs['MessageDisposition'] = opts[:message_disposition] if opts[:message_disposition]
         attribs['ConflictResolution'] = opts[:conflict_resolution] if opts[:conflict_resolution]
-        attribs['SendMeetingInvitationsOrCancellations'] = opts[:send_meeting_invitations_or_cancellations] if opts[:send_meeting_invitations_or_cancellations]
-        if(type == :header)
-        else
+        if opts[:send_meeting_invitations_or_cancellations]
+          attribs['SendMeetingInvitationsOrCancellations'] =
+            opts[:send_meeting_invitations_or_cancellations]
+        end
+        unless type == :header
           builder.nbuild.UpdateItem(attribs) {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.saved_item_folder_id!(opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
             builder.item_changes!(opts[:item_changes])
           }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsResponse)
     end
 
@@ -226,21 +224,20 @@ module Viewpoint::EWS::SOAP
     #   inst.delete_item(opts)
     def delete_item(opts)
       opts = opts.clone
-      [:delete_type, :item_ids].each do |k|
+      %i[delete_type item_ids].each do |k|
         validate_param(opts, k, true)
       end
-      req = build_soap! do |type, builder|
-        attribs = {'DeleteType' => opts[:delete_type]}
+      req = build_soap! { |type, builder|
+        attribs = { 'DeleteType' => opts[:delete_type] }
         attribs['SendMeetingCancellations'] = opts[:send_meeting_cancellations] if opts[:send_meeting_cancellations]
         attribs['AffectedTaskOccurrences'] = opts[:affected_task_occurrences] if opts[:affected_task_occurrences]
-        if(type == :header)
-        else
+        unless type == :header
           builder.nbuild.DeleteItem(attribs) {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.item_ids!(opts[:item_ids])
           }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsResponse)
     end
 
@@ -266,14 +263,13 @@ module Viewpoint::EWS::SOAP
     #   obj.move_item(opts)
     def move_item(opts)
       opts = opts.clone
-      [:to_folder_id, :item_ids].each do |k|
+      %i[to_folder_id item_ids].each do |k|
         validate_param(opts, k, true)
       end
       return_new_ids = validate_param(opts, :return_new_item_ids, false, true)
 
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
+      req = build_soap! { |type, builder|
+        unless type == :header
           builder.nbuild.MoveItem {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.to_folder_id!(opts[:to_folder_id])
@@ -281,7 +277,7 @@ module Viewpoint::EWS::SOAP
             builder.return_new_item_ids!(return_new_ids)
           }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsResponse)
     end
 
@@ -307,14 +303,13 @@ module Viewpoint::EWS::SOAP
     #   obj.copy_item(opts)
     def copy_item(opts)
       opts = opts.clone
-      [:to_folder_id, :item_ids].each do |k|
+      %i[to_folder_id item_ids].each do |k|
         validate_param(opts, k, true)
       end
       return_new_ids = validate_param(opts, :return_new_item_ids, false, true)
 
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
+      req = build_soap! { |type, builder|
+        unless type == :header
           builder.nbuild.CopyItem {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.to_folder_id!(opts[:to_folder_id])
@@ -322,7 +317,7 @@ module Viewpoint::EWS::SOAP
             builder.return_new_item_ids!(return_new_ids)
           }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsResponse)
     end
 
@@ -350,18 +345,17 @@ module Viewpoint::EWS::SOAP
         validate_param(opts, k, true)
       end
 
-      req = build_soap! do |type, builder|
+      req = build_soap! { |type, builder|
         attribs = {}
         attribs['SaveItemToFolder'] = validate_param(opts, :save_item_to_folder, false, true)
-        if(type == :header)
-        else
+        unless type == :header
           builder.nbuild.SendItem(attribs) {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.item_ids!(opts[:item_ids])
             builder.saved_item_folder_id!(opts[:saved_item_folder_id]) if opts[:saved_item_folder_id]
           }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsResponse)
     end
 
@@ -377,12 +371,9 @@ module Viewpoint::EWS::SOAP
       [:item_ids].each do |k|
         validate_param(ids, k, true)
       end
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-      builder.export_item_ids!(ids[:item_ids])
-        end
-      end
+      req = build_soap! { |type, builder|
+        builder.export_item_ids!(ids[:item_ids]) unless type == :header
+      }
       do_soap_request(req, response_class: EwsResponse)
     end
 
@@ -405,16 +396,15 @@ module Viewpoint::EWS::SOAP
     #       {:folder_id => {:id => 'blah', :change_key => 'blah'}}}
     def create_folder(opts)
       opts = opts.clone
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-          builder.nbuild.CreateFolder {|x|
+      req = build_soap! { |type, builder|
+        unless type == :header
+          builder.nbuild.CreateFolder { |x|
             x.parent.default_namespace = @default_ns
             builder.parent_folder_id!(opts[:parent_folder_id])
             builder.folders!(opts[:folders])
           }
         end
-      end
+      }
       do_soap_request(req)
     end
 
@@ -426,16 +416,15 @@ module Viewpoint::EWS::SOAP
     #   {:id => <myid>, :change_key => <optional_ck>},
     #   {:id => <myid2>, :change_key => <optional_ck>}
     def copy_folder(to_folder_id, *sources)
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
+      req = build_soap! { |type, builder|
+        unless type == :header
           builder.nbuild.CopyFolder {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.to_folder_id!(to_folder_id)
             builder.folder_ids!(sources.flatten)
           }
         end
-      end
+      }
       do_soap_request(req)
     end
 
@@ -452,15 +441,14 @@ module Viewpoint::EWS::SOAP
     #   must have been given delegate access to this folder or else this
     #   operation will fail.
     def delete_folder(opts)
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
+      req = build_soap! { |type, builder|
+        unless type == :header
           builder.nbuild.DeleteFolder('DeleteType' => opts[:delete_type]) {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.folder_ids!(opts[:folder_ids], opts[:act_as])
           }
         end
-      end
+      }
       do_soap_request(req)
     end
 
@@ -485,21 +473,20 @@ module Viewpoint::EWS::SOAP
     # @todo add FractionalPageFolderView
     def find_folder(opts)
       opts = opts.clone
-      [:parent_folder_ids, :traversal, :folder_shape].each do |k|
+      %i[parent_folder_ids traversal folder_shape].each do |k|
         validate_param(opts, k, true)
       end
 
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-          builder.nbuild.FindFolder(:Traversal => camel_case(opts[:traversal])) {
+      req = build_soap! { |type, builder|
+        unless type == :header
+          builder.nbuild.FindFolder(Traversal: camel_case(opts[:traversal])) {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.folder_shape!(opts[:folder_shape])
             builder.restriction!(opts[:restriction]) if opts[:restriction]
             builder.parent_folder_ids!(opts[:parent_folder_ids])
           }
         end
-      end
+      }
       do_soap_request(req)
     end
 
@@ -521,20 +508,19 @@ module Viewpoint::EWS::SOAP
     #     :folder_shape => {:base_shape => 'Default'} }
     def get_folder(opts)
       opts = opts.clone
-      [:folder_ids, :folder_shape].each do |k|
+      %i[folder_ids folder_shape].each do |k|
         validate_param(opts, k, true)
       end
       validate_param(opts[:folder_shape], :base_shape, true)
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
+      req = build_soap! { |type, builder|
+        unless type == :header
           builder.nbuild.GetFolder {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.folder_shape!(opts[:folder_shape])
             builder.folder_ids!(opts[:folder_ids], opts[:act_as])
           }
         end
-      end
+      }
       do_soap_request(req)
     end
 
@@ -546,16 +532,15 @@ module Viewpoint::EWS::SOAP
     #   {:id => <myid>, :change_key => <optional_ck>},
     #   {:id => <myid2>, :change_key => <optional_ck>}
     def move_folder(to_folder_id, *sources)
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
+      req = build_soap! { |type, builder|
+        unless type == :header
           builder.nbuild.MoveFolder {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.to_folder_id!(to_folder_id)
             builder.folder_ids!(sources.flatten)
           }
         end
-      end
+      }
       do_soap_request(req)
     end
 
@@ -566,9 +551,8 @@ module Viewpoint::EWS::SOAP
     # @see http://msdn.microsoft.com/en-us/library/aa580519(v=EXCHG.140).aspx
     # @param [Array<Hash>] folder_changes an Array of well formatted Hashes
     def update_folder(folder_changes)
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
+      req = build_soap! { |type, builder|
+        unless type == :header
           builder.nbuild.UpdateFolder {
             builder.nbuild.parent.default_namespace = @default_ns
             builder.nbuild.FolderChanges {
@@ -583,7 +567,7 @@ module Viewpoint::EWS::SOAP
             }
           }
         end
-      end
+      }
       do_soap_request(req)
     end
 
@@ -600,20 +584,19 @@ module Viewpoint::EWS::SOAP
     def empty_folder(opts)
       validate_version(VERSION_2010_SP1)
       ef_opts = {}
-      [:delete_type, :delete_sub_folders].each do |k|
+      %i[delete_type delete_sub_folders].each do |k|
         ef_opts[camel_case(k)] = validate_param(opts, k, true)
       end
       fids = validate_param opts, :folder_ids, true
 
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-          builder.nbuild.EmptyFolder(ef_opts) {|x|
+      req = build_soap! { |type, builder|
+        unless type == :header
+          builder.nbuild.EmptyFolder(ef_opts) { |_x|
             builder.nbuild.parent.default_namespace = @default_ns
             builder.folder_ids!(fids)
           }
         end
-      end
+      }
       do_soap_request(req)
     end
 
@@ -633,15 +616,14 @@ module Viewpoint::EWS::SOAP
       [:attachment_ids].each do |k|
         validate_param(opts, k, true)
       end
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-          builder.nbuild.GetAttachment {|x|
+      req = build_soap! { |type, builder|
+        unless type == :header
+          builder.nbuild.GetAttachment { |_x|
             builder.nbuild.parent.default_namespace = @default_ns
             builder.attachment_ids!(opts[:attachment_ids])
           }
         end
-      end
+      }
       do_soap_request(req)
     end
 
@@ -662,10 +644,9 @@ module Viewpoint::EWS::SOAP
       validate_param(opts, :files, false, [])
       validate_param(opts, :items, false, [])
 
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-          builder.nbuild.CreateAttachment {|x|
+      req = build_soap! { |type, builder|
+        unless type == :header
+          builder.nbuild.CreateAttachment { |x|
             builder.nbuild.parent.default_namespace = @default_ns
             builder.parent_item_id!(opts[:parent_id])
             x.Attachments {
@@ -681,10 +662,9 @@ module Viewpoint::EWS::SOAP
             }
           }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsResponse)
     end
-
 
     # ------------ Utility Operations ------------
 
@@ -700,19 +680,18 @@ module Viewpoint::EWS::SOAP
     #   {:id => 'my id'}
     def expand_dl(opts)
       opts = opts.clone
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-        builder.nbuild.ExpandDL {|x|
-          x.parent.default_namespace = @default_ns
-          x.Mailbox {|mb|
-            key = :email_address
-            mb[NS_EWS_TYPES].EmailAddress(opts[key]) if opts[key]
-            builder.item_id! if opts[:item_id]
+      req = build_soap! { |type, builder|
+        unless type == :header
+          builder.nbuild.ExpandDL { |x|
+            x.parent.default_namespace = @default_ns
+            x.Mailbox { |mb|
+              key = :email_address
+              mb[NS_EWS_TYPES].EmailAddress(opts[key]) if opts[key]
+              builder.item_id! if opts[:item_id]
+            }
           }
-        }
         end
-      end
+      }
       do_soap_request(req)
     end
 
@@ -732,18 +711,17 @@ module Viewpoint::EWS::SOAP
     def resolve_names(opts)
       opts = opts.clone
       fcd = opts.has_key?(:full_contact_data) ? opts[:full_contact_data] : true
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-        builder.nbuild.ResolveNames {|x|
-          x.parent['ReturnFullContactData'] = fcd.to_s
-          x.parent['SearchScope'] = opts[:search_scope] if opts[:search_scope]
-          x.parent.default_namespace = @default_ns
-          # @todo builder.nbuild.ParentFolderIds
-          x.UnresolvedEntry(opts[:name])
-        }
+      req = build_soap! { |type, builder|
+        unless type == :header
+          builder.nbuild.ResolveNames { |x|
+            x.parent['ReturnFullContactData'] = fcd.to_s
+            x.parent['SearchScope'] = opts[:search_scope] if opts[:search_scope]
+            x.parent.default_namespace = @default_ns
+            # @todo builder.nbuild.ParentFolderIds
+            x.UnresolvedEntry(opts[:name])
+          }
         end
-      end
+      }
       do_soap_request(req)
     end
 
@@ -753,14 +731,13 @@ module Viewpoint::EWS::SOAP
     def convert_id(opts)
       opts = opts.clone
 
-      [:id, :format, :destination_format, :mailbox ].each do |k|
+      %i[id format destination_format mailbox].each do |k|
         validate_param(opts, k, true)
       end
 
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-          builder.nbuild.ConvertId {|x|
+      req = build_soap! { |type, builder|
+        unless type == :header
+          builder.nbuild.ConvertId { |x|
             builder.nbuild.parent.default_namespace = @default_ns
             x.parent['DestinationFormat'] = opts[:destination_format].to_s.camel_case
             x.SourceIds { |x|
@@ -772,9 +749,8 @@ module Viewpoint::EWS::SOAP
             }
           }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsResponse)
     end
-
-  end #ExchangeDataServices
+  end # ExchangeDataServices
 end

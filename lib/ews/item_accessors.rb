@@ -1,20 +1,18 @@
-=begin
-  This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
-
-  Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-=end
+#   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+#
+#   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 module Viewpoint::EWS::ItemAccessors
   include Viewpoint::EWS
 
@@ -73,11 +71,11 @@ module Viewpoint::EWS::ItemAccessors
   #   on failure:
   #     {:success => false, :error_message => <the message>}
   def copy_items(items, folder)
-    folder = folder.id if folder.kind_of?(Types::GenericFolder)
-    item_ids = items.collect{|i| {item_id: {id: i.id, change_key: i.change_key}}}
+    folder = folder.id if folder.is_a?(Types::GenericFolder)
+    item_ids = items.collect { |i| { item_id: { id: i.id, change_key: i.change_key } } }
     copy_opts = {
-      :to_folder_id => {:id => folder},
-      :item_ids => item_ids
+      to_folder_id: { id: folder },
+      item_ids: item_ids
     }
     resp = ews.copy_item(copy_opts)
     copy_move_items_parser(resp)
@@ -86,11 +84,11 @@ module Viewpoint::EWS::ItemAccessors
   # Move an array of items to the specified folder
   # @see #copy_items for parameter info
   def move_items(items, folder)
-    folder = folder.id if folder.kind_of?(Types::GenericFolder)
-    item_ids = items.collect{|i| {item_id: {id: i.id, change_key: i.change_key}}}
+    folder = folder.id if folder.is_a?(Types::GenericFolder)
+    item_ids = items.collect { |i| { item_id: { id: i.id, change_key: i.change_key } } }
     move_opts = {
-      :to_folder_id => {:id => folder},
-      :item_ids => item_ids
+      to_folder_id: { id: folder },
+      item_ids: item_ids
     }
     resp = ews.move_item(move_opts)
     copy_move_items_parser(resp, :move_item_response_message)
@@ -106,45 +104,45 @@ module Viewpoint::EWS::ItemAccessors
     export_items_parser(resp)
   end
 
-private
+  private
 
   def get_item_args(item_id, opts)
     opts[:shape] ||= :default
     default_args = {
-      :item_shape => {:base_shape => opts[:shape]}
+      item_shape: { base_shape: opts[:shape] }
     }
     default_args[:item_ids] = case item_id
-    when Hash
-      if item_id.keys.index(:id)
-        [{:item_id => item_id}]
-      else
-        [item_id]
-      end
-    when Array
-      item_id.map do |i|
-        case i
-        when Hash
-          i
-        else
-          {:item_id => {:id => i}}
-        end
-      end
-    else
-      [{:item_id => {:id => item_id}}]
-    end
+                              when Hash
+                                if item_id.keys.index(:id)
+                                  [{ item_id: item_id }]
+                                else
+                                  [item_id]
+                                end
+                              when Array
+                                item_id.map do |i|
+                                  case i
+                                  when Hash
+                                    i
+                                  else
+                                    { item_id: { id: i } }
+                                  end
+                                end
+                              else
+                                [{ item_id: { id: item_id } }]
+                              end
     default_args.merge opts
   end
 
   def get_item_parser(resp)
     rm = resp.response_messages[0]
 
-    if(rm && rm.status == 'Success')
+    if rm && rm.status == 'Success'
       i = rm.items.first
       itype = i.keys.first
       class_by_name(itype).new(ews, i[itype])
     else
-      code = rm.respond_to?(:code) ? rm.code : "Unknown"
-      text = rm.respond_to?(:message_text) ? rm.message_text : "Unknown"
+      rm.respond_to?(:code) ? rm.code : 'Unknown'
+      rm.respond_to?(:message_text) ? rm.message_text : 'Unknown'
       raise EwsItemNotFound, "Could not retrieve item. #{rm.code}: #{rm.message_text}"
     end
   end
@@ -153,11 +151,11 @@ private
     items = []
 
     resp.response_messages.each do |rm|
-      if(rm && rm.status == 'Success')
-        rm.items.each do |i|
-          type = i.keys.first
-          items << class_by_name(type).new(ews, i[type])
-        end
+      next unless rm && rm.status == 'Success'
+
+      rm.items.each do |i|
+        type = i.keys.first
+        items << class_by_name(type).new(ews, i[type])
       end
     end
 
@@ -166,34 +164,32 @@ private
 
   def find_items_args(opts)
     default_args = {
-      :traversal => 'Shallow',
-      :item_shape  => {:base_shape => 'Default'}
+      traversal: 'Shallow',
+      item_shape: { base_shape: 'Default' }
     }
 
-    if opts[:folder_id].is_a?(Hash)
-      default_args[:parent_folder_ids] = [opts.delete(:folder_id)]
-    else
-      default_args[:parent_folder_ids] = [{:id => opts.delete(:folder_id)}]
-    end
+    default_args[:parent_folder_ids] = if opts[:folder_id].is_a?(Hash)
+                                         [opts.delete(:folder_id)]
+                                       else
+                                         [{ id: opts.delete(:folder_id) }]
+                                       end
     default_args.merge(opts)
   end
 
   def find_items_parser(resp)
     rm = resp.response_messages[0]
-    if rm.success?
-      items = []
-      rm.root_folder.items.each do |i|
-        type = i.keys.first
-        items << class_by_name(type).new(ews, i[type])
-      end
-      items
-    else
-      raise EwsError, "Could not retrieve folder. #{rm.code}: #{rm.message_text}"
+    raise EwsError, "Could not retrieve folder. #{rm.code}: #{rm.message_text}" unless rm.success?
+
+    items = []
+    rm.root_folder.items.each do |i|
+      type = i.keys.first
+      items << class_by_name(type).new(ews, i[type])
     end
+    items
   end
 
-  def copy_move_items_parser(resp, resp_type = :copy_item_response_message)
-    resp.response_messages.collect {|r|
+  def copy_move_items_parser(resp, _resp_type = :copy_item_response_message)
+    resp.response_messages.collect { |r|
       obj = {}
       if r.success?
         obj[:success] = true
@@ -211,32 +207,31 @@ private
   def export_items_args(item_ids)
     default_args = {}
     default_args[:item_ids] = []
-    if item_ids.is_a?(Array) then
+    if item_ids.is_a?(Array)
       item_ids.each do |id|
-        default_args[:item_ids] = default_args[:item_ids] + [{:item_id => {:id => id}}]
+        default_args[:item_ids] = default_args[:item_ids] + [{ item_id: { id: id } }]
       end
     else
-      default_args[:item_ids] = [{:item_id => {:id => item_ids}}]
+      default_args[:item_ids] = [{ item_id: { id: item_ids } }]
     end
     default_args
   end
 
   def export_items_parser(resp)
     rm = resp.response_messages
-    if(rm)
-      items = []
-      rm.each do |i|
-        if i.success? then
-          type = i.type
-          items << class_by_name(type).new(ews, i.message[:elems])
-        else
-          code = i.respond_to?(:code) ? i.code : "Unknown"
-          text = i.respond_to?(:message_text) ? i.message_text : "Unknown"
-          items << "Could not retrieve item. #{code}: #{text}"
-        end
-      end
-    items
-    end
-  end
+    return unless rm
 
+    items = []
+    rm.each do |i|
+      if i.success?
+        type = i.type
+        items << class_by_name(type).new(ews, i.message[:elems])
+      else
+        code = i.respond_to?(:code) ? i.code : 'Unknown'
+        text = i.respond_to?(:message_text) ? i.message_text : 'Unknown'
+        items << "Could not retrieve item. #{code}: #{text}"
+      end
+    end
+    items
+  end
 end # Viewpoint::EWS::ItemAccessors

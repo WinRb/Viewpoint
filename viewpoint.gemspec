@@ -1,7 +1,6 @@
-# -*- encoding: utf-8 -*-
 require 'date'
 
-version = File.read(File.expand_path("../VERSION", __FILE__)).strip
+version = File.read(File.expand_path('VERSION', __dir__)).strip
 
 Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
@@ -20,17 +19,18 @@ Gem::Specification.new do |s|
 
   s.files = Dir['Changelog.txt', 'README.md', 'TODO', 'lib/**/*']
   s.require_path = 'lib'
-  s.rdoc_options = %w(-x test/ -x examples/)
-  s.extra_rdoc_files = %w(README.md)
+  s.rdoc_options = %w[-x test/ -x examples/]
+  s.extra_rdoc_files = %w[README.md]
 
-  s.add_runtime_dependency  'nokogiri', '!=1.12.3', '!=1.12.2', '!=1.12.1', '!=1.12.0'
   s.add_runtime_dependency  'httpclient'
-  s.add_runtime_dependency  'rubyntlm'
   s.add_runtime_dependency  'logging'
-  s.add_runtime_dependency  'syslog'
   s.add_runtime_dependency  'mutex_m'
+  s.add_runtime_dependency  'nokogiri', '!=1.12.3', '!=1.12.2', '!=1.12.1', '!=1.12.0'
+  s.add_runtime_dependency  'rubyntlm'
+  s.add_runtime_dependency  'syslog'
   # ostruct and base64 are bundled (not default) gems on modern Rubies;
   # declare them so `require` keeps working under `bundle exec`.
-  s.add_runtime_dependency  'ostruct'
   s.add_runtime_dependency  'base64'
+  s.add_runtime_dependency  'ostruct'
+  s.metadata['rubygems_mfa_required'] = 'true'
 end

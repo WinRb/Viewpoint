@@ -1,20 +1,18 @@
-=begin
-  This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
-
-  Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-=end
+#   This file is part of Viewpoint; the Ruby library for Microsoft Exchange Web Services.
+#
+#   Copyright © 2011 Dan Wanek <dan.wanek@gmail.com>
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 require 'httpclient'
 
 class Viewpoint::EWS::Connection
@@ -22,6 +20,7 @@ class Viewpoint::EWS::Connection
   include Viewpoint::EWS
 
   attr_reader :endpoint
+
   @@supported_httpclient_opts = %i[agent_name default_header]
 
   # @param [String] endpoint the URL of the web service.
@@ -56,7 +55,7 @@ class Viewpoint::EWS::Connection
     @endpoint = endpoint
   end
 
-  def set_auth(user,pass)
+  def set_auth(user, pass)
     @httpcli.set_auth(@endpoint.to_s, user, pass)
   end
 
@@ -64,7 +63,7 @@ class Viewpoint::EWS::Connection
   # authentication will happen on the first request if you don't do it here.
   # @return [Boolean] true if authentication is successful, false otherwise
   def authenticate
-    self.get && true
+    get && true
   end
 
   # Every Connection class must have the dispatch method. It is what sends the
@@ -92,17 +91,16 @@ class Viewpoint::EWS::Connection
   # @return [String] If the request is successful (200) it returns the body of
   #   the response.
   def get
-    check_response( @httpcli.get(@endpoint) )
+    check_response(@httpcli.get(@endpoint))
   end
 
   # Send a POST to the web service
   # @return [String] If the request is successful (200) it returns the body of
   #   the response.
   def post(xmldoc)
-    headers = {'Content-Type' => 'text/xml'}
-    check_response( @httpcli.post(@endpoint, xmldoc, headers) )
+    headers = { 'Content-Type' => 'text/xml' }
+    check_response(@httpcli.post(@endpoint, xmldoc, headers))
   end
-
 
   private
 
@@ -112,16 +110,18 @@ class Viewpoint::EWS::Connection
       resp.body
     when 302
       # @todo redirect
-      raise Errors::UnhandledResponseError.new("Unhandled HTTP Redirect", resp)
+      raise Errors::UnhandledResponseError.new('Unhandled HTTP Redirect', resp)
     when 401
-      raise Errors::UnauthorizedResponseError.new("Unauthorized request", resp)
+      raise Errors::UnauthorizedResponseError.new('Unauthorized request', resp)
     when 500
-      if resp.headers['Content-Type'] =~ /xml/
-        err_string, err_code = parse_soap_error(resp.body)
-        raise Errors::SoapResponseError.new("SOAP Error: Message: #{err_string}  Code: #{err_code}", resp, err_code, err_string)
-      else
+      unless resp.headers['Content-Type'] =~ /xml/
         raise Errors::ServerError.new("Internal Server Error. Message: #{resp.body}", resp)
       end
+
+      err_string, err_code = parse_soap_error(resp.body)
+      raise Errors::SoapResponseError.new("SOAP Error: Message: #{err_string}  Code: #{err_code}", resp, err_code,
+                                          err_string)
+
     else
       raise Errors::ResponseError.new("HTTP Error Code: #{resp.status}, Msg: #{resp.body}", resp)
     end
@@ -131,10 +131,9 @@ class Viewpoint::EWS::Connection
   def parse_soap_error(xml)
     ndoc = Nokogiri::XML(xml)
     ns = ndoc.collect_namespaces
-    err_string  = ndoc.xpath("//faultstring",ns).text
-    err_code    = ndoc.xpath("//faultcode",ns).text
+    err_string  = ndoc.xpath('//faultstring', ns).text
+    err_code    = ndoc.xpath('//faultcode', ns).text
     @log.debug "Internal SOAP error. Message: #{err_string}, Code: #{err_code}"
     [err_string, err_code]
   end
-
 end

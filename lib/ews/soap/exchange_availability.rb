@@ -1,5 +1,4 @@
 module Viewpoint::EWS::SOAP
-
   # Exchange Availability operations as listed in the EWS Documentation.
   # @see http://msdn.microsoft.com/en-us/library/bb409286.aspx
   module ExchangeAvailability
@@ -18,15 +17,14 @@ module Viewpoint::EWS::SOAP
       [:address].each do |k|
         validate_param(opts, k, true)
       end
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-        builder.nbuild.GetUserOofSettingsRequest {|x|
-          x.parent.default_namespace = @default_ns
-          builder.mailbox!(opts)
-        }
+      req = build_soap! { |type, builder|
+        unless type == :header
+          builder.nbuild.GetUserOofSettingsRequest { |x|
+            x.parent.default_namespace = @default_ns
+            builder.mailbox!(opts)
+          }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsSoapAvailabilityResponse)
     end
 
@@ -41,21 +39,19 @@ module Viewpoint::EWS::SOAP
     # @option opts [String,Symbol] :external_audience :none, :known, :all
     def set_user_oof_settings(opts)
       opts = opts.clone
-      [:mailbox, :oof_state].each do |k|
+      %i[mailbox oof_state].each do |k|
         validate_param(opts, k, true)
       end
-      req = build_soap! do |type, builder|
-        if(type == :header)
-        else
-        builder.nbuild.SetUserOofSettingsRequest {|x|
-          x.parent.default_namespace = @default_ns
-          builder.mailbox! opts.delete(:mailbox)
-          builder.user_oof_settings!(opts)
-        }
+      req = build_soap! { |type, builder|
+        unless type == :header
+          builder.nbuild.SetUserOofSettingsRequest { |x|
+            x.parent.default_namespace = @default_ns
+            builder.mailbox! opts.delete(:mailbox)
+            builder.user_oof_settings!(opts)
+          }
         end
-      end
+      }
       do_soap_request(req, response_class: EwsSoapAvailabilityResponse)
     end
-
-  end #ExchangeAvailability
+  end # ExchangeAvailability
 end
