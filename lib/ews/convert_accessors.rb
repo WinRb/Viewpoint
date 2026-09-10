@@ -17,6 +17,7 @@
 #   limitations under the License.
 module Viewpoint
   module EWS
+    # Convert operations mixed into the EWS client.
     module ConvertAccessors
       include Viewpoint::EWS
 

@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module SOAP
+      # Parses the Sync Folder Items operation SOAP response.
       class SyncFolderItemsResponseMessage < ResponseMessage
         def sync_state
           safe_hash_access message, %i[elems sync_state text]

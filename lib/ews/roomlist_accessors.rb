@@ -18,6 +18,7 @@
 
 module Viewpoint
   module EWS
+    # Roomlist operations mixed into the EWS client.
     module RoomlistAccessors
       include Viewpoint::EWS
 

@@ -17,6 +17,7 @@
 #   limitations under the License.
 module Viewpoint
   module EWS
+    # Message operations mixed into the EWS client.
     module MessageAccessors
       include Viewpoint::EWS
 

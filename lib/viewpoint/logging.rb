@@ -17,6 +17,7 @@
 #   limitations under the License.
 
 module Viewpoint
+  # Exchange Web Services (EWS) client namespace.
   module EWS
     attr_reader :logger
 

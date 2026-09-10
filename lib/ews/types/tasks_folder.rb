@@ -3,6 +3,7 @@
 module Viewpoint
   module EWS
     module Types
+      # Tasks Folder EWS data type.
       class TasksFolder
         include Viewpoint::EWS
         include Viewpoint::EWS::Types

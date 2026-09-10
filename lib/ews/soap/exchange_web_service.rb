@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module SOAP
+      # Low-level SOAP web service interface to Exchange.
       class ExchangeWebService
         include Viewpoint::EWS
         include Viewpoint::EWS::SOAP

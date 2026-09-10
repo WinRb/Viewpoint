@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module Types
+      # Item Attachment EWS data type.
       class ItemAttachment < Attachment
         ITEM_ATTACH_KEY_PATHS = {
           item: [:item],

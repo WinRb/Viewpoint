@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module SOAP
+      # Parses the Get Events operation SOAP response.
       class GetEventsResponseMessage < ResponseMessage
         def notification
           safe_hash_access message, %i[elems notification elems]

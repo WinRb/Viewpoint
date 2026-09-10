@@ -3,6 +3,7 @@
 module Viewpoint
   module EWS
     module Template
+      # Template for building reply-to-item requests.
       class ReplyToItem < Message
         # Format this object for EWS backend consumption.
         def to_ews

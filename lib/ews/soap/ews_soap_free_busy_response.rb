@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module SOAP
+      # Parses GetUserAvailability SOAP responses.
       class EwsSoapFreeBusyResponse < EwsSoapResponse
         def envelope
           @resp[:envelope][:elems]

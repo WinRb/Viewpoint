@@ -18,6 +18,7 @@
 
 module Viewpoint
   module EWS
+    # Calendar operations mixed into the EWS client.
     module CalendarAccessors
       include Viewpoint::EWS
 

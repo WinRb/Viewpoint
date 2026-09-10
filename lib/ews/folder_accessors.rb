@@ -17,6 +17,7 @@
 #   limitations under the License.
 module Viewpoint
   module EWS
+    # Folder operations mixed into the EWS client.
     module FolderAccessors
       include Viewpoint::EWS
 

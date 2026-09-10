@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module Types
+      # Moved Event EWS data type.
       class MovedEvent < Event
         MOVED_EVENT_KEY_PATHS = {
           old_item_id: %i[old_item_id attribs],

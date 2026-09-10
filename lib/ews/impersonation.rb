@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Viewpoint
+  # Exchange Web Services (EWS) client namespace.
   module EWS
     ConnectingSID = {
       UPN: 'PrincipalName',

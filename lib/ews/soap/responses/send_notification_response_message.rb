@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module SOAP
+      # Parses the Send Notification operation SOAP response.
       class SendNotificationResponseMessage < ResponseMessage
         include Viewpoint::StringUtils
 

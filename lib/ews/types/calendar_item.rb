@@ -3,6 +3,7 @@
 module Viewpoint
   module EWS
     module Types
+      # Calendar Item EWS data type.
       class CalendarItem
         include Viewpoint::EWS
         include Viewpoint::EWS::Types

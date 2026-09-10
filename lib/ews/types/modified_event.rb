@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module Types
+      # Modified Event EWS data type.
       class ModifiedEvent < Event
         MODIFIED_EVENT_KEY_PATHS = {}.freeze
 

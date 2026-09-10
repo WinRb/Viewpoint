@@ -46,7 +46,7 @@ module Viewpoint
           resp = @ews.get_user_oof_settings(mailbox)
           ewsi = resp.response.clone
           ewsi.delete(:response_message)
-          return OutOfOffice.new(self, ewsi)
+          OutOfOffice.new(self, ewsi)
         end
 
         # Get information about when the user with the given email address is available.

@@ -3,6 +3,7 @@
 module Viewpoint
   module EWS
     module Types
+      # Parses the Export Items operation SOAP response.
       class ExportItemsResponseMessage
         include Viewpoint::EWS
         include Viewpoint::EWS::Types

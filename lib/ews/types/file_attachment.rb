@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module Types
+      # File Attachment EWS data type.
       class FileAttachment < Attachment
         FILE_ATTACH_KEY_PATHS = {
           is_contact_photo?: %i[is_contact_photo text],

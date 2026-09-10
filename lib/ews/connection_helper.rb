@@ -18,6 +18,7 @@
 
 module Viewpoint
   module EWS
+    # Helpers for building authenticated HTTP connections.
     module ConnectionHelper
       def init_logging!
         @log = Logging.logger[self.class.name.to_s.to_sym]

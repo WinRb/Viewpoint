@@ -3,6 +3,7 @@
 module Viewpoint
   module EWS
     module Template
+      # Template for building forward-item requests.
       class ForwardItem < Message
         # Format this object for EWS backend consumption.
         def to_ews

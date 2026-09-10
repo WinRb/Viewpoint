@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module Types
+      # Event EWS data type.
       class Event
         include Viewpoint::EWS
         include Viewpoint::EWS::Types

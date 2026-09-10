@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module SOAP
+      # Base class for parsed SOAP response messages.
       class ResponseMessage
         attr_reader :message, :type
 

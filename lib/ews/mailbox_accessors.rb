@@ -18,6 +18,7 @@
 
 module Viewpoint
   module EWS
+    # Mailbox operations mixed into the EWS client.
     module MailboxAccessors
       include Viewpoint::EWS
 

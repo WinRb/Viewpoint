@@ -17,6 +17,7 @@
 #   limitations under the License.
 module Viewpoint
   module EWS
+    # Item operations mixed into the EWS client.
     module ItemAccessors
       include Viewpoint::EWS
 

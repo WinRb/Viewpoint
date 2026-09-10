@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module Errors
+      # Raised for EWS error responses.
       class ResponseError < RuntimeError
         attr_reader :response
 
@@ -45,6 +46,7 @@ module Viewpoint
       class UnauthorizedResponseError < ResponseError
       end
 
+      # Raised for SOAP-level error responses.
       class SoapResponseError < ResponseError
         attr_reader :faultcode,
                     :faultstring

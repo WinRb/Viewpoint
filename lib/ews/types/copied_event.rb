@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module Types
+      # Copied Event EWS data type.
       class CopiedEvent < Event
         COPIED_EVENT_KEY_PATHS = {
           old_item_id: %i[old_item_id attribs],

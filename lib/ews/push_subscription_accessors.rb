@@ -18,6 +18,7 @@
 
 module Viewpoint
   module EWS
+    # Push Subscription operations mixed into the EWS client.
     module PushSubscriptionAccessors
       include Viewpoint::EWS
 

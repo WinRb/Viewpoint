@@ -2,6 +2,7 @@
 
 module Viewpoint
   module EWS
+    # Meeting operations mixed into the EWS client.
     module MeetingAccessors
       include Viewpoint::EWS
 

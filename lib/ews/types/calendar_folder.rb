@@ -3,6 +3,7 @@
 module Viewpoint
   module EWS
     module Types
+      # Calendar Folder EWS data type.
       class CalendarFolder
         include Viewpoint::EWS
         include Viewpoint::EWS::Types

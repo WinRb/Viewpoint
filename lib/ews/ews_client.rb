@@ -13,6 +13,7 @@ require 'ews/meeting_accessors'
 
 # This class is the glue between the Models and the Web Service.
 module Viewpoint
+  # Main entry point for the Exchange Web Services client.
   class EWSClient
     include Viewpoint::EWS
     include Viewpoint::EWS::FolderAccessors

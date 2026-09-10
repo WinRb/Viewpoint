@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module SOAP
+      # Parses the Subscribe operation SOAP response.
       class SubscribeResponseMessage < ResponseMessage
         def subscription
           safe_hash_access message, [:elems]

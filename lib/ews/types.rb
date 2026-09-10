@@ -2,6 +2,7 @@
 
 module Viewpoint
   module EWS
+    # EWS data type models.
     module Types
       include Viewpoint::StringUtils
 

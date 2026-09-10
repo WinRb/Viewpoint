@@ -20,6 +20,7 @@
 # the underlying SOAP classes and modules that do the actual work.
 module Viewpoint
   module EWS
+    # SOAP message building, dispatch, and response parsing.
     module SOAP
       # CONSTANTS
 

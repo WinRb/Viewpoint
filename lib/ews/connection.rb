@@ -19,6 +19,7 @@ require 'httpclient'
 
 module Viewpoint
   module EWS
+    # HTTP connection to the Exchange server.
     class Connection
       include Viewpoint::EWS::ConnectionHelper
       include Viewpoint::EWS

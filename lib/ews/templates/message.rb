@@ -3,6 +3,7 @@
 module Viewpoint
   module EWS
     module Template
+      # Template for building message requests.
       class Message < OpenStruct
         def initialize(opts = {})
           super opts.clone

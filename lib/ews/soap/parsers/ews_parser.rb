@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module SOAP
+      # Parses SOAP responses into Ruby hashes.
       class EwsParser
         include Viewpoint::EWS
 

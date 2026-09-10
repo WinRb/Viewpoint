@@ -3,6 +3,7 @@
 module Viewpoint
   module EWS
     module Types
+      # Folder EWS data type.
       class Folder
         include Viewpoint::EWS
         include Viewpoint::EWS::Types

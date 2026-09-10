@@ -21,6 +21,7 @@ require 'ews/item_accessors'
 module Viewpoint
   module EWS
     module Types
+      # Generic Folder EWS data type.
       module GenericFolder
         include Viewpoint::EWS
         include Viewpoint::EWS::Types

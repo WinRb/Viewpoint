@@ -17,6 +17,7 @@
 #   limitations under the License.
 
 module Viewpoint
+  # Exchange Web Services (EWS) client namespace.
   module EWS
     Logging.logger.root.level = :debug
     Logging.logger.root.appenders = Logging.appenders.stdout

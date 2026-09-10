@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module SOAP
+      # Root folder reference in FindItem responses.
       class RootFolder
         attr_reader :root
 
@@ -63,6 +64,7 @@ module Viewpoint
         end
       end
 
+      # Parses the Find Item operation SOAP response.
       class FindItemResponseMessage < ResponseMessage
         def root_folder
           return @root_folder if @root_folder

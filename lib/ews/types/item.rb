@@ -3,6 +3,7 @@
 module Viewpoint
   module EWS
     module Types
+      # Item EWS data type.
       module Item
         include Viewpoint::EWS
         include Viewpoint::EWS::Types
@@ -12,6 +13,7 @@ module Viewpoint
           klass.extend ClassMethods
         end
 
+        # Class-level helpers for EWS item types.
         module ClassMethods
           def init_simple_item(ews, id, change_key = nil, parent = nil)
             ews_item = { item_id: { attribs: { id: id, change_key: change_key } } }

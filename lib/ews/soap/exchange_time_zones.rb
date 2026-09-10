@@ -3,6 +3,7 @@
 module Viewpoint
   module EWS
     module SOAP
+      # Known Exchange time zone definitions.
       module ExchangeTimeZones
         include Viewpoint::EWS::SOAP
 

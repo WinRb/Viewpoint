@@ -19,6 +19,7 @@
 module Viewpoint
   module EWS
     module SOAP
+      # Parses the Create Attachment operation SOAP response.
       class CreateAttachmentResponseMessage < ResponseMessage
         include Viewpoint::StringUtils
 
