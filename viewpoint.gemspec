@@ -29,4 +29,8 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency  'logging'
   s.add_runtime_dependency  'syslog'
   s.add_runtime_dependency  'mutex_m'
+  # ostruct and base64 are bundled (not default) gems on modern Rubies;
+  # declare them so `require` keeps working under `bundle exec`.
+  s.add_runtime_dependency  'ostruct'
+  s.add_runtime_dependency  'base64'
 end
