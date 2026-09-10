@@ -47,14 +47,6 @@ module Viewpoint
           ewsi = resp.response.clone
           ewsi.delete(:response_message)
           return OutOfOffice.new(self, ewsi)
-          s = resp[:oof_settings]
-          @oof_state = s[:oof_state][:text]
-          @oof_ext_audience = s[:external_audience][:text]
-          @oof_start = DateTime.parse(s[:duration][:start_time][:text])
-          @oof_end = DateTime.parse(s[:duration][:end_time][:text])
-          @oof_internal_reply = s[:internal_reply][:message][:text]
-          @oof_external_reply = s[:internal_reply][:message][:text]
-          true
         end
 
         # Get information about when the user with the given email address is available.

@@ -38,7 +38,7 @@ module Viewpoint
         private
 
         def sax_parser
-          @parser ||= Nokogiri::XML::SAX::Parser.new(@sax_doc)
+          @sax_parser ||= Nokogiri::XML::SAX::Parser.new(@sax_doc)
         end
       end
     end

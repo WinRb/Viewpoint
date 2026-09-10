@@ -2,6 +2,13 @@
 
 require_relative '../spec_helper'
 
+class GetItemArgsAccessor
+  include Viewpoint::EWS::ItemAccessors
+  def call_get_item_args(*args)
+    get_item_args(*args)
+  end
+end
+
 module ResponseObjects
   def self.folders
     [{ folder: { display_name: { text: 'Inbox' } } },
@@ -34,13 +41,6 @@ describe Viewpoint::EWS::ItemAccessors do
   end
 
   context 'get_item_args should handle :occurrence_item_id' do
-    class GetItemArgsAccessor
-      include Viewpoint::EWS::ItemAccessors
-      def call_get_item_args(*args)
-        get_item_args(*args)
-      end
-    end
-
     it 'should handle an :occurrence_item_id hash' do
       occurrence_item_id = { occurrence_item_id: { recurring_master_id: 'rid1', change_key: 'ck',
 instance_index: 1 } }

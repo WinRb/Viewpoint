@@ -32,6 +32,10 @@ module Viewpoint
         end
       end
 
+      def respond_to_missing?(method_sym, include_private = false)
+        method_keys.include?(method_sym) || super
+      end
+
       def to_s
         "#{self.class.name}: EWS METHODS: #{ews_methods.sort.join(', ')}"
       end

@@ -50,8 +50,6 @@ module Viewpoint
           @ews_item.merge!(parse_response(resp))
         end
 
-        private
-
         def self.method_missing(method, *args, &block)
           if method.to_s =~ /^build_(.+)$/
             class_by_name(::Regexp.last_match(1)).new(ews, args[0])
@@ -59,6 +57,12 @@ module Viewpoint
             super
           end
         end
+        private_class_method :method_missing
+
+        def self.respond_to_missing?(method, include_private = false)
+          method.to_s.match?(/^build_(.+)$/) || super
+        end
+        private_class_method :respond_to_missing?
 
         def key_paths
           super.merge(ITEM_ATTACH_KEY_PATHS)

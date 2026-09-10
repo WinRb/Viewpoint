@@ -25,7 +25,7 @@ module Viewpoint
 
       attr_reader :endpoint
 
-      @@supported_httpclient_opts = %i[agent_name default_header]
+      SUPPORTED_HTTPCLIENT_OPTS = %i[agent_name default_header].freeze
 
       # @param [String] endpoint the URL of the web service.
       #   @example https://<site>/ews/Exchange.asmx
@@ -40,7 +40,7 @@ module Viewpoint
       def initialize(endpoint, opts = {})
         @log = Logging.logger[self.class.name.to_s.to_sym]
 
-        httpclient_opts = opts.slice(*@@supported_httpclient_opts)
+        httpclient_opts = opts.slice(*SUPPORTED_HTTPCLIENT_OPTS)
         @httpcli = HTTPClient.new(**httpclient_opts)
 
         if opts[:trust_ca]
