@@ -196,6 +196,18 @@ module Viewpoint::EWS::SOAP
       do_soap_request(req, response_class: EwsSoapRoomlistResponse)
     end
 
+    # Resolves a contact's name given an email address.
+    # @see https://docs.microsoft.com/en-us/exchange/client-developer/web-service-reference/resolvenames-operation
+    def resolve_names(name, full_contact_data)
+      req = build_soap! do |type, builder|
+        if(type == :header)
+        else
+          builder.resolve_names!(name, full_contact_data)
+        end
+      end
+      do_soap_request(req, response_class: EwsSoapResolveNamesResponse)
+    end
+
     # Send the SOAP request to the endpoint and parse it.
     # @param [String] soapmsg an XML formatted string
     # @todo make this work for Viewpoint (imported from SPWS)
