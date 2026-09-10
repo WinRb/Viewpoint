@@ -7,11 +7,11 @@ module Viewpoint
 
       KEY_PATHS = {
         extended_properties: [:extended_property]
-      }
+      }.freeze
       KEY_TYPES = {
         extended_properties: :build_extended_properties
-      }
-      KEY_ALIAS = {}
+      }.freeze
+      KEY_ALIAS = {}.freeze
 
       attr_reader :ews_item
 

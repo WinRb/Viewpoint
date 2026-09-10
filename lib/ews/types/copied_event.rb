@@ -24,11 +24,11 @@ module Viewpoint
           old_item_id: %i[old_item_id attribs],
           old_folder_id: %i[old_folder_id attribs],
           old_parent_folder_id: %i[old_parent_folder_id attribs]
-        }
+        }.freeze
 
-        COPIED_EVENT_KEY_TYPES = {}
+        COPIED_EVENT_KEY_TYPES = {}.freeze
 
-        COPIED_EVENT_KEY_ALIAS = {}
+        COPIED_EVENT_KEY_ALIAS = {}.freeze
 
         private
 

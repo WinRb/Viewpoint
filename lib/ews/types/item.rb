@@ -49,7 +49,7 @@ module Viewpoint
           conversation_topic: %i[conversation_topic text],
           body_type: %i[body attribs body_type],
           body: %i[body text]
-        }
+        }.freeze
 
         ITEM_KEY_TYPES = {
           size: lambda(&:to_i),
@@ -73,14 +73,14 @@ module Viewpoint
           to_recipients: :build_mailbox_users,
           cc_recipients: :build_mailbox_users,
           attachments: :build_attachments
-        }
+        }.freeze
 
         ITEM_KEY_ALIAS = {
           read?: :is_read?,
           draft?: :is_draft?,
           submitted?: :is_submitted?,
           associated?: :is_associated?
-        }
+        }.freeze
 
         attr_reader :ews_item, :parent
 

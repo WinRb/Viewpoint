@@ -29,11 +29,11 @@ module Viewpoint
         MAILBOX_KEY_PATHS = {
           name: [:name],
           email_address: [:email_address]
-        }
-        MAILBOX_KEY_TYPES = {}
+        }.freeze
+        MAILBOX_KEY_TYPES = {}.freeze
         MAILBOX_KEY_ALIAS = {
           email: :email_address
-        }
+        }.freeze
 
         def initialize(ews, mbox_user)
           @ews = ews

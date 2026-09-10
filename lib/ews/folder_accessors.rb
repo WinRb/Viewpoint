@@ -24,7 +24,7 @@ module Viewpoint
         mail: 'IPF.Note',
         calendar: 'IPF.Appointment',
         task: 'IPF.Task'
-      }
+      }.freeze
 
       # Find subfolders of the passed root folder.  If no parameters are passed this
       # method will search from the Root folder.

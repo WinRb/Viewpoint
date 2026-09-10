@@ -10,11 +10,11 @@ module Viewpoint
 
         FOLDER_KEY_PATHS = {
           unread_count: %i[unread_count text]
-        }
+        }.freeze
         FOLDER_KEY_TYPES = {
           unread_count: lambda(&:to_i)
-        }
-        FOLDER_KEY_ALIAS = {}
+        }.freeze
+        FOLDER_KEY_ALIAS = {}.freeze
 
         alias messages items
 

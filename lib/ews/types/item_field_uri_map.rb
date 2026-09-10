@@ -203,7 +203,7 @@ writable: true },
         global_importance: { text: 'conversation:GlobalImportance', writable: true },
         item_ids: { text: 'conversation:ItemIds', writable: true },
         global_item_ids: { text: 'conversation:GlobalItemIds', writable: true }
-      }
+      }.freeze
     end
   end
 end

@@ -30,13 +30,13 @@ module Viewpoint
           item_id: %i[item_id attribs],
           folder_id: %i[folder_id attribs],
           parent_folder_id: %i[parent_folder_id attribs]
-        }
+        }.freeze
 
         EVENT_KEY_TYPES = {
           timestamp: ->(ts) { DateTime.iso8601(ts) }
-        }
+        }.freeze
 
-        EVENT_KEY_ALIAS = {}
+        EVENT_KEY_ALIAS = {}.freeze
 
         def initialize(ews, event)
           @ews = ews

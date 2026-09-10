@@ -27,7 +27,7 @@ module Viewpoint
           recurrence: %i[recurrence elems],
           deleted_occurrences: %i[deleted_occurrences elems],
           modified_occurrences: %i[modified_occurrences elems]
-        }
+        }.freeze
 
         CALENDAR_ITEM_KEY_TYPES = {
           start: ->(str) { DateTime.parse(str) },
@@ -41,8 +41,8 @@ module Viewpoint
           required_attendees: :build_attendees_users,
           deleted_occurrences: :build_deleted_occurrences,
           modified_occurrences: :build_modified_occurrences
-        }
-        CALENDAR_ITEM_KEY_ALIAS = {}
+        }.freeze
+        CALENDAR_ITEM_KEY_ALIAS = {}.freeze
 
         # Delete this calendar item
         # @param deltype [Symbol] The delete type; must be :hard, :soft, or :recycle.

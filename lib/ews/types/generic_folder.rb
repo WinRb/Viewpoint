@@ -37,17 +37,17 @@ module Viewpoint
           total_count: %i[total_count text],
           child_folder_count: %i[child_folder_count text],
           display_name: %i[display_name text]
-        }
+        }.freeze
 
         GFOLDER_KEY_TYPES = {
           total_count: lambda(&:to_i),
           child_folder_count: lambda(&:to_i)
-        }
+        }.freeze
 
         GFOLDER_KEY_ALIAS = {
           name: :display_name,
           ckey: :change_key
-        }
+        }.freeze
 
         attr_accessor :subscription_id, :watermark, :sync_state
 

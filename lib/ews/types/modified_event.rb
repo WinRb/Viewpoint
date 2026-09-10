@@ -20,11 +20,11 @@ module Viewpoint
   module EWS
     module Types
       class ModifiedEvent < Event
-        MODIFIED_EVENT_KEY_PATHS = {}
+        MODIFIED_EVENT_KEY_PATHS = {}.freeze
 
-        MODIFIED_EVENT_KEY_TYPES = {}
+        MODIFIED_EVENT_KEY_TYPES = {}.freeze
 
-        MODIFIED_EVENT_KEY_ALIAS = {}
+        MODIFIED_EVENT_KEY_ALIAS = {}.freeze
 
         private
 

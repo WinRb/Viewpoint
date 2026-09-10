@@ -12,11 +12,11 @@ module Viewpoint
           id: %i[item_id attribs id],
           change_key: %i[item_id attribs change_key],
           data: %i[data text]
-        }
+        }.freeze
 
-        BULK_KEY_TYPES = {}
+        BULK_KEY_TYPES = {}.freeze
 
-        BULK_KEY_ALIAS = {}
+        BULK_KEY_ALIAS = {}.freeze
 
         def initialize(ews, bulk_item)
           super(ews, bulk_item)

@@ -36,16 +36,16 @@ module Viewpoint
           size: %i[size text],
           last_modified_time: %i[last_modified_time text],
           is_inline?: %i[is_inline text]
-        }
+        }.freeze
 
         ATTACH_KEY_TYPES = {
           is_inline?: ->(str) { str.downcase == 'true' },
           last_modified_type: ->(str) { DateTime.parse(str) },
           size: lambda(&:to_i),
           content_id: :fix_content_id
-        }
+        }.freeze
 
-        ATTACH_KEY_ALIAS = {}
+        ATTACH_KEY_ALIAS = {}.freeze
 
         # @param [Hash] attachment The attachment ews_item
         def initialize(item, attachment)

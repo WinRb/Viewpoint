@@ -23,15 +23,15 @@ module Viewpoint
         FILE_ATTACH_KEY_PATHS = {
           is_contact_photo?: %i[is_contact_photo text],
           content: %i[content text]
-        }
+        }.freeze
 
         FILE_ATTACH_KEY_TYPES = {
           is_contact_photo?: ->(str) { str.downcase == 'true' }
-        }
+        }.freeze
 
         FILE_ATTACH_KEY_ALIAS = {
           file_name: :name
-        }
+        }.freeze
 
         def get_all_properties!
           resp = ews.get_attachment attachment_ids: [id]

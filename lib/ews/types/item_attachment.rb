@@ -30,7 +30,7 @@ module Viewpoint
           meeting_request: [:meeting_request],
           meeting_response: [:meeting_response],
           meeting_cancellation: [:meeting_cancellation]
-        }
+        }.freeze
 
         ITEM_ATTACH_KEY_TYPES = {
           message: :build_message,
@@ -41,9 +41,9 @@ module Viewpoint
           meeting_request: :build_meeting_request,
           meeting_response: :build_meeting_response,
           meeting_cancellation: :build_meeting_cancellation
-        }
+        }.freeze
 
-        ITEM_ATTACH_KEY_ALIAS = {}
+        ITEM_ATTACH_KEY_ALIAS = {}.freeze
 
         def get_all_properties!
           resp = ews.get_attachment attachment_ids: [id]

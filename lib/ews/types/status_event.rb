@@ -26,7 +26,7 @@ module Viewpoint
 
         STATUS_EVENT_KEY_PATHS = {
           watermark: %i[watermark text]
-        }
+        }.freeze
 
         private
 

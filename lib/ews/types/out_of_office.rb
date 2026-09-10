@@ -23,15 +23,15 @@ module Viewpoint
         enabled?: %i[oof_settings oof_state],
         scheduled?: %i[oof_settings oof_state],
         duration: %i[oof_settings duration]
-      }
+      }.freeze
 
       OOF_KEY_TYPES = {
         enabled?: ->(str) { str == :enabled },
         scheduled?: ->(str) { str == :scheduled },
         duration: ->(hsh) { hsh[:start_time]..hsh[:end_time] }
-      }
+      }.freeze
 
-      OOF_KEY_ALIAS = {}
+      OOF_KEY_ALIAS = {}.freeze
 
       # This represents OutOfOffice settings
       # @see http://msdn.microsoft.com/en-us/library/aa563465.aspx

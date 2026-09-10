@@ -7,7 +7,7 @@ module Viewpoint
       SID: 'SID',
       PSMTP: 'PrimarySmtpAddress',
       SMTP: 'SmtpAddress'
-    }
+    }.freeze
 
     # @param connecting_type [String] should be one of the ConnectingSID variables
     #   ConnectingSID[:UPN] - use User Principal Name method
