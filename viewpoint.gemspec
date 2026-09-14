@@ -26,7 +26,8 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = %w[README.md]
 
   s.add_runtime_dependency  'httpclient'
-  s.add_runtime_dependency  'logging'
+  # logger is no longer a bundled gem on Ruby 4.0
+  s.add_runtime_dependency  'logger'
   s.add_runtime_dependency  'mutex_m'
   s.add_runtime_dependency  'nokogiri', '!=1.12.3', '!=1.12.2', '!=1.12.1', '!=1.12.0'
   s.add_runtime_dependency  'rubyntlm'
