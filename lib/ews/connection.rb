@@ -39,7 +39,7 @@ module Viewpoint
       # @option opts [Array]  :trust_ca an array of hashed dir paths or a file
       # @option opts [String] :user_agent the http user agent to use in all requests
       def initialize(endpoint, opts = {})
-        @log = Logging.logger[self.class.name.to_s.to_sym]
+        @log = Viewpoint::EWS.root_logger
 
         httpclient_opts = opts.slice(*SUPPORTED_HTTPCLIENT_OPTS)
         @httpcli = HTTPClient.new(**httpclient_opts)
