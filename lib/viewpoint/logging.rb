@@ -16,13 +16,18 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+require 'logger' unless defined?(Logger)
+
 module Viewpoint
   # Exchange Web Services (EWS) client namespace.
   module EWS
     attr_reader :logger
 
+    @root_logger = Logger.new($stdout)
+    @root_logger.level = Logger::WARN
+
     def self.root_logger
-      Logging.logger.root
+      @root_logger
     end
   end
 end

@@ -57,7 +57,7 @@ module Viewpoint
       MOVE_TO_DELETED_ITEMS = 'MoveToDeletedItems'
 
       def initialize
-        @log = Logging.logger[self.class.name.to_s.to_sym]
+        @log = Viewpoint::EWS.root_logger
         @default_ns = NAMESPACES["xmlns:#{NS_EWS_MESSAGES}"]
       end
     end

@@ -21,7 +21,7 @@ require 'date'
 require 'base64'
 require 'nokogiri'
 require 'ostruct'
-require 'logging'
+require 'logger' unless defined?(Logger)
 
 # String utilities
 require 'viewpoint/string_utils'
