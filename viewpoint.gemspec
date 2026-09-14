@@ -13,6 +13,8 @@ Gem::Specification.new do |s|
   s.description = 'A Ruby client access library for Microsoft Exchange Web Services (EWS).  ' \
                   'Examples can be found here: http://distributed-frostbite.blogspot.com'
 
+  # NOTE: this floor is intentionally conservative — CI starts at Ruby 3.0, but the gem likely
+  # still works on older Rubies. Don't raise it just to satisfy lint or match CI without evidence of breakage.
   s.required_ruby_version = '>= 1.9.1'
 
   s.author = 'Dan Wanek'
@@ -20,7 +22,7 @@ Gem::Specification.new do |s|
   s.homepage = 'http://github.com/zenchild/Viewpoint'
   s.rubyforge_project = nil
 
-  s.files = Dir['Changelog.txt', 'README.md', 'TODO', 'lib/**/*']
+  s.files = Dir['README.md', 'TODO', 'lib/**/*']
   s.require_path = 'lib'
   s.rdoc_options = %w[-x test/ -x examples/]
   s.extra_rdoc_files = %w[README.md]
