@@ -23,7 +23,7 @@ module Viewpoint
   module EWS
     attr_reader :logger
 
-    @root_logger = Logger.new(STDOUT)
+    @root_logger = Logger.new($stdout)
     @root_logger.level = Logger::WARN
 
     def self.root_logger
