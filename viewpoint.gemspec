@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.description = 'A Ruby client access library for Microsoft Exchange Web Services (EWS).  ' \
                   'Examples can be found here: http://distributed-frostbite.blogspot.com'
 
-  # Note: this floor is intentionally conservative — CI starts at Ruby 3.0, but the gem likely
+  # NOTE: this floor is intentionally conservative — CI starts at Ruby 3.0, but the gem likely
   # still works on older Rubies. Don't raise it just to satisfy lint or match CI without evidence of breakage.
   s.required_ruby_version = '>= 1.9.1'
 
