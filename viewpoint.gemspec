@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.homepage = 'http://github.com/zenchild/Viewpoint'
   s.rubyforge_project = nil
 
-  s.files = Dir['Changelog.txt', 'README.md', 'TODO', 'lib/**/*']
+  s.files = Dir['README.md', 'TODO', 'lib/**/*']
   s.require_path = 'lib'
   s.rdoc_options = %w[-x test/ -x examples/]
   s.extra_rdoc_files = %w[README.md]
