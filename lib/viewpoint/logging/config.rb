@@ -19,7 +19,6 @@
 module Viewpoint
   # Exchange Web Services (EWS) client namespace.
   module EWS
-    Logging.logger.root.level = :debug
-    Logging.logger.root.appenders = Logging.appenders.stdout
+    root_logger.level = Logger::DEBUG
   end
 end
