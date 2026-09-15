@@ -3,7 +3,7 @@
 require_relative '../spec_helper'
 
 describe Viewpoint::EWS::MailboxAccessors do
-  let(:ecli) { Viewpoint::EWSClient.new('dontcare', 'dontcare', 'dontcare') }
+  let(:ecli) { Viewpoint::EWSClient.new({ endpoint: 'dontcare', type: 'basic', user: 'dontcare', password: 'dontcare' }) }
   let(:recipients) { ['anyrecipient'] }
   let(:timezone_request) do
     "<t:TimeZone>

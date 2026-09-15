@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 * Replace the `logging` gem with stdlib `logger`
+* `EWSClient.new` and `Viewpoint::EWS::Connection.new` now take an `auth` hash (`endpoint:`, `type:`, `user:`, `password:`, `token:`) instead of positional `endpoint, username, password` arguments; OAuth bearer-token authentication is supported via `type: 'oauth'` with a `token:`, which is sent as an `Authorization: Bearer` header
 
 ## 1.2.0 (2025-10-28)
 

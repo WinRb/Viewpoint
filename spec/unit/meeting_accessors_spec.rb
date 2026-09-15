@@ -3,7 +3,7 @@
 require_relative '../spec_helper'
 
 describe Viewpoint::EWS::MeetingAccessors do
-  let(:ecli) { Viewpoint::EWSClient.new('dontcare', 'dontcare', 'dontcare') }
+  let(:ecli) { Viewpoint::EWSClient.new({ endpoint: 'dontcare', type: 'basic', user: 'dontcare', password: 'dontcare' }) }
 
   let(:default_opts) do
     {

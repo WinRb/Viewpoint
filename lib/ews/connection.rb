@@ -28,8 +28,13 @@ module Viewpoint
 
       SUPPORTED_HTTPCLIENT_OPTS = %i[agent_name default_header].freeze
 
-      # @param [String] endpoint the URL of the web service.
+      # @param [Hash] auth authentication details
+      # @option auth [String] :endpoint the URL of the web service.
       #   @example https://<site>/ews/Exchange.asmx
+      # @option auth [String] :type the authentication type: 'basic' or 'oauth'
+      # @option auth [String] :user the user to authenticate as (basic auth)
+      # @option auth [String] :password the user password (basic auth)
+      # @option auth [String] :token the OAuth bearer token (oauth auth)
       # @param [Hash] opts Misc config options (mostly for development)
       # @option opts [Fixnum] :ssl_verify_mode
       # @option opts [Fixnum] :receive_timeout override the default receive timeout
@@ -39,8 +44,11 @@ module Viewpoint
       # @option opts [OpenSSL::X509::Store]  :cert_store a custom cert store
       # @option opts [Array]  :trust_ca an array of hashed dir paths or a file
       # @option opts [String] :user_agent the http user agent to use in all requests
-      def initialize(endpoint, opts = {})
+      def initialize(auth, opts = {})
         @log = Viewpoint::EWS.root_logger
+
+        @auth_type  = auth[:type]
+        @auth_token = auth[:token]
 
         httpclient_opts = opts.slice(*SUPPORTED_HTTPCLIENT_OPTS)
         @httpcli = HTTPClient.new(**httpclient_opts)
@@ -64,7 +72,7 @@ module Viewpoint
         @httpcli.keep_alive_timeout = 60
         @httpcli.receive_timeout = opts[:receive_timeout] if opts[:receive_timeout]
         @httpcli.connect_timeout = opts[:connect_timeout] if opts[:connect_timeout]
-        @endpoint = endpoint
+        @endpoint = auth[:endpoint]
       end
 
       def set_auth(user, pass)
@@ -111,10 +119,16 @@ module Viewpoint
       #   the response.
       def post(xmldoc)
         headers = { 'Content-Type' => 'text/xml' }
+        headers['Authorization'] = "Bearer #{@auth_token}" if oauth_token?
         check_response(@httpcli.post(@endpoint, xmldoc, headers))
       end
 
       private
+
+      # True when a non-empty OAuth bearer token was supplied.
+      def oauth_token?
+        @auth_type == 'oauth' && @auth_token.is_a?(String) && !@auth_token.empty?
+      end
 
       def check_response(resp)
         case resp.status

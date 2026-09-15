@@ -32,27 +32,39 @@ module Viewpoint
     attr_reader :ews, :endpoint, :username
 
     # Initialize the EWSClient instance.
-    # @param [String] endpoint The EWS endpoint we will be connecting to
-    # @param [String] user The user to authenticate as. If you are using
-    #   NTLM or Negotiate authentication you do not need to pass this parameter.
-    # @param [String] pass The user password. If you are using NTLM or
-    #   Negotiate authentication you do not need to pass this parameter.
+    # @param [Hash] auth authentication details
+    # @option auth [String] :endpoint The EWS endpoint we will be connecting to
+    # @option auth [String] :type the authentication type: 'basic' or 'oauth'
+    # @option auth [String] :user The user to authenticate as (basic auth). If
+    #   you are using NTLM or Negotiate authentication you do not need to pass
+    #   this parameter.
+    # @option auth [String] :password The user password (basic auth). If you are
+    #   using NTLM or Negotiate authentication you do not need to pass this
+    #   parameter.
+    # @option auth [String] :token The OAuth bearer token (oauth auth)
     # @param [Hash] opts Various options to pass to the backends
     # @option opts [String] :server_version The Exchange server version to
     #   target. See the VERSION_* constants in
     #   Viewpoint::EWS::SOAP::ExchangeWebService.
     # @option opts [Object] :http_class specify an alternate HTTP connection class.
     # @option opts [Hash] :http_opts options to pass to the connection
-    def initialize(endpoint, username, password, opts = {})
+    def initialize(auth, opts = {})
       # dup all. @see ticket https://github.com/zenchild/Viewpoint/issues/68
-      @endpoint = endpoint.dup
-      @username = username.dup
-      password  = password.dup
-      opts      = opts.dup
+      auth = auth.dup
+      opts = opts.dup
+
+      @auth_type  = auth[:type]
+      @auth_token = auth[:token]
+
+      @endpoint = auth[:endpoint]
+      @username = auth[:user]
+      password  = @auth_type == 'basic' ? auth[:password] : nil
+
       http_klass = opts[:http_class] || Viewpoint::EWS::Connection
-      con = http_klass.new(endpoint, opts[:http_opts] || {})
-      con.set_auth @username, password
-      @ews = SOAP::ExchangeWebService.new(con, opts)
+      connection = http_klass.new(auth, opts[:http_opts] || {})
+      connection.set_auth(@username, password) unless password.nil?
+
+      @ews = SOAP::ExchangeWebService.new(connection, opts)
     end
 
     # @param deepen [Boolean] true to autodeepen, false otherwise
