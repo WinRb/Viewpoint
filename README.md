@@ -70,7 +70,12 @@ endpoint = 'https://example.com/ews/Exchange.asmx'
 user = 'username'
 pass = 'password'
 
-cli = Viewpoint::EWSClient.new endpoint, user, pass
+# Basic authentication
+cli = Viewpoint::EWSClient.new({ endpoint: endpoint, type: 'basic', user: user, password: pass })
+
+# OAuth bearer-token authentication
+token = 'your-oauth-bearer-token'
+cli = Viewpoint::EWSClient.new({ endpoint: endpoint, type: 'oauth', token: token })
 ```
 
 There are also various options you can pass to EWSClient.
