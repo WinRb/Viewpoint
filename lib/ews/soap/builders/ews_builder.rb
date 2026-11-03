@@ -131,7 +131,7 @@ module Viewpoint
           @nbuild[NS_EWS_MESSAGES].ItemShape {
             @nbuild.parent.default_namespace = @default_ns
             base_shape!(item_shape[:base_shape])
-            mime_content!(item_shape[:include_mime_content]) if item_shape.key?(:include_mime_content)
+            include_mime_content!(item_shape[:include_mime_content]) if item_shape.key?(:include_mime_content)
             body_type!(item_shape[:body_type]) if item_shape[:body_type]
             additional_properties!(item_shape[:additional_properties]) if item_shape[:additional_properties]
           }
@@ -152,7 +152,7 @@ module Viewpoint
           @nbuild[NS_EWS_TYPES].BaseShape(camel_case(base_shape))
         end
 
-        def mime_content!(include_mime_content)
+        def include_mime_content!(include_mime_content)
           @nbuild[NS_EWS_TYPES].IncludeMimeContent(include_mime_content.to_s.downcase)
         end
 
@@ -945,6 +945,13 @@ module Viewpoint
         def body!(body)
           nbuild[NS_EWS_TYPES].Body(body[:text]) { |x|
             x.parent['BodyType'] = body[:body_type] if body[:body_type]
+          }
+        end
+
+        # @see https://learn.microsoft.com/en-us/exchange/client-developer/web-service-reference/mimecontent
+        def mime_content!(mime_content)
+          nbuild[NS_EWS_TYPES].MimeContent(mime_content[:text]) { |x|
+            x.parent['CharacterSet'] = mime_content[:character_set] if mime_content[:character_set]
           }
         end
 

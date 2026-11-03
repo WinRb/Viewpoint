@@ -24,6 +24,22 @@ describe Viewpoint::EWS::SOAP::EwsBuilder do
     expect(doc.xpath('//t:BodyType[3]').text).to eq('Best')
   end
 
+  it 'should build MimeContent for a message item' do
+    doc = builder.build! { |section|
+      builder.message!(mime_content: { text: 'TUlNRQ==', character_set: 'UTF-8' }) if section == :body
+    }
+    mime_content = doc.at_xpath('//t:Message/t:MimeContent', namespaces)
+    expect(mime_content.text).to eq('TUlNRQ==')
+    expect(mime_content['CharacterSet']).to eq('UTF-8')
+  end
+
+  it 'should build IncludeMimeContent' do
+    doc = builder.build! { |section|
+      builder.include_mime_content!(true) if section == :body
+    }
+    expect(doc.at_xpath('//t:IncludeMimeContent', namespaces).text).to eq('true')
+  end
+
   it 'should format various Time inputs' do
     expect(builder.send(:format_time, Date.iso8601('2013-01-01'))).to eq('2013-01-01T00:00:00+00:00')
     expect(builder.send(:format_time, DateTime.iso8601('2013-01-01T23:01:00-05:00'))).to eq('2013-01-02T04:01:00+00:00')
