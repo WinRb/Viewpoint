@@ -7,6 +7,7 @@ gemspec
 group :development do
   gem 'bundler-audit', '~> 0.9.3', require: false
   gem 'pry-nav'
+  gem 'rake'
   gem 'rb-inotify', require: false
   gem 'rspec'
   gem 'rubocop', require: false
