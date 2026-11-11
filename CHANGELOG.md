@@ -1,10 +1,11 @@
 # Changelog
 
-## [Unreleased]
+## 2.0.0 (2026-11-11)
 
 * `Template::Message` accepts `mime_content` (Base64 MIME, with `mime_content_charset`, default `UTF-8`) and an explicit `message_disposition`; the builder now emits `t:MimeContent` for items, and `IncludeMimeContent` is built by `include_mime_content!`
 * Replace the `logging` gem with stdlib `logger`
 * `EWSClient.new` and `Viewpoint::EWS::Connection.new` now take an `auth` hash (`endpoint:`, `type:`, `user:`, `password:`, `token:`) instead of positional `endpoint, username, password` arguments; OAuth bearer-token authentication is supported via `type: 'oauth'` with a `token:`, which is sent as an `Authorization: Bearer` header
+* Allow providing a custom certificate store (`:cert_store` option) to the connection, for environments where the default store fails to verify a valid chain
 
 ## 1.2.0 (2025-10-28)
 
