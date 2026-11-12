@@ -16,6 +16,10 @@ Add me in LinkedIn:  http://www.linkedin.com/in/danwanek
 
 Find me on irc.freenode.net in #ruby-lang (zenChild)
 
+## Supported Ruby Versions
+
+Ruby 3.1 or higher is supported. The gem can still be installed on Ruby 3.0, but 3.0 is end-of-life and not tested.
+
 # Features
 
 ## New in 1.0
